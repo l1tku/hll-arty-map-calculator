@@ -2300,11 +2300,15 @@ function renderMapGrid(filter = "") {
     
     card.onclick = () => selectMapFromGrid(key);
 
+    // --- LOCATE THIS IN renderMapGrid ---
     const img = document.createElement("img");
     img.className = "map-card-img";
-    img.src = mapData.thumbnail || mapData.image; 
-    img.loading = "eager"; // Force download
-    img.alt = mapData.name;
+img.src = mapData.thumbnail || mapData.image; 
+
+// CHANGE THIS LINE:
+   img.loading = "eager"; // <--- This forces instant display from cache
+
+img.alt = mapData.name;
 
     const label = document.createElement("div");
     label.className = "map-card-name";
@@ -3750,11 +3754,12 @@ if (mobileFireBtn) {
     });
 }
 
-// --- PRE-LOAD ASSETS ---
-// 1. Force browser to fetch all thumbnails into cache immediately
+// --- UPDATE YOUR PRELOAD BLOCK AT THE BOTTOM ---
 (function preloadImages() {
     Object.values(MAP_DATABASE).forEach(map => {
         const img = new Image();
+        // Adding .fetchPriority tells modern browsers to grab these first
+        img.fetchPriority = "high"; 
         img.src = map.thumbnail || map.image;
     });
 })();
