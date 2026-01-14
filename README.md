@@ -1,6 +1,6 @@
-# HLL Artillery Calculator
+# HLL Arty Map Calculator
 
-A comprehensive, high-precision artillery calculator for Hell Let Loose. This tool provides accurate firing solutions using exact map scaling, interpolated ballistic tables, and visual targeting aids.
+An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic grid scaling for all maps, visual trajectory aids, and a mobile-optimized targeting UI.
 
 ## Features
 
@@ -10,7 +10,7 @@ A comprehensive, high-precision artillery calculator for Hell Let Loose. This to
   - **Trajectory Line**: Visualizes the flight path from gun to target.
   - **Dynamic Ruler**: Shows MILs and Distance markers every 50m along the trajectory.
   - **Impact Analysis**: Visual rings for Dispersion (40m), Shell Killzone (20m), and Blast Radius (10m).
-- **Live HUD**:
+- **Live Tracking**:
   - **Desktop**: Cursor-following HUD displaying real-time Distance, MILs, and Grid Reference.
   - **Mobile**: Docked HUD with crosshair targeting mode.
 - **Manual Calculator**: Integrated keypad for quick calculations without needing to click the map.
@@ -42,7 +42,7 @@ A comprehensive, high-precision artillery calculator for Hell Let Loose. This to
 
 ### Mobile
 -   **One Finger Drag**: Pan the map.
--   **Tap "Fire" Button**: Places target at the center of the screen (Crosshair mode).
+-   **Tap "Fire" Button**: Places target at the center of the screen (Live Tracking).
 
 ## Installation
 
