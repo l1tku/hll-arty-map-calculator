@@ -9,31 +9,20 @@ A comprehensive, high-precision artillery calculator for Hell Let Loose. This to
 - **Visual Targeting Suite**:
   - **Trajectory Line**: Visualizes the flight path from gun to target.
   - **Dynamic Ruler**: Shows MILs and Distance markers every 50m along the trajectory.
-  - **Impact Analysis**: Visual rings for Dispersion (20m), Shell Killzone (10m), and Blast Radius (5m).
+  - **Impact Analysis**: Visual rings for Dispersion (40m), Shell Killzone (20m), and Blast Radius (10m).
 - **Live HUD**:
   - **Desktop**: Cursor-following HUD displaying real-time Distance, MILs, and Grid Reference.
   - **Mobile**: Docked HUD with crosshair targeting mode.
 - **Manual Calculator**: Integrated keypad for quick calculations without needing to click the map.
 - **Dynamic Map Scaling**: Automatically adjusts calculations for different map sizes (e.g., 2016m Carentan vs 1984m Driel) for 1:1 accuracy.
 - **Mobile Optimized**:
-  - Specialized "T-Shape" control layout for mobile ease-of-use.
-  - Touch-friendly sizing and interaction.
-  - Pinch-to-zoom and double-tap prevention.
 - **Map Selector**: Visual grid selector with search functionality .
-
-## Supported Factions & Ballistics
-
-The calculator uses distinct ballistic tables for each faction, utilizing linear interpolation between known data points for maximum precision.
-
-* **US Forces / Great Britain** (M114 / QF 25-pounder)
-* **German Forces** (sFH 18)
-* **Soviet Union** (122mm M-30)
 
 ## Usage
 
 ### Method 1: Map Targeting
 1.  **Select Map**: Open the map selector grid and choose your battlefield.
-2.  **Configure Squad**: Select your Faction and active Gun (1, 2, or 3) from the control panel.
+2.  **Configure Faction**: Select your Faction and active Gun (1, 2, or 3) from the control panel.
 3.  **Aim**: Click anywhere on the map to place a target.
 4.  **Fire**: Read the firing solution from the **Target Data Panel** (Distance, Elevation MILs, Time of Flight).
 
@@ -94,7 +83,7 @@ Includes logic for varying map dimensions (1984m vs 2000m+):
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests. Special thanks to the HLL community for data verification.
+Feel free to submit issues and enhancement requests.
 
 ## License
 
