@@ -1062,6 +1062,10 @@ function centerMap() {
 }
 
 function initMap() {
+  const imgElement = document.getElementById('mapImage');
+  // Ensure it starts at 0 so we don't see the old map "jump"
+  imgElement.style.opacity = 0; 
+
   // Apply panel hidden state immediately before any rendering
   const controlsDrawer = document.getElementById("controlsDrawer");
   if (controlsDrawer) {
@@ -2358,40 +2362,46 @@ function selectMapFromGrid(key) {
 }
 
 function switchMap(mapKey) {
-  if (!MAP_DATABASE[mapKey]) return;
+    if (!MAP_DATABASE[mapKey]) return;
 
-  showLoading();
-  
-  // --- FIX: RESET TARGET DATA HERE ---
-  activeTarget = null; 
-  // -----------------------------------
+    // 1. SHOW LOADING IMMEDIATELY
+    showLoading();
+    
+    const config = MAP_DATABASE[mapKey];
+    const imgElement = document.getElementById('mapImage');
 
-  activeMapKey = mapKey;
-  const config = MAP_DATABASE[mapKey];
-  
-  // Correctly update the global variable
-  currentStrongpoints = config.strongpoints;
-  
-  // Update faction UI with new team names
-  updateFactionUI(config);
-  updateGunUI(config);
+    // 2. CREATE A "HIDDEN" PRELOADER FOR THE BIG MAP
+    const mapPreloader = new Image();
+    
+    mapPreloader.onload = function() {
+        // ONLY UPDATE DATA AFTER IMAGE IS FULLY DOWNLOADED
+        activeTarget = null; 
+        activeMapKey = mapKey;
+        currentStrongpoints = config.strongpoints;
 
-  const imgElement = document.getElementById('mapImage');
-  imgElement.style.opacity = 0; 
+        // Update Text UI
+        const currentMapLbl = document.getElementById("currentMapName");
+        if (currentMapLbl) currentMapLbl.innerText = config.name;
+        document.title = `HLL Artillery - ${config.name}`;
 
-  setTimeout(() => {
-    imgElement.alt = `${config.name} Map`;
+        updateFactionUI(config);
+        updateGunUI(config);
 
-    imgElement.onload = function() {
-      document.title = `HLL Artillery - ${config.name}`;
-      initMap(); 
-      render();  
-      imgElement.style.opacity = 1; 
-      hideLoading(); 
+        // Swap the actual visible image
+        imgElement.src = config.image;
+
+        // Re-initialize logic
+        initMap(); 
+        render();  
+
+        // HIDE LOADING ONLY WHEN EVERYTHING IS READY
+        hideLoading();
+        imgElement.style.opacity = 1;
     };
 
-    imgElement.src = config.image;
-  }, 100);
+    // Trigger the background download
+    mapPreloader.fetchPriority = "high";
+    mapPreloader.src = config.image;
 }
 
 // ==========================================
