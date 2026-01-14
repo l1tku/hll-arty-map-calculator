@@ -1062,16 +1062,15 @@ function centerMap() {
 }
 
 function initMap() {
-  // Apply panel hidden state immediately before any rendering
-  const controlsDrawer = document.getElementById("controlsDrawer");
-  if (controlsDrawer) {
-    if (window.savedPanelHidden) {
-      controlsDrawer.classList.add("closed");
-    } else {
-      // Remove hidden-by-default class if panel should be visible
-      controlsDrawer.classList.remove("hidden-by-default");
+    // --- NO OPACITY CODE HERE ---
+    const controlsDrawer = document.getElementById("controlsDrawer");
+    if (controlsDrawer) {
+        if (window.savedPanelHidden) {
+            controlsDrawer.classList.add("closed");
+        } else {
+            controlsDrawer.classList.remove("hidden-by-default");
+        }
     }
-  }
   
   updateDimensions();
   centerMap();
@@ -2364,19 +2363,21 @@ function switchMap(mapKey) {
     const imgElement = document.getElementById('mapImage');
     const markersLayer = document.getElementById("markers");
 
-    // 1. Keep the Loading Overlay visible, but hide the stage 
-    // using visibility:hidden so it doesn't flicker while resetting
-    if (mapStage) mapStage.style.visibility = "hidden";
-    if (mapStage) mapStage.style.opacity = "0";
+    // 1. Hide the map immediately so we don't see the switch happen
+    if (mapStage) {
+        mapStage.style.transition = "none"; // Disable animation so it hides instantly
+        mapStage.style.opacity = "0";
+    }
     if (markersLayer) markersLayer.innerHTML = ""; 
     
+    // Show the loading text
     showLoading();
     
     const config = MAP_DATABASE[mapKey];
     const mapPreloader = new Image();
     
     mapPreloader.onload = function() {
-        // 2. Update Data in background
+        // 2. Update Data
         activeTarget = null; 
         activeMapKey = mapKey;
         currentStrongpoints = config.strongpoints;
@@ -2388,28 +2389,31 @@ function switchMap(mapKey) {
         updateFactionUI(config);
         updateGunUI(config);
 
-        // 3. Swap visible image source
+        // 3. Swap Image Source
         imgElement.src = config.image;
 
-        // 4. THE OVERLAP: 
-        // We initialize and render while the stage is still hidden
-        initMap(); 
-        render();  
+        // 4. Force browser to render the new image frame
+        requestAnimationFrame(() => {
+            initMap(); 
+            render();  
 
-        // Now we make the map stage "Opaque" immediately (but still behind loading screen)
-        if (mapStage) {
-            mapStage.style.transition = "none"; // Disable fade-in for the map itself
-            mapStage.style.visibility = "visible";
-            mapStage.style.opacity = "1";
-        }
+            // 5. THE FIX: Show map INSTANTLY behind the loading screen
+            if (mapStage) {
+                mapStage.style.transition = "none"; // Ensure no fade-in delay
+                mapStage.style.opacity = "1";       // Snap to 100% visible
+            }
+            if (imgElement) imgElement.style.opacity = "1";
 
-        // 5. FINALLY, hide the loading text. 
-        // Because the map is already at Opacity 1 behind it, you won't see black.
-        setTimeout(() => {
-            hideLoading();
-            // Restore transition for future pans/zooms if needed
-            setTimeout(() => { if (mapStage) mapStage.style.transition = ""; }, 100);
-        }, 100);
+            // 6. Give the browser 100ms to paint the map, THEN remove loading text
+            setTimeout(() => {
+                hideLoading(); // The map is already there, so no black screen!
+                
+                // Re-enable smooth transitions for zooming/panning later
+                setTimeout(() => { 
+                    if (mapStage) mapStage.style.transition = "opacity 0.3s ease-in-out"; 
+                }, 50);
+            }, 100);
+        });
     };
 
     mapPreloader.src = config.image;
