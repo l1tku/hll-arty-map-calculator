@@ -1062,10 +1062,6 @@ function centerMap() {
 }
 
 function initMap() {
-  const imgElement = document.getElementById('mapImage');
-  // Ensure it starts at 0 so we don't see the old map "jump"
-  imgElement.style.opacity = 0; 
-
   // Apply panel hidden state immediately before any rendering
   const controlsDrawer = document.getElementById("controlsDrawer");
   if (controlsDrawer) {
@@ -2364,43 +2360,48 @@ function selectMapFromGrid(key) {
 function switchMap(mapKey) {
     if (!MAP_DATABASE[mapKey]) return;
 
-    // 1. SHOW LOADING IMMEDIATELY
+    // 1. BLACKOUT & CLEANUP IMMEDIATELY
+    const imgElement = document.getElementById('mapImage');
+    const markersLayer = document.getElementById("markers");
+    
+    imgElement.style.opacity = "0";
+    if (markersLayer) markersLayer.innerHTML = ""; // Clear old icons instantly
+    
     showLoading();
     
     const config = MAP_DATABASE[mapKey];
-    const imgElement = document.getElementById('mapImage');
 
-    // 2. CREATE A "HIDDEN" PRELOADER FOR THE BIG MAP
+    // 2. BACKGROUND PRELOAD
     const mapPreloader = new Image();
-    
     mapPreloader.onload = function() {
-        // ONLY UPDATE DATA AFTER IMAGE IS FULLY DOWNLOADED
+        // Update Data
         activeTarget = null; 
         activeMapKey = mapKey;
         currentStrongpoints = config.strongpoints;
 
-        // Update Text UI
         const currentMapLbl = document.getElementById("currentMapName");
         if (currentMapLbl) currentMapLbl.innerText = config.name;
-        document.title = `HLL Artillery - ${config.name}`;
-
+        
         updateFactionUI(config);
         updateGunUI(config);
 
-        // Swap the actual visible image
+        // Visual Swap
         imgElement.src = config.image;
 
-        // Re-initialize logic
-        initMap(); 
-        render();  
-
-        // HIDE LOADING ONLY WHEN EVERYTHING IS READY
-        hideLoading();
-        imgElement.style.opacity = 1;
+        // Decode ensures pixels are ready before we show the map
+        imgElement.decode().then(() => {
+            initMap(); 
+            render();  
+            imgElement.style.opacity = "1";
+            hideLoading();
+        }).catch(() => {
+            initMap();
+            render();
+            imgElement.style.opacity = "1";
+            hideLoading();
+        });
     };
 
-    // Trigger the background download
-    mapPreloader.fetchPriority = "high";
     mapPreloader.src = config.image;
 }
 
