@@ -3631,24 +3631,32 @@ function updateMobileHud() {
   if (hudGrid) hudGrid.innerText = getGridRef(targetPos.x, targetPos.y);
 }
 
-// --- NEW: Mobile Fire Logic ---
+// --- NEW: Mobile Fire Logic (Fixed Center Calculation) ---
 function fireAtCenter() {
   const mapImage = document.getElementById("mapImage");
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
+  
+  // Get exact map container dimensions and position
   const rect = mapContainer.getBoundingClientRect();
 
-  // Calculate Center
+  // Calculate the VISUAL center of the container (where the crosshair is)
+  // This is relative to the container's top-left corner
+  const visualCenterX = rect.width / 2;
+  const visualCenterY = rect.height / 2;
+
+  // Convert visual center to raw image coordinates (before zoom/pan)
+  // Logic: (VisualCenter - PanOffset) / CurrentZoom
   const effectiveZoom = state.scale * state.fitScale;
-  const rawImgX = ((rect.width / 2) - state.pointX) / effectiveZoom;
-  const rawImgY = ((rect.height / 2) - state.pointY) / effectiveZoom;
+  const rawImgX = (visualCenterX - state.pointX) / effectiveZoom;
+  const rawImgY = (visualCenterY - state.pointY) / effectiveZoom;
 
   // Convert to Game Coords
   const targetPos = imagePixelsToGame(rawImgX, rawImgY, w, h);
 
   // --- STANDARD SHOOTING LOGIC (Copied from Click Handler) ---
   const gunPos = getActiveGunCoords();
-  if (!gunPos) return;
+  if (!gunPos) return; // Safety check
 
   const dx = targetPos.x - gunPos.x;
   const dy = targetPos.y - gunPos.y;
