@@ -85,6 +85,15 @@ Includes logic for varying map dimensions (1984m vs 2000m+):
 
 Feel free to submit issues and enhancement requests.
 
+## Disclaimer & Copyright
+
+This project is a community-made tool and is **not** affiliated with, endorsed by, or sponsored by Team17, Cover 6 Studios, or Black Matter.
+
+**Hell Let Loose** content and materials are trademarks and copyrights of their respective owners.
+* **Game Assets:** All game images (maps, garrison icons) are the property of the Hell Let Loose developers and publishers. They are used here for non-commercial, educational, and informational purposes.
+
 ## License
 
-This project is for educational and gaming purposes.
+The source code (HTML, CSS, JavaScript) of this project is licensed under the **MIT License**.
+
+> **Note:** The game assets (images located in the `/images` folder) are **excluded** from this license and remain the intellectual property of their respective owners.
