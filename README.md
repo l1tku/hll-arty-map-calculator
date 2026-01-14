@@ -52,8 +52,6 @@ An interactive tactical map and high-precision artillery calculator for Hell Let
 
 ## Supported Maps
 
-Includes logic for varying map dimensions (1984m vs 2000m+):
-
 * Carentan (CAR)
 * Driel (DRI)
 * El Alamein (ELA)
