@@ -2260,10 +2260,22 @@ function renderMapGrid(filter = "") {
   const grid = document.getElementById("mapGrid");
   if (!grid) return;
   
-  // OPTIMIZATION: If we are asking for a full grid ("") and it's already full, STOP.
-  // This prevents the "Double Render" that kills your thumbnails.
+  // THE HIGHLIGHT FIX: If grid exists, just update the .active class
   if (filter === "" && isGridFull && grid.hasChildNodes()) {
-    return; 
+      const cards = grid.querySelectorAll('.map-card');
+      const sortedKeys = Object.keys(MAP_DATABASE).sort((a, b) => 
+          MAP_DATABASE[a].name.localeCompare(MAP_DATABASE[b].name)
+      );
+
+      cards.forEach((card, index) => {
+          const key = sortedKeys[index];
+          if (key === activeMapKey) {
+              card.classList.add('active');
+          } else {
+              card.classList.remove('active');
+          }
+      });
+      return; 
   }
 
   grid.innerHTML = ""; // Clear existing
@@ -2344,16 +2356,19 @@ function closeMapSelector() {
 }
 
 function selectMapFromGrid(key) {
-  switchMap(key);
-  closeMapSelector();
-  saveState(); // Auto-save when map changes
-  
-  // Update Button Text
-  const lbl = document.getElementById("currentMapName");
-  if(lbl) lbl.innerText = MAP_DATABASE[key].name;
-  
-  // Re-render to update border
-  renderMapGrid();
+    // 1. Close UI first
+    closeMapSelector();
+    
+    // 2. Perform the switch
+    switchMap(key);
+    
+    // 3. Save
+    saveState(); 
+
+    // 4. THE FIX: Update the highlight
+    // We update the active key locally first so the render knows what to highlight
+    activeMapKey = key; 
+    renderMapGrid(""); // This will now trigger the class update logic above
 }
 
 function switchMap(mapKey) {
@@ -2363,56 +2378,56 @@ function switchMap(mapKey) {
     const imgElement = document.getElementById('mapImage');
     const markersLayer = document.getElementById("markers");
 
-    // 1. Hide the map immediately so we don't see the switch happen
+    // 1. INSTANT BLACKOUT & CLEANUP
     if (mapStage) {
-        mapStage.style.transition = "none"; // Disable animation so it hides instantly
+        mapStage.style.transition = "none"; 
         mapStage.style.opacity = "0";
     }
     if (markersLayer) markersLayer.innerHTML = ""; 
     
-    // Show the loading text
+    // 2. CLEAR THE SOURCE (The Flicker Killer)
+    // This forces the browser to drop the old map from the visible element
+    imgElement.src = ""; 
+
     showLoading();
     
     const config = MAP_DATABASE[mapKey];
     const mapPreloader = new Image();
     
     mapPreloader.onload = function() {
-        // 2. Update Data
+        // Update Data
         activeTarget = null; 
         activeMapKey = mapKey;
         currentStrongpoints = config.strongpoints;
 
         const currentMapLbl = document.getElementById("currentMapName");
         if (currentMapLbl) currentMapLbl.innerText = config.name;
-        document.title = `HLL Artillery - ${config.name}`;
 
         updateFactionUI(config);
         updateGunUI(config);
 
-        // 3. Swap Image Source
+        // 3. APPLY NEW SOURCE
         imgElement.src = config.image;
 
-        // 4. Force browser to render the new image frame
+        // 4. WAIT FOR BROWSER PAINT
         requestAnimationFrame(() => {
-            initMap(); 
-            render();  
+            // Give it one more frame to ensure the src swap is registered
+            requestAnimationFrame(() => {
+                initMap(); 
+                render();  
 
-            // 5. THE FIX: Show map INSTANTLY behind the loading screen
-            if (mapStage) {
-                mapStage.style.transition = "none"; // Ensure no fade-in delay
-                mapStage.style.opacity = "1";       // Snap to 100% visible
-            }
-            if (imgElement) imgElement.style.opacity = "1";
+                // Show map instantly behind overlay
+                if (mapStage) mapStage.style.opacity = "1";
 
-            // 6. Give the browser 100ms to paint the map, THEN remove loading text
-            setTimeout(() => {
-                hideLoading(); // The map is already there, so no black screen!
-                
-                // Re-enable smooth transitions for zooming/panning later
-                setTimeout(() => { 
-                    if (mapStage) mapStage.style.transition = "opacity 0.3s ease-in-out"; 
-                }, 50);
-            }, 100);
+                // Fade out overlay ONLY after the map is definitely there
+                setTimeout(() => {
+                    hideLoading();
+                    // Put transition back for smooth user zooming later
+                    setTimeout(() => { 
+                        if (mapStage) mapStage.style.transition = "opacity 0.3s ease-in-out"; 
+                    }, 50);
+                }, 150);
+            });
         });
     };
 
