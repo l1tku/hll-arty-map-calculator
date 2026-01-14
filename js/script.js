@@ -2252,14 +2252,24 @@ function initMapSelector() {
   }
 }
 
+// --- OPTIMIZED MAP SELECTOR LOGIC ---
+
+// Helper to track if the grid is currently showing all maps
+let isGridFull = false; 
+
 function renderMapGrid(filter = "") {
   const grid = document.getElementById("mapGrid");
   if (!grid) return;
   
+  // OPTIMIZATION: If we are asking for a full grid ("") and it's already full, STOP.
+  // This prevents the "Double Render" that kills your thumbnails.
+  if (filter === "" && isGridFull && grid.hasChildNodes()) {
+    return; 
+  }
+
   grid.innerHTML = ""; // Clear existing
 
   // --- 1. NORMALIZE SEARCH TERM ---
-  // This converts "É" to "e", "ü" to "u", etc. so "eglise" finds "Église"
   const cleanFilter = filter
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -2278,30 +2288,24 @@ function renderMapGrid(filter = "") {
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
     
-    // Check if normalized name includes normalized search term
+    // Search check
     if (cleanFilter && !cleanName.includes(cleanFilter)) {
-      return; // Skip this map
+      return; 
     }
     
-    // 1. Card Container
+    // Card Construction
     const card = document.createElement("div");
     card.className = "map-card";
     if (key === activeMapKey) card.classList.add("active");
     
-    // Click Handler
     card.onclick = () => selectMapFromGrid(key);
 
-    // 2. Thumbnail Image
     const img = document.createElement("img");
     img.className = "map-card-img";
     img.src = mapData.thumbnail || mapData.image; 
-    
-    // Pre-load logic
-    img.loading = "eager";  
-    
+    img.loading = "eager"; // Force download
     img.alt = mapData.name;
 
-    // 3. Text Label
     const label = document.createElement("div");
     label.className = "map-card-name";
     label.innerText = mapData.name;
@@ -2310,10 +2314,22 @@ function renderMapGrid(filter = "") {
     card.appendChild(label);
     grid.appendChild(card);
   });
+
+  // Update flag: If filter was empty, we now have a full grid built.
+  isGridFull = (filter === "");
 }
 
 function openMapSelector() {
-  renderMapGrid("");
+  // Only render if we need to reset a search, otherwise keep the pre-loaded grid
+  const searchInput = document.getElementById("mapSearchInput");
+  if (searchInput && searchInput.value !== "") {
+      searchInput.value = "";
+      renderMapGrid(""); 
+  } else {
+      // If no search input, ensure grid is populated but don't wipe it if it's there
+      renderMapGrid(""); 
+  }
+  
   document.getElementById("mapModal").classList.add("active");
 }
 
@@ -3734,13 +3750,19 @@ if (mobileFireBtn) {
     });
 }
 
-// --- PRE-LOAD MAP GRID ---
-// This builds the grid in the background so thumbnails are ready when user clicks button
-renderMapGrid("");
+// --- PRE-LOAD ASSETS ---
+// 1. Force browser to fetch all thumbnails into cache immediately
+(function preloadImages() {
+    Object.values(MAP_DATABASE).forEach(map => {
+        const img = new Image();
+        img.src = map.thumbnail || map.image;
+    });
+})();
 
-// ==========================================
-// PROJECTS MODAL LOGIC
-// ==========================================
+// 2. Build the DOM nodes in the background so they are ready
+renderMapGrid(""); 
+
+// --- PROJECTS MODAL LOGIC ---
 
 const btnOtherProjects = document.getElementById("btnOtherProjects");
 const projectsModal = document.getElementById("projectsModal");
