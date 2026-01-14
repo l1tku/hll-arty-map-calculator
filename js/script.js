@@ -2300,15 +2300,18 @@ function renderMapGrid(filter = "") {
     
     card.onclick = () => selectMapFromGrid(key);
 
-    // --- LOCATE THIS IN renderMapGrid ---
+    // --- LOCATE THIS INSIDE sortedKeys.forEach block ---
     const img = document.createElement("img");
     img.className = "map-card-img";
-img.src = mapData.thumbnail || mapData.image; 
-
-// CHANGE THIS LINE:
-   img.loading = "eager"; // <--- This forces instant display from cache
-
-img.alt = mapData.name;
+    
+    // START WITH EMPTY SRC & HIDDEN (Preloader will fill this)
+    img.src = ""; 
+    img.style.opacity = "0"; 
+    img.style.transition = "opacity 0.2s ease-in";
+    
+    img.loading = "eager"; 
+    img.alt = mapData.name;
+    // ----------------------------------------------------
 
     const label = document.createElement("div");
     label.className = "map-card-name";
@@ -3717,55 +3720,34 @@ function fireAtCenter() {
 }
 
 // ==========================================
-// 6. EXECUTION START
+// 6. EXECUTION START & PRELOAD
 // ==========================================
 
-// NEW: Inject Version Number
-document.querySelectorAll('.app-version').forEach(el => {
-  el.innerText = APP_VERSION;
-});
-
-createStickyLabels();
-
-// Initialize Mobile Fire Button with Manual Animation
-const mobileFireBtn = document.getElementById("mobileFireBtn");
-
-if (mobileFireBtn) {
-    const triggerVisuals = () => {
-        // Add the class that forces the CSS move
-        mobileFireBtn.classList.add("pressed");
-        
-        // Remove it quickly so it "bounces" back
-        setTimeout(() => {
-            mobileFireBtn.classList.remove("pressed");
-        }, 150);
-    };
-
-    mobileFireBtn.addEventListener("touchstart", (e) => {
-        e.preventDefault(); // Prevents ghost clicks/zoom
-        triggerVisuals();   // Play animation
-        fireAtCenter();     // Execute logic
-    }, { passive: false });
-
-    // Fallback for testing on desktop with mouse
-    mobileFireBtn.addEventListener("mousedown", (e) => {
-        triggerVisuals();
-        fireAtCenter();
-    });
-}
-
-// --- UPDATE YOUR PRELOAD BLOCK AT THE BOTTOM ---
-(function preloadImages() {
-    Object.values(MAP_DATABASE).forEach(map => {
-        const img = new Image();
-        // Adding .fetchPriority tells modern browsers to grab these first
-        img.fetchPriority = "high"; 
-        img.src = map.thumbnail || map.image;
-    });
-})();
-
-// 2. Build the DOM nodes in the background so they are ready
+// 1. Build the Grid nodes immediately (Invisible until images arrive)
 renderMapGrid(""); 
+
+// 2. Optimized Preload & Reveal Logic
+(function preloadAndReveal() {
+    const allThumbnails = document.querySelectorAll('.map-card-img');
+    
+    Object.keys(MAP_DATABASE).forEach(key => {
+        const mapData = MAP_DATABASE[key];
+        const img = new Image();
+        img.fetchPriority = "high"; 
+        
+        img.onload = () => {
+            // Find the specific card image in the DOM and set its src now that it's cached
+            allThumbnails.forEach(domImg => {
+                if (domImg.alt === mapData.name) {
+                    domImg.src = img.src;
+                    domImg.style.opacity = "1"; // Fade in for smoothness
+                }
+            });
+        };
+        
+        img.src = mapData.thumbnail || mapData.image;
+    });
+})(); 
 
 // --- PROJECTS MODAL LOGIC ---
 
