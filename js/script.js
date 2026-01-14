@@ -2360,20 +2360,23 @@ function selectMapFromGrid(key) {
 function switchMap(mapKey) {
     if (!MAP_DATABASE[mapKey]) return;
 
-    // 1. BLACKOUT EVERYTHING IMMEDIATELY
     const mapStage = document.getElementById("mapStage");
     const imgElement = document.getElementById('mapImage');
     const markersLayer = document.getElementById("markers");
 
+    // 1. Keep the Loading Overlay visible, but hide the stage 
+    // using visibility:hidden so it doesn't flicker while resetting
+    if (mapStage) mapStage.style.visibility = "hidden";
     if (mapStage) mapStage.style.opacity = "0";
-    if (markersLayer) markersLayer.innerHTML = ""; // Wipe old icons instantly
+    if (markersLayer) markersLayer.innerHTML = ""; 
+    
     showLoading();
     
     const config = MAP_DATABASE[mapKey];
     const mapPreloader = new Image();
     
     mapPreloader.onload = function() {
-        // 2. DATA SWAP (While screen is still black)
+        // 2. Update Data in background
         activeTarget = null; 
         activeMapKey = mapKey;
         currentStrongpoints = config.strongpoints;
@@ -2385,25 +2388,28 @@ function switchMap(mapKey) {
         updateFactionUI(config);
         updateGunUI(config);
 
-        // 3. VISUAL SWAP
+        // 3. Swap visible image source
         imgElement.src = config.image;
 
-        // 4. WAIT FOR GPU TO BE READY
-        imgElement.decode().then(() => {
-            initMap(); 
-            render();  
-            
-            // Tiny delay to ensure browser finished drawing markers
-            setTimeout(() => {
-                if (mapStage) mapStage.style.opacity = "1"; 
-                hideLoading();
-            }, 60);
-        }).catch(() => {
-            initMap();
-            render();
-            if (mapStage) mapStage.style.opacity = "1";
+        // 4. THE OVERLAP: 
+        // We initialize and render while the stage is still hidden
+        initMap(); 
+        render();  
+
+        // Now we make the map stage "Opaque" immediately (but still behind loading screen)
+        if (mapStage) {
+            mapStage.style.transition = "none"; // Disable fade-in for the map itself
+            mapStage.style.visibility = "visible";
+            mapStage.style.opacity = "1";
+        }
+
+        // 5. FINALLY, hide the loading text. 
+        // Because the map is already at Opacity 1 behind it, you won't see black.
+        setTimeout(() => {
             hideLoading();
-        });
+            // Restore transition for future pans/zooms if needed
+            setTimeout(() => { if (mapStage) mapStage.style.transition = ""; }, 100);
+        }, 100);
     };
 
     mapPreloader.src = config.image;
