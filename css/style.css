@@ -154,6 +154,7 @@ body {
   position: absolute; 
   top: 0; 
   left: 0;
+  transition: opacity 0.4s ease-in-out;
 }
 
 .map-stage.zoom-transition {
@@ -165,7 +166,9 @@ body {
   pointer-events: none; 
   max-width: none; 
   max-height: none;
-  image-rendering: high-quality; 
+  image-rendering: high-quality;
+  transition: opacity 0.3s ease-in-out;
+  background-color: black; /* Prevents white flashes */
 }
 
 /* ==========================================
@@ -2450,6 +2453,10 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   pointer-events: none;
   /* Ensure it sits on top of the Blast/Red circle (z-index 30) */
   z-index: 40; 
+}
+
+#mapStage {
+    transition: opacity 0.4s ease-in-out;
 }
 
 /* The vertical and horizontal lines */

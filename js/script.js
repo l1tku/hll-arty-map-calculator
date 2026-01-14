@@ -2360,44 +2360,48 @@ function selectMapFromGrid(key) {
 function switchMap(mapKey) {
     if (!MAP_DATABASE[mapKey]) return;
 
-    // 1. BLACKOUT & CLEANUP IMMEDIATELY
+    // 1. BLACKOUT EVERYTHING IMMEDIATELY
+    const mapStage = document.getElementById("mapStage");
     const imgElement = document.getElementById('mapImage');
     const markersLayer = document.getElementById("markers");
-    
-    imgElement.style.opacity = "0";
-    if (markersLayer) markersLayer.innerHTML = ""; // Clear old icons instantly
-    
+
+    if (mapStage) mapStage.style.opacity = "0";
+    if (markersLayer) markersLayer.innerHTML = ""; // Wipe old icons instantly
     showLoading();
     
     const config = MAP_DATABASE[mapKey];
-
-    // 2. BACKGROUND PRELOAD
     const mapPreloader = new Image();
+    
     mapPreloader.onload = function() {
-        // Update Data
+        // 2. DATA SWAP (While screen is still black)
         activeTarget = null; 
         activeMapKey = mapKey;
         currentStrongpoints = config.strongpoints;
 
         const currentMapLbl = document.getElementById("currentMapName");
         if (currentMapLbl) currentMapLbl.innerText = config.name;
-        
+        document.title = `HLL Artillery - ${config.name}`;
+
         updateFactionUI(config);
         updateGunUI(config);
 
-        // Visual Swap
+        // 3. VISUAL SWAP
         imgElement.src = config.image;
 
-        // Decode ensures pixels are ready before we show the map
+        // 4. WAIT FOR GPU TO BE READY
         imgElement.decode().then(() => {
             initMap(); 
             render();  
-            imgElement.style.opacity = "1";
-            hideLoading();
+            
+            // Tiny delay to ensure browser finished drawing markers
+            setTimeout(() => {
+                if (mapStage) mapStage.style.opacity = "1"; 
+                hideLoading();
+            }, 60);
         }).catch(() => {
             initMap();
             render();
-            imgElement.style.opacity = "1";
+            if (mapStage) mapStage.style.opacity = "1";
             hideLoading();
         });
     };
