@@ -2300,18 +2300,18 @@ function renderMapGrid(filter = "") {
     
     card.onclick = () => selectMapFromGrid(key);
 
-    // --- LOCATE THIS INSIDE sortedKeys.forEach block ---
+    // --- LOCATE THIS INSIDE renderMapGrid sortedKeys.forEach ---
     const img = document.createElement("img");
     img.className = "map-card-img";
     
-    // START WITH EMPTY SRC & HIDDEN (Preloader will fill this)
-    img.src = ""; 
+    // THE FIX: Set a transparent 1x1 pixel base64 placeholder 
+    // This prevents the "broken image" icon while loading from GitHub
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     img.style.opacity = "0"; 
-    img.style.transition = "opacity 0.2s ease-in";
+    img.style.transition = "opacity 0.3s ease-in"; // Smooth fade-in
     
     img.loading = "eager"; 
     img.alt = mapData.name;
-    // ----------------------------------------------------
 
     const label = document.createElement("div");
     label.className = "map-card-name";
@@ -3720,32 +3720,41 @@ function fireAtCenter() {
 }
 
 // ==========================================
-// 6. EXECUTION START & PRELOAD
+// 6. EXECUTION START & SMART PRELOAD
 // ==========================================
 
-// 1. Build the Grid nodes immediately (Invisible until images arrive)
+// 1. Build the Grid structure immediately
 renderMapGrid(""); 
 
-// 2. Optimized Preload & Reveal Logic
-(function preloadAndReveal() {
+// 2. Preload with Cache Verification
+(function smartPreload() {
     const allThumbnails = document.querySelectorAll('.map-card-img');
     
     Object.keys(MAP_DATABASE).forEach(key => {
         const mapData = MAP_DATABASE[key];
-        const img = new Image();
-        img.fetchPriority = "high"; 
+        const imgPath = mapData.thumbnail || mapData.image;
         
-        img.onload = () => {
-            // Find the specific card image in the DOM and set its src now that it's cached
+        const tempImg = new Image();
+        tempImg.fetchPriority = "high"; 
+        
+        // This function handles the "Reveal"
+        const reveal = () => {
             allThumbnails.forEach(domImg => {
                 if (domImg.alt === mapData.name) {
-                    domImg.src = img.src;
-                    domImg.style.opacity = "1"; // Fade in for smoothness
+                    domImg.src = imgPath;
+                    domImg.style.opacity = "1";
                 }
             });
         };
+
+        // If the browser already has it (from a previous session/fast cache)
+        if (tempImg.complete) {
+            reveal();
+        } else {
+            tempImg.onload = reveal;
+        }
         
-        img.src = mapData.thumbnail || mapData.image;
+        tempImg.src = imgPath;
     });
 })(); 
 
