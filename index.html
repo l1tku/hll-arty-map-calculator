@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>HLL Artillery Calculator</title>
+  
+  <link rel="manifest" href="manifest.json">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HLL Arty">
+
+  <link rel="icon" type="image/webp" href="images/favicon.webp">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/icon-180.png">
+  <link rel="stylesheet" href="css/style.css?v=1.2">
+  <script src="js/script.js" defer></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      // Check if we are on HTTP or HTTPS (prevents error on file://)
+      if (window.location.protocol.indexOf('http') === 0) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('service-worker.js')
+            .then((reg) => console.log('Service Worker registered.', reg))
+            .catch((err) => console.log('Service Worker registration failed.', err));
+        });
+      } else {
+        console.log('Service Worker skipped (Local file system detected).');
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <div class="panel map-wrap" id="mapContainer">
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading map...</div>
+      </div>
+      
+      <div class="map-stage" id="mapStage">
+        <img 
+          id="mapImage" 
+          class="map-image"
+          src="images/maps/map_Carentan.webp" 
+          alt="Carentan Map"
+        >
+        <div id="markers" class="markers-layer"></div>
+      </div>
+    </div>
+
+    <div class="debug-overlay">
+      <div class="scale-container">
+        <div class="scale-wrapper" id="scaleWrapper">
+          <div class="scale-bar-graphic">
+            <div class="scale-tick t-start"></div>
+            <div class="scale-tick t-mid"></div>
+            <div class="scale-tick t-end"></div>
+          </div>
+          <div class="scale-labels">
+            <span class="scale-lbl l-start">0</span>
+            <span id="scaleTextMid" class="scale-lbl l-mid">125m</span>
+            <span id="scaleTextEnd" class="scale-lbl l-end">250m</span>
+          </div>
+        </div>
+
+        <div class="zoom-indicator-inline">
+          <span id="zoomIndicator">1.0x</span>
+        </div>
+      </div>
+      
+      <div class="controls-drawer" id="controlsDrawer">
+<button id="drawerToggleBtn" class="drawer-tab" aria-label="Toggle controls drawer" aria-expanded="true">
+          <span class="tab-arrow">▼</span>
+        </button>
+
+        <div class="controls-content">
+          <button id="openMapBtn" class="btn-map-select" aria-haspopup="true" aria-expanded="false" aria-label="Select Map">
+            <span id="currentMapName">Carentan</span> 
+            <span class="map-arrow">⇄</span>
+          </button>
+
+          <div class="custom-dropdown" id="factionDropdown">
+            <button class="btn-map-select compact" id="factionBtn" aria-haspopup="true" aria-expanded="false" aria-label="Select Faction">
+              <img id="currentFactionFlag" src="images/flags/us.webp" class="faction-flag" alt="">
+              <span id="factionLabel">US</span>
+              <span class="icon">▾</span>
+            </button>
+            <div class="dropdown-menu hidden">
+              <div class="dropdown-item" data-value="us">
+                <img class="faction-flag item-flag" src="images/flags/us.webp" alt="">
+                <span class="item-text">US</span>
+              </div>
+              <div class="dropdown-item" data-value="ger">
+                <img class="faction-flag item-flag" src="images/flags/ger.webp" alt="">
+                <span class="item-text">AXIS</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="custom-dropdown" id="gunDropdown">
+            <button class="btn-map-select compact" id="gunBtn" aria-haspopup="true" aria-expanded="false" aria-label="Select Gun">
+              <span id="gunLabel">Gun 1 (Left)</span>
+              <span class="icon">▾</span>
+            </button>
+            <div class="dropdown-menu hidden">
+              <div class="dropdown-item" data-value="0">Gun 1 (Left)</div>
+              <div class="dropdown-item" data-value="1">Gun 2 (Mid)</div>
+              <div class="dropdown-item" data-value="2">Gun 3 (Right)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobileCrosshair" class="mobile-crosshair hidden">
+    <div id="mobileRingContainer" class="ring-container">
+      <div class="m-ring dispersion"></div>
+      <div class="m-ring deadzone"></div>
+      <div class="m-ring blast"></div>
+      <div class="hud-crosshair"></div>
+    </div>
+  </div>
+
+  <div id="desktopCursorRings" class="ring-container hidden">
+    <div class="m-ring dispersion"></div>
+    <div class="m-ring deadzone"></div>
+    <div class="m-ring blast"></div>
+    <div class="hud-crosshair"></div>
+  </div>
+
+  <button id="mobileFireBtn" class="mobile-fire-btn hidden" aria-label="Fire Artillery">
+    <span>FIRE</span>
+  </button>
+
+  <div id="targetDataPanel" class="target-data-panel">
+    <div class="panel-watermark">
+       HLL ARTY MAP CALC <span class="app-version"></span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
+    </div>
+
+    <div class="data-col small-col">
+      <span class="data-label">DIST</span>
+      <span class="data-value val-small" id="panelDist">---</span>
+    </div>
+
+    <div class="data-divider"></div>
+
+    <div class="data-col main-col">
+      <span class="data-label">SET ELEVATION MIL</span>
+      <span class="data-value val-huge" id="panelMil">---</span>
+    </div>
+
+    <div class="data-divider"></div>
+
+    <div class="data-col small-col">
+      <span class="data-label">IMPACT</span>
+      <span class="data-value val-small" id="panelTime">---</span>
+    </div>
+  </div>
+
+  <div id="mapModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-brand-header">
+        <div class="main-title">HLL ARTY MAP CALCULATOR</div>
+        <div class="main-subtitle-credits"><span class="app-version"></span> • 2026 • BY LITKU</div>
+        <button class="close-btn" id="closeModalBtn" aria-label="Close Map Selection">×</button>
+      </div>
+
+      <div class="modal-sub-header">
+        <div class="modal-subtitle-container">
+          <div class="modal-search-wrapper">
+            <input type="text" id="mapSearchInput" placeholder="SEARCH MAPS..." autocomplete="off" aria-label="Search Maps">
+            <button id="clearSearchBtn" class="search-clear-btn" aria-label="Clear Search">×</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-grid" id="mapGrid">
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnManualCalc" class="footer-btn">
+          <span class="icon">🧮</span> Manual Calculator
+        </button>
+        <button id="btnOtherProjects" class="footer-btn secondary">
+          <span class="icon">🚀</span> More Projects
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="zoom-slider-container">
+    <div class="zoom-slider-track" id="zoomSliderTrack">
+      <div class="zoom-slider-fill" id="zoomSliderFill"></div>
+      <div class="zoom-slider-handle" id="zoomSliderHandle"></div>
+    </div>
+
+    <div class="zoom-icons">
+      <span id="btnZoomIn" data-tooltip="Zoom In" role="button" tabindex="0" aria-label="Zoom In">+</span>
+      <span id="btnZoomOut" data-tooltip="Zoom Out" role="button" tabindex="0" aria-label="Zoom Out">−</span>
+      
+      <span id="rulerToggleBtn" class="active" data-tooltip="BALLISTIC RULER" role="button" tabindex="0" aria-label="Toggle Ballistic Ruler">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 10V14C22 15.1046 21.1046 16 20 16H4C2.89543 16 2 15.1046 2 14V10C2 8.89543 2.89543 8 4 8H20C21.1046 8 22 8.89543 22 10Z"/>
+          <path d="M6 8V11M10 8V13M14 8V11M18 8V13"/>
+        </svg>
+      </span>
+
+      <span id="hudToggleBtn" data-tooltip="LIVE TRACKING" role="button" tabindex="0" aria-label="Toggle Live HUD">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </span>
+
+      <span id="sidebarCalcBtn" data-tooltip="CALCULATOR" role="button" tabindex="0" aria-label="Open Calculator">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="2" width="16" height="20" rx="2" />
+          <line x1="8" y1="6" x2="16" y2="6" />
+          <path d="M16 14h.01M12 14h.01M8 14h.01M16 18h.01M12 18h.01M8 18h.01" />
+        </svg>
+      </span>
+    </div>
+  </div>
+  
+  <div id="liveCursorHud" class="live-hud hidden">
+      <div class="hud-row">
+          <span class="hud-label text-yellow">MIL</span>
+          <span class="hud-value text-yellow" id="hudMil">---</span>
+      </div>
+      <div class="hud-row">
+          <span class="hud-label">DIST</span>
+          <span class="hud-value" id="hudDist">---</span>
+      </div>
+      <div class="hud-row">
+          <span class="hud-label">GRID</span>
+          <span class="hud-value" id="hudGrid">---</span>
+      </div>
+  </div>
+
+  <div id="calcModal" class="modal-overlay">
+    <div class="modal-content calc-content">
+      <div class="modal-brand-header">
+        ARTY CALCULATOR
+        <button class="close-btn" id="closeCalcBtn" aria-label="Close Calculator">×</button>
+      </div>
+
+      <div class="calc-faction-bar" id="calcFactionToggle">
+        <span class="calc-faction-label">FIRING AS:</span>
+        <img id="calcFlag" src="images/flags/us.webp" class="faction-flag" alt="">
+        <span id="calcFactionName" class="calc-faction-text">US</span>
+        <button class="btn-swap">⇄</button>
+      </div>
+
+      <div class="calc-screen">
+        <div class="screen-row">
+          <span class="screen-label">TARGET DISTANCE</span>
+          <div class="screen-input" id="calcInput">0</div>
+        </div>
+        
+        <div class="screen-divider"></div>
+
+        <div class="screen-results">
+          <div class="res-box">
+            <span class="res-label">ELEVATION MIL</span>
+            <span class="res-value text-yellow" id="calcMil">---</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-keypad">
+        <button class="key" onclick="inputDigit(7)">7</button>
+        <button class="key" onclick="inputDigit(8)">8</button>
+        <button class="key" onclick="inputDigit(9)">9</button>
+        <button class="key" onclick="inputDigit(4)">4</button>
+        <button class="key" onclick="inputDigit(5)">5</button>
+        <button class="key" onclick="inputDigit(6)">6</button>
+        <button class="key" onclick="inputDigit(1)">1</button>
+        <button class="key" onclick="inputDigit(2)">2</button>
+        <button class="key" onclick="inputDigit(3)">3</button>
+        <button class="key action red" onclick="clearInput()">C</button>
+        <button class="key" onclick="inputDigit(0)">0</button>
+        <button class="key action" onclick="backspaceInput()">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="projectsModal" class="modal-overlay">
+    <div class="modal-content projects-hub-content">
+      <div class="modal-brand-header">
+        <div class="main-title">OTHER PROJECTS</div>
+        <button class="close-btn" id="closeProjectsBtn" aria-label="Close Projects">×</button>
+      </div>
+
+      <div class="projects-list">
+        <button class="footer-btn" onclick="window.open('https://l1tku.github.io/hll-default-garrisons/', '_blank')">
+          <img src="images/favicon_garrison.png" class="footer-project-icon" alt=""> 
+          <span>DEFAULT GARRISONS MAP</span>
+        </button>
+
+        <button class="footer-btn" onclick="window.open('https://l1tku.github.io/hll-spa-calculator/', '_blank')">
+          <img src="images/favicon_spa.png" class="footer-project-icon" alt=""> 
+          <span>SPA ARTILLERY CALCULATOR</span>
+        </button>
+
+        <button class="footer-btn github-btn" onclick="window.open('https://github.com/l1tku', '_blank')">
+          <img src="images/github.png" class="footer-project-icon" alt=""> 
+          <span>GITHUB</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
