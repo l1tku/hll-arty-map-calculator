@@ -2258,6 +2258,13 @@ function renderMapGrid(filter = "") {
   
   grid.innerHTML = ""; // Clear existing
 
+  // --- 1. NORMALIZE SEARCH TERM ---
+  // This converts "É" to "e", "ü" to "u", etc. so "eglise" finds "Église"
+  const cleanFilter = filter
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
   const sortedKeys = Object.keys(MAP_DATABASE).sort((a, b) => {
     return MAP_DATABASE[a].name.localeCompare(MAP_DATABASE[b].name);
   });
@@ -2265,8 +2272,14 @@ function renderMapGrid(filter = "") {
   sortedKeys.forEach(key => {
     const mapData = MAP_DATABASE[key];
     
-    // Check if map name matches search term
-    if (filter && !mapData.name.toLowerCase().includes(filter)) {
+    // --- 2. NORMALIZE MAP NAME ---
+    const cleanName = mapData.name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    
+    // Check if normalized name includes normalized search term
+    if (cleanFilter && !cleanName.includes(cleanFilter)) {
       return; // Skip this map
     }
     
@@ -2282,7 +2295,10 @@ function renderMapGrid(filter = "") {
     const img = document.createElement("img");
     img.className = "map-card-img";
     img.src = mapData.thumbnail || mapData.image; 
-    img.loading = "lazy"; 
+    
+    // Pre-load logic
+    img.loading = "eager";  
+    
     img.alt = mapData.name;
 
     // 3. Text Label
@@ -3717,6 +3733,10 @@ if (mobileFireBtn) {
         fireAtCenter();
     });
 }
+
+// --- PRE-LOAD MAP GRID ---
+// This builds the grid in the background so thumbnails are ready when user clicks button
+renderMapGrid("");
 
 // ==========================================
 // PROJECTS MODAL LOGIC
