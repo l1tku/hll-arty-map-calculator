@@ -2119,7 +2119,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ==========================================
-// ZOOM SLIDER CONTROLS (FIXED & SAFE)
+// ZOOM SLIDER CONTROLS (STABLE MOBILE FIX)
 // ==========================================
 
 function initZoomControls() {
@@ -2138,78 +2138,100 @@ function initZoomControls() {
         const progress = (state.scale - MIN_ZOOM) / range;
         const percentage = Math.max(0, Math.min(1, progress)) * 100;
 
-        handle.style.bottom = `${percentage}%`;
-        fill.style.height = `${percentage}%`;
+        // Use requestAnimationFrame to prevent layout thrashing
+        requestAnimationFrame(() => {
+            handle.style.bottom = `${percentage}%`;
+            fill.style.height = `${percentage}%`;
+        });
     };
 
     // --- 2. SLIDER DRAG LOGIC ---
     let isDraggingSlider = false;
+    let cachedTrackRect = null; // Cache dimensions to prevent errors
 
-    // Helper to calculate zoom from Y position safely
-    const calculateZoomFromY = (clientY) => {
-        const rect = track.getBoundingClientRect();
-        
-        // SAFETY: If element is hidden or invisible, stop to prevent Black Map (NaN)
-        if (rect.height === 0) return state.scale;
+    const getClientY = (e) => {
+        if (e.touches && e.touches.length > 0) {
+            return e.touches[0].clientY;
+        }
+        return e.clientY;
+    };
 
-        const trackBottom = rect.bottom;
-        const trackHeight = rect.height;
+    const applyZoom = (clientY) => {
+        // FAILSAFE: If we don't have dimensions, don't do math.
+        if (!cachedTrackRect || cachedTrackRect.height === 0) return;
 
-        // Calculate 0.0 - 1.0 based on bottom-up logic
+        const trackBottom = cachedTrackRect.bottom;
+        const trackHeight = cachedTrackRect.height;
+
+        // Calculate Ratio (Bottom-up)
         let ratio = (trackBottom - clientY) / trackHeight;
         ratio = Math.max(0, Math.min(1, ratio));
 
-        return MIN_ZOOM + (ratio * (MAX_ZOOM - MIN_ZOOM));
-    };
+        const newZoom = MIN_ZOOM + (ratio * (MAX_ZOOM - MIN_ZOOM));
 
-    const handleDrag = (e) => {
-        if (!isDraggingSlider) return;
-        
-        // Stop browser scroll/zoom
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
+        // CRITICAL FIX: Prevent NaN (The "Black Map" killer)
+        if (isNaN(newZoom) || !isFinite(newZoom)) return;
 
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        // Use requestAnimationFrame to prevent layout thrashing (smoothness)
-        requestAnimationFrame(() => {
-            const newZoom = calculateZoomFromY(clientY);
-            const containerRect = mapContainer.getBoundingClientRect();
-            setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
-        });
+        const containerRect = mapContainer.getBoundingClientRect();
+        setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
     };
 
     const startDrag = (e) => {
+        // Prevent Chrome scrolling
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
 
         isDraggingSlider = true;
-        mapStage.classList.remove("zoom-transition"); // Disable smooth fade for instant drag
+        mapStage.classList.remove("zoom-transition");
         track.classList.add('active');
-        
-        // Trigger immediate move to touch point
-        handleDrag(e);
+
+        // Cache dimensions NOW (Stable reference)
+        cachedTrackRect = track.getBoundingClientRect();
+
+        const y = getClientY(e);
+        applyZoom(y);
         
         if (navigator.vibrate) navigator.vibrate(5);
     };
 
-    const endDrag = () => {
+    const handleMove = (e) => {
         if (!isDraggingSlider) return;
+        
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+
+        const y = getClientY(e);
+
+        // Throttle updates for performance
+        requestAnimationFrame(() => {
+            applyZoom(y);
+        });
+    };
+
+    const endDrag = (e) => {
+        if (!isDraggingSlider) return;
+        
+        // Prevent phantom clicks
+        if (e.cancelable) e.preventDefault();
+        
         isDraggingSlider = false;
-        mapStage.classList.add("zoom-transition"); // Re-enable smooth fade
+        cachedTrackRect = null; // Clear cache
+        
+        mapStage.classList.add("zoom-transition");
         track.classList.remove('active');
     };
 
-    // Events: Passive False is required for Chrome/Firefox Mobile to block scrolling
+    // --- LISTENERS ---
+    // Passive: false is MANDATORY for Chrome Mobile to allow preventDefault()
     track.addEventListener("mousedown", startDrag);
     track.addEventListener("touchstart", startDrag, { passive: false });
 
-    // Attach to Window to catch drags that go outside the bar
-    window.addEventListener("mousemove", handleDrag);
-    window.addEventListener("touchmove", handleDrag, { passive: false });
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("touchmove", handleMove, { passive: false });
 
     window.addEventListener("mouseup", endDrag);
     window.addEventListener("touchend", endDrag);
+    window.addEventListener("touchcancel", endDrag);
 
     // --- 3. BUTTONS (STRICT 1x STEP) ---
     const handleBtnPress = (e, direction) => {
@@ -2217,43 +2239,37 @@ function initZoomControls() {
         e.stopPropagation();
 
         const btn = e.currentTarget;
-
-        // Visual Feedback
         btn.classList.add('pressed');
         setTimeout(() => btn.classList.remove('pressed'), 150);
 
-        // Haptic
         if (navigator.vibrate) navigator.vibrate(10);
 
-        // Logic: Strict 1x step
-        const newZoom = state.scale + direction;
+        // Calculate new zoom
+        let newZoom = state.scale + direction;
+        
+        // Clamp it immediately to prevent out-of-bounds math
+        if(newZoom < MIN_ZOOM) newZoom = MIN_ZOOM;
+        if(newZoom > MAX_ZOOM) newZoom = MAX_ZOOM;
 
         const containerRect = mapContainer.getBoundingClientRect();
         setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
     };
 
-    // Use 'click' for desktop, 'touchstart' for mobile to eliminate delay
-    // We add a flag to prevent double-firing on devices that trigger both
-    let lastBtnTouch = 0;
-
-    const onBtnTouch = (e, dir) => {
-        lastBtnTouch = Date.now();
+    // Debounce to prevent double-firing (Touch + Click)
+    let lastTime = 0;
+    const safeBtnHandler = (e, dir) => {
+        const now = Date.now();
+        if (now - lastTime < 300) return; // Ignore double taps within 300ms
+        lastTime = now;
         handleBtnPress(e, dir);
     };
 
-    const onBtnClick = (e, dir) => {
-        // If a touch happened recently (<500ms), ignore this ghost click
-        if (Date.now() - lastBtnTouch < 500) return;
-        handleBtnPress(e, dir);
-    };
+    // Attach listeners
+    btnIn.addEventListener("touchstart", (e) => safeBtnHandler(e, 1), { passive: false });
+    btnIn.addEventListener("click", (e) => safeBtnHandler(e, 1));
 
-    // Zoom In
-    btnIn.addEventListener("touchstart", (e) => onBtnTouch(e, 1), { passive: false });
-    btnIn.addEventListener("click", (e) => onBtnClick(e, 1));
-
-    // Zoom Out
-    btnOut.addEventListener("touchstart", (e) => onBtnTouch(e, -1), { passive: false });
-    btnOut.addEventListener("click", (e) => onBtnClick(e, -1));
+    btnOut.addEventListener("touchstart", (e) => safeBtnHandler(e, -1), { passive: false });
+    btnOut.addEventListener("click", (e) => safeBtnHandler(e, -1));
 }
 
 // Initialize
