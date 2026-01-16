@@ -351,6 +351,7 @@ function createStickyLabels() {
   }
 }
 
+// === FIX #2: Sticky Labels using 2D Transform ===
 function updateStickyLabels(currentDrawScale) {
   const mapImage = document.getElementById("mapImage");
   const w = mapImage.naturalWidth;
@@ -358,21 +359,15 @@ function updateStickyLabels(currentDrawScale) {
   const stepX = (w / 10) * currentDrawScale; 
   const stepY = (h / 10) * currentDrawScale; 
 
-  // MOBILE CHECK
   const isMobile = window.innerWidth <= 768;
   const padding = isMobile ? 15 : 30; 
   
-  const topOffset = 0;      
-  const bottomOffset = 0;   
-  
-  const stickyTopY = Math.max(state.pointY, topOffset);
+  const stickyTopY = Math.max(state.pointY, 0);
   const stickyLeftX = Math.max(state.pointX, 0);
 
-  // --- CALCULATE TEXT SCALE ---
   let fontScale = 0.7 + ((state.scale - 1) * 0.15);
   if (fontScale > 1.0) fontScale = 1.0;
 
-  // --- DRAW COLUMNS (Letters) ---
   for (let i = 0; i < 10; i++) {
     const el = document.getElementById(`label-col-${i}`);
     if (!el) continue;
@@ -381,16 +376,13 @@ function updateStickyLabels(currentDrawScale) {
     const finalX = colScreenX + padding;
     
     let finalY;
-    if (i === 0) {
-        finalY = state.pointY + padding; 
-    } else {
-        finalY = stickyTopY + padding;   
-    }
+    if (i === 0) finalY = state.pointY + padding; 
+    else finalY = stickyTopY + padding;    
     
-    el.style.transform = `translate3d(${Math.round(finalX)}px, ${Math.round(finalY)}px, 0) scale(${fontScale})`;
+    // FIX: Using translate (2D) instead of translate3d
+    el.style.transform = `translate(${Math.round(finalX)}px, ${Math.round(finalY)}px) scale(${fontScale})`;
   }
 
-  // --- DRAW ROWS (Numbers) ---
   for (let i = 1; i < 10; i++) {
     const el = document.getElementById(`label-row-${i}`);
     if (!el) continue;
@@ -399,7 +391,8 @@ function updateStickyLabels(currentDrawScale) {
     const rowScreenY = state.pointY + (i * stepY);
     const finalY = rowScreenY + padding;
     
-    el.style.transform = `translate3d(${Math.round(finalX)}px, ${Math.round(finalY)}px, 0) scale(${fontScale})`;
+    // FIX: Using translate (2D) instead of translate3d
+    el.style.transform = `translate(${Math.round(finalX)}px, ${Math.round(finalY)}px) scale(${fontScale})`;
   }
 }
 
@@ -871,76 +864,48 @@ function renderTargeting() {
   }
 }
 
+// === FIX #1: Main Render Function using 2D Transform ===
 function render() {
   clampPosition();
   const drawScale = state.scale * state.fitScale;
   
   mapContainer.style.setProperty('--current-scale', drawScale); 
   mapStage.style.setProperty('--effective-zoom', drawScale);
-  mapStage.style.transform = `translate3d(${state.pointX}px, ${state.pointY}px, 0) scale(${drawScale})`;
+  
+  // FIX: Replaced translate3d with translate to avoid Mobile GPU memory limits
+  mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
   
   updateRealScale(drawScale);
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
   // --- LABEL SCALING & POSITIONING LOGIC ---
   const isMobile = window.innerWidth <= 768;
-  // Increase mobile text slightly more for readability
   const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
 
-  // --- DYNAMIC INTERPOLATION ---
-  // Range: Zoom 1.0 (Edge) -> Zoom 5.0 (Center)
   const TRANSITION_START_ZOOM = 1.0;
   const TRANSITION_END_ZOOM = 5.0;
   
-  // Calculate movement progress from 0.0 to 1.0
   let progress = (state.scale - TRANSITION_START_ZOOM) / (TRANSITION_END_ZOOM - TRANSITION_START_ZOOM);
-  progress = Math.max(0, Math.min(1, progress)); // Clamp between 0 and 1
+  progress = Math.max(0, Math.min(1, progress)); 
 
-  // 1. Position: Slide from 0% (Top) to 50% (Center)
+  // 1. Position
   const topVal = progress * 50; 
-
-  // 2. Transform Y: Slide from -100% (Above line) to -50% (Centered on line)
+  // 2. Transform Y
   const transY = -100 + (progress * 50);
-
-  // 3. Spacing Gap: Slide from -20px (Space for the pin arrow) to 0px (No gap)
-  // Matching your CSS arrow size (20px)
+  // 3. Spacing Gap
   const gap = -20 + (progress * 20);
-
-  // 4. Arrow Opacity: Fade out faster (gone by 60% of the way)
+  // 4. Arrow Opacity
   const arrowOp = Math.max(0, 1 - (progress * 1.6));
 
-  // 5. TEXT SIZE SMOOTHING (The Fix)
-  // Instead of "if scale > 2.0" check, we use a power curve.
-  // inverseScale (1/scale) makes text stay the same size on screen.
-  // We dampen it with pow(..., 0.85) so the text gets *slightly* larger visually 
-  // as you zoom in, which feels more natural.
+  // 5. TEXT SIZE SMOOTHING
   const smoothInverse = 1.0 / Math.pow(state.scale, 0.85);
-  
   const finalScale = smoothInverse * mobileScaleMultiplier;
 
   for (let i = 0; i < labelCache.length; i++) {
       const label = labelCache[i];
-      
-      // Apply calculated values
       label.style.setProperty('--arrow-opacity', arrowOp);
-      
-      // PERFORMANCE FIX: Use transform instead of top/left
-      // We combine the vertical slide (transY) with the centering (-50%)
-      // and the specific top position (topVal) into one translate3d command.
-      
-      // Note: You must remove 'top' from your CSS class .marker-label if it's set there, 
-      // or set label.style.top = '0px' once.
-      
-      // Calculate Y offset in percentage relative to container + pixel gap
-      // This mimics your `top: ${topVal}%` logic but using GPU.
-      // Since we can't easily mix % top with transform in JS efficiently without calc,
-      // we stick to the existing logic but ensure 'will-change: transform, top' is in CSS.
-      
-      // ACTUALLY, simpler fix for your specific interpolation code:
-      // Your current code is okay, BUT add this line to your CSS class .marker-label:
-      // will-change: transform, top;
-      
       label.style.top = `${topVal}%`; 
+      // This is safe (2D transform)
       label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
   }
 
@@ -962,9 +927,8 @@ function render() {
   
   if (window.updateZoomSliderUI) window.updateZoomSliderUI();
   
-  // --- ADD THESE TWO LINES AT THE END ---
   updateMobileHud();
-  updateDesktopRingScale(); // <--- This forces ring resize on scroll
+  updateDesktopRingScale(); 
 }
 
 // ... (rest of the code remains the same)
