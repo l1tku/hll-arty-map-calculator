@@ -3138,37 +3138,39 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 }
 
 /* ==========================================
-   FINAL FIX: MOBILE STICKY HOVER RESET
+   FINAL FIX: MOBILE STICKY HOVER RESET (WHITE ICONS)
    ========================================== */
 @media (hover: none) {
-  /* 1. RESET: Force Grey on Focus/Hover for BOTH types of buttons */
-  /* We use higher specificity (.projects-list .footer-btn) to beat the yellow rule */
+  /* 1. BACKGROUND: Force Grey (No Yellow) on Focus/Hover */
   .footer-btn:hover,
   .footer-btn:focus,
+  .footer-btn:focus-visible,
   .projects-list .footer-btn:hover, 
   .projects-list .footer-btn:focus {
     background: rgba(255, 255, 255, 0.05) !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
     color: rgba(255, 255, 255, 0.8) !important;
     box-shadow: none !important;
-    outline: none !important; /* Removes browser blue focus ring */
+    outline: none !important;
   }
 
-  /* 2. ICONS: Force icons to stay WHITE on mobile, not grey/currentColor */
+  /* 2. ICONS: Force them BRIGHT WHITE (opacity 1), not Grey */
   .footer-btn:hover .icon,
   .footer-btn:focus .icon,
+  .footer-btn:focus-visible .icon,
   .projects-list .footer-btn:hover .external-link-icon,
   .projects-list .footer-btn:focus .external-link-icon {
-    /* Changed from currentColor to bright white */
-    stroke: rgba(255, 255, 255, 0.9) !important; 
+    stroke: #ffffff !important; /* Force Bright White */
     fill: none !important;
-    opacity: 1 !important; /* Ensure full visibility */
+    opacity: 1 !important;      /* CHANGED: 0.4 -> 1 (Fully Visible) */
     transform: none !important;
   }
 
-  /* Specific fix for the 'dots' in the calc icon to make them white too */
-  .footer-btn:hover .icon circle {
-      fill: rgba(255, 255, 255, 0.9) !important;
+  /* 2b. DOTS: Ensure dots inside calculator icon are also white */
+  .footer-btn:hover .icon circle,
+  .footer-btn:focus .icon circle {
+    fill: #ffffff !important;
+    stroke: none !important;
   }
 
   /* 3. ACTIVE: The ONLY time it should be yellow (While finger is down) */
@@ -3180,9 +3182,13 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     transition: none !important;
   }
   
-  /* Active State for Icons */
+  .footer-btn:active .icon,
   .projects-list .footer-btn:active .external-link-icon {
       opacity: 1 !important;
-      color: #ffc107 !important;
+      stroke: #ffc107 !important; /* Yellow when actually pressing */
+  }
+  
+  .footer-btn:active .icon circle {
+      fill: #ffc107 !important;
   }
 }
