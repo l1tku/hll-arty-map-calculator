@@ -2737,19 +2737,27 @@ const projectsModal = document.getElementById("projectsModal");
 const closeProjectsBtn = document.getElementById("closeProjectsBtn");
 
 if (btnOtherProjects && projectsModal) {
-    // This stops it from opening GitHub directly
     btnOtherProjects.addEventListener("click", (e) => {
         e.preventDefault();
         projectsModal.classList.add("active");
+        // Also blur the opening button immediately so it doesn't stick
+        btnOtherProjects.blur(); 
     });
 
-    closeProjectsBtn.onclick = () => {
+    const closeHub = () => {
         projectsModal.classList.remove("active");
+        // THE FIX: When the modal closes, force the browser to forget 
+        // focus on any button (prevents sticking grey/yellow)
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
     };
+
+    closeProjectsBtn.onclick = closeHub;
 
     // Close if clicking the dark background
     projectsModal.onclick = (e) => {
-        if (e.target === projectsModal) projectsModal.classList.remove("active");
+        if (e.target === projectsModal) closeHub();
     };
     
     // NEW: Target all buttons inside the hub to clear focus after clicking
