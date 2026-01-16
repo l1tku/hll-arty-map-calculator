@@ -71,7 +71,7 @@
       </div>
       
       <div class="controls-drawer" id="controlsDrawer">
-<button id="drawerToggleBtn" class="drawer-tab" aria-label="Toggle controls drawer" aria-expanded="true">
+        <button id="drawerToggleBtn" class="drawer-tab" aria-label="Toggle controls drawer" aria-expanded="true">
           <span class="tab-arrow">▼</span>
         </button>
 
@@ -137,7 +137,7 @@
 
   <div id="targetDataPanel" class="target-data-panel">
     <div class="panel-watermark">
-       HLL ARTY MAP CALC <span class="app-version"></span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
+       HLL ARTY MAP CALC <span id="appVersionPanel">v1.1.0</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
     </div>
 
     <div class="data-col small-col">
@@ -164,7 +164,7 @@
     <div class="modal-content">
       <div class="modal-brand-header">
         <div class="main-title">HLL ARTY MAP CALCULATOR</div>
-        <div class="main-subtitle-credits"><span class="app-version"></span> • 2026 • BY LITKU</div>
+        <div class="main-subtitle-credits"><span id="appVersion">v1.1.0</span> • 2026 • BY LITKU</div>
         <button class="close-btn" id="closeModalBtn" aria-label="Close Map Selection">×</button>
       </div>
 
@@ -181,11 +181,26 @@
       </div>
 
       <div class="modal-footer">
-        <button id="btnManualCalc" class="footer-btn">
-          <span class="icon">🧮</span> Manual Calculator
-        </button>
-        <button id="btnOtherProjects" class="footer-btn secondary">
-          <span class="icon">🚀</span> More Projects
+        <div class="footer-btn" id="btnOpenManualCalc">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="3" width="14" height="18" rx="2" />
+            <line x1="8" y1="7" x2="16" y2="7" />
+            <circle cx="8.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
+            <circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
+            <circle cx="8.5" cy="16" r="0.8" fill="currentColor" stroke="none" />
+            <circle cx="12" cy="16" r="0.8" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="16" r="0.8" fill="currentColor" stroke="none" />
+          </svg>
+          <span>MANUAL CALCULATOR</span>
+        </div>
+        <button class="footer-btn secondary" id="btnOtherProjects" onclick="openProjectsModal()">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          MORE PROJECTS
         </button>
       </div>
     </div>
@@ -298,16 +313,31 @@
         <button class="footer-btn" onclick="window.open('https://l1tku.github.io/hll-default-garrisons/', '_blank')">
           <img src="images/favicon_garrison.png" class="footer-project-icon" alt=""> 
           <span>DEFAULT GARRISONS MAP</span>
+          <svg class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
         </button>
 
         <button class="footer-btn" onclick="window.open('https://l1tku.github.io/hll-spa-calculator/', '_blank')">
           <img src="images/favicon_spa.png" class="footer-project-icon" alt=""> 
           <span>SPA ARTILLERY CALCULATOR</span>
+          <svg class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
         </button>
 
         <button class="footer-btn github-btn" onclick="window.open('https://github.com/l1tku', '_blank')">
           <img src="images/github.png" class="footer-project-icon" alt=""> 
           <span>GITHUB</span>
+          <svg class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
         </button>
       </div>
     </div>

@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.0"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
+const APP_VERSION = "v1.1.1"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
 
 // Map Dimensions
 const MAP_WIDTH_METERS = 2000.0; 
@@ -37,10 +37,39 @@ let labelCache = [];
 let isRendering = false; 
 let calcInputVal = ""; // Stores the string like "1250" 
 
+// --- MOVE THESE HERE (Top of script) ---
+let _lastMobDist = null;
+let _lastMobMil = null;
+let _lastMobGrid = null;
+
 // DOM Elements
 const mapContainer = document.getElementById("mapContainer");
 const mapStage = document.getElementById("mapStage");
 const zoomIndicator = document.getElementById("zoomIndicator");
+
+// Function to open the Projects Hub Modal
+function openProjectsModal() {
+    const modal = document.getElementById('projectsModal');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+// Function to close the Projects Hub Modal
+function closeProjectsModal() {
+    const modal = document.getElementById('projectsModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// Add event listener for the close button inside the modal
+document.getElementById('closeProjectsBtn')?.addEventListener('click', closeProjectsModal);
+
+// Optional: Close modal if clicking on the dark overlay
+document.getElementById('projectsModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'projectsModal') closeProjectsModal();
+});
 
 // Helper function to get mil value from artillery data table with interpolation
 function getMilFromTable(distance, faction) {
@@ -2294,6 +2323,50 @@ if (toggleBtn && drawer) {
           saveState();
       });
   }
+  
+  // Inject version number into UI elements
+  const versionEl = document.getElementById('appVersion');
+  if (versionEl) {
+    versionEl.textContent = APP_VERSION;
+  }
+  
+  const versionPanelEl = document.getElementById('appVersionPanel');
+  if (versionPanelEl) {
+    versionPanelEl.textContent = APP_VERSION;
+  }
+  
+  // --- MANUAL CALCULATOR MODAL LOGIC ---
+  
+  // 1. Open Calculator (and hide Map Menu if open)
+  const btnOpenManualCalc = document.getElementById('btnOpenManualCalc');
+  const calcModal = document.getElementById('calcModal');
+  const mapModal = document.getElementById('mapModal');
+
+  if (btnOpenManualCalc && calcModal) {
+    btnOpenManualCalc.addEventListener('click', () => {
+      calcModal.classList.add('active'); // Show Calculator
+      if (mapModal) {
+        mapModal.classList.remove('active'); // Hide Map Menu
+      }
+    });
+  }
+
+  // 2. Close Calculator
+  const closeCalcBtn = document.getElementById('closeCalcBtn');
+  if (closeCalcBtn && calcModal) {
+    closeCalcBtn.addEventListener('click', () => {
+      calcModal.classList.remove('active');
+    });
+  }
+
+  // 3. Close Calculator when clicking outside the box (Overlay click)
+  if (calcModal) {
+    calcModal.addEventListener('click', (e) => {
+      if (e.target === calcModal) {
+        calcModal.classList.remove('active');
+      }
+    });
+  }
 });
 
 // ==========================================
@@ -2578,10 +2651,7 @@ document.addEventListener("mousemove", (e) => {
 
 // --- NEW: Mobile HUD Logic ---
 
-// Global cache vars to prevent DOM thrashing on mobile
-let _lastMobDist = null;
-let _lastMobMil = null;
-let _lastMobGrid = null;
+// Global cache vars moved to top of script to prevent initialization errors
 
 function updateMobileHud() {
   // Only run if HUD is enabled and we are on mobile
@@ -2627,25 +2697,24 @@ function updateMobileHud() {
       const factionLabel = document.getElementById("factionLabel").innerText;
       
       // OPTIMIZATION: Only calculate Mil if distance changed
-      let mil = _lastMobMil;
       if (dist !== _lastMobDist) {
-          mil = getMil(dist, factionLabel);
+          const mil = getMil(dist, factionLabel);
           _lastMobMil = mil; // Update cache
-      }
-      
-      // OPTIMIZATION: Only write to DOM if values changed
-      if (dist !== _lastMobDist) {
+          
+          const hudMil = document.getElementById("hudMil");
+          if (hudMil) {
+              hudMil.innerText = (mil !== null) ? mil : "---";
+          }
+
           const hudDist = document.getElementById("hudDist");
-          if (hudDist) hudDist.innerText = dist + "m";
+          if (hudDist) {
+              hudDist.innerText = dist + "m";
+          }
           _lastMobDist = dist;
       }
-
-      if (mil !== null) { // Always check mil validity 
-          const hudMil = document.getElementById("hudMil");
-          if (hudMil && hudMil.innerText !== (mil + "")) {
-             hudMil.innerText = mil;
-          }
-      } else {
+      
+      // Handle case when no gun position is available
+      if (!gunPos) {
           const hudMil = document.getElementById("hudMil");
           if (hudMil && hudMil.innerText !== "---") hudMil.innerText = "---";
       }

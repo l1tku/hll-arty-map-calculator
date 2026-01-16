@@ -678,9 +678,148 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ==========================================
-   HLL TACTICAL BUTTON STYLES
-   ========================================== */
+/* Ensure SVG icons scale with font-size and inherit color */
+svg.icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  display: block; /* Removes baseline gap issues */
+}
+
+/* --- MODAL FOOTER ICON SIZE INCREASE --- */
+
+/* Target icons only inside modal footer */
+.modal-footer .footer-btn .icon {
+    /* Increased from 20px/22px to 28px for better visibility */
+    width: 28px !important;
+    height: 28px !important;
+    
+    /* Ensure colors and strokes stay consistent */
+    fill: none !important;
+    stroke: currentColor !important;
+    vector-effect: non-scaling-stroke !important;
+}
+
+/* Specific fix for the 'dots' in the calculator icon to make them bigger too */
+.modal-footer .footer-btn .icon circle {
+    fill: currentColor !important;
+    stroke: none !important;
+    r: 1.2; /* Slightly larger dots for larger icon */
+}
+
+/* Desktop: Adjust spacing for the larger icons */
+@media (min-width: 769px) {
+    .modal-footer .footer-btn .icon {
+        margin-right: 15px !important; /* More breathing room for bigger icon */
+    }
+    
+    .modal-footer .footer-btn {
+        padding: 0 30px !important; /* Wider buttons to accommodate size */
+    }
+}
+
+/* Mobile: Ensure absolute centering stays perfect with the new size */
+@media (max-width: 768px) {
+    .modal-footer .footer-btn:first-child .icon {
+        width: 30px !important; /* Slightly larger on mobile for touch clarity */
+        height: 30px !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+    .modal-footer .footer-btn:last-child .icon {
+        width: 24px !important; /* Keep the rocket slightly smaller than the square calc button */
+        height: 24px !important;
+    }
+}
+
+
+/* --- DESKTOP WHITE BLOCK FIX --- */
+@media (min-width: 769px) {
+  /* 1. Force the icon to be an outline, not a solid block */
+  .modal-footer .footer-btn .icon {
+    position: static !important;
+    transform: none !important;
+    fill: none !important; /* This stops the white background block */
+    stroke: currentColor !important; /* This ensures the lines are visible */
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 12px !important;
+    display: inline-block !important;
+  }
+
+  /* 2. Specific fix for the tiny dots inside the calculator */
+  .modal-footer .footer-btn .icon circle {
+    fill: currentColor !important; /* Only the dots should be solid */
+    stroke: none !important;
+  }
+
+  /* 3. Ensure the button doesn't force absolute centering on desktop */
+  .modal-footer .footer-btn:first-child {
+    width: auto !important;
+    flex: 0 1 auto !important;
+    padding: 0 20px !important;
+  }
+}
+
+/* --- DESKTOP FOOTER ICON ALIGNMENT --- */
+@media (min-width: 769px) {
+  /* Fix icon position so it sits next to the text */
+  .modal-footer .footer-btn .icon {
+    position: static !important; /* Removes the absolute centering used for mobile */
+    transform: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 12px !important; /* Spacing between icon and "MANUAL CALCULATOR" */
+    display: inline-block !important;
+    vertical-align: middle;
+  }
+
+  /* Ensure the button itself uses flex for horizontal layout */
+  .modal-footer .footer-btn {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 54px !important;
+    width: auto !important; /* Allows button to expand horizontally */
+    padding: 0 25px !important;
+  }
+}
+
+/* --- MOBILE ICON SHARPNESS FIX --- */
+@media (max-width: 768px) {
+  /* Prevent the footer icons from stretching or blurring */
+  .modal-footer .footer-btn .icon {
+    /* 1. Reset dimensions to a standard tactical size */
+    width: 22px !important;
+    height: 22px !important;
+
+    /* 2. Absolute center inside the square button */
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+
+    /* 3. CRITICAL: Prevent browser scaling from thickening the lines */
+    vector-effect: non-scaling-stroke !important;
+    
+    /* 4. Ensure it doesn't try to 'fill' the interior */
+    fill: none !important;
+  }
+
+  /* Specific fix for the 'dots' in the calc icon so they remain visible */
+  .modal-footer .footer-btn svg.icon path,
+  .modal-footer .footer-btn svg.icon circle {
+    vector-effect: non-scaling-stroke !important;
+  }
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
 /* ==========================================
    ALLOW 2-LINE TEXT WRAPPING
    ========================================== */
@@ -1852,11 +1991,13 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
 /* --- MANUAL CALCULATOR STYLES --- */
 
-/* Specific Modal Size for Calc */
+/* Specific Modal Size for Calc - FIX: Remove fixed height */
 .calc-content {
   max-width: 400px !important;
-  height: auto !important;
+  height: auto !important; /* Shrinks to fit content */
   max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Faction Bar */
@@ -2551,4 +2692,368 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   width: 100%;
   height: 2px;
   transform: translateY(-50%);
+}
+
+/* Ensure the Manual Calculator Modal doesn't have dead space */
+#calcModal .modal-content {
+    height: auto !important;
+    min-height: unset !important;
+    max-height: 90vh;
+    align-self: center; /* Centers vertically if it's short */
+}
+
+/* ==========================================
+   MOBILE MAP MENU FIX (Absolute Centering)
+   ========================================== */
+@media (max-width: 768px) {
+  
+  /* 1. MAP MENU HEIGHT */
+  .modal-content {
+      height: 92vh !important; 
+      max-height: none !important;
+      margin: 0 !important;
+      width: 95% !important;
+      display: flex;
+      flex-direction: column;
+  }
+
+  /* 2. FOOTER LAYOUT */
+  .modal-footer {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      gap: 10px !important;
+      padding: 12px 10px !important;
+      flex-shrink: 0 !important;
+  }
+
+  /* --- 3. CALCULATOR BUTTON (Square) --- */
+  .footer-btn:first-child {
+      position: relative !important; /* Anchor for absolute centering */
+      flex: 0 0 54px !important; 
+      width: 54px !important;
+      height: 54px !important; 
+      
+      /* Kill all padding/margins that could push the icon */
+      padding: 0 !important;
+      margin: 0 !important;
+      
+      font-size: 0 !important; /* Hide text */
+  }
+
+  /* NUCLEAR OPTION: Absolute Centering Icon */
+  .footer-btn:first-child .icon {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important; /* Pin center to center */
+      
+      width: 24px !important;
+      height: 24px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: block !important;
+  }
+
+  /* --- 4. PROJECTS BUTTON (Wide) --- */
+  .footer-btn:last-child {
+      flex: 1 !important; 
+      height: 54px !important;
+      
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important; 
+      
+      font-size: 11px !important;
+      padding: 0 10px !important;
+      white-space: nowrap !important;
+      margin: 0 !important;
+  }
+  
+  /* Rocket Icon Alignment */
+  .footer-btn:last-child .icon {
+      font-size: 16px !important;
+      margin-right: 10px !important; 
+      display: block !important;
+      flex-shrink: 0 !important;
+      position: static !important; /* Default behavior for this one */
+      transform: none !important;
+  }
+}
+
+/* ==========================================
+   MOBILE UI FIXES (Menu & Projects)
+   ========================================== */
+@media (max-width: 768px) {
+  
+  /* --- GLOBAL MODAL FIXES --- */
+  .modal-content {
+      height: 92vh !important; 
+      max-height: none !important;
+      margin: 0 !important;
+      width: 95% !important;
+      display: flex;
+      flex-direction: column;
+  }
+
+  /* ----------------------------------------------------
+     1. MAIN MENU FOOTER (The one with Calculator & Rocket)
+     ---------------------------------------------------- */
+  
+  /* Container Layout */
+  .modal-footer {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      gap: 10px !important;
+      padding: 12px 10px !important;
+      flex-shrink: 0 !important;
+  }
+
+  /* CALC BUTTON (Square SVG) - Scoped to .modal-footer */
+  .modal-footer .footer-btn:first-child {
+      position: relative !important;
+      flex: 0 0 54px !important; 
+      width: 54px !important;
+      height: 54px !important; 
+      padding: 0 !important;
+      margin: 0 !important;
+      font-size: 0 !important; /* Hide Text */
+  }
+
+  /* CALC ICON (Absolute Center) */
+  .modal-footer .footer-btn:first-child .icon {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      
+      width: 24px !important;
+      height: 24px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: block !important;
+  }
+
+  /* PROJECTS BUTTON (Wide) - Scoped to .modal-footer */
+  .modal-footer .footer-btn:last-child {
+      flex: 1 !important; 
+      height: 54px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important; 
+      font-size: 11px !important;
+      padding: 0 10px !important;
+      white-space: nowrap !important;
+      margin: 0 !important;
+  }
+  
+  .modal-footer .footer-btn:last-child .icon {
+      font-size: 16px !important;
+      margin-right: 10px !important; 
+      display: block !important;
+      flex-shrink: 0 !important;
+      position: static !important;
+      transform: none !important;
+  }
+
+  /* ----------------------------------------------------
+     2. PROJECTS MODAL (The list of other apps)
+     ---------------------------------------------------- */
+     
+  .projects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px 15px;
+      width: 100%;
+  }
+
+  /* RESET BUTTONS for Projects List */
+  .projects-list .footer-btn {
+      /* Force full width bars */
+      flex: 0 0 auto !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 54px !important;
+      
+      /* Normal Text Display */
+      font-size: 13px !important; 
+      
+      /* Alignment */
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-start !important; /* Align left */
+      
+      padding: 12px 20px !important;
+      margin: 0 !important;
+  }
+
+  /* RESET ICONS inside Projects List */
+  .projects-list .footer-project-icon, 
+  .projects-list .icon {
+      width: 24px !important;
+      height: 24px !important;
+      margin-right: 15px !important;
+      margin-left: 0 !important;
+      display: block !important;
+      object-fit: contain !important;
+      
+      /* Ensure they don't inherit the absolute positioning from above */
+      position: static !important;
+      transform: none !important;
+      top: auto !important;
+      left: auto !important;
+  }
+}
+
+/* ==========================================
+   DESKTOP ICON SYNC (1:1 SIZE)
+   ========================================== */
+@media (min-width: 769px) {
+    /* 1. Force both icons to be EXACT same size */
+    .modal-footer .footer-btn .icon {
+        width: 26px !important; 
+        height: 26px !important;
+        margin-right: 12px !important;
+        
+        /* Remove ALL previous scaling and centering */
+        position: static !important;
+        transform: none !important;
+        display: inline-block !important;
+        vertical-align: middle !important;
+        
+        /* Ensure stroke weight is consistent */
+        stroke-width: 2.2 !important;
+    }
+
+    /* 2. Specific fix for More Projects to ensure no extra scale is hiding */
+    #btnOtherProjects .icon {
+        width: 26px !important;
+        height: 26px !important;
+        transform: none !important; 
+    }
+
+    /* 3. Adjust button height to fit icons cleanly */
+    .modal-footer .footer-btn {
+        height: 54px !important;
+        padding: 0 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
+
+/* ==========================================
+   MOBILE UI FIX: INCREASE PROJECTS FONT
+   ========================================== */
+@media (max-width: 768px) {
+    /* Target the text inside the "More Projects" button in the footer */
+    .modal-footer .footer-btn:last-child {
+        font-size: 14px !important; /* Increased from 11px to 14px */
+        font-weight: 900 !important; /* Thickest weight for readability */
+        letter-spacing: 1px !important;
+        
+        /* Ensure it remains centered even with larger text */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Keep the "tactical Stack" icon aligned with the larger text */
+    .modal-footer .footer-btn:last-child .icon {
+        margin-right: 12px !important;
+        width: 22px !important; /* Balanced size for the larger text */
+        height: 22px !important;
+    }
+}
+
+/* ==========================================
+   DESKTOP HOVER FIX: MORE PROJECTS
+   ========================================== */
+@media (hover: hover) and (min-width: 769px) {
+    /* Target button AND icon inside when hovering */
+    .modal-footer #btnOtherProjects:hover {
+        background: rgba(255, 193, 7, 0.1) !important; /* Subtle yellow glow BG */
+        border-color: #ffc107 !important;            /* Bright yellow border */
+        color: #ffc107 !important;                   /* Yellow text */
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.1) !important;
+    }
+
+    /* Ensure the icon specifically turns yellow too */
+    .modal-footer #btnOtherProjects:hover .icon {
+        stroke: #ffc107 !important;
+        filter: none !important; /* Removes any grayscale if present */
+    }
+}
+
+/* ==========================================
+   MOBILE HUB: REMOVE EMPTY SPACE
+   ========================================== */
+@media (max-width: 768px) {
+    /* Target Projects Hub specifically to remove forced height */
+    #projectsModal .modal-content {
+        height: auto !important;      /* Shrink to fit the list */
+        min-height: unset !important;
+        max-height: 80vh !important;  /* Safety limit */
+        margin: auto !important;      /* Centers it vertically in the blur */
+        align-self: center !important;
+    }
+
+    /* Adjust the list padding for a tighter fit */
+    #projectsModal .projects-list {
+        padding: 15px !important;
+        gap: 10px !important;
+    }
+}
+
+/* --- PROJECTS HUB EXTERNAL LINK ICONS --- */
+
+.projects-list .footer-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-left: 20px !important;
+    /* Reduced right padding to let the icon get closer to the edge */
+    padding-right: 15px !important; 
+    width: 100% !important;
+}
+
+/* This forces the text to take up all available space, pushing the icon to the end */
+.projects-list .footer-btn span {
+    flex-grow: 1 !important;
+    text-align: left !important;
+}
+
+.external-link-icon {
+    width: 14px !important;
+    height: 14px !important;
+    opacity: 0.4;
+    transition: all 0.2s ease;
+    
+    /* Ensure it doesn't shrink and stays at the very end */
+    flex-shrink: 0 !important;
+    margin-left: 10px !important; 
+}
+
+/* Hover highlight for the whole button */
+.projects-list .footer-btn:hover {
+    border-color: #ffc107 !important;
+    color: #ffc107 !important;
+}
+
+.projects-list .footer-btn:hover .external-link-icon {
+    opacity: 1;
+    color: #ffc107;
+    /* Subtle pop effect on hover */
+    transform: translateX(2px); 
+}
+
+/* Mobile Tweak: Slightly larger icon for touch screens */
+@media (max-width: 768px) {
+    .external-link-icon {
+        width: 16px !important;
+        height: 16px !important;
+    }
 }
