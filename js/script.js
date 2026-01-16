@@ -29,7 +29,7 @@ let activeFaction = "us";
 let activeGunIndex = 0;   
 let activeTarget = null;
 let activeMapKey = "CAR"; 
-let rulerEnabled = true; // Ruler toggle state 
+let rulerEnabled = false; // Ruler toggle state 
 let hudEnabled = false; // NEW: HUD toggle state
 let manualCalcFaction = "us"; // <--- MOVED HERE (Fixes the crash)
 let currentStrongpoints = []; 
@@ -137,6 +137,20 @@ function hideLoading() {
       overlay.classList.add('hidden');
     }, 200); 
   }
+}
+
+// --- PINCH ZOOM HELPERS ---
+function getPinchDistance(e) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getPinchCenter(e) {
+    return {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+    };
 }
 
 function syncToggleUI() {
@@ -1174,20 +1188,16 @@ function renderMapGrid(filter = "") {
         const img = document.createElement("img");
         img.className = "map-card-img";
         img.alt = mapData.name;
-       
+        
+        // Use a simpler loading approach to prevent "stuck" hidden images
         const imgPath = mapData.thumbnail || mapData.image;
-        const temp = new Image();
-        temp.onload = () => {
-            img.src = imgPath;
-            img.style.opacity = "1";
+        img.src = imgPath; 
+        
+        // If image fails, show a fallback background color
+        img.onerror = () => {
+            img.style.display = 'none';
+            card.style.background = '#222';
         };
-        temp.src = imgPath;
-        if (temp.complete) {
-            img.src = imgPath;
-            img.style.opacity = "1";
-        } else {
-            img.style.opacity = "0";
-        }
        
         const label = document.createElement("div");
         label.className = "map-card-name";
@@ -1764,7 +1774,7 @@ function loadState() {
     activeFaction = loaded.activeFaction || 'us';
     activeGunIndex = loaded.activeGunIndex || 0;
     manualCalcFaction = loaded.manualCalcFaction || 'us';
-    rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : true;
+    rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : false;
     hudEnabled = loaded.hudEnabled !== undefined ? loaded.hudEnabled : false;
     
     // Restore Panel State
@@ -2037,9 +2047,11 @@ mapContainer.addEventListener("touchmove", (e) => {
   } 
   else if (e.touches.length === 2 && initialPinchDistance) {
     // Pinch Zoom Logic
-    isDragging = true; // Pinch always counts as drag
+    isDragging = true; 
     const currentDistance = getPinchDistance(e);
     const zoomFactor = currentDistance / initialPinchDistance;
+    
+    // Calculate new zoom based on the scale at the start of the pinch
     let newZoom = lastZoomScale * zoomFactor;
     newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
     
@@ -2051,6 +2063,8 @@ mapContainer.addEventListener("touchmove", (e) => {
     if (!isRendering) {
       isRendering = true;
       requestAnimationFrame(() => {
+        // Update both the state and the tracking variable
+        currentZoomLevel = newZoom; 
         setZoomLevel(newZoom, mouseX, mouseY);
         isRendering = false;
       });
@@ -2113,7 +2127,7 @@ function initZoomControls() {
   const fill = document.getElementById("zoomSliderFill");
   const btnIn = document.getElementById("btnZoomIn");
   const btnOut = document.getElementById("btnZoomOut");
-  const mapStage = document.getElementById("mapStage"); 
+  const mapStage = document.getElementById("mapStage");
 
   if (!track || !handle) return;
 
@@ -2129,152 +2143,68 @@ function initZoomControls() {
 
   // --- 2. HANDLE DRAG LOGIC ---
   let isDraggingSlider = false;
-  let sliderFrame = null; 
-  let trackRect = null;
-  let containerRect = null;
 
-  function startSliderDrag() {
-    isDraggingSlider = true;
-    trackRect = track.getBoundingClientRect();
-    containerRect = mapContainer.getBoundingClientRect();
-    mapStage.classList.remove("zoom-transition");
-    mapStage.style.transition = "none";
-  }
-
-  function updateZoomFromSlider(clientY) {
-    if (!trackRect || !containerRect) return; 
-    let val = (trackRect.bottom - clientY) / trackRect.height;
+  function updateZoomFromEvent(e) {
+    const rect = track.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    // Calculate percentage from bottom of track
+    let val = (rect.bottom - clientY) / rect.height;
     val = Math.max(0, Math.min(1, val));
+    
     const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
-    const centerX = containerRect.width / 2;
-    const centerY = containerRect.height / 2;
-    setZoomLevel(newZoom, centerX, centerY);
+    
+    // Zoom into visual center of container
+    const containerRect = mapContainer.getBoundingClientRect();
+    setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
   }
 
-  // --- MOUSE EVENTS ---
-  track.addEventListener("mousedown", (e) => {
-    startSliderDrag();
-    updateZoomFromSlider(e.clientY);
-  });
+  // --- EVENTS ---
+  const startDrag = (e) => {
+    isDraggingSlider = true;
+    mapStage.classList.remove("zoom-transition");
+    updateZoomFromEvent(e);
+    // Vibrate on interaction start
+    if (navigator.vibrate) navigator.vibrate(10);
+  };
 
-  window.addEventListener("mousemove", (e) => {
-    if (isDraggingSlider) {
-      e.preventDefault();
-      if (!sliderFrame) {
-        sliderFrame = requestAnimationFrame(() => {
-          updateZoomFromSlider(e.clientY);
-          sliderFrame = null;
-        });
-      }
-    }
-  });
+  const doDrag = (e) => {
+    if (!isDraggingSlider) return;
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    
+    requestAnimationFrame(() => updateZoomFromEvent(e));
+  };
 
-  window.addEventListener("mouseup", () => {
+  const endDrag = () => {
     isDraggingSlider = false;
-    if (sliderFrame) {
-        cancelAnimationFrame(sliderFrame);
-        sliderFrame = null;
-    }
-    mapStage.style.transition = ""; 
     mapStage.classList.add("zoom-transition");
-  });
+  };
 
-  // --- TOUCH EVENTS ---
-  track.addEventListener("touchstart", (e) => {
-    startSliderDrag();
-    updateZoomFromSlider(e.touches[0].clientY);
-  }, { passive: false });
+  // Track Listeners
+  track.addEventListener("mousedown", startDrag);
+  track.addEventListener("touchstart", startDrag, { passive: false });
 
-  window.addEventListener("touchmove", (e) => {
-    if (isDraggingSlider) {
-      if (e.cancelable) e.preventDefault(); 
-      if (!sliderFrame) {
-        sliderFrame = requestAnimationFrame(() => {
-          updateZoomFromSlider(e.touches[0].clientY);
-          sliderFrame = null;
-        });
-      }
-    }
-  }, { passive: false });
+  window.addEventListener("mousemove", (e) => { if(isDraggingSlider) updateZoomFromEvent(e); });
+  window.addEventListener("touchmove", doDrag, { passive: false });
 
-  window.addEventListener("touchend", () => {
-    isDraggingSlider = false;
-    if (sliderFrame) {
-        cancelAnimationFrame(sliderFrame);
-        sliderFrame = null;
-    }
-    mapStage.style.transition = ""; 
-    mapStage.classList.add("zoom-transition");
-  });
+  window.addEventListener("mouseup", endDrag);
+  window.addEventListener("touchend", endDrag);
 
-  // --- 3. BUTTONS (ANIMATION FIX) ---
-  
-  // Helper to manually trigger the CSS animation class
-  function triggerAnim(btn) {
-      if (!btn) return;
-      btn.classList.add("pressed");
-      setTimeout(() => btn.classList.remove("pressed"), 150);
-  }
+  // --- 3. BUTTONS ---
+  const handleBtn = (e, zoomDiff) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (navigator.vibrate) navigator.vibrate(15);
+    
+    const rect = mapContainer.getBoundingClientRect();
+    setZoomLevel(state.scale + zoomDiff, rect.width/2, rect.height/2);
+  };
 
-  // Track touch handling to prevent duplicate click events on Firefox mobile
-  let touchHandled = false;
-  let touchTimeout = null;
-
-  function handleZoomIn(e) {
-      // Prevent ghost clicks on touch, but trigger manual animation
-      if (e.cancelable && e.type === 'touchstart') {
-          e.preventDefault();
-          touchHandled = true;
-          
-          // Clear existing timeout and set new one to reset flag
-          if (touchTimeout) clearTimeout(touchTimeout);
-          touchTimeout = setTimeout(() => {
-              touchHandled = false;
-          }, 300);
-      } else if (e.type === 'click' && touchHandled) {
-          // If this click follows a handled touch, prevent duplicate execution
-          e.preventDefault();
-          return;
-      }
-      
-      triggerAnim(e.currentTarget); // <--- Animation Trigger
-      
-      const rect = mapContainer.getBoundingClientRect();
-      setZoomLevel(state.scale + 1, rect.width/2, rect.height/2);
-  }
-
-  function handleZoomOut(e) {
-      // Prevent ghost clicks on touch, but trigger manual animation
-      if (e.cancelable && e.type === 'touchstart') {
-          e.preventDefault();
-          touchHandled = true;
-          
-          // Clear existing timeout and set new one to reset flag
-          if (touchTimeout) clearTimeout(touchTimeout);
-          touchTimeout = setTimeout(() => {
-              touchHandled = false;
-          }, 300);
-      } else if (e.type === 'click' && touchHandled) {
-          // If this click follows a handled touch, prevent duplicate execution
-          e.preventDefault();
-          return;
-      }
-      
-      triggerAnim(e.currentTarget); // <--- Animation Trigger
-      
-      const rect = mapContainer.getBoundingClientRect();
-      setZoomLevel(state.scale - 1, rect.width/2, rect.height/2);
-  }
-
-  if (btnIn) {
-    btnIn.addEventListener("click", handleZoomIn);
-    btnIn.addEventListener("touchstart", handleZoomIn, { passive: false });
-  }
-
-  if (btnOut) {
-    btnOut.addEventListener("click", handleZoomOut);
-    btnOut.addEventListener("touchstart", handleZoomOut, { passive: false });
-  }
+  btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
+  btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
+  btnIn.addEventListener("click", (e) => handleBtn(e, 1));
+  btnOut.addEventListener("click", (e) => handleBtn(e, -1));
 }
 
 // Initialize
@@ -2337,29 +2267,34 @@ if (toggleBtn && drawer) {
   
   // --- MANUAL CALCULATOR MODAL LOGIC ---
   
-  // 1. Open Calculator (and hide Map Menu if open)
   const btnOpenManualCalc = document.getElementById('btnOpenManualCalc');
   const calcModal = document.getElementById('calcModal');
   const mapModal = document.getElementById('mapModal');
 
   if (btnOpenManualCalc && calcModal) {
-    btnOpenManualCalc.addEventListener('click', () => {
-      calcModal.classList.add('active'); // Show Calculator
-      if (mapModal) {
-        mapModal.classList.remove('active'); // Hide Map Menu
-      }
+    btnOpenManualCalc.addEventListener('click', (e) => {
+      e.stopPropagation();
+      calcModal.classList.add('active'); 
+      // We keep the Map Modal active in the background
+      // so it is still there when we close the calculator.
     });
   }
 
-  // 2. Close Calculator
+  // 2. Close Calculator specifically
   const closeCalcBtn = document.getElementById('closeCalcBtn');
   if (closeCalcBtn && calcModal) {
-    closeCalcBtn.addEventListener('click', () => {
+    const handleCloseCalc = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       calcModal.classList.remove('active');
-    });
+      // Notice: We DO NOT touch mapModal here. 
+      // If it was open, it stays open.
+    };
+    closeCalcBtn.addEventListener('click', handleCloseCalc);
+    closeCalcBtn.addEventListener('touchstart', handleCloseCalc, { passive: false });
   }
 
-  // 3. Close Calculator when clicking outside the box (Overlay click)
+  // 3. Overlay click for Calculator only
   if (calcModal) {
     calcModal.addEventListener('click', (e) => {
       if (e.target === calcModal) {
