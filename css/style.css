@@ -828,9 +828,13 @@ svg.icon {
 .zoom-slider-handle,
 #btnZoomIn,
 #btnZoomOut {
-    touch-action: none; /* KEY FIX: Stops browser scrolling/zooming while touching these */
+    touch-action: none; /* Stops browser zoom/scroll */
     user-select: none;
     -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#btnZoomIn, #btnZoomOut {
     cursor: pointer;
 }
 
