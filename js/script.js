@@ -42,6 +42,11 @@ let _lastMobDist = null;
 let _lastMobMil = null;
 let _lastMobGrid = null;
 
+// --- PERFORMANCE CACHE VARIABLES ---
+let cachedMapRect = null;      // Stores map container dimensions
+let cachedSliderRect = null;   // Stores zoom slider dimensions
+let isMobileCached = false;    // Stores mobile state
+
 // DOM Elements
 const mapContainer = document.getElementById("mapContainer");
 const mapStage = document.getElementById("mapStage");
@@ -303,7 +308,9 @@ function setZoomLevel(newLevel, mouseX = null, mouseY = null) {
 }
 
 function clampPosition() {
-  const rect = mapContainer.getBoundingClientRect();
+  // PERFORMANCE FIX: Use cached rect if available, otherwise read DOM (fallback)
+  const rect = cachedMapRect || mapContainer.getBoundingClientRect();
+  
   const mapImage = document.getElementById("mapImage");
   const drawScale = state.scale * state.fitScale;
   const imgW = mapImage.naturalWidth * drawScale;
@@ -875,6 +882,7 @@ function render() {
   clampPosition();
   const drawScale = state.scale * state.fitScale;
   
+  // Use requestAnimationFrame for CSS updates if not already in one (Micro-optimization)
   mapContainer.style.setProperty('--current-scale', drawScale); 
   mapStage.style.setProperty('--effective-zoom', drawScale);
   mapStage.style.transform = `translate3d(${state.pointX}px, ${state.pointY}px, 0) scale(${drawScale})`;
@@ -882,75 +890,35 @@ function render() {
   updateRealScale(drawScale);
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
-  // --- LABEL SCALING & POSITIONING LOGIC ---
-  const isMobile = window.innerWidth <= 768;
-  // Increase mobile text slightly more for readability
-  const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
+  // PERFORMANCE FIX: Use cached mobile state
+  const mobileScaleMultiplier = isMobileCached ? 2.5 : 1.0; 
 
-  // --- DYNAMIC INTERPOLATION ---
+  // ... (Keep your existing Label Interpolation Logic here) ...
   // Range: Zoom 1.0 (Edge) -> Zoom 5.0 (Center)
   const TRANSITION_START_ZOOM = 1.0;
   const TRANSITION_END_ZOOM = 5.0;
-  
-  // Calculate movement progress from 0.0 to 1.0
   let progress = (state.scale - TRANSITION_START_ZOOM) / (TRANSITION_END_ZOOM - TRANSITION_START_ZOOM);
-  progress = Math.max(0, Math.min(1, progress)); // Clamp between 0 and 1
+  progress = Math.max(0, Math.min(1, progress));
 
-  // 1. Position: Slide from 0% (Top) to 50% (Center)
   const topVal = progress * 50; 
-
-  // 2. Transform Y: Slide from -100% (Above line) to -50% (Centered on line)
   const transY = -100 + (progress * 50);
-
-  // 3. Spacing Gap: Slide from -20px (Space for the pin arrow) to 0px (No gap)
-  // Matching your CSS arrow size (20px)
   const gap = -20 + (progress * 20);
-
-  // 4. Arrow Opacity: Fade out faster (gone by 60% of the way)
   const arrowOp = Math.max(0, 1 - (progress * 1.6));
-
-  // 5. TEXT SIZE SMOOTHING (The Fix)
-  // Instead of "if scale > 2.0" check, we use a power curve.
-  // inverseScale (1/scale) makes text stay the same size on screen.
-  // We dampen it with pow(..., 0.85) so the text gets *slightly* larger visually 
-  // as you zoom in, which feels more natural.
   const smoothInverse = 1.0 / Math.pow(state.scale, 0.85);
-  
   const finalScale = smoothInverse * mobileScaleMultiplier;
 
   for (let i = 0; i < labelCache.length; i++) {
       const label = labelCache[i];
-      
-      // Apply calculated values
       label.style.setProperty('--arrow-opacity', arrowOp);
-      
-      // PERFORMANCE FIX: Use transform instead of top/left
-      // We combine the vertical slide (transY) with the centering (-50%)
-      // and the specific top position (topVal) into one translate3d command.
-      
-      // Note: You must remove 'top' from your CSS class .marker-label if it's set there, 
-      // or set label.style.top = '0px' once.
-      
-      // Calculate Y offset in percentage relative to container + pixel gap
-      // This mimics your `top: ${topVal}%` logic but using GPU.
-      // Since we can't easily mix % top with transform in JS efficiently without calc,
-      // we stick to the existing logic but ensure 'will-change: transform, top' is in CSS.
-      
-      // ACTUALLY, simpler fix for your specific interpolation code:
-      // Your current code is okay, BUT add this line to your CSS class .marker-label:
-      // will-change: transform, top;
-      
       label.style.top = `${topVal}%`; 
       label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
   }
 
   // --- GRID THICKNESS FIX ---
   const majorThickness = Math.max(1.0, 2.0 / drawScale); 
-  
   const gridLayer = document.getElementById("gridLayer");
   if (gridLayer) {
       gridLayer.style.setProperty('--major-width', `${majorThickness}px`);
-      
       const subGrid = gridLayer.querySelector('.keypad-grid');
       if (subGrid) {
           subGrid.style.opacity = state.scale >= 3.0 ? "0.4" : "0";
@@ -962,9 +930,8 @@ function render() {
   
   if (window.updateZoomSliderUI) window.updateZoomSliderUI();
   
-  // --- ADD THESE TWO LINES AT THE END ---
   updateMobileHud();
-  updateDesktopRingScale(); // <--- This forces ring resize on scroll
+  updateDesktopRingScale(); 
 }
 
 // ... (rest of the code remains the same)
@@ -1957,128 +1924,110 @@ mapContainer.addEventListener("wheel", (e) => {
   }, 10);
 }, { passive: false });
 
-// --- 4. PANNING LOGIC (DESKTOP) ---
-mapContainer.addEventListener("mousedown", (e) => {
-  e.preventDefault();
-  
-  // Stop animations for instant dragging
-  mapStage.classList.remove("zoom-transition");
-  mapStage.style.transition = "none";
-  
-  state.panning = true;
-  isDragging = false; 
-  
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
+// --- 4 & 5. UNIFIED PANNING LOGIC (OPTIMIZED) ---
 
-  state.startX = e.clientX - state.pointX;
-  state.startY = e.clientY - state.pointY;
-  
-  // REMOVED: mapContainer.style.cursor = "grabbing"; 
-  // We don't change the cursor yet!
+function startInteraction(e) {
+    // CACHE DIMENSIONS NOW (Once per drag interaction)
+    cachedMapRect = mapContainer.getBoundingClientRect();
+    isMobileCached = window.innerWidth <= 768; // Update mobile check
+
+    mapStage.classList.remove("zoom-transition");
+    mapStage.style.transition = "none";
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    if (!e.touches || e.touches.length === 1) {
+        state.panning = true;
+        isDragging = false;
+        
+        dragStartX = clientX;
+        dragStartY = clientY;
+
+        state.startX = clientX - state.pointX;
+        state.startY = clientY - state.pointY;
+    } else if (e.touches && e.touches.length === 2) {
+        state.panning = false; 
+        initialPinchDistance = getPinchDistance(e);
+        lastZoomScale = state.scale;
+    }
+}
+
+function endInteraction() {
+    state.panning = false;
+    initialPinchDistance = null;
+    
+    // Clear cache to release memory and ensure next resize is caught
+    cachedMapRect = null; 
+    
+    // Re-enable smooth transitions
+    mapStage.style.transition = ""; 
+    mapStage.classList.add("zoom-transition");
+}
+
+// Mouse Events
+mapContainer.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    startInteraction(e);
 });
 
 window.addEventListener("mousemove", (e) => {
-  if (!state.panning) return;
-  e.preventDefault();
-
-  const moveDist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
-  
-  // FIX: Only start the logic if we crossed the threshold
-  if (!isDragging && moveDist > DRAG_THRESHOLD) {
-      isDragging = true;
-      mapContainer.style.cursor = "grabbing";
-  }
-
-  // FIX: Only pan the map if we are officially dragging
-  if (isDragging) {
-      handleMove(e.clientX, e.clientY);
-  }
+    if (!state.panning) return;
+    e.preventDefault();
+    const moveDist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+    if (!isDragging && moveDist > DRAG_THRESHOLD) {
+        isDragging = true;
+        mapContainer.style.cursor = "grabbing";
+    }
+    if (isDragging) handleMove(e.clientX, e.clientY);
 });
 
 window.addEventListener("mouseup", () => {
-  state.panning = false;
-  mapContainer.style.cursor = ""; // Returns to the crosshair/dot cursor
+    endInteraction();
+    mapContainer.style.cursor = "";
 });
 
-// --- 5. PANNING LOGIC (MOBILE) ---
-// Note: Double Tap is handled natively by "dblclick" event on most mobile browsers now
-// provided touch-action is set to none (which it is in your CSS).
-
-let initialPinchDistance = null;
-let lastZoomScale = 1;
-
+// Touch Events
 mapContainer.addEventListener("touchstart", (e) => {
-  mapStage.classList.remove("zoom-transition");
-  mapStage.style.transition = "none";
-
-  if (e.touches.length === 1) {
-    state.panning = true;
-    isDragging = false;
-    
-    // Record Start for Threshold check
-    dragStartX = e.touches[0].clientX;
-    dragStartY = e.touches[0].clientY;
-
-    state.startX = e.touches[0].clientX - state.pointX;
-    state.startY = e.touches[0].clientY - state.pointY;
-  } else if (e.touches.length === 2) {
-    state.panning = false; 
-    initialPinchDistance = getPinchDistance(e);
-    lastZoomScale = state.scale;
-  }
+    startInteraction(e);
 }, { passive: false });
 
 mapContainer.addEventListener("touchmove", (e) => {
-  if (e.cancelable) e.preventDefault(); 
+    if (e.cancelable) e.preventDefault(); 
 
-  if (e.touches.length === 1 && state.panning) {
-    // Check Threshold
-    const moveDist = Math.hypot(e.touches[0].clientX - dragStartX, e.touches[0].clientY - dragStartY);
-    
-    if (!isDragging && moveDist > DRAG_THRESHOLD) {
-        isDragging = true;
+    if (e.touches.length === 1 && state.panning) {
+        const moveDist = Math.hypot(e.touches[0].clientX - dragStartX, e.touches[0].clientY - dragStartY);
+        if (!isDragging && moveDist > DRAG_THRESHOLD) isDragging = true;
+        if (isDragging) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    } 
+    else if (e.touches.length === 2 && initialPinchDistance) {
+        isDragging = true; 
+        const currentDistance = getPinchDistance(e);
+        const zoomFactor = currentDistance / initialPinchDistance;
+        
+        let newZoom = lastZoomScale * zoomFactor;
+        newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+        
+        const center = getPinchCenter(e);
+        
+        // USE CACHED RECT HERE
+        const rect = cachedMapRect || mapContainer.getBoundingClientRect();
+        const mouseX = center.x - rect.left;
+        const mouseY = center.y - rect.top;
+        
+        if (!isRendering) {
+            isRendering = true;
+            requestAnimationFrame(() => {
+                currentZoomLevel = newZoom; 
+                setZoomLevel(newZoom, mouseX, mouseY);
+                isRendering = false;
+            });
+        }
     }
-
-    // FIX: Only move if confirmed dragging
-    if (isDragging) {
-        handleMove(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  } 
-  else if (e.touches.length === 2 && initialPinchDistance) {
-    // Pinch Zoom Logic
-    isDragging = true; 
-    const currentDistance = getPinchDistance(e);
-    const zoomFactor = currentDistance / initialPinchDistance;
-    
-    // Calculate new zoom based on the scale at the start of the pinch
-    let newZoom = lastZoomScale * zoomFactor;
-    newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
-    
-    const center = getPinchCenter(e);
-    const rect = mapContainer.getBoundingClientRect();
-    const mouseX = center.x - rect.left;
-    const mouseY = center.y - rect.top;
-    
-    if (!isRendering) {
-      isRendering = true;
-      requestAnimationFrame(() => {
-        // Update both the state and the tracking variable
-        currentZoomLevel = newZoom; 
-        setZoomLevel(newZoom, mouseX, mouseY);
-        isRendering = false;
-      });
-    }
-  }
 }, { passive: false });
 
 mapContainer.addEventListener("touchend", (e) => {
-  if (e.touches.length < 2) {
-    initialPinchDistance = null;
-  }
-  if (e.touches.length === 0) {
-    state.panning = false;
-  }
+    if (e.touches.length === 0) endInteraction();
 });
 
 // Shared Move Handler
@@ -2141,28 +2090,33 @@ function initZoomControls() {
     fill.style.height = `${percentage}%`;
   };
 
-  // --- 2. HANDLE DRAG LOGIC ---
+  // --- 2. HANDLE DRAG LOGIC (CACHED) ---
   let isDraggingSlider = false;
-  let cachedTrackRect = null;
-  let cachedContainerRect = null;
 
   function updateZoomFromEvent(e) {
-    const rect = cachedTrackRect || track.getBoundingClientRect();
-    const containerRect = cachedContainerRect || mapContainer.getBoundingClientRect();
+    // USE CACHED RECTS TO PREVENT LAYOUT THRASHING
+    const rect = cachedSliderRect || track.getBoundingClientRect();
+    const containerRect = cachedMapRect || mapContainer.getBoundingClientRect();
+    
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
     let val = (rect.bottom - clientY) / rect.height;
     val = Math.max(0, Math.min(1, val));
     
     const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
+    
+    // Zoom into center of container
     setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
   }
 
   const startDrag = (e) => {
     isDraggingSlider = true;
     mapStage.classList.remove("zoom-transition");
-    cachedTrackRect = track.getBoundingClientRect();
-    cachedContainerRect = mapContainer.getBoundingClientRect();
+    
+    // CACHE DIMENSIONS ONCE ON START
+    cachedSliderRect = track.getBoundingClientRect();
+    cachedMapRect = mapContainer.getBoundingClientRect();
+    
     updateZoomFromEvent(e);
     if (navigator.vibrate) navigator.vibrate(10);
   };
@@ -2171,14 +2125,17 @@ function initZoomControls() {
     if (!isDraggingSlider) return;
     if (e.cancelable) e.preventDefault();
     e.stopPropagation();
+    
     requestAnimationFrame(() => updateZoomFromEvent(e));
   };
 
   const endDrag = () => {
     isDraggingSlider = false;
     mapStage.classList.add("zoom-transition");
-    cachedTrackRect = null;
-    cachedContainerRect = null;
+    
+    // CLEAR CACHE
+    cachedSliderRect = null;
+    cachedMapRect = null;
   };
 
   track.addEventListener("mousedown", startDrag);
@@ -2188,37 +2145,49 @@ function initZoomControls() {
   window.addEventListener("mouseup", endDrag);
   window.addEventListener("touchend", endDrag);
 
-  // --- 3. BUTTONS (ANIMATION FIXED) ---
-  const handleBtn = (e, zoomDiff) => {
-    // Prevent default to stop scrolling/zooming the page
-    if (e.cancelable) e.preventDefault();
+  // --- 3. BUTTONS (LAG-FREE OPTIMIZATION) ---
+  const handleZoomInteraction = (e, zoomDiff) => {
+    // 1. MOBILE FIX: Stop browser from firing a ghost 'click' later
+    if (e.type === 'touchstart') {
+        if (e.cancelable) e.preventDefault();
+    }
     e.stopPropagation();
-    
-    // 1. Trigger Visual Animation (The Fix)
+
+    // 2. VISUAL ANIMATION (Optimized)
     const btn = e.currentTarget;
     
-    // Reset animation if user taps rapidly
-    btn.classList.remove('pressed');
-    void btn.offsetWidth; // Force reflow to restart animation
+    // Removed 'void btn.offsetWidth' (The lag causer)
+    // Simply add the class. The CSS transition handles the rest.
     btn.classList.add('pressed');
     
-    // Clear any previous timer to ensure the flash stays visible
     if (btn._pressTimeout) clearTimeout(btn._pressTimeout);
     btn._pressTimeout = setTimeout(() => btn.classList.remove('pressed'), 150);
 
-    // 2. Trigger Vibration
+    // 3. VIBRATION
     if (navigator.vibrate) navigator.vibrate(15);
 
-    // 3. Perform Zoom
-    const rect = mapContainer.getBoundingClientRect();
-    setZoomLevel(state.scale + zoomDiff, rect.width/2, rect.height/2);
+    // 4. ZOOM (Performance Fix)
+    // We manually set the global cache variable so clampPosition() and render() 
+    // don't have to recalculate the layout 5 times during this one click.
+    cachedMapRect = mapContainer.getBoundingClientRect();
+    isMobileCached = window.innerWidth <= 768;
+
+    // Execute Zoom using the cached dimensions
+    setZoomLevel(state.scale + zoomDiff, cachedMapRect.width/2, cachedMapRect.height/2);
+
+    // Clear the cache in the next frame to free memory
+    requestAnimationFrame(() => {
+        cachedMapRect = null;
+    });
   };
 
-  // Add listeners for both touch (mobile) and click (desktop)
-  btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
-  btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
-  btnIn.addEventListener("click", (e) => handleBtn(e, 1));
-  btnOut.addEventListener("click", (e) => handleBtn(e, -1));
+  // Bind Touch (Mobile) with passive: false to allow preventing defaults
+  btnIn.addEventListener("touchstart", (e) => handleZoomInteraction(e, 1), { passive: false });
+  btnOut.addEventListener("touchstart", (e) => handleZoomInteraction(e, -1), { passive: false });
+
+  // Bind Click (Desktop) - Mobile will ignore these due to preventDefault above
+  btnIn.addEventListener("click", (e) => handleZoomInteraction(e, 1));
+  btnOut.addEventListener("click", (e) => handleZoomInteraction(e, -1));
 }
 
 // Initialize
