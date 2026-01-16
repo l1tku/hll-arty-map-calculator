@@ -106,8 +106,22 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    /* STOPS Pull-to-Refresh on Android */
+    overscroll-behavior-y: none; 
+    
+    /* STOPS the whole page from bouncing on iOS */
+    overflow: hidden; 
+    
+    /* STOPS double-tap to zoom on buttons */
+    touch-action: none;
+
+    /* Fixes the "Address Bar" jumping issue */
+    height: 100dvh; 
+}
+
 body {
-  margin: 0; height: 100vh; width: 100vw;
+  margin: 0; height: 100dvh; width: 100vw;
   background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; font-family: sans-serif;
@@ -330,6 +344,7 @@ body {
   text-align: center; white-space: nowrap; pointer-events: none;
   transform-origin: center center;
   backface-visibility: hidden; -webkit-font-smoothing: antialiased;
+  will-change: transform, top;
 
   /* --- DELETED: transition: transform 0.2s, top 0.2s; --- */
   /* Removing this prevents the labels from "jumping" when you click shoot */
@@ -384,91 +399,84 @@ body {
 }
 
 /* ==========================================
-   UNIFIED UI THEME (Matches Sidebar Exact Style)
+   UNIFIED UI THEME (Exact Color Match Fix)
    ========================================== */
 
-/* --- 1. THE MAIN PANEL (Solid Background) --- */
-.controls-content {
-  pointer-events: auto;
-  position: relative;
-  
-  /* Positioning */
-  top: 1px; 
-  display: flex; 
-  justify-content: center; 
-  width: 100%;
-  max-width: 600px; 
-  margin: 0 auto; 
-  padding: 8px 12px; 
-  gap: 10px;
-  z-index: 1200; 
-
-  /* CHANGE: Solid color (No RGBA) to match the tab perfectly */
-  background: #181818 !important; 
-  
-  /* Border: Uniform grey border (Restored Top) */
-  border: 1px solid rgba(255, 255, 255, 0.3); 
-  border-bottom: none; /* Anchored to bottom edge */
-  
-  /* Shape: Rounded top corners, flat bottom */
-  border-radius: 6px 6px 0 0; 
-  
-  /* Shadow */
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.8);
+/* Define the exact shared background color here */
+:root {
+    --drawer-bg: #181818; 
 }
 
-/* --- 2. THE TAB BUTTON (Sharp Connection) --- */
+/* LAYER 1: The Drawer Tab (Lowest) */
 .drawer-tab {
-  position: absolute;
-  /* Exact position */
-  top: -31px !important; 
-  height: 32px; 
-  width: 80px; 
-  
-  /* Solid Match */
-  background-color: #181818 !important; 
-  
-  /* Borders */
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
-  border-right: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none; 
-  
-  /* Round Top, Square Bottom */
-  border-radius: 10px 10px 0 0 !important; 
-  
-  cursor: pointer;
-  pointer-events: auto; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  z-index: 1300 !important; 
-  
-  /* Subtle highlight */
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: absolute;
+    top: -31px !important;
+    height: 32px;
+    width: 80px;
+    
+    /* Z-INDEX 1200: Lower than the Panel */
+    z-index: 1200 !important; 
+    
+    /* EXACT COLOR MATCH */
+    background-color: var(--drawer-bg) !important;
+    
+    /* Borders */
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: none !important;
+    
+    /* Shape */
+    border-radius: 10px 10px 0 0 !important;
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex; align-items: center; justify-content: center;
+    
+    /* REMOVE SHADOWS to flatten the look */
+    box-shadow: none !important;
 }
 
-/* --- 3. THE "ERASER" STRIP (The Sharpness Fix) --- */
-.drawer-tab::after {
-  content: "";
-  position: absolute;
-  
-  /* Position: Sit exactly on the connection line */
-  bottom: -1px; 
-  
-  /* CHANGE: Extend full width (0) instead of inset (1px) 
-     This covers the bottom-most pixels of the side borders, 
-     creating a perfectly sharp 90-degree corner at the joint. */
-  left: 0;   
-  right: 0;
-  
-  height: 4px; 
-  
-  /* Exact color match */
-  background-color: #181818; 
-  
-  z-index: 1301;
+/* LAYER 2: The Main Panel (Middle) */
+.controls-content {
+    position: relative;
+    top: 1px;
+    
+    /* Z-INDEX 1300: Higher than Tab */
+    z-index: 1300 !important; 
+    
+    /* EXACT COLOR MATCH */
+    background-color: var(--drawer-bg) !important;
+    
+    display: flex; justify-content: center;
+    width: 100%; max-width: 600px;
+    margin: 0 auto; padding: 8px 12px; gap: 10px;
+    
+    /* Borders */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+}
+
+/* LAYER 2.5: The "Eraser" Patch */
+.controls-content::before {
+    content: "";
+    position: absolute;
+    
+    /* Position slightly higher to cover the seam aggressively */
+    top: -3px; 
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* Width matches the inner width of the tab (80px - borders) */
+    width: 78px; 
+    
+    /* Taller height to ensure full coverage */
+    height: 6px; 
+    
+    /* EXACT COLOR MATCH */
+    background-color: var(--drawer-bg);
+    
+    z-index: 1301;
 }
 
 /* --- 4. THE ARROW (White) --- */
@@ -1089,9 +1097,12 @@ select.btn-map-select option {
    CUSTOM DROPDOWNS
    ========================================== */
 .custom-dropdown {
-  position: relative; height: auto; display: flex; flex-direction: column;
-  /* Ensure dropdown container is above drawer-tab */
-  z-index: 1200;
+  position: relative; 
+  height: auto; 
+  display: flex; 
+  flex-direction: column;
+  /* Above the 'Eraser' patch and Tab */
+  z-index: 1400 !important;
 }
 
 /* --- UNIFY THE DROPDOWN MENU COLOR --- */
@@ -1557,41 +1568,97 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* ==========================================
    MOBILE & TABLET OPTIMIZATIONS
    ========================================== */
+/* ==========================================
+   MOBILE LAYOUT FIX (Stacking Context & Merge)
+   ========================================== */
 @media (max-width: 768px) {
-  /* --- CHANGE 2: FIX MOBILE DRAWER HIDING --- */
-  /* This forces the drawer to stop exactly at the bottom edge, 
-     keeping your arrow tab fully visible. */
-  .controls-drawer.closed {
-    transform: translateY(100%); 
+
+  /* 1. THE PANEL (Now Highest Layer) */
+  .controls-content {
+      z-index: 1300 !important; /* CHANGE: Higher than Tab */
+      position: relative;
+      background-color: #181818 !important;
+      
+      /* Borders */
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-bottom: none !important;
+      border-radius: 12px 12px 0 0 !important;
+      
+      /* Layout */
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding: 10px !important;
+      gap: 8px;
   }
 
-  /* FIX: Ensure tab doesn't have a weird shadow line when docked at bottom */
-  .controls-drawer.closed .drawer-tab {
-    border-bottom: none; /* Double check */
-    box-shadow: 0 -1px 0 rgba(0,0,0,1); /* Fake line to cover gaps if needed */
+  /* 2. THE VISUAL PATCH (Hides the border line) */
+  /* This creates a small black strip on top of the panel border 
+     where the tab sits, creating the "merged" look */
+  .controls-content::before {
+      content: "";
+      position: absolute;
+      top: -2px; /* Shift up to cover the border */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 78px; /* Slightly narrower than tab (80px) */
+      height: 4px; 
+      background-color: #181818; /* Matches Panel BG */
+      z-index: 1301;
   }
 
-  /* FIX: Sync mobile position with new button height */
+  /* 3. THE DRAWER TAB (Now Lower Layer) */
   .drawer-tab {
-    /* CHANGE: Was -28px, needs to be -24px to match height */
-    top: -30px !important; 
-    z-index: 1300 !important; /* Ensure z-index stays high on mobile */
+      top: -31px !important;
+      height: 32px !important;
+      width: 80px !important;
+      
+      z-index: 1000 !important; /* CHANGE: Lower than Panel */
+      
+      background-color: #181818 !important;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-bottom: none !important;
+      border-radius: 10px 10px 0 0 !important;
+      box-shadow: none !important;
   }
 
-  /* Mobile: Override controls-drawer width for full width on mobile */
-  .controls-drawer {
-    width: 100% !important;
-    min-width: auto !important;
-    max-width: none !important;
-  }
-
-  /* Mobile: Adjust spacing if the slider is too tall */
-  .zoom-icons {
-    gap: 5px; /* Tighter gap for mobile to fit 3 buttons */
+  /* 4. THE DROPDOWNS (Free to float on top) */
+  /* Now that the parent Panel is 1300, these are safe */
+  .custom-dropdown {
+      position: relative;
+      z-index: 1400 !important; 
   }
   
-  .zoom-slider-container {
-    height: 360px; /* Increased from 310px to fit the 5th button */
+  .dropdown-menu {
+      z-index: 1500 !important;
+  }
+
+  /* --- Rest of Layout Logic --- */
+  
+  /* Map Button - Full Width */
+  .custom-dropdown:nth-child(1) {
+      width: 100% !important;
+      flex: 0 0 100% !important;
+  }
+
+  /* Faction & Gun - 50% Split */
+  .custom-dropdown:nth-child(2),
+  .custom-dropdown:nth-child(3) {
+      width: calc(50% - 4px) !important;
+      flex: 0 0 calc(50% - 4px) !important;
+  }
+
+  /* Button Styling */
+  .btn-map-select {
+      font-size: 13px !important;
+      padding: 10px 12px !important;
+      min-height: 48px !important;
+      background: rgba(29, 31, 39, 0.9) !important;
+  }
+
+  /* Hide Desktop Elements */
+  #desktopCursorRings, #liveCursorHud { 
+      display: none !important; 
   }
 
   /* Prevent the default mobile tap highlight gray box on the ruler icon */
