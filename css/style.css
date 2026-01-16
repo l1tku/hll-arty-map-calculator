@@ -3154,16 +3154,21 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     outline: none !important; /* Removes browser blue focus ring */
   }
 
-  /* 2. ICONS: Keep icons muted on fake hover */
+  /* 2. ICONS: Force icons to stay WHITE on mobile, not grey/currentColor */
   .footer-btn:hover .icon,
   .footer-btn:focus .icon,
   .projects-list .footer-btn:hover .external-link-icon,
   .projects-list .footer-btn:focus .external-link-icon {
-    stroke: currentColor !important;
+    /* Changed from currentColor to bright white */
+    stroke: rgba(255, 255, 255, 0.9) !important; 
     fill: none !important;
-    opacity: 0.4 !important;
-    color: inherit !important;
+    opacity: 1 !important; /* Ensure full visibility */
     transform: none !important;
+  }
+
+  /* Specific fix for the 'dots' in the calc icon to make them white too */
+  .footer-btn:hover .icon circle {
+      fill: rgba(255, 255, 255, 0.9) !important;
   }
 
   /* 3. ACTIVE: The ONLY time it should be yellow (While finger is down) */
