@@ -3137,31 +3137,47 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     justify-content: center;
 }
 
-/* --- FIX STICKY HOVER ON MOBILE FOR ALL FOOTER BUTTONS --- */
+/* ==========================================
+   FINAL FIX: MOBILE STICKY HOVER RESET
+   ========================================== */
 @media (hover: none) {
-  /* Reset background and border for ALL footer buttons on mobile */
-  .footer-btn:hover {
+  /* 1. RESET: Force Grey on Focus/Hover for BOTH types of buttons */
+  /* We use higher specificity (.projects-list .footer-btn) to beat the yellow rule */
+  .footer-btn:hover,
+  .footer-btn:focus,
+  .projects-list .footer-btn:hover, 
+  .projects-list .footer-btn:focus {
     background: rgba(255, 255, 255, 0.05) !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
     color: rgba(255, 255, 255, 0.8) !important;
     box-shadow: none !important;
+    outline: none !important; /* Removes browser blue focus ring */
   }
 
-  /* Ensure icons don't change color on fake mobile hover */
-  .footer-btn:hover .icon {
+  /* 2. ICONS: Keep icons muted on fake hover */
+  .footer-btn:hover .icon,
+  .footer-btn:focus .icon,
+  .projects-list .footer-btn:hover .external-link-icon,
+  .projects-list .footer-btn:focus .external-link-icon {
     stroke: currentColor !important;
     fill: none !important;
+    opacity: 0.4 !important;
+    color: inherit !important;
+    transform: none !important;
   }
 
-  /* Keep the Calculator dots muted on fake hover */
-  .footer-btn:hover .icon circle {
-      fill: currentColor !important;
-  }
-
-  /* Provide feedback ONLY while the finger is actually touching the screen */
-  .footer-btn:active {
+  /* 3. ACTIVE: The ONLY time it should be yellow (While finger is down) */
+  .footer-btn:active,
+  .projects-list .footer-btn:active {
     background: rgba(255, 193, 7, 0.2) !important;
     border-color: #ffc107 !important;
     color: #ffc107 !important;
+    transition: none !important;
+  }
+  
+  /* Active State for Icons */
+  .projects-list .footer-btn:active .external-link-icon {
+      opacity: 1 !important;
+      color: #ffc107 !important;
   }
 }

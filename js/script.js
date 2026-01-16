@@ -2276,12 +2276,8 @@ if (toggleBtn && drawer) {
       e.stopPropagation();
       calcModal.classList.add('active'); 
       
-      // THE FIX: Force the button to drop the yellow highlight state immediately
-      setTimeout(() => {
-          btnOpenManualCalc.blur();
-      }, 100);
-      // We keep the Map Modal active in the background
-      // so it is still there when we close the calculator.
+      // FORCE BLUR: Remove focus immediately so highlight doesn't stay
+      btnOpenManualCalc.blur(); 
     });
   }
 
@@ -2760,11 +2756,45 @@ if (btnOtherProjects && projectsModal) {
     const hubButtons = projectsModal.querySelectorAll('.footer-btn');
     hubButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // This forces the browser to drop the 'hover/active' state 
-            // after the link opens
+            // We use a small timeout to ensure the link opens before we kill focus
             setTimeout(() => {
                 btn.blur();
+                // Safety: if the user came back and it's still focused
+                if (document.activeElement === btn) btn.blur();
             }, 100);
         });
     });
 }
+
+// Add this inside your projects modal logic where you handle the button clicks
+const hubButtons = projectsModal.querySelectorAll('.footer-btn');
+hubButtons.forEach(btn => {
+    btn.addEventListener('mousedown', () => {
+        // This stops the focus from ever sticking in the first place
+        setTimeout(() => btn.blur(), 0);
+    });
+    
+    btn.addEventListener('click', () => {
+        // Second safety check
+        setTimeout(() => btn.blur(), 100);
+    });
+});
+
+// Global reset when you switch back to the Artillery tab
+window.onfocus = function() {
+    document.querySelectorAll('button').forEach(b => b.blur());
+};
+
+// --- FORCE RESET ON TAB RETURN (Mobile Fix) ---
+// This handles the "Back" button or switching tabs back to the app
+window.addEventListener('pageshow', (event) => {
+    // If the page was restored from cache (bfcache) or just shown
+    if (event.persisted || document.visibilityState === 'visible') {
+        // Kill focus on everything
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+        // Double tap: Explicitly blur all footer buttons
+        document.querySelectorAll('.footer-btn').forEach(btn => btn.blur());
+    }
+});
