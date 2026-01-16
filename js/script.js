@@ -2119,7 +2119,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ==========================================
-// ZOOM SLIDER CONTROLS (STABLE MOBILE FIX)
+// ZOOM SLIDER CONTROLS (ROBUST FIX)
 // ==========================================
 
 function initZoomControls() {
@@ -2134,11 +2134,14 @@ function initZoomControls() {
 
     // --- 1. SYNC UI FROM STATE ---
     window.updateZoomSliderUI = function() {
+        // Safety check for NaN values in state
+        if (isNaN(state.scale)) state.scale = MIN_ZOOM;
+
         const range = MAX_ZOOM - MIN_ZOOM;
         const progress = (state.scale - MIN_ZOOM) / range;
+        // Clamp percentage between 0 and 100
         const percentage = Math.max(0, Math.min(1, progress)) * 100;
 
-        // Use requestAnimationFrame to prevent layout thrashing
         requestAnimationFrame(() => {
             handle.style.bottom = `${percentage}%`;
             fill.style.height = `${percentage}%`;
@@ -2147,45 +2150,53 @@ function initZoomControls() {
 
     // --- 2. SLIDER DRAG LOGIC ---
     let isDraggingSlider = false;
-    let cachedTrackRect = null; // Cache dimensions to prevent errors
+    let cachedTrackRect = null;
 
+    // Helper: Safely get Y coordinate from Mouse or Touch
     const getClientY = (e) => {
-        if (e.touches && e.touches.length > 0) {
-            return e.touches[0].clientY;
+        if (e.targetTouches && e.targetTouches.length > 0) {
+            return e.targetTouches[0].clientY;
         }
-        return e.clientY;
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            return e.changedTouches[0].clientY;
+        }
+        return e.clientY || 0;
     };
 
     const applyZoom = (clientY) => {
-        // FAILSAFE: If we don't have dimensions, don't do math.
-        if (!cachedTrackRect || cachedTrackRect.height === 0) return;
+        // FAILSAFE 1: If track dimensions are missing or invalid, STOP.
+        if (!cachedTrackRect || cachedTrackRect.height <= 0) return;
 
         const trackBottom = cachedTrackRect.bottom;
         const trackHeight = cachedTrackRect.height;
 
         // Calculate Ratio (Bottom-up)
         let ratio = (trackBottom - clientY) / trackHeight;
+        
+        // FAILSAFE 2: NaN protection on ratio
+        if (isNaN(ratio)) return;
+
         ratio = Math.max(0, Math.min(1, ratio));
 
         const newZoom = MIN_ZOOM + (ratio * (MAX_ZOOM - MIN_ZOOM));
 
-        // CRITICAL FIX: Prevent NaN (The "Black Map" killer)
-        if (isNaN(newZoom) || !isFinite(newZoom)) return;
+        // FAILSAFE 3: The "Black Map" Killer. 
+        // If the result is not a valid finite number, DO NOT APPLY IT.
+        if (!Number.isFinite(newZoom) || isNaN(newZoom)) return;
 
         const containerRect = mapContainer.getBoundingClientRect();
         setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
     };
 
     const startDrag = (e) => {
-        // Prevent Chrome scrolling
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
 
         isDraggingSlider = true;
-        mapStage.classList.remove("zoom-transition");
+        mapStage.classList.remove("zoom-transition"); 
         track.classList.add('active');
 
-        // Cache dimensions NOW (Stable reference)
+        // Cache dimensions only on start
         cachedTrackRect = track.getBoundingClientRect();
 
         const y = getClientY(e);
@@ -2202,7 +2213,7 @@ function initZoomControls() {
 
         const y = getClientY(e);
 
-        // Throttle updates for performance
+        // Throttle using rAF to prevent blurry UI/lag
         requestAnimationFrame(() => {
             applyZoom(y);
         });
@@ -2211,18 +2222,17 @@ function initZoomControls() {
     const endDrag = (e) => {
         if (!isDraggingSlider) return;
         
-        // Prevent phantom clicks
         if (e.cancelable) e.preventDefault();
         
         isDraggingSlider = false;
-        cachedTrackRect = null; // Clear cache
+        cachedTrackRect = null;
         
         mapStage.classList.add("zoom-transition");
         track.classList.remove('active');
     };
 
     // --- LISTENERS ---
-    // Passive: false is MANDATORY for Chrome Mobile to allow preventDefault()
+    // Passive: false is MANDATORY for Chrome Mobile to prevent scrolling
     track.addEventListener("mousedown", startDrag);
     track.addEventListener("touchstart", startDrag, { passive: false });
 
@@ -2244,34 +2254,33 @@ function initZoomControls() {
 
         if (navigator.vibrate) navigator.vibrate(10);
 
-        // Calculate new zoom
+        // Calculate
         let newZoom = state.scale + direction;
         
-        // Clamp it immediately to prevent out-of-bounds math
-        if(newZoom < MIN_ZOOM) newZoom = MIN_ZOOM;
-        if(newZoom > MAX_ZOOM) newZoom = MAX_ZOOM;
+        // Safety Clamp
+        if (isNaN(newZoom)) newZoom = MIN_ZOOM;
+        if (newZoom < MIN_ZOOM) newZoom = MIN_ZOOM;
+        if (newZoom > MAX_ZOOM) newZoom = MAX_ZOOM;
 
         const containerRect = mapContainer.getBoundingClientRect();
         setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
     };
 
-    // Debounce to prevent double-firing (Touch + Click)
-    let lastTime = 0;
+    // Debounce Logic for Buttons
+    let lastBtnTime = 0;
     const safeBtnHandler = (e, dir) => {
         const now = Date.now();
-        if (now - lastTime < 300) return; // Ignore double taps within 300ms
-        lastTime = now;
+        if (now - lastBtnTime < 100) return; // fast debounce
+        lastBtnTime = now;
         handleBtnPress(e, dir);
     };
 
-    // Attach listeners
     btnIn.addEventListener("touchstart", (e) => safeBtnHandler(e, 1), { passive: false });
     btnIn.addEventListener("click", (e) => safeBtnHandler(e, 1));
 
     btnOut.addEventListener("touchstart", (e) => safeBtnHandler(e, -1), { passive: false });
     btnOut.addEventListener("click", (e) => safeBtnHandler(e, -1));
 }
-
 // Initialize
 initZoomControls();
 

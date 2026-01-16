@@ -822,13 +822,12 @@ svg.icon {
   }
 }
 
-/* --- ZOOM CONTROLS CSS FIX --- */
-#zoomSliderContainer, 
+/* --- ZOOM SLIDER FIXES --- */
 #zoomSliderTrack, 
 #zoomSliderHandle,
 #btnZoomIn,
 #btnZoomOut {
-    touch-action: none; 
+    touch-action: none; /* Critical for Chrome Mobile */
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
