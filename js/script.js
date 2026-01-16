@@ -2143,28 +2143,27 @@ function initZoomControls() {
 
   // --- 2. HANDLE DRAG LOGIC ---
   let isDraggingSlider = false;
+  let cachedTrackRect = null;
+  let cachedContainerRect = null;
 
   function updateZoomFromEvent(e) {
-    const rect = track.getBoundingClientRect();
+    const rect = cachedTrackRect || track.getBoundingClientRect();
+    const containerRect = cachedContainerRect || mapContainer.getBoundingClientRect();
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
-    // Calculate percentage from bottom of track
     let val = (rect.bottom - clientY) / rect.height;
     val = Math.max(0, Math.min(1, val));
     
     const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
-    
-    // Zoom into visual center of container
-    const containerRect = mapContainer.getBoundingClientRect();
     setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
   }
 
-  // --- EVENTS ---
   const startDrag = (e) => {
     isDraggingSlider = true;
     mapStage.classList.remove("zoom-transition");
+    cachedTrackRect = track.getBoundingClientRect();
+    cachedContainerRect = mapContainer.getBoundingClientRect();
     updateZoomFromEvent(e);
-    // Vibrate on interaction start
     if (navigator.vibrate) navigator.vibrate(10);
   };
 
@@ -2172,35 +2171,50 @@ function initZoomControls() {
     if (!isDraggingSlider) return;
     if (e.cancelable) e.preventDefault();
     e.stopPropagation();
-    
     requestAnimationFrame(() => updateZoomFromEvent(e));
   };
 
   const endDrag = () => {
     isDraggingSlider = false;
     mapStage.classList.add("zoom-transition");
+    cachedTrackRect = null;
+    cachedContainerRect = null;
   };
 
-  // Track Listeners
   track.addEventListener("mousedown", startDrag);
   track.addEventListener("touchstart", startDrag, { passive: false });
-
   window.addEventListener("mousemove", (e) => { if(isDraggingSlider) updateZoomFromEvent(e); });
   window.addEventListener("touchmove", doDrag, { passive: false });
-
   window.addEventListener("mouseup", endDrag);
   window.addEventListener("touchend", endDrag);
 
-  // --- 3. BUTTONS ---
+  // --- 3. BUTTONS (ANIMATION FIXED) ---
   const handleBtn = (e, zoomDiff) => {
-    e.preventDefault();
+    // Prevent default to stop scrolling/zooming the page
+    if (e.cancelable) e.preventDefault();
     e.stopPropagation();
-    if (navigator.vibrate) navigator.vibrate(15);
     
+    // 1. Trigger Visual Animation (The Fix)
+    const btn = e.currentTarget;
+    
+    // Reset animation if user taps rapidly
+    btn.classList.remove('pressed');
+    void btn.offsetWidth; // Force reflow to restart animation
+    btn.classList.add('pressed');
+    
+    // Clear any previous timer to ensure the flash stays visible
+    if (btn._pressTimeout) clearTimeout(btn._pressTimeout);
+    btn._pressTimeout = setTimeout(() => btn.classList.remove('pressed'), 150);
+
+    // 2. Trigger Vibration
+    if (navigator.vibrate) navigator.vibrate(15);
+
+    // 3. Perform Zoom
     const rect = mapContainer.getBoundingClientRect();
     setZoomLevel(state.scale + zoomDiff, rect.width/2, rect.height/2);
   };
 
+  // Add listeners for both touch (mobile) and click (desktop)
   btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
   btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
   btnIn.addEventListener("click", (e) => handleBtn(e, 1));

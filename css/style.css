@@ -168,6 +168,11 @@ body {
   position: absolute; 
   top: 0; 
   left: 0;
+  
+  /* CRITICAL FOR MOBILE PERFORMANCE */
+  will-change: transform; 
+  transform: translate3d(0, 0, 0); /* Forces GPU layer creation */
+  backface-visibility: hidden;
   transition: opacity 0.4s ease-in-out;
 }
 
