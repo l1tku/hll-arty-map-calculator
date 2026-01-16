@@ -2275,6 +2275,11 @@ if (toggleBtn && drawer) {
     btnOpenManualCalc.addEventListener('click', (e) => {
       e.stopPropagation();
       calcModal.classList.add('active'); 
+      
+      // THE FIX: Force the button to drop the yellow highlight state immediately
+      setTimeout(() => {
+          btnOpenManualCalc.blur();
+      }, 100);
       // We keep the Map Modal active in the background
       // so it is still there when we close the calculator.
     });
@@ -2750,4 +2755,16 @@ if (btnOtherProjects && projectsModal) {
     projectsModal.onclick = (e) => {
         if (e.target === projectsModal) projectsModal.classList.remove("active");
     };
+    
+    // NEW: Target all buttons inside the hub to clear focus after clicking
+    const hubButtons = projectsModal.querySelectorAll('.footer-btn');
+    hubButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // This forces the browser to drop the 'hover/active' state 
+            // after the link opens
+            setTimeout(() => {
+                btn.blur();
+            }, 100);
+        });
+    });
 }

@@ -3136,3 +3136,32 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     align-items: center;
     justify-content: center;
 }
+
+/* --- FIX STICKY HOVER ON MOBILE FOR ALL FOOTER BUTTONS --- */
+@media (hover: none) {
+  /* Reset background and border for ALL footer buttons on mobile */
+  .footer-btn:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure icons don't change color on fake mobile hover */
+  .footer-btn:hover .icon {
+    stroke: currentColor !important;
+    fill: none !important;
+  }
+
+  /* Keep the Calculator dots muted on fake hover */
+  .footer-btn:hover .icon circle {
+      fill: currentColor !important;
+  }
+
+  /* Provide feedback ONLY while the finger is actually touching the screen */
+  .footer-btn:active {
+    background: rgba(255, 193, 7, 0.2) !important;
+    border-color: #ffc107 !important;
+    color: #ffc107 !important;
+  }
+}
