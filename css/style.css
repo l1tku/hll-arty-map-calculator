@@ -822,29 +822,6 @@ svg.icon {
   }
 }
 
-/* --- ZOOM SLIDER FIXES --- */
-#zoomSliderTrack, 
-#zoomSliderHandle,
-#btnZoomIn,
-#btnZoomOut {
-    touch-action: none; /* Critical for Chrome Mobile */
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    cursor: pointer;
-}
-
-/* Optimize the pressed animation to avoid JS reflows */
-.zoom-btn {
-    transition: transform 0.1s ease, background-color 0.2s;
-    will-change: transform;
-}
-
-.zoom-btn.pressed {
-    transform: scale(0.92);
-    background-color: rgba(255, 255, 255, 0.2); /* Optional visual feedback */
-}
-
 /* ==========================================================================
    Base Styles
    ========================================================================== */

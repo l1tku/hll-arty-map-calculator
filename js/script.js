@@ -2118,169 +2118,109 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// ==========================================
-// ZOOM SLIDER CONTROLS (ROBUST FIX)
+// ZOOM SLIDER CONTROLS
 // ==========================================
 
 function initZoomControls() {
-    const track = document.getElementById("zoomSliderTrack");
-    const handle = document.getElementById("zoomSliderHandle");
-    const fill = document.getElementById("zoomSliderFill");
-    const btnIn = document.getElementById("btnZoomIn");
-    const btnOut = document.getElementById("btnZoomOut");
-    const mapStage = document.getElementById("mapStage");
+  const track = document.getElementById("zoomSliderTrack");
+  const handle = document.getElementById("zoomSliderHandle");
+  const fill = document.getElementById("zoomSliderFill");
+  const btnIn = document.getElementById("btnZoomIn");
+  const btnOut = document.getElementById("btnZoomOut");
+  const mapStage = document.getElementById("mapStage");
 
-    if (!track || !handle) return;
+  if (!track || !handle) return;
 
-    // --- 1. SYNC UI FROM STATE ---
-    window.updateZoomSliderUI = function() {
-        // Safety check for NaN values in state
-        if (isNaN(state.scale)) state.scale = MIN_ZOOM;
+  // --- 1. SYNC UI FROM STATE ---
+  window.updateZoomSliderUI = function() {
+    const range = MAX_ZOOM - MIN_ZOOM;
+    const progress = (state.scale - MIN_ZOOM) / range;
+    const percentage = Math.max(0, Math.min(1, progress)) * 100;
 
-        const range = MAX_ZOOM - MIN_ZOOM;
-        const progress = (state.scale - MIN_ZOOM) / range;
-        // Clamp percentage between 0 and 100
-        const percentage = Math.max(0, Math.min(1, progress)) * 100;
+    handle.style.bottom = `${percentage}%`;
+    fill.style.height = `${percentage}%`;
+  };
 
-        requestAnimationFrame(() => {
-            handle.style.bottom = `${percentage}%`;
-            fill.style.height = `${percentage}%`;
-        });
-    };
+  // --- 2. HANDLE DRAG LOGIC ---
+  let isDraggingSlider = false;
+  let cachedTrackRect = null;
+  let cachedContainerRect = null;
 
-    // --- 2. SLIDER DRAG LOGIC ---
-    let isDraggingSlider = false;
-    let cachedTrackRect = null;
+  function updateZoomFromEvent(e) {
+    const rect = cachedTrackRect || track.getBoundingClientRect();
+    const containerRect = cachedContainerRect || mapContainer.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    let val = (rect.bottom - clientY) / rect.height;
+    val = Math.max(0, Math.min(1, val));
+    
+    const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
+    setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
+  }
 
-    // Helper: Safely get Y coordinate from Mouse or Touch
-    const getClientY = (e) => {
-        if (e.targetTouches && e.targetTouches.length > 0) {
-            return e.targetTouches[0].clientY;
-        }
-        if (e.changedTouches && e.changedTouches.length > 0) {
-            return e.changedTouches[0].clientY;
-        }
-        return e.clientY || 0;
-    };
+  const startDrag = (e) => {
+    isDraggingSlider = true;
+    mapStage.classList.remove("zoom-transition");
+    cachedTrackRect = track.getBoundingClientRect();
+    cachedContainerRect = mapContainer.getBoundingClientRect();
+    updateZoomFromEvent(e);
+    if (navigator.vibrate) navigator.vibrate(10);
+  };
 
-    const applyZoom = (clientY) => {
-        // FAILSAFE 1: If track dimensions are missing or invalid, STOP.
-        if (!cachedTrackRect || cachedTrackRect.height <= 0) return;
+  const doDrag = (e) => {
+    if (!isDraggingSlider) return;
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    requestAnimationFrame(() => updateZoomFromEvent(e));
+  };
 
-        const trackBottom = cachedTrackRect.bottom;
-        const trackHeight = cachedTrackRect.height;
+  const endDrag = () => {
+    isDraggingSlider = false;
+    mapStage.classList.add("zoom-transition");
+    cachedTrackRect = null;
+    cachedContainerRect = null;
+  };
 
-        // Calculate Ratio (Bottom-up)
-        let ratio = (trackBottom - clientY) / trackHeight;
-        
-        // FAILSAFE 2: NaN protection on ratio
-        if (isNaN(ratio)) return;
+  track.addEventListener("mousedown", startDrag);
+  track.addEventListener("touchstart", startDrag, { passive: false });
+  window.addEventListener("mousemove", (e) => { if(isDraggingSlider) updateZoomFromEvent(e); });
+  window.addEventListener("touchmove", doDrag, { passive: false });
+  window.addEventListener("mouseup", endDrag);
+  window.addEventListener("touchend", endDrag);
 
-        ratio = Math.max(0, Math.min(1, ratio));
+  // --- 3. BUTTONS (ANIMATION FIXED) ---
+  const handleBtn = (e, zoomDiff) => {
+    // Prevent default to stop scrolling/zooming the page
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    
+    // 1. Trigger Visual Animation (The Fix)
+    const btn = e.currentTarget;
+    
+    // Reset animation if user taps rapidly
+    btn.classList.remove('pressed');
+    void btn.offsetWidth; // Force reflow to restart animation
+    btn.classList.add('pressed');
+    
+    // Clear any previous timer to ensure the flash stays visible
+    if (btn._pressTimeout) clearTimeout(btn._pressTimeout);
+    btn._pressTimeout = setTimeout(() => btn.classList.remove('pressed'), 150);
 
-        const newZoom = MIN_ZOOM + (ratio * (MAX_ZOOM - MIN_ZOOM));
+    // 2. Trigger Vibration
+    if (navigator.vibrate) navigator.vibrate(15);
 
-        // FAILSAFE 3: The "Black Map" Killer. 
-        // If the result is not a valid finite number, DO NOT APPLY IT.
-        if (!Number.isFinite(newZoom) || isNaN(newZoom)) return;
+    // 3. Perform Zoom
+    const rect = mapContainer.getBoundingClientRect();
+    setZoomLevel(state.scale + zoomDiff, rect.width/2, rect.height/2);
+  };
 
-        const containerRect = mapContainer.getBoundingClientRect();
-        setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
-    };
-
-    const startDrag = (e) => {
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
-
-        isDraggingSlider = true;
-        mapStage.classList.remove("zoom-transition"); 
-        track.classList.add('active');
-
-        // Cache dimensions only on start
-        cachedTrackRect = track.getBoundingClientRect();
-
-        const y = getClientY(e);
-        applyZoom(y);
-        
-        if (navigator.vibrate) navigator.vibrate(5);
-    };
-
-    const handleMove = (e) => {
-        if (!isDraggingSlider) return;
-        
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
-
-        const y = getClientY(e);
-
-        // Throttle using rAF to prevent blurry UI/lag
-        requestAnimationFrame(() => {
-            applyZoom(y);
-        });
-    };
-
-    const endDrag = (e) => {
-        if (!isDraggingSlider) return;
-        
-        if (e.cancelable) e.preventDefault();
-        
-        isDraggingSlider = false;
-        cachedTrackRect = null;
-        
-        mapStage.classList.add("zoom-transition");
-        track.classList.remove('active');
-    };
-
-    // --- LISTENERS ---
-    // Passive: false is MANDATORY for Chrome Mobile to prevent scrolling
-    track.addEventListener("mousedown", startDrag);
-    track.addEventListener("touchstart", startDrag, { passive: false });
-
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("touchmove", handleMove, { passive: false });
-
-    window.addEventListener("mouseup", endDrag);
-    window.addEventListener("touchend", endDrag);
-    window.addEventListener("touchcancel", endDrag);
-
-    // --- 3. BUTTONS (STRICT 1x STEP) ---
-    const handleBtnPress = (e, direction) => {
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
-
-        const btn = e.currentTarget;
-        btn.classList.add('pressed');
-        setTimeout(() => btn.classList.remove('pressed'), 150);
-
-        if (navigator.vibrate) navigator.vibrate(10);
-
-        // Calculate
-        let newZoom = state.scale + direction;
-        
-        // Safety Clamp
-        if (isNaN(newZoom)) newZoom = MIN_ZOOM;
-        if (newZoom < MIN_ZOOM) newZoom = MIN_ZOOM;
-        if (newZoom > MAX_ZOOM) newZoom = MAX_ZOOM;
-
-        const containerRect = mapContainer.getBoundingClientRect();
-        setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
-    };
-
-    // Debounce Logic for Buttons
-    let lastBtnTime = 0;
-    const safeBtnHandler = (e, dir) => {
-        const now = Date.now();
-        if (now - lastBtnTime < 100) return; // fast debounce
-        lastBtnTime = now;
-        handleBtnPress(e, dir);
-    };
-
-    btnIn.addEventListener("touchstart", (e) => safeBtnHandler(e, 1), { passive: false });
-    btnIn.addEventListener("click", (e) => safeBtnHandler(e, 1));
-
-    btnOut.addEventListener("touchstart", (e) => safeBtnHandler(e, -1), { passive: false });
-    btnOut.addEventListener("click", (e) => safeBtnHandler(e, -1));
+  // Add listeners for both touch (mobile) and click (desktop)
+  btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
+  btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
+  btnIn.addEventListener("click", (e) => handleBtn(e, 1));
+  btnOut.addEventListener("click", (e) => handleBtn(e, -1));
 }
+
 // Initialize
 initZoomControls();
 
