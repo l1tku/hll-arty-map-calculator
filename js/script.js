@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.1"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
+const APP_VERSION = "v1.1.2"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
 
 // Map Dimensions
 const MAP_WIDTH_METERS = 2000.0; 
@@ -990,7 +990,9 @@ function updateRealScale(effectiveZoom) {
 
 function updateDimensions() {
   const mapImage = document.getElementById("mapImage");
-  if (!mapImage.complete) return;
+  
+  // FIX: Check naturalWidth to prevent "Stuck Zoom" bug on browser restore
+  if (!mapImage.complete || mapImage.naturalWidth === 0) return;
   
   const rect = mapContainer.getBoundingClientRect();
   
@@ -1797,24 +1799,6 @@ if (localStorage.getItem('hllArtyCalculatorState') === null) {
   openMapSelector();
 }
 
-// 6. Load Map Image and Start Rendering
-const imgEl = document.getElementById("mapImage");
-const onInitLoad = function() {
-  initMap();   // This calls renderMarkers(), which now has data!
-  render();
-  syncToggleUI(); 
-  hideLoading();
-};
-
-// Set image source and trigger load
-imgEl.src = MAP_DATABASE[activeMapKey].image;
-if (imgEl.complete) {
-  onInitLoad();
-} else {
-  imgEl.onload = onInitLoad;
-}
-
-new ResizeObserver(() => { updateDimensions(); render(); }).observe(mapContainer);
 // ==========================================
 // 5. EVENT LISTENERS
 // ==========================================
@@ -2688,11 +2672,38 @@ renderMapGrid("");
 // Load saved data
 loadState();
 
-// Start the app with saved map
-const startKey = activeMapKey || "CAR";
-switchMap(startKey); 
+// 6. Load Map Image and Start Rendering
+const imgEl = document.getElementById("mapImage");
 
-new ResizeObserver(() => { updateDimensions(); render(); }).observe(mapContainer);
+const onInitLoadWithRetry = function() {
+  // FIX: Loop until image has physical dimensions (Fixes "Stuck Zoom" on Reload)
+  if (imgEl.naturalWidth === 0) {
+      setTimeout(onInitLoadWithRetry, 50);
+      return;
+  }
+
+  initMap(); 
+  render();
+  syncToggleUI(); 
+  hideLoading();
+};
+
+// Set image source and trigger load
+imgEl.src = MAP_DATABASE[activeMapKey].image;
+
+if (imgEl.complete) {
+  onInitLoadWithRetry();
+} else {
+  imgEl.onload = onInitLoadWithRetry;
+}
+
+// Ensure ResizeObserver doesn't trigger bad math if image isn't ready
+new ResizeObserver(() => { 
+    if (imgEl.naturalWidth > 0) {
+        updateDimensions(); 
+        render(); 
+    }
+}).observe(mapContainer);
 
 // --- PROJECTS MODAL LOGIC ---
 

@@ -1,50 +1,72 @@
+/* ==========================================
+   MODAL HEADER (Version Positioning Fix)
+   ========================================== */
+
 /* Container for the stacked title */
 .modal-brand-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px 20px; /* Reduced vertical padding to save space */
-  gap: 4px; /* Space between title and credits */
+  /* Balanced padding */
+  padding: 25px 20px 20px; 
+  /* CHANGE: Increased gap from 4px to 12px to push credits down */
+  gap: 12px; 
+  position: relative;
+  flex-shrink: 0;
+  
+  /* Background & Border (Moved here from your lower code for organization) */
+  background: rgba(0, 0, 0, 0.4); 
+  border-bottom: 1px solid rgba(255, 193, 7, 0.3); 
 }
 
 /* The Main Project Name */
 .main-title {
   font-family: 'GothamSS', sans-serif;
   font-weight: 900;
-  font-size: 28px; /* Slightly smaller to fit credits comfortably */
+  font-size: 36px !important; /* Kept your larger size preference */
   color: #ffc107;
   text-transform: uppercase;
   letter-spacing: 2px;
+  line-height: 1; /* Tighter line height for the title itself */
   text-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
+  text-align: center;
 }
 
 /* Your Credit Line */
 .main-subtitle-credits {
   font-family: 'GothamSS', sans-serif;
   font-weight: 700;
-  font-size: 10px; /* Reduced slightly to fit version number */
-  color: rgba(255, 255, 255, 0.4); /* Subtle grey */
-  letter-spacing: 2px; /* Adjusted for better legibility */
+  font-size: 10px; 
+  color: rgba(255, 255, 255, 0.5); /* Slightly brighter for better "sit" */
+  letter-spacing: 3px; /* Wider spacing looks more "premium" */
   text-transform: uppercase;
   display: flex;
   align-items: center;
-  gap: 8px; /* Space between v1.0.0, year, and name */
-  text-shadow: none; /* Explicitly remove any glow effects */
+  gap: 10px; 
+  text-shadow: none;
+  
+  /* CHANGE: Force it slightly further down explicitly */
+  margin-top: 2px; 
 }
 
-/* Mobile Adjustment to keep header compact */
+/* Mobile Adjustment */
 @media (max-width: 768px) {
+  .modal-brand-header {
+    /* Ensure padding accommodates the X button on the right */
+    padding: 20px 50px 20px 20px; 
+    gap: 8px; /* Slightly tighter gap on mobile, but still separated */
+    min-height: 60px;
+  }
+
   .main-title {
-    font-size: 18px;
+    font-size: 24px !important;
     letter-spacing: 1px;
   }
+
   .main-subtitle-credits {
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: 1.5px;
-  }
-  .modal-brand-header {
-    padding: 15px 10px;
   }
 }
 
@@ -169,6 +191,10 @@ body {
   top: 0; 
   left: 0;
   transition: opacity 0.4s ease-in-out;
+  
+  /* --- ADD THIS LINE FOR FIREFOX PERFORMANCE --- */
+  will-change: transform; 
+  /* ------------------------------------------- */
 }
 
 .map-stage.zoom-transition {
@@ -1135,12 +1161,17 @@ select.btn-map-select option {
     border-radius: 4px;
     overflow: hidden;
     cursor: pointer;
-    background: #111; /* Dark background while loading */
-    border: 2px solid transparent;
+    background: #111;
+    
+    /* FIX: Ensure border exists but is transparent so it doesn't jump */
+    border: 3px solid transparent; 
+    
     width: 100%;
-    aspect-ratio: 16 / 9; /* Modern replacement for the padding-bottom hack */
+    aspect-ratio: 16 / 9;
     height: auto;
-    transition: transform 0.2s, border-color 0.2s;
+    
+    /* FIX: Add box-shadow to the transition so the glow fades in/out smoothly */
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .map-card-img {
@@ -1153,6 +1184,26 @@ select.btn-map-select option {
     display: block;
     opacity: 1 !important; /* Force visibility */
     transition: transform 0.3s ease;
+}
+
+/* --- DESKTOP HOVER: YELLOW HIGHLIGHT --- */
+@media (hover: hover) and (min-width: 769px) {
+    /* When hovering ANY card that is NOT currently selected */
+    .map-card:not(.active):hover {
+        border-color: #ffc107; /* Tactical Yellow */
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.4); /* Yellow Glow */
+        transform: translateY(-2px); /* Subtle lift effect */
+        z-index: 5; /* Ensure glow sits on top of neighbors */
+    }
+
+    /* Optional: When hovering the ALREADY SELECTED (Green) card */
+    .map-card.active:hover {
+        /* Keep Green Border */
+        border-color: #28a745 !important; 
+        /* Add Green Glow instead of Yellow */
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.5); 
+        transform: translateY(-2px);
+    }
 }
 
 /* Ensure the green highlight beats everything */
