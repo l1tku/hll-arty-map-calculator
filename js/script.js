@@ -175,15 +175,15 @@ function syncToggleUI() {
     if (hudEl) hudEl.classList.remove("hidden");
     
     if (isMobile) {
-      // MOBILE: Show Crosshair + Fire Button, Hide Desktop Rings
+      // Mobile Mode
       if (crosshair) crosshair.classList.remove("hidden");
       if (fireBtn) fireBtn.classList.remove("hidden");
       if (desktopRings) desktopRings.classList.add("hidden"); 
     } else {
-      // DESKTOP: Hide Crosshair + Fire Button, Show Rings
-      if (crosshair) crosshair.classList.add("hidden"); 
-      if (fireBtn) fireBtn.classList.add("hidden");     
+      // Desktop Mode
       if (desktopRings) desktopRings.classList.remove("hidden"); 
+      if (crosshair) crosshair.classList.add("hidden");
+      if (fireBtn) fireBtn.classList.add("hidden");
     }
   } else {
     // Everything Hidden
@@ -853,13 +853,13 @@ function renderTargeting() {
   
   layer.appendChild(circleSvg);
 
-  // --- C. CENTER CROSS (THE X) ---
-  const marker = document.createElement("div");
-  marker.className = "impact-marker";
-  marker.style.left = `${Math.round(end.x)}px`;
-  marker.style.top = `${Math.round(end.y)}px`;
+  // --- C. CENTER CROSS ---
+  // const marker = document.createElement("div");
+  // marker.className = "impact-marker";
+  // marker.style.left = `${Math.round(end.x)}px`;
+  // marker.style.top = `${Math.round(end.y)}px`;
   
-  layer.appendChild(marker);
+  // layer.appendChild(marker);
 
   // 4. UPDATE DASHBOARD
   if (elDist) elDist.innerText = `${activeTarget.distance}m`;
@@ -1840,16 +1840,14 @@ mapContainer.addEventListener("click", (e) => {
   // 1. If we were dragging (panning), DO NOT SHOOT.
   if (isDragging) return; 
 
-// ============================================================
-  // FIX: CHECK IF CROSSHAIR IS VISIBLE
-  // Only block clicks if we are on Mobile AND the crosshair is active.
-  // On desktop, we ignore this check so you can click-to-shoot.
   // ============================================================
-  const isMobile = window.innerWidth <= 768;
+  // FIX: CHECK IF CROSSHAIR IS VISIBLE
+  // If the crosshair has an 'offsetParent', it means it is visible on screen.
+  // In that case, we BLOCK the click so the red marker doesn't move.
+  // ============================================================
   const crosshair = document.getElementById("mobileCrosshair");
-  
-  if (isMobile && crosshair && crosshair.offsetParent !== null) {
-      return; // Block click on mobile if crosshair is visible
+  if (crosshair && crosshair.offsetParent !== null) {
+      return; 
   }
   // ============================================================
 
@@ -2764,7 +2762,6 @@ new ResizeObserver(() => {
     if (imgEl.naturalWidth > 0) {
         updateDimensions(); 
         render(); 
-        syncToggleUI(); // <--- ADD THIS LINE to fix UI switching
     }
 }).observe(mapContainer);
 
