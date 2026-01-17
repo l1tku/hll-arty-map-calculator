@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2026-01-17
+### Fixed
+- **Desktop Stutter**: Eliminated micro-stutter during mouse-wheel zooming on desktop browsers by re-enabling `will-change: transform` strictly for non-mobile devices.
+
+### Performance
+- **Hybrid Rendering Pipeline**: Implemented a split rendering strategy:
+    - **Desktop**: Uses GPU acceleration (`will-change`) for maximum frame rate.
+    - **Mobile**: Uses memory-safe 2D transforms to prevent "checkerboard" crashes on devices with limited video memory.
+- **Label Synchronization**: Optimized the label layer to use CSS transitions instead of JavaScript loop calculations for movement, significantly reducing CPU load during zoom animations.
+
 ## [1.1.2] - 2026-01-17
 ### Fixed
 - **Mobile GPU Checkerboarding**: Resolved a critical rendering issue on mobile Chrome where high zoom levels caused black flickering. Replaced `translate3d` with 2D `translate` to prevent exceeding GPU texture memory limits.

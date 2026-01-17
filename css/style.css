@@ -188,8 +188,9 @@ body {
 }
 
 .map-stage.zoom-transition {
-  /* Keep the transition for smooth snapping */
-  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Smoother, slightly longer transition for high-precision scroll zooming */
+  transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+  will-change: transform;
 }
 
 .map-image {
@@ -356,7 +357,7 @@ body {
   top: 50%; left: 50%; 
   /* Lower than the line (was 20) */
   z-index: 15 !important; 
-  font-size: 40px; font-family: 'GothamSS', sans-serif; font-weight: 700; color: white;
+  font-size: 42px; font-family: 'GothamSS', sans-serif; font-weight: 700; color: white;
   padding: 2px 6px; background-color: rgba(20, 20, 20, 0.70); border-radius: 2px;
   text-align: center; white-space: nowrap; pointer-events: none;
   transform-origin: center center;
@@ -3158,6 +3159,33 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 }
 
 /* ==========================================
+   CHROME & FIREFOX MOBILE ZOOM ANIMATION
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1. Disable default browser highlights */
+  .zoom-icons span {
+    transition: transform 0.1s ease-out, background-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent; 
+    outline: none !important;
+  }
+
+  /* 2. Firefox specific: remove inner dotted focus ring */
+  .zoom-icons span::-moz-focus-inner {
+    border: 0;
+  }
+
+  /* 3. The Pressed State (Triggered by JS) */
+  .zoom-icons span.pressed {
+    background-color: #ffc107 !important;
+    color: black !important;
+    border-color: #ffc107 !important;
+    transform: scale(0.82) !important; /* Slightly more aggressive for Firefox clarity */
+    transition: none !important; 
+    z-index: 10;
+  }
+}
+
+/* ==========================================
    TEMPORARY: REMOVE HUD CROSSHAIRS
    ========================================== */
 
@@ -3233,4 +3261,46 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   .footer-btn:active .icon circle {
       fill: #ffc107 !important;
   }
+}
+
+/* ==========================================
+   MOBILE ZOOM BUTTON HIGHLIGHT FIX
+   ========================================== */
+/* Hard reset for mobile button highlights */
+@media (max-width: 768px) {
+  .zoom-icons span {
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    touch-action: manipulation;
+  }
+  
+  /* Force removal of any "hover" state browser tries to emulate */
+  .zoom-icons span:hover {
+    background-color: rgba(20, 20, 20, 0.95) !important;
+    color: white !important;
+  }
+}
+
+/* ==========================================
+   DESKTOP SMOOTH ZOOM FIX
+   ========================================== */
+@media (min-width: 769px) {
+  /* 1. Fix Stutter: Keep map in GPU memory on PC */
+  .map-stage {
+    will-change: transform;
+  }
+
+  /* 2. Fix Drift: Force markers to move in sync with map */
+  /* This prevents them from "wobbling" or snapping to pixels */
+  .marker, .marker-label, .hll-grid-line {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0); 
+  }
+}
+
+/* Force labels to match the map's zoom curve */
+.label-layer.zoom-transition .hll-grid-label {
+    transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+    will-change: transform;
 }

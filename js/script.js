@@ -278,8 +278,16 @@ function getGridRef(gameX, gameY) {
 
 function setZoomLevel(newLevel, mouseX = null, mouseY = null) {
   const prevZoom = getEffectiveZoom();
+  // Update the global state immediately
   currentZoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newLevel));
   state.scale = currentZoomLevel;
+  
+  // Make sure we DON'T remove zoom-transition if we aren't dragging/panning
+  if (!state.panning) {
+      mapStage.classList.add("zoom-transition");
+      // NEW: Sync labels
+      document.getElementById("labelLayer")?.classList.add("zoom-transition"); 
+  }
   
   const newZoom = getEffectiveZoom();
   
@@ -898,14 +906,16 @@ function render() {
   const arrowOp = Math.max(0, 1 - (progress * 1.6));
 
   // 5. TEXT SIZE SMOOTHING
-  const smoothInverse = 1.0 / Math.pow(state.scale, 0.85);
+  // Use a lower exponent (0.7) on desktop to keep labels larger at high zoom
+  const exponent = isMobile ? 0.85 : 0.6; 
+  const smoothInverse = 1.0 / Math.pow(state.scale, exponent);
   const finalScale = smoothInverse * mobileScaleMultiplier;
 
   for (let i = 0; i < labelCache.length; i++) {
       const label = labelCache[i];
       label.style.setProperty('--arrow-opacity', arrowOp);
       label.style.top = `${topVal}%`; 
-      // This is safe (2D transform)
+      // Applying the updated scale
       label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
   }
 
@@ -1877,32 +1887,52 @@ mapContainer.addEventListener("click", (e) => {
   render();           
 });
 
-// --- 3. WHEEL ZOOM ---
+// --- 3. HIGH-SPEED SMOOTH WHEEL ZOOM ---
+let isWheelThrottled = false;
+
 mapContainer.addEventListener("wheel", (e) => {
   e.preventDefault();
+  
+  // 1. Kill transition for instant response during the scroll
   mapStage.classList.remove("zoom-transition");
+  document.getElementById("labelLayer")?.classList.remove("zoom-transition");
   mapStage.style.transition = "none";
-  
-  const direction = e.deltaY > 0 ? -1 : 1;
-  let rawZoom = currentZoomLevel + (direction * ZOOM_STEP);
-  let newZoom = Math.round(rawZoom * 10) / 10;
 
-  if (newZoom < MIN_ZOOM) newZoom = MIN_ZOOM;
-  if (newZoom > MAX_ZOOM) newZoom = MAX_ZOOM;
+  if (!isWheelThrottled) {
+    isWheelThrottled = true;
+    
+    requestAnimationFrame(() => {
+      const direction = e.deltaY > 0 ? -1 : 1;
+      
+      // SPEED FIX: Increased from 0.2 to 0.8 for faster travel
+      // This means 1 notch = 80% of a zoom level
+      const SCROLL_SPEED = 0.8; 
+      
+      let newZoom = currentZoomLevel + (direction * SCROLL_SPEED);
+      
+      // Round to 2 decimals to keep math precise but clean
+      newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
 
-  if (newZoom === currentZoomLevel) return;
+      const rect = mapContainer.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-  const rect = mapContainer.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-  
-  setZoomLevel(newZoom, mouseX, mouseY);
-  
-  if (window.zoomTimeout) clearTimeout(window.zoomTimeout);
-  window.zoomTimeout = setTimeout(() => {
-    mapStage.style.transition = ""; 
+      if (Math.abs(newZoom - currentZoomLevel) > 0.01) {
+        setZoomLevel(newZoom, mouseX, mouseY);
+      }
+      
+      isWheelThrottled = false;
+    });
+  }
+
+  // 2. The "Soft Landing" - Restores smoothness when you STOP scrolling
+  clearTimeout(window.wheelStopTimeout);
+  window.wheelStopTimeout = setTimeout(() => {
     mapStage.classList.add("zoom-transition");
-  }, 10);
+    // NEW: Sync labels
+    document.getElementById("labelLayer")?.classList.add("zoom-transition");
+    mapStage.style.transition = ""; 
+  }, 100); // Faster recovery time (100ms)
 }, { passive: false });
 
 // --- 4. PANNING LOGIC (DESKTOP) ---
@@ -2141,12 +2171,30 @@ function initZoomControls() {
 
   // --- 3. BUTTONS ---
   const handleBtn = (e, zoomDiff) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     e.stopPropagation();
-    if (navigator.vibrate) navigator.vibrate(15);
+
+    const btn = e.currentTarget;
+    if (btn.classList.contains('pressed')) return;
+
+    // 1. Ensure the transition class is ACTIVE
+    mapStage.classList.add("zoom-transition");
     
+    // 2. Feedback
+    if (navigator.vibrate) navigator.vibrate(10);
+    btn.classList.add("pressed");
+
+    // 3. Calculation
+    let newScale = state.scale + zoomDiff;
+    newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
+
     const rect = mapContainer.getBoundingClientRect();
-    setZoomLevel(state.scale + zoomDiff, rect.width/2, rect.height/2);
+    
+    // 4. Force the browser to process the zoom
+    setZoomLevel(newScale, rect.width / 2, rect.height / 2);
+
+    // 5. Cleanup the button state
+    setTimeout(() => btn.classList.remove("pressed"), 150);
   };
 
   btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
