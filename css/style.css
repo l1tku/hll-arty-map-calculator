@@ -344,17 +344,13 @@ body {
 .marker-label {
   position: absolute; 
   top: 50%; left: 50%; 
-  /* Lower than the line (was 20) */
   z-index: 15 !important; 
   font-size: 42px; font-family: 'GothamSS', sans-serif; font-weight: 700; color: white;
   padding: 2px 6px; background-color: rgba(20, 20, 20, 0.70); border-radius: 2px;
   text-align: center; white-space: nowrap; pointer-events: none;
   transform-origin: center center;
   backface-visibility: hidden; -webkit-font-smoothing: antialiased;
-  will-change: transform, top;
-
-  /* --- DELETED: transition: transform 0.2s, top 0.2s; --- */
-  /* Removing this prevents the labels from "jumping" when you click shoot */
+  /* Removed will-change */
 }
 
 .marker-label::after {
@@ -3279,6 +3275,40 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
 /* Force labels to match the map's zoom curve */
 .label-layer.zoom-transition .hll-grid-label {
-    transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
-    will-change: transform;
+   transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+}
+
+/* =================================================================
+   CRITICAL MOBILE GPU FIX - PASTE AT THE VERY BOTTOM OF CSS
+   This forces hardware acceleration OFF on mobile to prevent crashes
+   ================================================================= */
+@media (max-width: 768px) {
+    /* 1. Reset Map & Transitions */
+    .map-stage,
+    .map-stage.zoom-transition {
+        will-change: auto !important;
+        transform-style: flat !important;
+    }
+
+    /* 2. Reset Markers & Labels */
+    .marker-label,
+    .hll-grid-label,
+    .label-layer {
+        will-change: auto !important;
+    }
+
+    /* 3. Reset Overlays (The biggest cause of crashes) */
+    .impact-circles-svg,
+    .trajectory-visual {
+        will-change: auto !important;
+        transform: none !important; /* Safe because JS sets Top/Left for these */
+    }
+
+    /* 4. Reset Icons */
+    .arty-icon,
+    .marker {
+        will-change: auto !important;
+        -webkit-backface-visibility: visible !important;
+        backface-visibility: visible !important;
+    }
 }
