@@ -175,15 +175,15 @@ function syncToggleUI() {
     if (hudEl) hudEl.classList.remove("hidden");
     
     if (isMobile) {
-      // Mobile Mode
+      // MOBILE: Show Crosshair + Fire Button, Hide Desktop Rings
       if (crosshair) crosshair.classList.remove("hidden");
       if (fireBtn) fireBtn.classList.remove("hidden");
       if (desktopRings) desktopRings.classList.add("hidden"); 
     } else {
-      // Desktop Mode
+      // DESKTOP: Hide Crosshair + Fire Button, Show Rings
+      if (crosshair) crosshair.classList.add("hidden"); 
+      if (fireBtn) fireBtn.classList.add("hidden");     
       if (desktopRings) desktopRings.classList.remove("hidden"); 
-      if (crosshair) crosshair.classList.add("hidden");
-      if (fireBtn) fireBtn.classList.add("hidden");
     }
   } else {
     // Everything Hidden
@@ -853,13 +853,13 @@ function renderTargeting() {
   
   layer.appendChild(circleSvg);
 
-  // --- C. CENTER CROSS ---
-  // const marker = document.createElement("div");
-  // marker.className = "impact-marker";
-  // marker.style.left = `${Math.round(end.x)}px`;
-  // marker.style.top = `${Math.round(end.y)}px`;
+  // --- C. CENTER CROSS (THE X) ---
+  const marker = document.createElement("div");
+  marker.className = "impact-marker";
+  marker.style.left = `${Math.round(end.x)}px`;
+  marker.style.top = `${Math.round(end.y)}px`;
   
-  // layer.appendChild(marker);
+  layer.appendChild(marker);
 
   // 4. UPDATE DASHBOARD
   if (elDist) elDist.innerText = `${activeTarget.distance}m`;
@@ -2762,6 +2762,7 @@ new ResizeObserver(() => {
     if (imgEl.naturalWidth > 0) {
         updateDimensions(); 
         render(); 
+        syncToggleUI(); // <--- ADD THIS LINE to fix UI switching
     }
 }).observe(mapContainer);
 
