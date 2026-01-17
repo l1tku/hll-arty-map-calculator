@@ -22,6 +22,10 @@ Access the calculator instantly in your browser:
 - **Mobile Optimized**:
 - **Map Selector**: Visual grid selector with search functionality .
 
+## Technical Details
+* **Dynamic Caching**: The app uses a "Stale-While-Revalidate" strategy. It only downloads and caches the specific high-res maps you actually open, saving storage space on your device while ensuring instant loading for future visits.
+* **PWA Ready**: Can be installed to the home screen on mobile devices for a native app experience.
+
 ## Usage
 
 ### Method 1: Map Targeting
