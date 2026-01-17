@@ -185,6 +185,9 @@ body {
   perspective: 1000px;
 }
 
+/* ==========================================
+   FIXED MAP STAGE (Prevents Mobile Black Screen)
+   ========================================== */
 .map-stage {
   transform-origin: 0 0; 
   position: absolute; 
@@ -192,12 +195,13 @@ body {
   left: 0;
   transition: opacity 0.4s ease-in-out;
   
-  /* --- ADD THIS LINE FOR FIREFOX PERFORMANCE --- */
-  will-change: transform; 
-  /* ------------------------------------------- */
+  /* CRITICAL FIX: Deleted 'will-change: transform' 
+     This allows Mobile Chrome to manage memory dynamically 
+     instead of crashing on high zoom. */
 }
 
 .map-stage.zoom-transition {
+  /* Keep the transition for smooth snapping */
   transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
