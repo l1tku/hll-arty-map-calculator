@@ -96,7 +96,7 @@ Feel free to submit issues and enhancement requests.
 This project is a community-made tool and is **not** affiliated with, endorsed by, or sponsored by Team17, Cover 6 Studios, or Black Matter.
 
 **Hell Let Loose** content and materials are trademarks and copyrights of their respective owners.
-* **Game Assets:** All game images (maps, garrison icons) are the property of the Hell Let Loose developers and publishers. They are used here for non-commercial, educational, and informational purposes.
+* **Game Assets:** All game images (maps, icons) are the property of the Hell Let Loose developers and publishers. They are used here for non-commercial, educational, and informational purposes.
 
 ## License
 
