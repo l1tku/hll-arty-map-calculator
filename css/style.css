@@ -282,20 +282,13 @@ body {
 
 .arty-icon {
   width: 70%; height: 70%; display: block; pointer-events: none;
-  
-  /* Filters */
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 1px black);
-  
   transition: transform 0.2s ease-out;
   
-  /* FIX: Firefox-specific hack. Adding a transparent outline forces the browser
-     to use a higher quality anti-aliasing method during rotation. */
+  /* Removed translateZ */
+  
   outline: 1px solid transparent;
-  
-  /* FIX: Ensure standard image interpolation */
   image-rendering: auto; 
-  
-  /* FIX: Prevent backface flickering */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -1368,27 +1361,16 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 }
 
 /* 1. Impact Circles Container Fix */
-/* 1. Impact Circles Container Fix */
 .impact-circles-svg {
   position: absolute;
-  /* Ensure it sits above the map (z-index 0) and markers (z-index 50) */
   z-index: 100 !important; 
-  
-  /* FIX: Give it a 1px size so Mobile Chrome doesn't cull/delete it */
   width: 1px !important;
   height: 1px !important;
-  
-  /* Let's circles flow outside that 1px box */
   overflow: visible;
   pointer-events: none;
-  
-  /* Reset offsets */
   top: 0;
   left: 0;
-  
-  /* FIX: Force hardware acceleration on the container to prevent flickering */
-  transform: translateZ(0);
-  will-change: transform;
+  /* Hardware acceleration removed for mobile safety */
 }
 
 /* 2. Impact Marker (The "X") */

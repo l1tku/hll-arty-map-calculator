@@ -585,33 +585,37 @@ function renderMarkers() {
         img.className = "arty-icon";
         
         if (isActiveGun && activeTarget) {
-            // Dynamic Rotation
-            const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
-            const dy = targetPos.y - pos.y; 
-            const dx = targetPos.x - pos.x;
-            let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-            angle += 90; 
-            img.style.transform = `rotate(${angle}deg) scaleX(-1)`;
-        } else {
-            // Static Rotation
-            let baseRotation = 0; 
-            const teamKey = point.team.toLowerCase(); 
-            const isAxis = ["ger", "axis", "afrika", "rus", "soviet"].some(x => teamKey.includes(x));
-            
-            if (mapConfig && mapConfig.gunRotations) {
-                 const rotKey = isAxis ? "ger" : "us"; 
-                 const finalKey = mapConfig.gunRotations[teamKey] !== undefined ? teamKey : rotKey;
-                 baseRotation = mapConfig.gunRotations[finalKey];
-                 if (baseRotation === undefined) baseRotation = 0;
-            } else {
-                if (sortMode === "x") {
-                    if (isAxis) baseRotation = -90; else baseRotation = 90;
-                } else {
-                    if (isAxis) baseRotation = 180; else baseRotation = 0;
-                }
-            }
-            img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
-        }
+           // Dynamic Rotation
+           const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
+           const dy = targetPos.y - pos.y; 
+           const dx = targetPos.x - pos.x;
+           let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+           angle += 90; 
+           
+           // CHANGE THIS LINE: Remove translateZ(0)
+           img.style.transform = `rotate(${angle}deg) scaleX(-1)`;
+       } else {
+           // Static Rotation
+           let baseRotation = 0; 
+           const teamKey = point.team.toLowerCase(); 
+           const isAxis = ["ger", "axis", "afrika", "rus", "soviet"].some(x => teamKey.includes(x));
+           
+           if (mapConfig && mapConfig.gunRotations) {
+                const rotKey = isAxis ? "ger" : "us"; 
+                const finalKey = mapConfig.gunRotations[teamKey] !== undefined ? teamKey : rotKey;
+                baseRotation = mapConfig.gunRotations[finalKey];
+                if (baseRotation === undefined) baseRotation = 0;
+           } else {
+               if (sortMode === "x") {
+                   if (isAxis) baseRotation = -90; else baseRotation = 90;
+               } else {
+                   if (isAxis) baseRotation = 180; else baseRotation = 0;
+               }
+           }
+           
+           // CHANGE THIS LINE: Remove translateZ(0)
+           img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
+       }
         el.appendChild(img);
     } 
     else if (point.type === 'strongpoint') {
