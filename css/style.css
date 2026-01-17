@@ -1377,7 +1377,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   width: 1px !important;
   height: 1px !important;
   
-  /* Let's circles flow outside that 1px box */
+  /* Let circles flow outside that 1px box */
   overflow: visible;
   pointer-events: none;
   
@@ -1385,9 +1385,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   top: 0;
   left: 0;
   
-  /* FIX: Force hardware acceleration on the container to prevent flickering */
-  transform: translateZ(0);
-  will-change: transform;
+  /* CRITICAL FIX: Removed translateZ(0) and will-change */
+  /* These were causing mobile GPU memory overflows (checkerboarding) */
 }
 
 /* ==========================================
