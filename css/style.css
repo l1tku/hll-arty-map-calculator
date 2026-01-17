@@ -181,8 +181,16 @@ body {
 .map-stage, 
 .grid-layer, 
 .label-layer {
-  backface-visibility: hidden;
-  perspective: 1000px;
+  /* Removed backface-visibility and perspective to save RAM */
+}
+
+.map-stage {
+  transform-origin: 0 0; 
+  position: absolute; 
+  top: 0; 
+  left: 0;
+  transition: opacity 0.4s ease-in-out;
+  /* ENSURE 'will-change' IS DELETED HERE TOO */
 }
 
 /* ==========================================
