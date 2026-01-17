@@ -2,6 +2,10 @@
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
+## Live Demo
+Access the calculator instantly in your browser:  
+**[https://l1tku.github.io/hll-arty-map-calculator/](https://l1tku.github.io/hll-arty-map-calculator/)**
+
 ## Features
 
 - **Interactive Tactical Maps**: High-resolution maps with smooth pan, zoom, and dynamic grid rendering.
@@ -44,11 +48,15 @@ An interactive tactical map and high-precision artillery calculator for Hell Let
 -   **One Finger Drag**: Pan the map.
 -   **Tap "Fire" Button**: Places target at the center of the screen (Live Tracking).
 
-## Installation
+## Installation & Local Usage
 
-1.  Clone or download this repository.
-2.  Ensure map images are placed in `images/maps/` and thumbnails in `images/maps/thumbnail/`.
-3.  Open `index.html` in any modern web browser.
+### Option 1: Live Web Access (Recommended)
+No installation required. Simply visit the [Live Demo Link](https://l1tku.github.io/hll-arty-map-calculator/) from any desktop or mobile browser.
+
+### Option 2: Local Development
+1. **Clone** or download this repository.
+2. Ensure map images are placed in `images/maps/` and thumbnails are in `images/maps/thumbnail/`.
+3. Open `index.html` in any modern web browser.
 
 ## Supported Maps
 
