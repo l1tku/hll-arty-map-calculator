@@ -291,20 +291,19 @@ body {
 .arty-icon {
   width: 70%; height: 70%; display: block; pointer-events: none;
   
-  /* Simple filter is faster */
+  /* Simple shadow */
   filter: drop-shadow(0 0 1px rgba(0,0,0,0.8));
   
   transition: transform 0.2s ease-out;
   
-  /* CRITICAL FIX: Remove 'translateZ(0)' to prevent Mobile GPU Crash */
+  /* CRITICAL: No translateZ */
   transform: none; 
   
-  /* Use standard smoothing */
+  /* Standard rendering */
   image-rendering: auto; 
-  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
-
 .marker.dimmed-gun { opacity: 0.4; transition: opacity 0.2s ease; }
 
 /* Ensure the active gun is above the trajectory line (100) */
@@ -2371,13 +2370,12 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
 /* Force hide mobile elements on desktop */
 @media (min-width: 769px) {
+    /* 1. Force Hide Mobile UI */
     #mobileFireBtn, #mobileCrosshair {
         display: none !important;
     }
-}
 
-/* ONLY use GPU memory optimization on Desktop */
-@media (min-width: 769px) {
+    /* 2. GPU Optimization for Labels */
     .label-layer.zoom-transition .hll-grid-label {
         will-change: transform;
     }
