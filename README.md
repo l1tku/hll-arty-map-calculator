@@ -1,6 +1,6 @@
 # HLL Arty Map Calculator
 
-An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic grid scaling for all maps, visual trajectory aids, and a mobile-optimized targeting UI.
+An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
 ## Features
 
@@ -9,7 +9,7 @@ An interactive tactical map and high-precision artillery calculator for Hell Let
 - **Visual Targeting Suite**:
   - **Trajectory Line**: Visualizes the flight path from gun to target.
   - **Dynamic Ruler**: Shows MILs and Distance markers every 50m along the trajectory.
-  - **Impact Analysis**: Visual rings for Dispersion (40m), Shell Killzone (20m), and Blast Radius (10m).
+  - **Impact Analysis**: Visual rings for Dispersion (40m), Killzone (20m), and Blast Radius (10m).
 - **Live Tracking**:
   - **Desktop**: Cursor-following HUD displaying real-time Distance, MILs, and Grid Reference.
   - **Mobile**: Docked HUD with crosshair targeting mode.
@@ -21,15 +21,15 @@ An interactive tactical map and high-precision artillery calculator for Hell Let
 ## Usage
 
 ### Method 1: Map Targeting
-1.  **Select Map**: Open the map selector grid and choose your battlefield.
+1.  **Select Map**: Open the map selector and choose your map.
 2.  **Configure Faction**: Select your Faction and active Gun (1, 2, or 3) from the control panel.
 3.  **Aim**: Click anywhere on the map to place a target.
-4.  **Fire**: Read the firing solution from the **Target Data Panel** (Distance, Elevation MILs, Time of Flight).
+4.  **Fire**: Read the result from the Target Data Panel topside or use Live Tracking for real-time results directly under your cursor.
 
 ### Method 2: Manual Calculator
-1.  Click the **Calculator Icon** in the sidebar.
+1.  Click the Calculator Icon in the sidebar or within the Map Selection footer.
 2.  Select your faction.
-3.  Type the distance to target (e.g., "1250").
+3.  Enter the distance using the keypad.
 4.  Get instant Elevation MILs.
 
 ## Map Controls
