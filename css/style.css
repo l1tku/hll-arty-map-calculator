@@ -282,9 +282,6 @@ body {
   width: 70%; height: 70%; display: block; pointer-events: none;
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 1px black);
   transition: transform 0.2s ease-out;
-  
-  /* Removed translateZ */
-  
   outline: 1px solid transparent;
   image-rendering: auto; 
 }
@@ -345,7 +342,7 @@ body {
   padding: 2px 6px; background-color: rgba(20, 20, 20, 0.70); border-radius: 2px;
   text-align: center; white-space: nowrap; pointer-events: none;
   transform-origin: center center;
-  /* Removed will-change */
+  -webkit-font-smoothing: antialiased;
 }
 
 .marker-label::after {
@@ -3248,63 +3245,4 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     background-color: rgba(20, 20, 20, 0.95) !important;
     color: white !important;
   }
-}
-
-/* ==========================================
-   DESKTOP SMOOTH ZOOM FIX
-   ========================================== */
-/* INCREASED TO 1025px to ensure high-end phones don't crash */
-@media (min-width: 1025px) {
-  /* 1. Fix Stutter: Keep map in GPU memory on PC */
-  .map-stage {
-    will-change: transform;
-  }
-
-  /* 2. Fix Drift: Force markers to move in sync with map */
-  .marker, .marker-label, .hll-grid-line {
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    transform: translateZ(0); 
-  }
-}
-
-/* Force labels to match the map's zoom curve */
-.label-layer.zoom-transition .hll-grid-label {
-   transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
-}
-
-/* =================================================================
-   CRITICAL MOBILE GPU FIX - PASTE AT THE VERY BOTTOM OF CSS
-   This forces hardware acceleration OFF on mobile to prevent crashes
-   ================================================================= */
-/* CHANGED from 768px to 1024px to cover high-end phones/tablets */
-@media (max-width: 1024px) {
-    /* 1. Reset Map & Transitions */
-    .map-stage,
-    .map-stage.zoom-transition {
-        will-change: auto !important;
-        transform-style: flat !important;
-    }
-
-    /* 2. Reset Markers & Labels */
-    .marker-label,
-    .hll-grid-label,
-    .label-layer {
-        will-change: auto !important;
-    }
-
-    /* 3. Reset Overlays (The biggest cause of crashes) */
-    .impact-circles-svg,
-    .trajectory-visual {
-        will-change: auto !important;
-        transform: none !important; 
-    }
-
-    /* 4. Reset Icons */
-    .arty-icon,
-    .marker {
-        will-change: auto !important;
-        -webkit-backface-visibility: visible !important;
-        backface-visibility: visible !important;
-    }
 }
