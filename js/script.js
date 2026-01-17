@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.2"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
+const APP_VERSION = "v1.1.3"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
 
 // Map Dimensions
 const MAP_WIDTH_METERS = 2000.0; 
@@ -274,6 +274,19 @@ function getGridRef(gameX, gameY) {
   const rowChar = rowIndex + 1;
   
   return `${colChar}${rowChar}`;
+}
+
+function toggleTransitions(enable) {
+  const labelLayer = document.getElementById("labelLayer");
+  if (enable) {
+    mapStage.classList.add("zoom-transition");
+    labelLayer?.classList.add("zoom-transition");
+    mapStage.style.transition = "";
+  } else {
+    mapStage.classList.remove("zoom-transition");
+    labelLayer?.classList.remove("zoom-transition");
+    mapStage.style.transition = "none";
+  }
 }
 
 function setZoomLevel(newLevel, mouseX = null, mouseY = null) {
@@ -1939,9 +1952,8 @@ mapContainer.addEventListener("wheel", (e) => {
 mapContainer.addEventListener("mousedown", (e) => {
   e.preventDefault();
   
-  // Stop animations for instant dragging
-  mapStage.classList.remove("zoom-transition");
-  mapStage.style.transition = "none";
+  // FIX: Kill transitions on BOTH map and labels immediately
+  toggleTransitions(false); 
   
   state.panning = true;
   isDragging = false; 
@@ -1986,15 +1998,15 @@ window.addEventListener("mouseup", () => {
 let initialPinchDistance = null;
 let lastZoomScale = 1;
 
+// --- 5. PANNING LOGIC (MOBILE) ---
 mapContainer.addEventListener("touchstart", (e) => {
-  mapStage.classList.remove("zoom-transition");
-  mapStage.style.transition = "none";
+  // FIX: Kill transitions immediately so drag is 1:1 instant
+  toggleTransitions(false);
 
   if (e.touches.length === 1) {
     state.panning = true;
     isDragging = false;
     
-    // Record Start for Threshold check
     dragStartX = e.touches[0].clientX;
     dragStartY = e.touches[0].clientY;
 
