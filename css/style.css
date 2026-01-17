@@ -187,10 +187,17 @@ body {
   /* ENSURE 'will-change' IS DELETED HERE TOO */
 }
 
+/* Base Class (Mobile Safe - CPU Only) */
 .map-stage.zoom-transition {
-  /* Smoother, slightly longer transition for high-precision scroll zooming */
   transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
-  will-change: transform;
+  /* NO will-change here! Prevents mobile black screen crash. */
+}
+
+/* Desktop Only (GPU Acceleration Safe) */
+@media (min-width: 769px) {
+  .map-stage.zoom-transition {
+    will-change: transform; /* Safe on PC with dedicated graphics cards */
+  }
 }
 
 .map-image {
@@ -311,10 +318,6 @@ body {
     z-index: 105 !important; 
 }
 
-/* Ensure the tiny X stays at the absolute top */
-.impact-marker {
-    z-index: 110 !important;
-}
 
 /* Keep the trajectory line and circles at 100 */
 .trajectory-visual, 
@@ -1395,25 +1398,29 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   will-change: transform;
 }
 
-/* 2. Impact Marker (The "X") */
+/* ==========================================
+   IMPACT POINT "X" (Longer & Sharp)
+   ========================================== */
 .impact-marker {
-  position: absolute; 
-  width: 4px;
-  height: 4px;
-  transform: translate(-50%, -50%); 
-  pointer-events: none;
+    position: absolute; 
+    /* Increased size for longer arms */
+    width: 12px;  
+    height: 12px;
+    transform: translate(-50%, -50%); 
+    pointer-events: none;
+    z-index: 120 !important;
 }
 
 .impact-marker::before,
 .impact-marker::after {
-  content: ''; 
-  position: absolute; 
-  top: 50%; 
-  left: 0; 
-  width: 100%; 
-  height: 1px;
-  background-color: #000; /* Original black color */
-  box-shadow: 0 0 1px rgba(255, 255, 255, 0.4); 
+    content: ''; 
+    position: absolute; 
+    top: 50%; 
+    left: 0; 
+    width: 100%; 
+    height: 1px; /* Keeping it needle thin */
+    background-color: #ffc107;
+    box-shadow: none; 
 }
 
 .impact-marker::before { transform: translateY(-50%) rotate(45deg); }
@@ -1521,7 +1528,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* 3. Specifics */
 .deadzone-circle {
   stroke-width: 1px; 
-  stroke: rgba(255, 0, 0, 0.3); 
+  stroke: rgba(255, 0, 0, 0.4); 
   fill: rgba(255, 0, 0, 0.3); 
 }
 
@@ -1534,8 +1541,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
 /* --- THE FIX FOR BLURRY RED CIRCLE --- */
 .blast-circle {
-  stroke: none; 
-  fill: rgba(255, 0, 0, 0.4); 
+  fill: rgba(255, 0, 0, 0.5); 
   
   /* FIX: REMOVED 'transform: translateZ(0)' 
      This forces Chrome to re-draw the vector at high quality 
@@ -3185,27 +3191,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   }
 }
 
-/* ==========================================
-   TEMPORARY: REMOVE HUD CROSSHAIRS
-   ========================================== */
-
-/* Completely hide the crosshair element and its pseudo-elements (lines) */
-.hud-crosshair, 
-.hud-crosshair::before, 
-.hud-crosshair::after {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-
-/* Ensure the ring containers stay centered without the crosshair influencing layout */
-.ring-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
 /* ==========================================
    FINAL FIX: MOBILE STICKY HOVER RESET (WHITE ICONS)
