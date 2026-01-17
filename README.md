@@ -23,8 +23,8 @@ An interactive tactical map and high-precision artillery calculator for Hell Let
 ### Method 1: Map Targeting
 1.  **Select Map**: Open the map selector and choose your map.
 2.  **Configure Faction**: Select your Faction and active Gun (1, 2, or 3) from the control panel.
-3.  **Aim**: Click anywhere on the map to place a target.
-4.  **Fire**: Read the result from the Target Data Panel topside or use Live Tracking for real-time results directly under your cursor.
+3.  **Aim**: Click anywhere on the map to place a target or use Live Tracking for real-time results directly under your cursor.
+4.  **Result**: Read the result from the Target Data Panel topside.
 
 ### Method 2: Manual Calculator
 1.  Click the Calculator Icon in the sidebar or within the Map Selection footer.
