@@ -188,9 +188,8 @@ body {
 }
 
 .map-stage.zoom-transition {
-  /* Smoother, slightly longer transition for high-precision scroll zooming */
   transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
-  will-change: transform;
+  /* Removed will-change to prevent mobile memory crash */
 }
 
 .map-image {
@@ -288,9 +287,6 @@ body {
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 1px black);
   
   transition: transform 0.2s ease-out;
-  
-  /* FIX: Force GPU rendering context */
-  transform: translateZ(0);
   
   /* FIX: Firefox-specific hack. Adding a transparent outline forces the browser
      to use a higher quality anti-aliasing method during rotation. */

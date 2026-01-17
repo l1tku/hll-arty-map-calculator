@@ -591,7 +591,7 @@ function renderMarkers() {
             const dx = targetPos.x - pos.x;
             let angle = Math.atan2(dy, dx) * (180 / Math.PI);
             angle += 90; 
-            img.style.transform = `rotate(${angle}deg) scaleX(-1) translateZ(0)`;
+            img.style.transform = `rotate(${angle}deg) scaleX(-1)`;
         } else {
             // Static Rotation
             let baseRotation = 0; 
@@ -610,7 +610,7 @@ function renderMarkers() {
                     if (isAxis) baseRotation = 180; else baseRotation = 0;
                 }
             }
-            img.style.transform = `rotate(${baseRotation}deg) scaleX(-1) translateZ(0)`;
+            img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
         }
         el.appendChild(img);
     } 
