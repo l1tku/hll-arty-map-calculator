@@ -289,8 +289,6 @@ body {
   
   outline: 1px solid transparent;
   image-rendering: auto; 
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .marker.dimmed-gun { opacity: 0.4; transition: opacity 0.2s ease; }
@@ -3258,14 +3256,14 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* ==========================================
    DESKTOP SMOOTH ZOOM FIX
    ========================================== */
-@media (min-width: 769px) {
+/* INCREASED TO 1025px to ensure high-end phones don't crash */
+@media (min-width: 1025px) {
   /* 1. Fix Stutter: Keep map in GPU memory on PC */
   .map-stage {
     will-change: transform;
   }
 
   /* 2. Fix Drift: Force markers to move in sync with map */
-  /* This prevents them from "wobbling" or snapping to pixels */
   .marker, .marker-label, .hll-grid-line {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
