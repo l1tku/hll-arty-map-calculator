@@ -187,9 +187,11 @@ body {
   /* ENSURE 'will-change' IS DELETED HERE TOO */
 }
 
-.map-stage.zoom-transition {
-  transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
-  /* Removed will-change to prevent mobile memory crash */
+/* CHANGE: Only allow CSS smooth zoom on Desktop (Safe screens) */
+@media (min-width: 1025px) {
+  .map-stage.zoom-transition {
+    transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+  }
 }
 
 .map-image {
