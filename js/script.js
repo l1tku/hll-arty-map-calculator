@@ -1840,14 +1840,16 @@ mapContainer.addEventListener("click", (e) => {
   // 1. If we were dragging (panning), DO NOT SHOOT.
   if (isDragging) return; 
 
-  // ============================================================
+// ============================================================
   // FIX: CHECK IF CROSSHAIR IS VISIBLE
-  // If the crosshair has an 'offsetParent', it means it is visible on screen.
-  // In that case, we BLOCK the click so the red marker doesn't move.
+  // Only block clicks if we are on Mobile AND the crosshair is active.
+  // On desktop, we ignore this check so you can click-to-shoot.
   // ============================================================
+  const isMobile = window.innerWidth <= 768;
   const crosshair = document.getElementById("mobileCrosshair");
-  if (crosshair && crosshair.offsetParent !== null) {
-      return; 
+  
+  if (isMobile && crosshair && crosshair.offsetParent !== null) {
+      return; // Block click on mobile if crosshair is visible
   }
   // ============================================================
 
