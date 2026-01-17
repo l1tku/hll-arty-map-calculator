@@ -178,12 +178,6 @@ body {
   cursor: grabbing;
 }
 
-.map-stage, 
-.grid-layer, 
-.label-layer {
-  /* Removed backface-visibility and perspective to save RAM */
-}
-
 .map-stage {
   transform-origin: 0 0; 
   position: absolute; 
@@ -191,21 +185,6 @@ body {
   left: 0;
   transition: opacity 0.4s ease-in-out;
   /* ENSURE 'will-change' IS DELETED HERE TOO */
-}
-
-/* ==========================================
-   FIXED MAP STAGE (Prevents Mobile Black Screen)
-   ========================================== */
-.map-stage {
-  transform-origin: 0 0; 
-  position: absolute; 
-  top: 0; 
-  left: 0;
-  transition: opacity 0.4s ease-in-out;
-  
-  /* CRITICAL FIX: Deleted 'will-change: transform' 
-     This allows Mobile Chrome to manage memory dynamically 
-     instead of crashing on high zoom. */
 }
 
 .map-stage.zoom-transition {
