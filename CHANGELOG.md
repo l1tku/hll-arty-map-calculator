@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2026-01-17
+### Fixed
+- **Mobile GPU Checkerboarding**: Resolved a critical rendering issue on mobile Chrome where high zoom levels caused black flickering. Replaced `translate3d` with 2D `translate` to prevent exceeding GPU texture memory limits.
+- **Stuck Zoom on Reload**: Fixed a race condition where the map initialized before image dimensions were decoded, causing the viewport to lock at 100% scale. Implemented a robust retry loop to ensure `naturalWidth` is available before rendering.
+- **Script Initialization**: Removed a redundant code block causing a `SyntaxError: redeclaration of const imgEl`.
+- **Desktop Hover Highlights**: Restored the **Tactical Yellow** hover state for map selection thumbnails on desktop devices for better interactive feedback.
+- **Modal Persistence**: Fixed a bug where closing the Manual Calculator unintentionally closed the underlying Map Selector modal.
+- **Mobile Interaction Cleanup**: 
+    - Eliminated "sticky" highlights on mobile for the Calculator button, Project Hub links (Garrison, SPA, GitHub), and map thumbnails. Highlights now only trigger during active touch.
+    - Temporarily removed Live HUD crosshairs for both mobile and desktop to prepare for a new crosshair implementation.
+- **State Management**: Corrected a bug where the Ruler would default to "ON" after clearing cookies; it now correctly defaults to "OFF".
+- **Pinch-to-Zoom**: Fixed a gesture conflict that occasionally prevented zooming with two fingers on mobile browsers.
+
+### Performance
+- **Firefox Mobile Optimization**: Added `will-change: transform` to the map stage to force hardware acceleration in Firefox, resolving low-framerate lag during panning and zooming.
+- **Memory Management**: Reduced video memory overhead by decoupling the map stage from forced 3D hardware acceleration layers.
+- **Zoom Slider Responsiveness**: Re-engineered the vertical zoom slider logic for smoother tracking and accuracy on touch screens.
+
+### Added
+- **Tab Focus Reset**: Implemented a global reset when returning to the app tab to ensure buttons do not remain in a highlighted state after clicking external links.
+
 ## [1.1.1] - 2026-01-16
 ### Fixed
 - **Projects Hub Logic**: Resolved a `ReferenceError` where the "Other Projects" modal failed to open due to an undefined function scope.
@@ -40,4 +61,4 @@ All notable changes to this project will be documented in this file.
 - **Initial Release**: Launch of the HLL Artillery Calculator core engine.
 - **Dynamic Targeting**: Automated calculation of MIL elevation based on interactive map coordinates.
 - **Visual Impact Zones**: Scaled dispersion, deadzone, and blast radius circles.
-- **Visual Map Selector**: Interactive thumbnail-based map selection system.
+- **Visual Map Selector**: Interactive thumbnail-based map selector.
