@@ -36,8 +36,6 @@ let currentStrongpoints = [];
 let labelCache = [];
 let isRendering = false; 
 let calcInputVal = ""; // Stores the string like "1250" 
-// --- ADD THIS LINE BELOW: ---
-let isZoomAnimating = false; 
 
 // --- MOVE THESE HERE (Top of script) ---
 let _lastMobDist = null;
@@ -902,12 +900,6 @@ function render() {
   // 1. Move the Map (Always do this)
   mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
   
-  // --- PERFORMANCE GATE ---
-  // If we are animating zoom, STOP HERE.
-  // Skipping labels/HUD prevents the black flicker and lag.
-  if (isZoomAnimating) return; 
-  // -----------------------
-
   updateRealScale(drawScale);
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
@@ -2118,7 +2110,7 @@ document.addEventListener("keydown", (e) => {
 
 // ==========================================
 // ==========================================
-// SMOOTH ZOOM CONTROLS (CPU SAFE + OPTIMIZED)
+// ZOOM CONTROLS (STABILITY MODE)
 // ==========================================
 
 function initZoomControls() {
@@ -2131,82 +2123,38 @@ function initZoomControls() {
 
     if (!track || !handle) return;
 
+    // --- 1. SYNC UI ---
     window.updateZoomSliderUI = function() {
         const range = MAX_ZOOM - MIN_ZOOM;
         const progress = (state.scale - MIN_ZOOM) / range;
         const percentage = Math.max(0, Math.min(1, progress)) * 100;
+
         handle.style.bottom = `${percentage}%`;
         fill.style.height = `${percentage}%`;
     };
 
-    let zoomAnimFrame = null;
-
-    function smoothZoomStep(targetScale) {
-        const startScale = state.scale;
-        const diff = targetScale - startScale;
-        const duration = 250; 
-        const startTime = performance.now();
-
-        const rect = mapContainer.getBoundingClientRect();
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        // A. LOCK RENDERER
-        isZoomAnimating = true; 
-        
-        // B. Hint browser to allocate memory NOW (Prevents Black Blocks)
-        mapStage.style.willChange = "transform"; 
-        
-        // C. Disable CSS transitions explicitly during JS animation
-        mapStage.classList.remove("zoom-transition");
-
-        function animate(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const ease = 1 - Math.pow(1 - progress, 3);
-            
-            const nextScale = startScale + (diff * ease);
-            setZoomLevel(nextScale, centerX, centerY); 
-
-            if (progress < 1) {
-                zoomAnimFrame = requestAnimationFrame(animate);
-            } else {
-                // D. FINISH
-                setZoomLevel(targetScale, centerX, centerY);
-                
-                isZoomAnimating = false; // UNLOCK
-                mapStage.style.willChange = "auto"; // CLEANUP
-                mapStage.classList.add("zoom-transition"); // RESTORE CSS
-                
-                render(); // Do one full render to snap labels/HUD into place
-            }
-        }
-
-        if (zoomAnimFrame) cancelAnimationFrame(zoomAnimFrame);
-        zoomAnimFrame = requestAnimationFrame(animate);
-    }
-
-    // --- HANDLE DRAG LOGIC ---
+    // --- 2. HANDLE DRAG (Slider) ---
     let isDraggingSlider = false;
 
     function updateZoomFromEvent(e) {
         const rect = track.getBoundingClientRect();
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
         let val = (rect.bottom - clientY) / rect.height;
         val = Math.max(0, Math.min(1, val));
+        
         const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
+        
         const containerRect = mapContainer.getBoundingClientRect();
+        
+        // Instant update - CPU efficient
         setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
     }
 
     const startDrag = (e) => {
         isDraggingSlider = true;
-        if (zoomAnimFrame) cancelAnimationFrame(zoomAnimFrame);
-        
-        isZoomAnimating = false;
-        mapStage.style.willChange = "auto";
+        // Disable desktop transitions while dragging so it feels responsive
         mapStage.classList.remove("zoom-transition");
-        
         updateZoomFromEvent(e);
         if (navigator.vibrate) navigator.vibrate(10);
     };
@@ -2215,13 +2163,15 @@ function initZoomControls() {
         if (!isDraggingSlider) return;
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
+        
+        // Use requestAnimationFrame only to throttle input, not to animate
         requestAnimationFrame(() => updateZoomFromEvent(e));
     };
 
     const endDrag = () => {
         isDraggingSlider = false;
+        // Re-enable desktop transitions
         mapStage.classList.add("zoom-transition");
-        render(); 
     };
 
     track.addEventListener("mousedown", startDrag);
@@ -2231,7 +2181,7 @@ function initZoomControls() {
     window.addEventListener("mouseup", endDrag);
     window.addEventListener("touchend", endDrag);
 
-    // --- BUTTONS ---
+    // --- 3. BUTTONS (INSTANT SNAP) ---
     const handleBtn = (e, direction) => {
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
@@ -2243,16 +2193,20 @@ function initZoomControls() {
         btn.classList.add("pressed");
         setTimeout(() => btn.classList.remove("pressed"), 150);
 
-        const step = (window.innerWidth <= 768) ? 1.0 : 1.0; 
+        // Mobile: Smaller steps for precision
+        // Desktop: Larger steps for speed
+        const step = (window.innerWidth <= 768) ? 0.5 : 1.0; 
+        
         let target = state.scale + (direction * step);
         target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
 
-        // Use Double-Frame Warmup
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                smoothZoomStep(target);
-            });
-        });
+        const rect = mapContainer.getBoundingClientRect();
+
+        // --- THE FIX: INSTANT SET ---
+        // No animation loop. No "smoothStep". Just set the value.
+        // On Mobile: It snaps (Zero Lag, Zero Checkerboard).
+        // On Desktop: The CSS "transition" rule handles the smoothing automatically.
+        setZoomLevel(target, rect.width / 2, rect.height / 2);
     };
 
     btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
