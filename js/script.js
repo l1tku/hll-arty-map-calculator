@@ -890,6 +890,7 @@ function renderTargeting() {
 }
 
 // === FIX #1: Main Render Function using 2D Transform ===
+// === FIX: RENDER SPLITTING (Prioritize Map, Defer Text) ===
 function render() {
   clampPosition();
   const drawScale = state.scale * state.fitScale;
@@ -897,65 +898,66 @@ function render() {
   mapContainer.style.setProperty('--current-scale', drawScale); 
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
-  // FIX: Replaced translate3d with translate to avoid Mobile GPU memory limits
+  // 1. CRITICAL: Move the Map Image IMMEDIATELY
+  // This is the most important visual feedback. We do it right now.
   mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
   
-  updateRealScale(drawScale);
-  if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
-  
-  // --- LABEL SCALING & POSITIONING LOGIC ---
-  const isMobile = window.innerWidth <= 768;
-  const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
-
-  const TRANSITION_START_ZOOM = 1.0;
-  const TRANSITION_END_ZOOM = 5.0;
-  
-  let progress = (state.scale - TRANSITION_START_ZOOM) / (TRANSITION_END_ZOOM - TRANSITION_START_ZOOM);
-  progress = Math.max(0, Math.min(1, progress)); 
-
-  // 1. Position
-  const topVal = progress * 50; 
-  // 2. Transform Y
-  const transY = -100 + (progress * 50);
-  // 3. Spacing Gap
-  const gap = -20 + (progress * 20);
-  // 4. Arrow Opacity
-  const arrowOp = Math.max(0, 1 - (progress * 1.6));
-
-  // 5. TEXT SIZE SMOOTHING
-  // Use a lower exponent (0.7) on desktop to keep labels larger at high zoom
-  const exponent = isMobile ? 0.85 : 0.6; 
-  const smoothInverse = 1.0 / Math.pow(state.scale, exponent);
-  const finalScale = smoothInverse * mobileScaleMultiplier;
-
-  for (let i = 0; i < labelCache.length; i++) {
-      const label = labelCache[i];
-      label.style.setProperty('--arrow-opacity', arrowOp);
-      label.style.top = `${topVal}%`; 
-      // Applying the updated scale
-      label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
-  }
-
-  // --- GRID THICKNESS FIX ---
-  const majorThickness = Math.max(1.0, 2.0 / drawScale); 
-  
-  const gridLayer = document.getElementById("gridLayer");
-  if (gridLayer) {
-      gridLayer.style.setProperty('--major-width', `${majorThickness}px`);
+  // 2. DEFER: Update Text, Grid, and HUD in the NEXT FRAME
+  // This frees up the CPU to finish painting the map first.
+  // It eliminates the 1.5s freeze on Firefox Mobile.
+  requestAnimationFrame(() => {
       
-      const subGrid = gridLayer.querySelector('.keypad-grid');
-      if (subGrid) {
-          subGrid.style.opacity = state.scale >= 3.0 ? "0.4" : "0";
-          const minorThickness = Math.max(1.0, 1.0 / drawScale);
-          gridLayer.style.setProperty('--minor-width', `${minorThickness}px`);
+      updateRealScale(drawScale);
+      if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
+      
+      // --- HEAVY LOOP: Label Counter-Scaling ---
+      const isMobile = window.innerWidth <= 768;
+      const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
+
+      const TRANSITION_START_ZOOM = 1.0;
+      const TRANSITION_END_ZOOM = 5.0;
+      
+      let progress = (state.scale - TRANSITION_START_ZOOM) / (TRANSITION_END_ZOOM - TRANSITION_START_ZOOM);
+      progress = Math.max(0, Math.min(1, progress)); 
+
+      const topVal = progress * 50; 
+      const transY = -100 + (progress * 50);
+      const gap = -20 + (progress * 20);
+      const arrowOp = Math.max(0, 1 - (progress * 1.6));
+
+      const exponent = isMobile ? 0.85 : 0.6; 
+      const smoothInverse = 1.0 / Math.pow(state.scale, exponent);
+      const finalScale = smoothInverse * mobileScaleMultiplier;
+
+      // This loop touching 50+ elements is what caused the lag
+      for (let i = 0; i < labelCache.length; i++) {
+          const label = labelCache[i];
+          label.style.setProperty('--arrow-opacity', arrowOp);
+          label.style.top = `${topVal}%`; 
+          label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
       }
-  }
-  updateStickyLabels(drawScale);
-  
-  if (window.updateZoomSliderUI) window.updateZoomSliderUI();
-  
-  updateMobileHud();
-  updateDesktopRingScale(); 
+
+      // --- HEAVY DOM: Grid Lines ---
+      const majorThickness = Math.max(1.0, 2.0 / drawScale); 
+      
+      const gridLayer = document.getElementById("gridLayer");
+      if (gridLayer) {
+          gridLayer.style.setProperty('--major-width', `${majorThickness}px`);
+          
+          const subGrid = gridLayer.querySelector('.keypad-grid');
+          if (subGrid) {
+              subGrid.style.opacity = state.scale >= 3.0 ? "0.4" : "0";
+              const minorThickness = Math.max(1.0, 1.0 / drawScale);
+              gridLayer.style.setProperty('--minor-width', `${minorThickness}px`);
+          }
+      }
+      
+      updateStickyLabels(drawScale); // Another heavy DOM function
+      if (window.updateZoomSliderUI) window.updateZoomSliderUI();
+      
+      updateMobileHud();
+      updateDesktopRingScale(); 
+  });
 }
 
 // ... (rest of the code remains the same)
