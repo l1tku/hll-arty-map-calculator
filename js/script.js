@@ -2185,34 +2185,30 @@ function initZoomControls() {
   window.addEventListener("mouseup", endDrag);
   window.addEventListener("touchend", endDrag);
 
-  // --- 3. BUTTONS ---
-  const handleBtn = (e, zoomDiff) => {
-    if (e.cancelable) e.preventDefault();
-    e.stopPropagation();
+// --- 3. BUTTONS (INSTANT SNAP) ---
+    const handleBtn = (e, direction) => {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
 
-    const btn = e.currentTarget;
-    if (btn.classList.contains('pressed')) return;
+        const btn = e.currentTarget;
+        if (btn.classList.contains('pressed')) return;
 
-    // 1. Ensure the transition class is ACTIVE
-    mapStage.classList.add("zoom-transition");
-    
-    // 2. Feedback
-    if (navigator.vibrate) navigator.vibrate(10);
-    btn.classList.add("pressed");
+        if (navigator.vibrate) navigator.vibrate(10);
+        btn.classList.add("pressed");
+        setTimeout(() => btn.classList.remove("pressed"), 150);
 
-    // 3. Calculation
-    let newScale = state.scale + zoomDiff;
-    newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
+        // CHANGE: Mobile uses 2.0 step to cover the 20x range quickly
+        // Desktop uses 1.0 step for standard precision
+        const step = (window.innerWidth <= 768) ? 2.0 : 1.0; 
+        
+        let target = state.scale + (direction * step);
+        target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
 
-    const rect = mapContainer.getBoundingClientRect();
-    
-    // 4. Force the browser to process the zoom
-    setZoomLevel(newScale, rect.width / 2, rect.height / 2);
+        const rect = mapContainer.getBoundingClientRect();
 
-    // 5. Cleanup the button state
-    setTimeout(() => btn.classList.remove("pressed"), 150);
-  };
-
+        // Instant set (Safe for Mobile)
+        setZoomLevel(target, rect.width / 2, rect.height / 2);
+    };
   btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
   btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
   btnIn.addEventListener("click", (e) => handleBtn(e, 1));
