@@ -187,10 +187,32 @@ body {
   /* ENSURE 'will-change' IS DELETED HERE TOO */
 }
 
-/* CHANGE: Only allow CSS smooth zoom on Desktop (Safe screens) */
+/* ==========================================
+   DESKTOP SMOOTH ZOOM FIX (Safe for Mobile)
+   ========================================== */
+/* 1025px ensures this NEVER runs on phones (even Pro Max in landscape) */
 @media (min-width: 1025px) {
+  
+  /* 1. Hardware Acceleration (Desktop Only) */
+  .map-stage {
+    will-change: transform;
+  }
+  
+  .marker, .marker-label, .hll-grid-line {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0); 
+  }
+
+  /* 2. Smooth Zoom Transitions (Desktop Only) */
+  /* We move the transition logic HERE so mobile doesn't crash trying to animate huge textures */
   .map-stage.zoom-transition {
     transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+  }
+
+  .label-layer.zoom-transition .hll-grid-label {
+    transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+    will-change: transform;
   }
 }
 
@@ -3232,8 +3254,3 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   }
 }
 
-/* Force labels to match the map's zoom curve */
-.label-layer.zoom-transition .hll-grid-label {
-    transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
-    will-change: transform;
-}
