@@ -2486,10 +2486,51 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   }
 }
 
+/* ==========================================
+   FIRE BUTTON GUIDE ARROWS (Above Panel)
+   ========================================== */
+
+/* Ensure the drawer allows elements to peek outside its box */
+.controls-drawer {
+    overflow: visible !important;
+}
+
+.fire-guide-arrow {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .fire-guide-arrow {
+        position: absolute;
+        /* Position them above the panel content */
+        top: -45px; 
+        font-size: 20px;
+        color: #ffc107;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 5px #ffc107;
+        pointer-events: none;
+        /* Set very high to be seen above the panel and tab */
+        z-index: 2000; 
+    }
+
+    .fire-guide-arrow.left  { left: 20%; }
+    .fire-guide-arrow.right { right: 20%; }
+
+    /* Logic: Show only when HUD active AND drawer is open */
+    body.hud-active .controls-drawer:not(.closed) .fire-guide-arrow {
+        display: block;
+        animation: arrow-point-down 1.2s infinite;
+    }
+
+    @keyframes arrow-point-down {
+        0%, 100% { transform: translateY(0); opacity: 0.5; }
+        50%      { transform: translateY(8px); opacity: 1; }
+    }
+}
+
 /* --- Mobile Fire Button (Centered & Lower) --- */
 .mobile-fire-btn {
   position: absolute;
-  bottom: 120px; 
+  bottom: 50px; 
   left: 50%;
   transform: translateX(-50%);
   right: auto;

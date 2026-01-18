@@ -126,15 +126,20 @@ function getMilFromTable(distance, faction) {
 
 
 function showLoading() {
-  const overlay = document.getElementById('loadingOverlay');
-  if (overlay) overlay.classList.remove('hidden');
+    const loading = document.getElementById('loadingOverlay');
+    if (loading) loading.style.display = 'flex';
+}
+
+function updatePageTitle(mapName) {
+    // Dynamically updates the browser tab title using the original case
+    document.title = `HLL Arty Calculator - ${mapName}`;
 }
 
 function hideLoading() {
   const overlay = document.getElementById('loadingOverlay');
   if (overlay) {
     setTimeout(() => {
-      overlay.classList.add('hidden');
+      overlay.style.display = 'none';
     }, 200); 
   }
 }
@@ -162,6 +167,11 @@ function syncToggleUI() {
 
   const hudBtn = document.getElementById('hudToggleBtn');
   if (hudBtn) hudBtn.classList.toggle('active', hudEnabled);
+
+  // --- ADD THIS LINE HERE ---
+  // This lets the CSS know the HUD is on to show the arrows
+  document.body.classList.toggle('hud-active', hudEnabled);
+  // --------------------------
 
   // 2. Sync Visibility
   const hudEl = document.getElementById("liveCursorHud");
@@ -973,10 +983,10 @@ function updateRealScale(effectiveZoom) {
   const totalMeters = dims.width / GAME_UNITS_PER_METER;
 
   // Calculate pixels currently displayed on screen for the full map width
-  const currentMapWidthPx = mapImg.naturalWidth * effectiveZoom;
+  const currentMapPixelWidth = mapImg.naturalWidth * effectiveZoom;
   
   // Calculate precise Pixels Per Meter based on the SPECIFIC map size
-  const pixelsPerMeter = currentMapWidthPx / totalMeters;
+  const pixelsPerMeter = currentMapPixelWidth / totalMeters;
   // ----------------------------------------------------
 
   // Detect Mobile
@@ -1259,7 +1269,9 @@ function selectMapFromGrid(key) {
     activeMapKey = key;
     currentStrongpoints = config.strongpoints || [];
 
-    // Update header and dropdowns instantly so no old name shows during load
+    // --- ADD THIS LINE HERE ---
+    updatePageTitle(config.name);
+
     const currentMapLbl = document.getElementById("currentMapName");
     if (currentMapLbl) currentMapLbl.innerText = config.name;
 
@@ -1581,7 +1593,7 @@ function initArtyControls() {
       // Toggle state
       rulerEnabled = !rulerEnabled;
       rulerToggleBtn.classList.toggle('active', rulerEnabled);
-      
+
       // THE FIX: Remove focus so it doesn't stay in a "pseudo-active" state
       rulerToggleBtn.blur(); 
       
@@ -1884,8 +1896,8 @@ mapContainer.addEventListener("click", (e) => {
   
   const distanceUnits = Math.sqrt(dx*dx + dy*dy);
   const rawDistanceMeters = distanceUnits / GAME_UNITS_PER_METER;
-  
   const correctedDistance = Math.round(rawDistanceMeters);
+  
   const factionLabel = document.getElementById("factionLabel").innerText;
   const mil = getMil(correctedDistance, factionLabel);
 
@@ -2695,7 +2707,9 @@ function fireAtCenter() {
 
   // --- STANDARD SHOOTING LOGIC (Copied from Click Handler) ---
   const gunPos = getActiveGunCoords();
-  if (!gunPos) return; // Safety check
+  if (!gunPos) {
+      return;
+  }
 
   const dx = targetPos.x - gunPos.x;
   const dy = targetPos.y - gunPos.y;
@@ -2737,6 +2751,11 @@ const onInitLoadWithRetry = function() {
   if (imgEl.naturalWidth === 0) {
       setTimeout(onInitLoadWithRetry, 50);
       return;
+  }
+
+  // --- ADD THIS LINE HERE ---
+  if (MAP_DATABASE[activeMapKey]) {
+      updatePageTitle(MAP_DATABASE[activeMapKey].name);
   }
 
   initMap(); 
