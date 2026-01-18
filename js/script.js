@@ -889,7 +889,7 @@ function renderTargeting() {
   }
 }
 
-// === FIX #1: Main Render Function (Optimized) ===
+// === FIX #1: Main Render Function using 2D Transform ===
 function render() {
   clampPosition();
   const drawScale = state.scale * state.fitScale;
@@ -897,13 +897,13 @@ function render() {
   mapContainer.style.setProperty('--current-scale', drawScale); 
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
-  // 1. Move the Map (Always do this)
+  // FIX: Replaced translate3d with translate to avoid Mobile GPU memory limits
   mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
   
   updateRealScale(drawScale);
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
-  // --- LABEL SCALING & POSITIONING ---
+  // --- LABEL SCALING & POSITIONING LOGIC ---
   const isMobile = window.innerWidth <= 768;
   const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
 
@@ -913,11 +913,17 @@ function render() {
   let progress = (state.scale - TRANSITION_START_ZOOM) / (TRANSITION_END_ZOOM - TRANSITION_START_ZOOM);
   progress = Math.max(0, Math.min(1, progress)); 
 
+  // 1. Position
   const topVal = progress * 50; 
+  // 2. Transform Y
   const transY = -100 + (progress * 50);
+  // 3. Spacing Gap
   const gap = -20 + (progress * 20);
+  // 4. Arrow Opacity
   const arrowOp = Math.max(0, 1 - (progress * 1.6));
 
+  // 5. TEXT SIZE SMOOTHING
+  // Use a lower exponent (0.7) on desktop to keep labels larger at high zoom
   const exponent = isMobile ? 0.85 : 0.6; 
   const smoothInverse = 1.0 / Math.pow(state.scale, exponent);
   const finalScale = smoothInverse * mobileScaleMultiplier;
@@ -926,10 +932,11 @@ function render() {
       const label = labelCache[i];
       label.style.setProperty('--arrow-opacity', arrowOp);
       label.style.top = `${topVal}%`; 
+      // Applying the updated scale
       label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
   }
 
-  // --- GRID THICKNESS ---
+  // --- GRID THICKNESS FIX ---
   const majorThickness = Math.max(1.0, 2.0 / drawScale); 
   
   const gridLayer = document.getElementById("gridLayer");
@@ -2108,118 +2115,108 @@ document.addEventListener("keydown", (e) => {
 // ZOOM SLIDER CONTROLS
 // ==========================================
 
-// ==========================================
-// ==========================================
-// ZOOM CONTROLS (STABILITY MODE)
-// ==========================================
-
 function initZoomControls() {
-    const track = document.getElementById("zoomSliderTrack");
-    const handle = document.getElementById("zoomSliderHandle");
-    const fill = document.getElementById("zoomSliderFill");
-    const btnIn = document.getElementById("btnZoomIn");
-    const btnOut = document.getElementById("btnZoomOut");
-    const mapStage = document.getElementById("mapStage");
+  const track = document.getElementById("zoomSliderTrack");
+  const handle = document.getElementById("zoomSliderHandle");
+  const fill = document.getElementById("zoomSliderFill");
+  const btnIn = document.getElementById("btnZoomIn");
+  const btnOut = document.getElementById("btnZoomOut");
+  const mapStage = document.getElementById("mapStage");
 
-    if (!track || !handle) return;
+  if (!track || !handle) return;
 
-    // --- 1. SYNC UI ---
-    window.updateZoomSliderUI = function() {
-        const range = MAX_ZOOM - MIN_ZOOM;
-        const progress = (state.scale - MIN_ZOOM) / range;
-        const percentage = Math.max(0, Math.min(1, progress)) * 100;
+  // --- 1. SYNC UI FROM STATE ---
+  window.updateZoomSliderUI = function() {
+    const range = MAX_ZOOM - MIN_ZOOM;
+    const progress = (state.scale - MIN_ZOOM) / range;
+    const percentage = Math.max(0, Math.min(1, progress)) * 100;
 
-        handle.style.bottom = `${percentage}%`;
-        fill.style.height = `${percentage}%`;
-    };
+    handle.style.bottom = `${percentage}%`;
+    fill.style.height = `${percentage}%`;
+  };
 
-    // --- 2. HANDLE DRAG (Slider) ---
-    let isDraggingSlider = false;
+  // --- 2. HANDLE DRAG LOGIC ---
+  let isDraggingSlider = false;
 
-    function updateZoomFromEvent(e) {
-        const rect = track.getBoundingClientRect();
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        let val = (rect.bottom - clientY) / rect.height;
-        val = Math.max(0, Math.min(1, val));
-        
-        const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
-        
-        const containerRect = mapContainer.getBoundingClientRect();
-        
-        // Instant update - CPU efficient
-        setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
-    }
-
-    const startDrag = (e) => {
-        isDraggingSlider = true;
-        // Disable desktop transitions while dragging so it feels responsive
-        mapStage.classList.remove("zoom-transition");
-        updateZoomFromEvent(e);
-        if (navigator.vibrate) navigator.vibrate(10);
-    };
-
-    const doDrag = (e) => {
-        if (!isDraggingSlider) return;
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
-        
-        // Use requestAnimationFrame only to throttle input, not to animate
-        requestAnimationFrame(() => updateZoomFromEvent(e));
-    };
-
-    const endDrag = () => {
-        isDraggingSlider = false;
-        // Re-enable desktop transitions
-        mapStage.classList.add("zoom-transition");
-    };
-
-    track.addEventListener("mousedown", startDrag);
-    track.addEventListener("touchstart", startDrag, { passive: false });
-    window.addEventListener("mousemove", (e) => { if(isDraggingSlider) updateZoomFromEvent(e); });
-    window.addEventListener("touchmove", doDrag, { passive: false });
-    window.addEventListener("mouseup", endDrag);
-    window.addEventListener("touchend", endDrag);
-
-    // --- 3. BUTTONS (INSTANT SNAP) ---
-    const handleBtn = (e, direction) => {
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
-
-        const btn = e.currentTarget;
-        if (btn.classList.contains('pressed')) return;
-
-        if (navigator.vibrate) navigator.vibrate(10);
-        btn.classList.add("pressed");
-        setTimeout(() => btn.classList.remove("pressed"), 150);
-
-        // Mobile: Smaller steps for precision
-        // Desktop: Larger steps for speed
-        const step = (window.innerWidth <= 768) ? 0.5 : 1.0; 
-        
-        let target = state.scale + (direction * step);
-        target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
-
-        const rect = mapContainer.getBoundingClientRect();
-
-        // --- THE FIX: INSTANT SET ---
-        // No animation loop. No "smoothStep". Just set the value.
-        // On Mobile: It snaps (Zero Lag, Zero Checkerboard).
-        // On Desktop: The CSS "transition" rule handles the smoothing automatically.
-        setZoomLevel(target, rect.width / 2, rect.height / 2);
-    };
-
-    btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
-    btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
+  function updateZoomFromEvent(e) {
+    const rect = track.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
-    btnIn.addEventListener("click", (e) => {
-        if (e.detail === 0) return; 
-        handleBtn(e, 1);
-    });
-    btnOut.addEventListener("click", (e) => {
-        if (e.detail === 0) return;
-        handleBtn(e, -1);
-    });
+    // Calculate percentage from bottom of track
+    let val = (rect.bottom - clientY) / rect.height;
+    val = Math.max(0, Math.min(1, val));
+    
+    const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
+    
+    // Zoom into visual center of container
+    const containerRect = mapContainer.getBoundingClientRect();
+    setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
+  }
+
+  // --- EVENTS ---
+  const startDrag = (e) => {
+    isDraggingSlider = true;
+    mapStage.classList.remove("zoom-transition");
+    updateZoomFromEvent(e);
+    // Vibrate on interaction start
+    if (navigator.vibrate) navigator.vibrate(10);
+  };
+
+  const doDrag = (e) => {
+    if (!isDraggingSlider) return;
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    
+    requestAnimationFrame(() => updateZoomFromEvent(e));
+  };
+
+  const endDrag = () => {
+    isDraggingSlider = false;
+    mapStage.classList.add("zoom-transition");
+  };
+
+  // Track Listeners
+  track.addEventListener("mousedown", startDrag);
+  track.addEventListener("touchstart", startDrag, { passive: false });
+
+  window.addEventListener("mousemove", (e) => { if(isDraggingSlider) updateZoomFromEvent(e); });
+  window.addEventListener("touchmove", doDrag, { passive: false });
+
+  window.addEventListener("mouseup", endDrag);
+  window.addEventListener("touchend", endDrag);
+
+  // --- 3. BUTTONS ---
+  const handleBtn = (e, zoomDiff) => {
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+
+    const btn = e.currentTarget;
+    if (btn.classList.contains('pressed')) return;
+
+    // 1. Ensure the transition class is ACTIVE
+    mapStage.classList.add("zoom-transition");
+    
+    // 2. Feedback
+    if (navigator.vibrate) navigator.vibrate(10);
+    btn.classList.add("pressed");
+
+    // 3. Calculation
+    let newScale = state.scale + zoomDiff;
+    newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
+
+    const rect = mapContainer.getBoundingClientRect();
+    
+    // 4. Force the browser to process the zoom
+    setZoomLevel(newScale, rect.width / 2, rect.height / 2);
+
+    // 5. Cleanup the button state
+    setTimeout(() => btn.classList.remove("pressed"), 150);
+  };
+
+  btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
+  btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
+  btnIn.addEventListener("click", (e) => handleBtn(e, 1));
+  btnOut.addEventListener("click", (e) => handleBtn(e, -1));
 }
 
 // Initialize
@@ -2621,45 +2618,22 @@ function updateMobileHud() {
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
 
-  // --- 2. Scale Rings (Pixel Perfect Fix) ---
+  // --- 2. Scale 3-Ring Container ---
   const dims = getMapDimensions();
   const totalMapMeters = dims.width / GAME_UNITS_PER_METER;  
   const currentMapPixelWidth = w * effectiveZoom;
   const pixelsPerMeter = currentMapPixelWidth / totalMapMeters;  
   
-  // A. Outer Ring (Dispersion - 40m)
-  // Has 2px border inside. We add +2px so border sits *exactly* on the 40m edge.
-  const sizeDispersion = (pixelsPerMeter * 40) + 2;
-  
-  // B. Middle Ring (Deadzone - 20m)
-  // Has 1px border inside. We add +1px so it aligns with the 1px SVG stroke on the map.
-  const sizeDeadzone = (pixelsPerMeter * 20) + 1;
-
-  // C. Inner Ring (Blast - 10m)
-  // Has 1px border inside. We add +1px to match the map fill/stroke edge.
-  const sizeBlast = (pixelsPerMeter * 10) + 1;
-
-  // Apply sizes to DOM
-  const container = document.getElementById("mobileRingContainer");
-  if (container) {
-      container.style.width = `${sizeDispersion}px`;
-      container.style.height = `${sizeDispersion}px`;
-      
-      // Target inner rings directly using class selectors
-      const ringDeadzone = container.querySelector('.deadzone');
-      if (ringDeadzone) {
-          ringDeadzone.style.width = `${sizeDeadzone}px`;
-          ringDeadzone.style.height = `${sizeDeadzone}px`;
-      }
-
-      const ringBlast = container.querySelector('.blast');
-      if (ringBlast) {
-          ringBlast.style.width = `${sizeBlast}px`;
-          ringBlast.style.height = `${sizeBlast}px`;
-      }
+  // Scale container to 40m Diameter
+  const dispersionDiameterMeters = 40; 
+  const containerSize = pixelsPerMeter * dispersionDiameterMeters;  
+  const containerEl = document.getElementById("mobileRingContainer");
+  if (containerEl) {
+      containerEl.style.width = `${containerSize}px`;
+      containerEl.style.height = `${containerSize}px`;
   }
 
-  // --- 3. Update HUD Text ---
+  // --- 3. Update HUD Text (Optimized) ---
   const targetPos = imagePixelsToGame(rawImgX, rawImgY, w, h);
   const gunPos = getActiveGunCoords();
 
@@ -2670,25 +2644,31 @@ function updateMobileHud() {
       
       const factionLabel = document.getElementById("factionLabel").innerText;
       
+      // OPTIMIZATION: Only calculate Mil if distance changed
       if (dist !== _lastMobDist) {
           const mil = getMil(dist, factionLabel);
-          _lastMobMil = mil; 
+          _lastMobMil = mil; // Update cache
           
           const hudMil = document.getElementById("hudMil");
-          if (hudMil) hudMil.innerText = (mil !== null) ? mil : "---";
+          if (hudMil) {
+              hudMil.innerText = (mil !== null) ? mil : "---";
+          }
 
           const hudDist = document.getElementById("hudDist");
-          if (hudDist) hudDist.innerText = dist + "m";
-          
+          if (hudDist) {
+              hudDist.innerText = dist + "m";
+          }
           _lastMobDist = dist;
       }
       
+      // Handle case when no gun position is available
       if (!gunPos) {
           const hudMil = document.getElementById("hudMil");
           if (hudMil && hudMil.innerText !== "---") hudMil.innerText = "---";
       }
   }
   
+  // Grid Ref optimization
   const gridRef = getGridRef(targetPos.x, targetPos.y);
   if (gridRef !== _lastMobGrid) {
       const hudGrid = document.getElementById("hudGrid");
