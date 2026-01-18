@@ -2116,7 +2116,7 @@ document.addEventListener("keydown", (e) => {
 // ==========================================
 
 // ==========================================
-// SMOOTH ZOOM CONTROLS (CPU SAFE)
+// SMOOTH ZOOM CONTROLS (CPU SAFE + ANTI-FLICKER)
 // ==========================================
 
 function initZoomControls() {
@@ -2140,13 +2140,12 @@ function initZoomControls() {
     };
 
     // --- 2. SMOOTH ANIMATION ENGINE ---
-    // This allows smooth zooming on mobile without CSS Transitions (which crash GPUs)
     let zoomAnimFrame = null;
 
     function smoothZoomStep(targetScale) {
         const startScale = state.scale;
         const diff = targetScale - startScale;
-        const duration = 250; // milliseconds (Speed of zoom)
+        const duration = 250; // milliseconds
         const startTime = performance.now();
 
         // Zoom toward the center of the viewport
@@ -2158,51 +2157,42 @@ function initZoomControls() {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // "Ease Out Cubic" math for a natural feeling slow-down
+            // "Ease Out Cubic" for natural feel
             const ease = 1 - Math.pow(1 - progress, 3);
             
             const nextScale = startScale + (diff * ease);
             
-            // Apply the zoom
             setZoomLevel(nextScale, centerX, centerY);
 
             if (progress < 1) {
                 zoomAnimFrame = requestAnimationFrame(animate);
             } else {
-                // Ensure we hit the exact target at the end
                 setZoomLevel(targetScale, centerX, centerY);
             }
         }
 
-        // Cancel any existing animation to prevent fighting
         if (zoomAnimFrame) cancelAnimationFrame(zoomAnimFrame);
         zoomAnimFrame = requestAnimationFrame(animate);
     }
 
-    // --- 3. HANDLE DRAG LOGIC (Slider) ---
+    // --- 3. HANDLE DRAG LOGIC ---
     let isDraggingSlider = false;
 
     function updateZoomFromEvent(e) {
         const rect = track.getBoundingClientRect();
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        // Calculate percentage from bottom of track
         let val = (rect.bottom - clientY) / rect.height;
         val = Math.max(0, Math.min(1, val));
-        
         const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
-        
         const containerRect = mapContainer.getBoundingClientRect();
-        // Instant zoom for dragging (feels more responsive)
         setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
     }
 
     const startDrag = (e) => {
         isDraggingSlider = true;
-        // Kill any smooth animation if the user grabs the slider
         if (zoomAnimFrame) cancelAnimationFrame(zoomAnimFrame);
         
-        // Temporarily disable CSS transitions on Desktop for instant response
+        // Remove transitions just in case (Desktop safety)
         mapStage.classList.remove("zoom-transition");
         updateZoomFromEvent(e);
         if (navigator.vibrate) navigator.vibrate(10);
@@ -2217,7 +2207,6 @@ function initZoomControls() {
 
     const endDrag = () => {
         isDraggingSlider = false;
-        // Re-enable CSS transitions (for Desktop)
         mapStage.classList.add("zoom-transition");
     };
 
@@ -2228,7 +2217,7 @@ function initZoomControls() {
     window.addEventListener("mouseup", endDrag);
     window.addEventListener("touchend", endDrag);
 
-    // --- 4. BUTTONS (Updated to use Smooth Engine) ---
+    // --- 4. BUTTONS (With Anti-Flicker Warmup) ---
     const handleBtn = (e, direction) => {
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
@@ -2236,29 +2225,29 @@ function initZoomControls() {
         const btn = e.currentTarget;
         if (btn.classList.contains('pressed')) return;
 
-        // Feedback
         if (navigator.vibrate) navigator.vibrate(10);
         btn.classList.add("pressed");
         setTimeout(() => btn.classList.remove("pressed"), 150);
 
-        // Calculate Target
-        // Mobile steps are smaller (0.5) for control, Desktop larger (1.0)
         const step = (window.innerWidth <= 768) ? 1.0 : 1.0; 
         let target = state.scale + (direction * step);
-        
-        // Clamp target
         target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
 
-        // Trigger Smooth Animation
-        smoothZoomStep(target);
+        // --- THE FIX: DOUBLE FRAME WARMUP ---
+        // We ask the browser for a frame, then ANOTHER frame.
+        // This ensures the GPU compositor is fully "awake" and ready
+        // before we actually change the pixels.
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                smoothZoomStep(target);
+            });
+        });
     };
 
     btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
     btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
     
-    // Fallback for click (Desktop)
     btnIn.addEventListener("click", (e) => {
-        // If touch triggered, ignore click
         if (e.detail === 0) return; 
         handleBtn(e, 1);
     });
@@ -2667,22 +2656,45 @@ function updateMobileHud() {
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
 
-  // --- 2. Scale 3-Ring Container ---
+  // --- 2. Scale Rings (Pixel Perfect Fix) ---
   const dims = getMapDimensions();
   const totalMapMeters = dims.width / GAME_UNITS_PER_METER;  
   const currentMapPixelWidth = w * effectiveZoom;
   const pixelsPerMeter = currentMapPixelWidth / totalMapMeters;  
   
-  // Scale container to 40m Diameter
-  const dispersionDiameterMeters = 40; 
-  const containerSize = pixelsPerMeter * dispersionDiameterMeters;  
-  const containerEl = document.getElementById("mobileRingContainer");
-  if (containerEl) {
-      containerEl.style.width = `${containerSize}px`;
-      containerEl.style.height = `${containerSize}px`;
+  // A. Outer Ring (Dispersion - 40m)
+  // Has 2px border inside. We add +2px so border sits *exactly* on the 40m edge.
+  const sizeDispersion = (pixelsPerMeter * 40) + 2;
+  
+  // B. Middle Ring (Deadzone - 20m)
+  // Has 1px border inside. We add +1px so it aligns with the 1px SVG stroke on the map.
+  const sizeDeadzone = (pixelsPerMeter * 20) + 1;
+
+  // C. Inner Ring (Blast - 10m)
+  // Has 1px border inside. We add +1px to match the map fill/stroke edge.
+  const sizeBlast = (pixelsPerMeter * 10) + 1;
+
+  // Apply sizes to DOM
+  const container = document.getElementById("mobileRingContainer");
+  if (container) {
+      container.style.width = `${sizeDispersion}px`;
+      container.style.height = `${sizeDispersion}px`;
+      
+      // Target inner rings directly using class selectors
+      const ringDeadzone = container.querySelector('.deadzone');
+      if (ringDeadzone) {
+          ringDeadzone.style.width = `${sizeDeadzone}px`;
+          ringDeadzone.style.height = `${sizeDeadzone}px`;
+      }
+
+      const ringBlast = container.querySelector('.blast');
+      if (ringBlast) {
+          ringBlast.style.width = `${sizeBlast}px`;
+          ringBlast.style.height = `${sizeBlast}px`;
+      }
   }
 
-  // --- 3. Update HUD Text (Optimized) ---
+  // --- 3. Update HUD Text ---
   const targetPos = imagePixelsToGame(rawImgX, rawImgY, w, h);
   const gunPos = getActiveGunCoords();
 
@@ -2693,31 +2705,25 @@ function updateMobileHud() {
       
       const factionLabel = document.getElementById("factionLabel").innerText;
       
-      // OPTIMIZATION: Only calculate Mil if distance changed
       if (dist !== _lastMobDist) {
           const mil = getMil(dist, factionLabel);
-          _lastMobMil = mil; // Update cache
+          _lastMobMil = mil; 
           
           const hudMil = document.getElementById("hudMil");
-          if (hudMil) {
-              hudMil.innerText = (mil !== null) ? mil : "---";
-          }
+          if (hudMil) hudMil.innerText = (mil !== null) ? mil : "---";
 
           const hudDist = document.getElementById("hudDist");
-          if (hudDist) {
-              hudDist.innerText = dist + "m";
-          }
+          if (hudDist) hudDist.innerText = dist + "m";
+          
           _lastMobDist = dist;
       }
       
-      // Handle case when no gun position is available
       if (!gunPos) {
           const hudMil = document.getElementById("hudMil");
           if (hudMil && hudMil.innerText !== "---") hudMil.innerText = "---";
       }
   }
   
-  // Grid Ref optimization
   const gridRef = getGridRef(targetPos.x, targetPos.y);
   if (gridRef !== _lastMobGrid) {
       const hudGrid = document.getElementById("hudGrid");

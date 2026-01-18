@@ -1854,7 +1854,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   }
 
   /* Hide Desktop Elements */
-  #desktopCursorRings, #liveCursorHud { 
+  #desktopCursorRings { 
       display: none !important; 
   }
 
@@ -2654,7 +2654,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     border-radius: 4px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.8); /* Stronger shadow for readability */
     
-    /* LAYER FIX: Set higher than crosshair (200) so it sits ON TOP */
+    /* Ensure this is high enough */
     z-index: 300 !important; 
     min-width: auto;
   }
