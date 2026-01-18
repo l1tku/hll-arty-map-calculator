@@ -2115,108 +2115,157 @@ document.addEventListener("keydown", (e) => {
 // ZOOM SLIDER CONTROLS
 // ==========================================
 
+// ==========================================
+// SMOOTH ZOOM CONTROLS (CPU SAFE)
+// ==========================================
+
 function initZoomControls() {
-  const track = document.getElementById("zoomSliderTrack");
-  const handle = document.getElementById("zoomSliderHandle");
-  const fill = document.getElementById("zoomSliderFill");
-  const btnIn = document.getElementById("btnZoomIn");
-  const btnOut = document.getElementById("btnZoomOut");
-  const mapStage = document.getElementById("mapStage");
+    const track = document.getElementById("zoomSliderTrack");
+    const handle = document.getElementById("zoomSliderHandle");
+    const fill = document.getElementById("zoomSliderFill");
+    const btnIn = document.getElementById("btnZoomIn");
+    const btnOut = document.getElementById("btnZoomOut");
+    const mapStage = document.getElementById("mapStage");
 
-  if (!track || !handle) return;
+    if (!track || !handle) return;
 
-  // --- 1. SYNC UI FROM STATE ---
-  window.updateZoomSliderUI = function() {
-    const range = MAX_ZOOM - MIN_ZOOM;
-    const progress = (state.scale - MIN_ZOOM) / range;
-    const percentage = Math.max(0, Math.min(1, progress)) * 100;
+    // --- 1. SYNC UI FROM STATE ---
+    window.updateZoomSliderUI = function() {
+        const range = MAX_ZOOM - MIN_ZOOM;
+        const progress = (state.scale - MIN_ZOOM) / range;
+        const percentage = Math.max(0, Math.min(1, progress)) * 100;
 
-    handle.style.bottom = `${percentage}%`;
-    fill.style.height = `${percentage}%`;
-  };
+        handle.style.bottom = `${percentage}%`;
+        fill.style.height = `${percentage}%`;
+    };
 
-  // --- 2. HANDLE DRAG LOGIC ---
-  let isDraggingSlider = false;
+    // --- 2. SMOOTH ANIMATION ENGINE ---
+    // This allows smooth zooming on mobile without CSS Transitions (which crash GPUs)
+    let zoomAnimFrame = null;
 
-  function updateZoomFromEvent(e) {
-    const rect = track.getBoundingClientRect();
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    function smoothZoomStep(targetScale) {
+        const startScale = state.scale;
+        const diff = targetScale - startScale;
+        const duration = 250; // milliseconds (Speed of zoom)
+        const startTime = performance.now();
+
+        // Zoom toward the center of the viewport
+        const rect = mapContainer.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        function animate(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // "Ease Out Cubic" math for a natural feeling slow-down
+            const ease = 1 - Math.pow(1 - progress, 3);
+            
+            const nextScale = startScale + (diff * ease);
+            
+            // Apply the zoom
+            setZoomLevel(nextScale, centerX, centerY);
+
+            if (progress < 1) {
+                zoomAnimFrame = requestAnimationFrame(animate);
+            } else {
+                // Ensure we hit the exact target at the end
+                setZoomLevel(targetScale, centerX, centerY);
+            }
+        }
+
+        // Cancel any existing animation to prevent fighting
+        if (zoomAnimFrame) cancelAnimationFrame(zoomAnimFrame);
+        zoomAnimFrame = requestAnimationFrame(animate);
+    }
+
+    // --- 3. HANDLE DRAG LOGIC (Slider) ---
+    let isDraggingSlider = false;
+
+    function updateZoomFromEvent(e) {
+        const rect = track.getBoundingClientRect();
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        // Calculate percentage from bottom of track
+        let val = (rect.bottom - clientY) / rect.height;
+        val = Math.max(0, Math.min(1, val));
+        
+        const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
+        
+        const containerRect = mapContainer.getBoundingClientRect();
+        // Instant zoom for dragging (feels more responsive)
+        setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
+    }
+
+    const startDrag = (e) => {
+        isDraggingSlider = true;
+        // Kill any smooth animation if the user grabs the slider
+        if (zoomAnimFrame) cancelAnimationFrame(zoomAnimFrame);
+        
+        // Temporarily disable CSS transitions on Desktop for instant response
+        mapStage.classList.remove("zoom-transition");
+        updateZoomFromEvent(e);
+        if (navigator.vibrate) navigator.vibrate(10);
+    };
+
+    const doDrag = (e) => {
+        if (!isDraggingSlider) return;
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+        requestAnimationFrame(() => updateZoomFromEvent(e));
+    };
+
+    const endDrag = () => {
+        isDraggingSlider = false;
+        // Re-enable CSS transitions (for Desktop)
+        mapStage.classList.add("zoom-transition");
+    };
+
+    track.addEventListener("mousedown", startDrag);
+    track.addEventListener("touchstart", startDrag, { passive: false });
+    window.addEventListener("mousemove", (e) => { if(isDraggingSlider) updateZoomFromEvent(e); });
+    window.addEventListener("touchmove", doDrag, { passive: false });
+    window.addEventListener("mouseup", endDrag);
+    window.addEventListener("touchend", endDrag);
+
+    // --- 4. BUTTONS (Updated to use Smooth Engine) ---
+    const handleBtn = (e, direction) => {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+
+        const btn = e.currentTarget;
+        if (btn.classList.contains('pressed')) return;
+
+        // Feedback
+        if (navigator.vibrate) navigator.vibrate(10);
+        btn.classList.add("pressed");
+        setTimeout(() => btn.classList.remove("pressed"), 150);
+
+        // Calculate Target
+        // Mobile steps are smaller (0.5) for control, Desktop larger (1.0)
+        const step = (window.innerWidth <= 768) ? 1.0 : 1.0; 
+        let target = state.scale + (direction * step);
+        
+        // Clamp target
+        target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
+
+        // Trigger Smooth Animation
+        smoothZoomStep(target);
+    };
+
+    btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
+    btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
     
-    // Calculate percentage from bottom of track
-    let val = (rect.bottom - clientY) / rect.height;
-    val = Math.max(0, Math.min(1, val));
-    
-    const newZoom = MIN_ZOOM + (val * (MAX_ZOOM - MIN_ZOOM));
-    
-    // Zoom into visual center of container
-    const containerRect = mapContainer.getBoundingClientRect();
-    setZoomLevel(newZoom, containerRect.width / 2, containerRect.height / 2);
-  }
-
-  // --- EVENTS ---
-  const startDrag = (e) => {
-    isDraggingSlider = true;
-    mapStage.classList.remove("zoom-transition");
-    updateZoomFromEvent(e);
-    // Vibrate on interaction start
-    if (navigator.vibrate) navigator.vibrate(10);
-  };
-
-  const doDrag = (e) => {
-    if (!isDraggingSlider) return;
-    if (e.cancelable) e.preventDefault();
-    e.stopPropagation();
-    
-    requestAnimationFrame(() => updateZoomFromEvent(e));
-  };
-
-  const endDrag = () => {
-    isDraggingSlider = false;
-    mapStage.classList.add("zoom-transition");
-  };
-
-  // Track Listeners
-  track.addEventListener("mousedown", startDrag);
-  track.addEventListener("touchstart", startDrag, { passive: false });
-
-  window.addEventListener("mousemove", (e) => { if(isDraggingSlider) updateZoomFromEvent(e); });
-  window.addEventListener("touchmove", doDrag, { passive: false });
-
-  window.addEventListener("mouseup", endDrag);
-  window.addEventListener("touchend", endDrag);
-
-  // --- 3. BUTTONS ---
-  const handleBtn = (e, zoomDiff) => {
-    if (e.cancelable) e.preventDefault();
-    e.stopPropagation();
-
-    const btn = e.currentTarget;
-    if (btn.classList.contains('pressed')) return;
-
-    // 1. Ensure the transition class is ACTIVE
-    mapStage.classList.add("zoom-transition");
-    
-    // 2. Feedback
-    if (navigator.vibrate) navigator.vibrate(10);
-    btn.classList.add("pressed");
-
-    // 3. Calculation
-    let newScale = state.scale + zoomDiff;
-    newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
-
-    const rect = mapContainer.getBoundingClientRect();
-    
-    // 4. Force the browser to process the zoom
-    setZoomLevel(newScale, rect.width / 2, rect.height / 2);
-
-    // 5. Cleanup the button state
-    setTimeout(() => btn.classList.remove("pressed"), 150);
-  };
-
-  btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
-  btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
-  btnIn.addEventListener("click", (e) => handleBtn(e, 1));
-  btnOut.addEventListener("click", (e) => handleBtn(e, -1));
+    // Fallback for click (Desktop)
+    btnIn.addEventListener("click", (e) => {
+        // If touch triggered, ignore click
+        if (e.detail === 0) return; 
+        handleBtn(e, 1);
+    });
+    btnOut.addEventListener("click", (e) => {
+        if (e.detail === 0) return;
+        handleBtn(e, -1);
+    });
 }
 
 // Initialize
