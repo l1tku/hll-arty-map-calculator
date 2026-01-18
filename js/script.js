@@ -857,13 +857,13 @@ function renderTargeting() {
   
   layer.appendChild(circleSvg);
 
-  // --- C. CENTER CROSS ---
-  // const marker = document.createElement("div");
-  // marker.className = "impact-marker";
-  // marker.style.left = `${Math.round(end.x)}px`;
-  // marker.style.top = `${Math.round(end.y)}px`;
+  // --- C. CENTER CROSS (THE X) ---
+  const marker = document.createElement("div");
+  marker.className = "impact-marker";
+  marker.style.left = `${Math.round(end.x)}px`;
+  marker.style.top = `${Math.round(end.y)}px`;
   
-  // layer.appendChild(marker);
+  layer.appendChild(marker);
 
   // 4. UPDATE DASHBOARD
   if (elDist) elDist.innerText = `${activeTarget.distance}m`;
