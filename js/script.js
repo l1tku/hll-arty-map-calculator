@@ -36,6 +36,8 @@ let currentStrongpoints = [];
 let labelCache = [];
 let isRendering = false; 
 let calcInputVal = ""; // Stores the string like "1250" 
+// --- ADD THIS LINE BELOW: ---
+let isZoomAnimating = false; 
 
 // --- MOVE THESE HERE (Top of script) ---
 let _lastMobDist = null;
@@ -889,7 +891,7 @@ function renderTargeting() {
   }
 }
 
-// === FIX #1: Main Render Function using 2D Transform ===
+// === FIX #1: Main Render Function (Optimized) ===
 function render() {
   clampPosition();
   const drawScale = state.scale * state.fitScale;
@@ -897,13 +899,19 @@ function render() {
   mapContainer.style.setProperty('--current-scale', drawScale); 
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
-  // FIX: Replaced translate3d with translate to avoid Mobile GPU memory limits
+  // 1. Move the Map (Always do this)
   mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
   
+  // --- PERFORMANCE GATE ---
+  // If we are animating zoom, STOP HERE.
+  // Skipping labels/HUD prevents the black flicker and lag.
+  if (isZoomAnimating) return; 
+  // -----------------------
+
   updateRealScale(drawScale);
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
-  // --- LABEL SCALING & POSITIONING LOGIC ---
+  // --- LABEL SCALING & POSITIONING ---
   const isMobile = window.innerWidth <= 768;
   const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
 
@@ -913,17 +921,11 @@ function render() {
   let progress = (state.scale - TRANSITION_START_ZOOM) / (TRANSITION_END_ZOOM - TRANSITION_START_ZOOM);
   progress = Math.max(0, Math.min(1, progress)); 
 
-  // 1. Position
   const topVal = progress * 50; 
-  // 2. Transform Y
   const transY = -100 + (progress * 50);
-  // 3. Spacing Gap
   const gap = -20 + (progress * 20);
-  // 4. Arrow Opacity
   const arrowOp = Math.max(0, 1 - (progress * 1.6));
 
-  // 5. TEXT SIZE SMOOTHING
-  // Use a lower exponent (0.7) on desktop to keep labels larger at high zoom
   const exponent = isMobile ? 0.85 : 0.6; 
   const smoothInverse = 1.0 / Math.pow(state.scale, exponent);
   const finalScale = smoothInverse * mobileScaleMultiplier;
@@ -932,11 +934,10 @@ function render() {
       const label = labelCache[i];
       label.style.setProperty('--arrow-opacity', arrowOp);
       label.style.top = `${topVal}%`; 
-      // Applying the updated scale
       label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
   }
 
-  // --- GRID THICKNESS FIX ---
+  // --- GRID THICKNESS ---
   const majorThickness = Math.max(1.0, 2.0 / drawScale); 
   
   const gridLayer = document.getElementById("gridLayer");
@@ -2116,7 +2117,8 @@ document.addEventListener("keydown", (e) => {
 // ==========================================
 
 // ==========================================
-// SMOOTH ZOOM CONTROLS (CPU SAFE + ANTI-FLICKER)
+// ==========================================
+// SMOOTH ZOOM CONTROLS (CPU SAFE + OPTIMIZED)
 // ==========================================
 
 function initZoomControls() {
@@ -2129,45 +2131,54 @@ function initZoomControls() {
 
     if (!track || !handle) return;
 
-    // --- 1. SYNC UI FROM STATE ---
     window.updateZoomSliderUI = function() {
         const range = MAX_ZOOM - MIN_ZOOM;
         const progress = (state.scale - MIN_ZOOM) / range;
         const percentage = Math.max(0, Math.min(1, progress)) * 100;
-
         handle.style.bottom = `${percentage}%`;
         fill.style.height = `${percentage}%`;
     };
 
-    // --- 2. SMOOTH ANIMATION ENGINE ---
     let zoomAnimFrame = null;
 
     function smoothZoomStep(targetScale) {
         const startScale = state.scale;
         const diff = targetScale - startScale;
-        const duration = 250; // milliseconds
+        const duration = 250; 
         const startTime = performance.now();
 
-        // Zoom toward the center of the viewport
         const rect = mapContainer.getBoundingClientRect();
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
+        // A. LOCK RENDERER
+        isZoomAnimating = true; 
+        
+        // B. Hint browser to allocate memory NOW (Prevents Black Blocks)
+        mapStage.style.willChange = "transform"; 
+        
+        // C. Disable CSS transitions explicitly during JS animation
+        mapStage.classList.remove("zoom-transition");
+
         function animate(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
-            // "Ease Out Cubic" for natural feel
             const ease = 1 - Math.pow(1 - progress, 3);
             
             const nextScale = startScale + (diff * ease);
-            
-            setZoomLevel(nextScale, centerX, centerY);
+            setZoomLevel(nextScale, centerX, centerY); 
 
             if (progress < 1) {
                 zoomAnimFrame = requestAnimationFrame(animate);
             } else {
+                // D. FINISH
                 setZoomLevel(targetScale, centerX, centerY);
+                
+                isZoomAnimating = false; // UNLOCK
+                mapStage.style.willChange = "auto"; // CLEANUP
+                mapStage.classList.add("zoom-transition"); // RESTORE CSS
+                
+                render(); // Do one full render to snap labels/HUD into place
             }
         }
 
@@ -2175,7 +2186,7 @@ function initZoomControls() {
         zoomAnimFrame = requestAnimationFrame(animate);
     }
 
-    // --- 3. HANDLE DRAG LOGIC ---
+    // --- HANDLE DRAG LOGIC ---
     let isDraggingSlider = false;
 
     function updateZoomFromEvent(e) {
@@ -2192,8 +2203,10 @@ function initZoomControls() {
         isDraggingSlider = true;
         if (zoomAnimFrame) cancelAnimationFrame(zoomAnimFrame);
         
-        // Remove transitions just in case (Desktop safety)
+        isZoomAnimating = false;
+        mapStage.style.willChange = "auto";
         mapStage.classList.remove("zoom-transition");
+        
         updateZoomFromEvent(e);
         if (navigator.vibrate) navigator.vibrate(10);
     };
@@ -2208,6 +2221,7 @@ function initZoomControls() {
     const endDrag = () => {
         isDraggingSlider = false;
         mapStage.classList.add("zoom-transition");
+        render(); 
     };
 
     track.addEventListener("mousedown", startDrag);
@@ -2217,7 +2231,7 @@ function initZoomControls() {
     window.addEventListener("mouseup", endDrag);
     window.addEventListener("touchend", endDrag);
 
-    // --- 4. BUTTONS (With Anti-Flicker Warmup) ---
+    // --- BUTTONS ---
     const handleBtn = (e, direction) => {
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
@@ -2233,10 +2247,7 @@ function initZoomControls() {
         let target = state.scale + (direction * step);
         target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
 
-        // --- THE FIX: DOUBLE FRAME WARMUP ---
-        // We ask the browser for a frame, then ANOTHER frame.
-        // This ensures the GPU compositor is fully "awake" and ready
-        // before we actually change the pixels.
+        // Use Double-Frame Warmup
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 smoothZoomStep(target);
