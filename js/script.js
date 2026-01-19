@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.3"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
+const APP_VERSION = "v1.1.4"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
 
 // Map Dimensions
 const MAP_WIDTH_METERS = 2000.0; 
@@ -36,6 +36,10 @@ let currentStrongpoints = [];
 let labelCache = [];
 let isRendering = false; 
 let calcInputVal = ""; // Stores the string like "1250" 
+
+// Trajectory Slider Variables
+let trajSliderEnabled = false;
+let originalAngle = 0; // Locks the bearing 
 
 // --- MOVE THESE HERE (Top of script) ---
 let _lastMobDist = null;
@@ -1262,14 +1266,24 @@ function closeMapSelector() {
 function selectMapFromGrid(key) {
     closeMapSelector();
 
-    // --- IMMEDIATE STATE UPDATE (Fixes save-on-refresh and text flicker) ---
+    // 1. Reset Global Targeting State
+    activeTarget = null; // <--- ADD THIS: Clears the coordinates/math for the target
+
+    // 2. Reset Slider State
+    trajSliderEnabled = false;
+    const trajToggleBtn = document.getElementById('trajToggleBtn');
+    const trajContainer = document.getElementById('trajSliderContainer');
+    
+    if (trajToggleBtn) trajToggleBtn.classList.remove('active');
+    if (trajContainer) trajContainer.classList.add('hidden');
+
+    // 3. Update Page Config
     const config = MAP_DATABASE[key];
     if (!config) return;
 
     activeMapKey = key;
     currentStrongpoints = config.strongpoints || [];
 
-    // --- ADD THIS LINE HERE ---
     updatePageTitle(config.name);
 
     const currentMapLbl = document.getElementById("currentMapName");
@@ -1281,10 +1295,10 @@ function selectMapFromGrid(key) {
     // Save the new map selection immediately
     saveState();
 
-    // Highlight the selected card
+    // Highlight the selected card in the grid
     renderMapGrid("");
 
-    // --- NOW SWITCH THE MAP IMAGE (Smooth fade) ---
+    // 4. Trigger Map Transition
     switchMap(key);
 }
 
@@ -1470,6 +1484,27 @@ function updateGunUI(config) {
               activeTarget.mil = newMil;
           }
       }
+
+      // --- ADD THIS BLOCK HERE ---
+      if (trajSliderEnabled && activeTarget) {
+          const gunPos = getActiveGunCoords();
+          if (gunPos) {
+              const dx = activeTarget.gameX - gunPos.x;
+              const dy = activeTarget.gameY - gunPos.y;
+              originalAngle = Math.atan2(dy, dx);
+
+              const trajInput = document.getElementById('trajectoryRange');
+              if (trajInput) trajInput.value = activeTarget.distance;
+
+              // THE FIX: Sync text on gun switch
+              const milDisplay = document.getElementById('trajCurrentMil');
+              const meterDisplay = document.getElementById('trajCurrentMeter');
+              
+              if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
+              if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
+          }
+      }
+      // ---------------------------
       
       // 3. RENDER EVERYTHING IN ORDER
       renderMarkers();   // Draws guns (and rotates active gun to target)
@@ -1535,7 +1570,14 @@ function initArtyControls() {
       activeFaction = value;
       activeTarget = null;
       
-      // THE FIX: Refresh the UI labels so "us" becomes "British 8th Army" etc.
+      // Disable trajectory slider when target is cleared
+      trajSliderEnabled = false;
+      const trajToggleBtn = document.getElementById('trajToggleBtn');
+      const trajContainer = document.getElementById('trajSliderContainer');
+      if (trajToggleBtn) trajToggleBtn.classList.remove('active');
+      if (trajContainer) trajContainer.classList.add('hidden');
+      
+      // Refresh the UI labels
       updateFactionUI(MAP_DATABASE[activeMapKey]); 
       
       renderMarkers(); 
@@ -1546,8 +1588,6 @@ function initArtyControls() {
   });
 
   // 2. Setup Gun Dropdown (Toggle Only)
-  // We do NOT use setupDropdown here because items are dynamic 
-  // and handled entirely by updateGunUI(). We only need to toggle the menu.
   const gunBtn = document.getElementById('gunBtn');
   const gunMenu = document.querySelector('#gunDropdown .dropdown-menu');
   
@@ -1556,11 +1596,9 @@ function initArtyControls() {
           e.stopPropagation();
           const wasHidden = gunMenu.classList.contains('hidden');
           
-          // 1. Close all other menus first
           document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
           document.querySelectorAll('.btn-map-select').forEach(el => el.classList.remove('active'));
 
-          // 2. Toggle this one
           if (wasHidden) {
               gunMenu.classList.remove('hidden');
               gunBtn.classList.add('active');
@@ -1571,30 +1609,20 @@ function initArtyControls() {
   // 3. Setup Ruler Toggle
   const rulerToggleBtn = document.getElementById('rulerToggleBtn');
   if (rulerToggleBtn) {
-    // Flag to prevent double-triggering on Firefox mobile
     let rulerTouchHandled = false;
-
       const handleRuler = (e) => {
-      // If we are currently handling a touch, ignore follow-up click
-      if (e.type === 'click' && rulerTouchHandled) {
-        return;
-      }
-
-      e.preventDefault(); // Stops button from firing twice or zooming
-      e.stopPropagation(); // Stops click from passing through to map
+      if (e.type === 'click' && rulerTouchHandled) return;
+      e.preventDefault(); 
+      e.stopPropagation(); 
 
       if (e.cancelable && e.type === 'touchstart') {
         e.preventDefault();
         rulerTouchHandled = true;
-        // Reset flag after a short delay
         setTimeout(() => { rulerTouchHandled = false; }, 300);
       }
       
-      // Toggle state
       rulerEnabled = !rulerEnabled;
       rulerToggleBtn.classList.toggle('active', rulerEnabled);
-
-      // THE FIX: Remove focus so it doesn't stay in a "pseudo-active" state
       rulerToggleBtn.blur(); 
       
       renderTargeting();
@@ -1603,63 +1631,40 @@ function initArtyControls() {
 
     rulerToggleBtn.addEventListener('click', handleRuler);
     rulerToggleBtn.addEventListener('touchstart', handleRuler, { passive: false });
-    
-    // Set initial state from loaded settings
     rulerToggleBtn.classList.toggle('active', rulerEnabled);
   }
 
-  // 4. Setup HUD Toggle (Robust Mobile Fix)
+  // 4. Setup HUD Toggle
   const hudToggleBtn = document.getElementById('hudToggleBtn');
   if (hudToggleBtn) {
       let hudTouchHandled = false;
       let hudTouchTimeout = null;
 
       const handleHud = (e) => {
-          // --- 1. GATEKEEPER LOGIC ---
-          // If this is a 'click' that happened right after a 'touchstart', IGNORE it.
           if (e.type === 'click' && hudTouchHandled) {
-              e.preventDefault();
-              e.stopPropagation();
-              return;
+              e.preventDefault(); e.stopPropagation(); return;
           }
-
-          // If this is 'touchstart', set the flag to block the upcoming ghost click
           if (e.type === 'touchstart') {
               hudTouchHandled = true;
               if (hudTouchTimeout) clearTimeout(hudTouchTimeout);
-              // Reset flag after 500ms (enough time for the ghost click to pass)
-              hudTouchTimeout = setTimeout(() => { 
-                  hudTouchHandled = false; 
-              }, 500);
+              hudTouchTimeout = setTimeout(() => { hudTouchHandled = false; }, 500);
           }
           
-          // Prevent browser zooming or map panning underneath
           if (e.cancelable) e.preventDefault();
           e.stopPropagation();
           
-          // --- UPDATED LOGIC START ---
-          hudEnabled = !hudEnabled; // Toggle Global Variable
-          
-          // Use the global sync function to handle ALL visibility (Desktop Rings + Mobile HUD)
+          hudEnabled = !hudEnabled; 
           syncToggleUI(); 
-          
-          // Force button focus off
           hudToggleBtn.blur(); 
-          // --- UPDATED LOGIC END ---
-          
-          // Force render to update text values immediately
           render(); 
           saveState(); 
       };
       
       hudToggleBtn.addEventListener('click', handleHud);
       hudToggleBtn.addEventListener('touchstart', handleHud, { passive: false });
-
-      // --- FIX: APPLY SAVED STATE ON LOAD ---
-      // 1. Update Button Visual
       hudToggleBtn.classList.toggle('active', hudEnabled);
 
-      // 2. Update UI Elements Visibility
+      // Initial Sync
       const hudEl = document.getElementById("liveCursorHud");
       const crosshair = document.getElementById("mobileCrosshair");
       const fireBtn = document.getElementById("mobileFireBtn");
@@ -1678,32 +1683,21 @@ function initArtyControls() {
       }
   }
 
-  // 3. Global Click Listener (Close menus when clicking outside)
+  // 3. Global Click Listener
   window.addEventListener('click', () => {
-    // Hide all menus
-    document.querySelectorAll('.dropdown-menu').forEach(el => {
-      el.classList.add('hidden');
-    });
-    // Reset all arrows
-    document.querySelectorAll('.btn-map-select').forEach(el => {
-      el.classList.remove('active');
-    });
+    document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.btn-map-select').forEach(el => el.classList.remove('active'));
   });
 
   // 5. Setup Sidebar Calculator Button
   const sidebarCalcBtn = document.getElementById("sidebarCalcBtn");
   if (sidebarCalcBtn) {
       const handleOpenCalc = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          // Visual Feedback (Press animation)
+          e.preventDefault(); e.stopPropagation();
           sidebarCalcBtn.classList.add("pressed");
           setTimeout(() => sidebarCalcBtn.classList.remove("pressed"), 150);
-
           openManualCalculator();
       };
-
       sidebarCalcBtn.addEventListener("click", handleOpenCalc);
       sidebarCalcBtn.addEventListener("touchstart", handleOpenCalc, { passive: false });
   }
@@ -1712,25 +1706,161 @@ function initArtyControls() {
   const mobileFireBtn = document.getElementById("mobileFireBtn");
   if (mobileFireBtn) {
       const handleFire = (e) => {
-          e.preventDefault();
-          e.stopPropagation(); // Stop zoom/pan
-          
-          // --- NEW: Add Heavier Vibration for Fire ---
+          e.preventDefault(); e.stopPropagation(); 
           if (navigator.vibrate) navigator.vibrate(30); 
-          // ------------------------------------------
-          
-          // Visual Feedback
           mobileFireBtn.classList.add("pressed");
           setTimeout(() => mobileFireBtn.classList.remove("pressed"), 150);
-          
           fireAtCenter();
       };
-      
       mobileFireBtn.addEventListener("touchstart", handleFire, { passive: false });
       mobileFireBtn.addEventListener("click", handleFire);
   }
 
-  // 4. Fix Keypad Events
+  // 7. Setup Trajectory Slider Toggle (Mozilla-Proof Mobile Logic)
+  const trajToggleBtn = document.getElementById('trajToggleBtn');
+  const trajContainer = document.getElementById('trajSliderContainer');
+  const trajInput = document.getElementById('trajectoryRange');
+
+  if (trajToggleBtn && trajContainer && trajInput) {
+    let trajTouchHandled = false;
+    let trajTouchTimeout = null;
+
+    const handleTrajToggle = (e) => {
+      // Mozilla Mobile Gatekeeper
+      if (e.type === 'click' && trajTouchHandled) {
+        e.preventDefault(); e.stopPropagation(); return;
+      }
+      if (e.type === 'touchstart') {
+        trajTouchHandled = true;
+        if (trajTouchTimeout) clearTimeout(trajTouchTimeout);
+        trajTouchTimeout = setTimeout(() => { trajTouchHandled = false; }, 500);
+      }
+
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      if (!activeTarget) return; 
+
+      trajSliderEnabled = !trajSliderEnabled;
+      trajToggleBtn.classList.toggle('active', trajSliderEnabled);
+      trajContainer.classList.toggle('hidden', !trajSliderEnabled);
+
+      if (trajSliderEnabled) {
+        const gunPos = getActiveGunCoords();
+        if (gunPos) {
+          // 1. LOCK exact bearing from map shot
+          const dx = activeTarget.gameX - gunPos.x;
+          const dy = activeTarget.gameY - gunPos.y;
+          originalAngle = Math.atan2(dy, dx);
+          
+          // 2. SYNC only the handle visual value
+          // DO NOT call updateTrajectoryFromDistance() here - it stops the jump!
+          const trajInput = document.getElementById('trajectoryRange');
+          if (trajInput) trajInput.value = activeTarget.distance;
+        }
+      }
+      trajToggleBtn.blur();
+      saveState();
+    };
+
+    trajToggleBtn.addEventListener('click', handleTrajToggle);
+    trajToggleBtn.addEventListener('touchstart', handleTrajToggle, { passive: false });
+
+    // (Keep the input event listener below as is...)
+    trajInput.addEventListener('input', () => { /* ... math ... */ });
+  }
+
+  // 1. Helper Function to apply distance change (Buttons)
+  function adjustTrajDistance(delta) {
+      if (!activeTarget || !trajSliderEnabled) return;
+      const trajInput = document.getElementById('trajectoryRange');
+      let newDist = parseInt(trajInput.value) + delta;
+      newDist = Math.max(100, Math.min(1600, newDist));
+      trajInput.value = newDist;
+      updateTrajectoryFromDistance(newDist);
+  }
+
+  // 2. Logic to update position (Only runs when moving slider)
+  function updateTrajectoryFromDistance(newDistMeters) {
+      const gunPos = getActiveGunCoords();
+      const newDistUnits = newDistMeters * GAME_UNITS_PER_METER;
+
+      // Moves marker along the locked angle
+      const newX = gunPos.x + (newDistUnits * Math.cos(originalAngle));
+      const newY = gunPos.y + (newDistUnits * Math.sin(originalAngle));
+
+      const factionLabel = document.getElementById("factionLabel").innerText;
+      const mils = getMil(newDistMeters, factionLabel); 
+
+      activeTarget = {
+          gameX: newX,
+          gameY: newY,
+          distance: newDistMeters,
+          mil: mils
+      };
+
+      // NOTE: No text update logic here anymore.
+      
+      renderMarkers();
+      renderTargeting();
+      render();
+  }
+
+  // 3. Attach listeners to step buttons (Mozilla Mobile Fix)
+  document.querySelectorAll('.traj-step-btn').forEach(btn => {
+      const newBtn = btn.cloneNode(true); // Clear old listeners
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      let stepTouchHandled = false;
+      let stepTouchTimeout = null;
+
+      const handleStep = (e) => {
+          // GATEKEEPER: If we recently handled a touch, strictly ignore this 'click'
+          if (e.type === 'click' && stepTouchHandled) {
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+          }
+
+          // TOUCH START: Set flag immediately
+          if (e.type === 'touchstart') {
+              stepTouchHandled = true;
+              if (stepTouchTimeout) clearTimeout(stepTouchTimeout);
+              // Extended timeout (500ms) to catch lingering ghost clicks on Mozilla
+              stepTouchTimeout = setTimeout(() => { stepTouchHandled = false; }, 500);
+          }
+
+          // NUCLEAR OPTION: Stop browser handling (Zoom, Scroll, Emulated Click)
+          if (e.cancelable) e.preventDefault();
+          e.stopPropagation();
+
+          // Visual Feedback
+          newBtn.classList.add("pressed");
+          setTimeout(() => newBtn.classList.remove("pressed"), 100);
+
+          // Logic
+          const step = parseInt(newBtn.getAttribute('data-step'));
+          adjustTrajDistance(step);
+
+          // Haptics
+          if (navigator.vibrate) navigator.vibrate(10);
+      };
+
+      // Add listeners for both Touch and Click
+      // Passive: false is required to allow e.preventDefault() to work
+      newBtn.addEventListener('touchstart', handleStep, { passive: false });
+      newBtn.addEventListener('click', handleStep);
+  });
+
+  // 4. Link slider input
+  const rangeInput = document.getElementById('trajectoryRange');
+  const newRange = rangeInput.cloneNode(true); // Clear old listeners
+  rangeInput.parentNode.replaceChild(newRange, rangeInput);
+  
+  newRange.addEventListener('input', (e) => {
+      updateTrajectoryFromDistance(parseInt(e.target.value));
+  });
+
+  // 5. Fix Keypad Events
   fixKeypadEvents();
 }
 
@@ -1907,6 +2037,25 @@ mapContainer.addEventListener("click", (e) => {
     distance: correctedDistance, 
     mil: mil
   };
+
+  // Refresh slider state if it's currently enabled
+  if (trajSliderEnabled) {
+    // 1. Re-calculate and "Lock" new angle
+    const dx = activeTarget.gameX - gunPos.x;
+    const dy = activeTarget.gameY - gunPos.y;
+    originalAngle = Math.atan2(dy, dx);
+
+    // 2. Snap slider handle
+    const trajInput = document.getElementById('trajectoryRange');
+    if (trajInput) trajInput.value = activeTarget.distance;
+
+    // 3. THE FIX: Explicitly update the text labels
+    const milDisplay = document.getElementById('trajCurrentMil');
+    const meterDisplay = document.getElementById('trajCurrentMeter');
+    
+    if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
+    if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
+  }
 
   renderMarkers();    
   renderTargeting();  
@@ -2112,6 +2261,13 @@ document.addEventListener("keydown", (e) => {
     // Only act if there is currently a target selected
     if (activeTarget) {
       activeTarget = null; // Clear target data
+      
+      // Disable trajectory slider when target is cleared
+      trajSliderEnabled = false;
+      const trajToggleBtn = document.getElementById('trajToggleBtn');
+      const trajContainer = document.getElementById('trajSliderContainer');
+      if (trajToggleBtn) trajToggleBtn.classList.remove('active');
+      if (trajContainer) trajContainer.classList.add('hidden');
       
       // Update visual states
       renderMarkers();     // Resets gun rotation (stops pointing at target)
@@ -2728,6 +2884,24 @@ function fireAtCenter() {
     mil: mil
   };
 
+  // --- FIX START ---
+  if (trajSliderEnabled) {
+      const dx = activeTarget.gameX - gunPos.x;
+      const dy = activeTarget.gameY - gunPos.y;
+      originalAngle = Math.atan2(dy, dx);
+
+      const trajInput = document.getElementById('trajectoryRange');
+      if (trajInput) trajInput.value = activeTarget.distance;
+
+      // Update Text Displays
+      const milDisplay = document.getElementById('trajCurrentMil');
+      const meterDisplay = document.getElementById('trajCurrentMeter');
+      
+      if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
+      if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
+  }
+  // --- FIX END ---
+
   renderMarkers();    
   renderTargeting();  
   render();           
@@ -2788,56 +2962,47 @@ const projectsModal = document.getElementById("projectsModal");
 const closeProjectsBtn = document.getElementById("closeProjectsBtn");
 
 if (btnOtherProjects && projectsModal) {
+    // Open Modal
     btnOtherProjects.addEventListener("click", (e) => {
         e.preventDefault();
         projectsModal.classList.add("active");
-        // Also blur the opening button immediately so it doesn't stick
-        btnOtherProjects.blur(); 
+        btnOtherProjects.blur(); // Blur opening button immediately
     });
 
+    // Close Logic
     const closeHub = () => {
         projectsModal.classList.remove("active");
-        // THE FIX: When the modal closes, force the browser to forget 
-        // focus on any button (prevents sticking grey/yellow)
+        // Force browser to forget focus when closing (prevents sticking grey/yellow)
         if (document.activeElement) {
             document.activeElement.blur();
         }
     };
 
-    closeProjectsBtn.onclick = closeHub;
+    if (closeProjectsBtn) closeProjectsBtn.onclick = closeHub;
 
     // Close if clicking the dark background
     projectsModal.onclick = (e) => {
         if (e.target === projectsModal) closeHub();
     };
     
-    // NEW: Target all buttons inside the hub to clear focus after clicking
+    // NEW: Target all buttons inside the hub to clear focus (Mobile Sticky Fix)
     const hubButtons = projectsModal.querySelectorAll('.footer-btn');
     hubButtons.forEach(btn => {
+        // 1. Prevent focus from sticking on initial touch/click
+        btn.addEventListener('mousedown', () => {
+            setTimeout(() => btn.blur(), 0);
+        });
+
+        // 2. Ensure blur happens after action triggers
         btn.addEventListener('click', () => {
-            // We use a small timeout to ensure the link opens before we kill focus
             setTimeout(() => {
                 btn.blur();
-                // Safety: if the user came back and it's still focused
+                // Double safety: if user came back and it's still focused
                 if (document.activeElement === btn) btn.blur();
             }, 100);
         });
     });
 }
-
-// Add this inside your projects modal logic where you handle the button clicks
-const hubButtons = projectsModal.querySelectorAll('.footer-btn');
-hubButtons.forEach(btn => {
-    btn.addEventListener('mousedown', () => {
-        // This stops the focus from ever sticking in the first place
-        setTimeout(() => btn.blur(), 0);
-    });
-    
-    btn.addEventListener('click', () => {
-        // Second safety check
-        setTimeout(() => btn.blur(), 100);
-    });
-});
 
 // Global reset when you switch back to the Artillery tab
 window.onfocus = function() {
@@ -2845,15 +3010,12 @@ window.onfocus = function() {
 };
 
 // --- FORCE RESET ON TAB RETURN (Mobile Fix) ---
-// This handles the "Back" button or switching tabs back to the app
 window.addEventListener('pageshow', (event) => {
     // If the page was restored from cache (bfcache) or just shown
     if (event.persisted || document.visibilityState === 'visible') {
-        // Kill focus on everything
         if (document.activeElement) {
             document.activeElement.blur();
         }
-        // Double tap: Explicitly blur all footer buttons
         document.querySelectorAll('.footer-btn').forEach(btn => btn.blur());
     }
 });

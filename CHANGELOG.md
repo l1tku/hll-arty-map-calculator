@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4] - 2026-01-19
+### Added
+- **Trajectory Adjustment Slider**: Implemented a new tool (toggled via the control bar) allowing precise distance modification along the established bearing vector. Users can now "walk" shots back and forth along the trajectory line without losing the angle.
+
+### Fixed
+- **Mobile Fire Offset**: Recalibrated the `fireAtCenter` coordinate logic to align the impact marker more accurately with the visual crosshair center on mobile devices.
+- **Map Transition Flicker**: Resolved a rendering issue where the previous map's texture or label text would briefly flash during the loading sequence of a new map.
+- **Dynamic Page Titles**: Fixed a bug where the browser tab title (`document.title`) failed to update with the active map name (e.g., "HLL Arty Calculator - Carentan").
+- **Mobile UI Ergonomics**:
+    - Relocated the mobile **Fire Button** lower on the screen to improve thumb reachability and prevent obstruction of the map view.
+    - Removed unsightly drop shadows from the vertical zoom slider buttons for a cleaner, flatter aesthetic.
+- **Trajectory Slider Interaction**: Added "gatekeeper" logic to the trajectory stepper buttons (`-25`, `-10`, etc.) to prevent double-firing events on Firefox Mobile browsers.
+
+### Performance
+- **Mobile Zoom Strategy**: Evaluated "smooth zoom" interpolation for mobile devices but reverted to standard step-zooming to preserve frame rates and prevent texture memory crashes on lower-end devices.
+
 ## [1.1.3] - 2026-01-17
 ### Fixed
 - **Desktop Stutter**: Eliminated micro-stutter during mouse-wheel zooming on desktop browsers by re-enabling `will-change: transform` strictly for non-mobile devices.

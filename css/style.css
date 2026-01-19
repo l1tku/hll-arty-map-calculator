@@ -71,6 +71,189 @@
 }
 
 /* ==========================================
+   TRAJECTORY STEPPER BUTTONS (Zoom Style Sync)
+   ========================================== */
+
+.traj-step-btn {
+    /* Exact Background and Border from Zoom Icons */
+    background-color: rgba(20, 20, 20, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    
+    /* Font Styling */
+    font-family: 'GothamSS', sans-serif;
+    font-weight: 900;
+    font-size: 14px; /* Matches zoom icons font size */
+    
+    /* Layout */
+    width: 36px;  /* Square-ish shape like zoom buttons */
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    
+    /* Interactions */
+    transition: background-color 0.1s, color 0.1s, transform 0.1s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 0; /* Keeps tactical square look */
+}
+
+/* Hover State (Desktop Only) */
+@media (hover: hover) {
+    .traj-step-btn:hover {
+        background-color: #ffc107 !important;
+        color: black !important;
+        border-color: #ffc107 !important;
+    }
+}
+
+/* Pressed State (Physical Feedback) */
+.traj-step-btn:active,
+.traj-step-btn.pressed {
+    background-color: #ffc107 !important;
+    color: black !important;
+    border-color: #ffc107 !important;
+    transform: scale(0.95) !important;
+    box-shadow: none !important;
+}
+
+/* Ensure the step groups are aligned correctly */
+.traj-step-group {
+    display: flex;
+    gap: 8px; /* Slightly wider gap for accessibility */
+    align-items: center;
+}
+
+
+#trajToggleBtn.active {
+    background-color: #ffc107 !important;
+    color: black !important;
+    border-color: #ffc107 !important;
+}
+
+
+
+/* ==========================================
+   TRAJECTORY BUTTON - EXACT HUD CLONE
+   ========================================== */
+
+/* SVG Handling */
+#trajToggleBtn svg {
+    display: block;
+    pointer-events: none;
+}
+
+/* Base State (Exact HUD Clone) */
+#trajToggleBtn {
+    background-color: rgba(20, 20, 20, 0.95) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    touch-action: manipulation; /* Removes 300ms browser delay */
+    -webkit-tap-highlight-color: transparent; /* Optional: removes tap highlight box */
+    user-select: none; /* Prevents text selection on rapid taps */
+    transition: background-color 0.1s, color 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Hover State (Exact HUD Clone) */
+@media (hover: hover) {
+    #trajToggleBtn:not(.active):hover {
+        background-color: rgba(60, 60, 60, 1) !important;
+        color: #ffc107 !important;
+    }
+}
+
+/* Active State (Exact HUD Clone) */
+#trajToggleBtn.active {
+    background-color: #ffc107 !important;
+    color: black !important;
+    border-color: #ffc107 !important;
+}
+
+/* Visual feedback on press (Exact HUD Clone) */
+#trajToggleBtn:active {
+    transform: scale(0.95);
+}
+
+/* ==========================================
+   TRAJECTORY SLIDER - VISUAL RESTORATION
+   ========================================== */
+
+.traj-slider-container {
+    position: fixed !important; /* Locks to screen glass, ignores map movement */
+    bottom: 50px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px !important;       
+    max-width: 95vw; 
+    box-sizing: border-box !important;
+    
+    background: rgba(15, 15, 15, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 3px solid #ffc107;
+    border-radius: 4px;
+    
+    padding: 12px 10px !important; 
+    z-index: 2500 !important; /* Higher than main panel */
+    pointer-events: auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* Forces slider track to expand between button groups */
+.traj-controls-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 36px; 
+    gap: 12px;
+}
+
+.traj-slider-inner {
+    position: relative;
+    flex: 1 !important; /* CRITICAL: Forces track to fill middle */
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+}
+
+#trajectoryRange {
+    width: 100% !important;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #ffc107;
+    display: block;
+    height: 30px; /* Larger hit area for fingers */
+    touch-action: none;
+}
+
+/* Hide old text displays for good */
+.traj-current-val-display, .traj-meter-display {
+    display: none !important;
+}
+
+/* Ensure step buttons stay tactical squares */
+.traj-step-group {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+/* Mobile Docking Fix */
+@media (max-width: 768px) {
+    .traj-slider-container {
+        bottom: 90px !important; 
+        width: 96vw !important;
+        padding: 10px 8px !important;
+    }
+}
+
+/* ==========================================
    GLOBAL SETTINGS
    ========================================== */
 * {
@@ -520,80 +703,141 @@ body {
 }
 
 /* ==========================================
-   MOBILE OPTIMIZATIONS (T-Shape Layout)
+   MOBILE MAIN PANEL - FIXED POSITIONING FIX
    ========================================== */
 @media (max-width: 768px) {
 
-  /* 1. THE PANEL (ROUNDED & WRAPPED) */
-  .controls-content {
-    /* Enable wrapping so we can put Map on top, others below */
-    display: flex;
-    flex-wrap: wrap; 
-    justify-content: space-between;
-    
-    /* ROUND THE SHARP CORNERS */
-    border-radius: 12px 12px 0 0 !important;
-    border-bottom: none !important;
-    
-    padding: 10px !important;
-    gap: 8px; /* Space between === rows */
-    width: 100% !important;
-    box-sizing: border-box;
-  }
+    /* 1. DRAWER: Lock to screen edges (Stops sideways movement) */
+    .controls-drawer {
+        position: fixed !important; /* Breaks out of the moving shell */
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        
+        z-index: 2000 !important; /* Ensure it sits on top of map */
+        pointer-events: none; /* Allows touches to pass through empty space above */
+    }
 
-  /* 2. FIRST ITEM (MAP) - FULL WIDTH */
-  /* This targets the first dropdown (Map) to make it take the whole top row */
-  .controls-content > .custom-dropdown:nth-child(1),
-  .controls-content > .btn-map-select:nth-child(1) {
-    width: 100% !important;
-    flex: 0 0 100% !important;
-  }
+    /* 2. PRESERVE ANIMATION: Ensure it can still slide down */
+    .controls-drawer.closed {
+        transform: translateY(100%) !important;
+    }
 
-  /* 3. OTHER ITEMS (FACTION & GUN) - 50% SPLIT */
-  /* This targets the 2nd and 3rd items to share the bottom row */
-  .controls-content > .custom-dropdown:nth-child(2),
-  .controls-content > .custom-dropdown:nth-child(3),
-  .controls-content > .btn-map-select:not(:first-child) {
-    /* Use calc to share width minus the gap */
-    width: calc(50% - 4px) !important;
-    flex: 0 0 calc(50% - 4px) !important;
-  }
+    /* 3. CONTENT: Full Width Box */
+    .controls-content {
+        pointer-events: auto; /* Re-enable clicks */
+        width: 100% !important;
+        max-width: none !important;
+        
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: space-between;
+        align-items: stretch;
+        
+        /* Visuals */
+        background-color: #181818 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        border-left: none !important;
+        border-right: none !important;
+        border-radius: 12px 12px 0 0 !important;
+        
+        /* Padding: Extra bottom space for iPhone Home Bar */
+        padding: 10px 10px 25px 10px !important; 
+        gap: 8px;
+    }
 
-  /* 4. BIGGER DRAWER BUTTON (SCALED UP) */
-  .drawer-tab {
-    /* Make it wider and taller for touch */
-    width: 80px !important; 
-    height: 32px !important;
-    
-    /* Position it to sit perfectly on the rounded corners */
-    top: -31px !important; 
-    
-    /* Center it */
-    left: 50%;
-    transform: translateX(-50%);
-    
-    /* Round tab corners */
-    border-radius: 10px 10px 0 0 !important;
-    z-index: 1300 !important;
-  }
+    /* 4. BUTTON LAYOUT (T-Shape) */
+    /* Map Button (Top Row) */
+    .custom-dropdown:nth-child(1),
+    .btn-map-select:nth-child(1) {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+    }
 
-  /* 5. TEXT SAFETY */
-  /* Ensure long text cuts off with "..." instead of breaking layout */
-  .btn-map-select span, 
-  #currentMapName, 
-  #factionLabel, 
-  #gunLabel {
-    font-size: 12px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
+    /* Faction & Gun Buttons (Bottom Row) */
+    .custom-dropdown:nth-child(2),
+    .custom-dropdown:nth-child(3) {
+        /* Use calc to split exactly 50% minus half of gap */
+        width: calc(50% - 4px) !important;
+        flex: 0 0 calc(50% - 4px) !important;
+        min-width: 0; /* Critical for text ellipsis to work */
+    }
+
+    /* 5. TEXT OVERLAP FIX */
+    .btn-map-select {
+        min-height: 48px !important;
+        padding: 0 10px !important;
+    }
+
+    #currentMapName, 
+    #factionLabel, 
+    #gunLabel {
+        font-size: 13px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Adds "..." if text is too long */
+        display: block !important;
+        max-width: 100% !important;
+    }
+    
+    /* 6. TAB CENTERING */
+    .drawer-tab {
+        position: absolute !important;
+        top: -32px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 80px !important;
+        pointer-events: auto;
+    }
+}
+
+/* ==========================================
+   MOBILE MAIN PANEL FIX (Docking & Width)
+   ========================================== */
+
+@media (max-width: 768px) {
+    /* 1. RESET PARENT CONTAINER
+       Removing 'transform' allows the child drawer's 'position: fixed' 
+       to work correctly relative to the viewport. */
+    .main-ui-overlay {
+        transform: none !important;   /* CRITICAL FIX: Stops breaking position:fixed */
+        left: 0 !important;           /* Reset centering hack */
+        width: 100% !important;       /* Force full width */
+        bottom: 0 !important;         
+        
+        /* Ensure scale bar stays centered visually */
+        align-items: center;
+        justify-content: flex-end;    /* Push content to bottom */
+    }
+
+    /* 2. ENSURE DRAWER IS LOCKED */
+    .controls-drawer {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        z-index: 2000 !important;
+    }
+
+    /* 3. ENSURE CONTENT FILLS WIDTH */
+    .controls-content {
+        width: 100% !important;
+        max-width: none !important;
+        border-radius: 12px 12px 0 0 !important; /* Rounded top corners only */
+        padding-bottom: max(20px, env(safe-area-inset-bottom)) !important; /* iPhone Home Bar Safety */
+    }
 }
 
 /* ==========================================
    UI CONTROLS
    ========================================== */
-.debug-overlay {
+/* 1. RAISE THE MAIN UI CONTAINER (Map/Faction/Gun Panel) */
+.main-ui-overlay {
   position: absolute; 
   bottom: 0; /* CHANGE: Was 20px. Now 0 to dock it to the edge. */
   left: 50%; 
@@ -602,8 +846,11 @@ body {
   flex-direction: column; 
   align-items: center; 
   gap: 5px;
-  pointer-events: none; 
-  z-index: 100;
+  
+  /* CRITICAL CHANGE: Increased from 100 to 2000 so it beats everything */
+  z-index: 2000 !important; 
+  
+  pointer-events: none; /* Lets clicks pass through empty spaces */
 }
 
 /* SCALE BAR & ZOOM INDICATOR */
@@ -1687,10 +1934,12 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 .zoom-slider-handle {
   position: absolute; left: 50%; bottom: 0%; transform: translate(-50%, 50%); 
   width: 24px; height: 16px; background-color: #ffffff;
-  border: 2px solid #000000; border-radius: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+  border: 2px solid #000000; border-radius: 0; 
   cursor: grab; touch-action: none; 
   
   pointer-events: auto !important; /* Allow grabbing the handle */
+  /* CHANGE: Removed box-shadow */
+  box-shadow: none !important;
 }
 
 .zoom-slider-handle:active {
@@ -1709,6 +1958,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   font-family: 'GothamSS', sans-serif; font-weight: 900; font-size: 20px;
   cursor: pointer; user-select: none; transition: background-color 0.1s;
   -webkit-tap-highlight-color: transparent; 
+  /* CHANGE: Removed box-shadow */
+  box-shadow: none !important;
 }
 
 @media (hover: hover) {
@@ -1721,6 +1972,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 .zoom-icons span.pressed {
   background-color: #ffc107 !important; color: black !important;
   border-color: #ffc107 !important; transform: scale(0.95);
+  /* CHANGE: Force shadow removal on press */
+  box-shadow: none !important;
 }
 
 /* Ensure the Ruler icon inside the zoom slider looks correct */
@@ -2530,7 +2783,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* --- Mobile Fire Button (Centered & Lower) --- */
 .mobile-fire-btn {
   position: absolute;
-  bottom: 50px; 
+  bottom: 40px; 
   left: 50%;
   transform: translateX(-50%);
   right: auto;
@@ -3293,5 +3546,57 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     background-color: rgba(20, 20, 20, 0.95) !important;
     color: white !important;
   }
+}
+
+/* ==========================================
+   MOBILE ZOOM & SCALE FIX (Lifted +50px)
+   ========================================== */
+
+@media (max-width: 768px) {
+    /* 1. Container: Lifted Up */
+    .scale-container {
+        display: block !important;        
+        width: 100% !important;
+        height: 40px !important;
+        position: relative !important;
+        
+        /* CHANGED: Increased from 25px to 75px to move everything up */
+        margin-bottom: 160px !important;   
+        
+        pointer-events: none !important;
+    }
+
+    /* 2. Meter Scale: Force Absolute Centering */
+    .scale-wrapper {
+        position: absolute !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        bottom: 0 !important;
+        margin: 0 !important;
+        z-index: 5 !important;
+    }
+
+    /* 3. Zoom Indicator: Pinned to Right Edge */
+    .zoom-indicator-inline {
+        position: absolute !important;
+        right: 15px !important;
+        bottom: 15px !important;           /* Moved up 5px from 2px */
+        left: auto !important;
+        top: auto !important;
+        width: auto !important;
+        transform: none !important;
+        margin: 0 !important;
+        z-index: 10 !important;
+        display: block !important;
+    }
+
+    /* 4. Text Styling */
+    #zoomIndicator {
+        text-align: right !important;
+        font-size: 16px !important;
+        display: block !important;
+        line-height: 1 !important;
+        text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
+    }
 }
 
