@@ -22,26 +22,6 @@ let MAX_ZOOM = 10;
 const ZOOM_STEP = 0.5; 
 const MARKER_ROTATION_DEG = 0; 
 
-// Performance optimization: RAF throttling for trajectory updates
-let trajUpdatePending = false;
-
-// Performance optimization: Ruler label pooling
-let rulerLabelPool = [];
-
-// Performance optimization: Canvas for targeting visuals
-let targetingCanvas = null;
-let targetingCtx = null;
-
-// Performance optimization: Cache frequently accessed DOM elements
-const cached = {
-  mapImage: null,
-  markersLayer: null,
-  mapContainer: null,
-  trajCurrentMil: null,
-  trajCurrentMeter: null,
-  factionLabel: null
-};
-
 // Initial State
 let state = { scale: 1, fitScale: 1, panning: false, pointX: 0, pointY: 0, startX: 0, startY: 0 };
 let currentZoomLevel = 1;
@@ -747,7 +727,7 @@ function getActiveGunCoords() {
 }
 
 function renderTargeting() {
-  const layer = cached.markersLayer || document.getElementById("markers");
+  const layer = document.getElementById("markers");
   
   // 1. CLEANUP
   layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg, .ruler-mil-label').forEach(el => el.remove());
@@ -766,7 +746,7 @@ function renderTargeting() {
   if (panel) panel.classList.remove("hidden");
 
   const gunPos = getActiveGunCoords();
-  const mapImage = cached.mapImage || document.getElementById("mapImage");
+  const mapImage = document.getElementById("mapImage");
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   
@@ -789,8 +769,7 @@ function renderTargeting() {
   
   // Calculate total distance in meters based on the CORRECT scale
   const totalDistanceMeters = totalDistPx / pixelsPerMeter;
-  // Performance optimization: Fewer markers at high zoom
-  const intervalMeters = state.scale > 5 ? 100 : 50; 
+  const intervalMeters = 50; 
   const intervalPx = intervalMeters * pixelsPerMeter;
 
   // Calculate pixel size for 10m segments
@@ -826,13 +805,9 @@ function renderTargeting() {
     const numMarkers = Math.floor(lineLength / intervalPx);
     const MAX_RULER_DIST = 1600;
 
-    const factionLabel = cached.factionLabel ? cached.factionLabel.innerText : "US";
+    const factionLabel = document.getElementById("factionLabel").innerText;
     const cosAngle = Math.cos(angleRad);
     const sinAngle = Math.sin(angleRad);
-
-    // Clear existing ruler labels from pool
-    rulerLabelPool.forEach(label => label.remove());
-    rulerLabelPool = [];
 
     for (let i = 2; i <= numMarkers; i++) {
       const markerX = i * intervalPx;
@@ -851,7 +826,7 @@ function renderTargeting() {
       tick.setAttribute("class", "ruler-tick");
       lineSvg.appendChild(tick);
 
-      // 2. Create/Reuse DIV Label
+      // 2. Standard DIV Label
       const labelX = start.x + cosAngle * markerX;
       const labelY = start.y + sinAngle * markerX;
 
@@ -867,7 +842,6 @@ function renderTargeting() {
       milLabel.style.top = `${labelY}px`;
       
       layer.appendChild(milLabel);
-      rulerLabelPool.push(milLabel);
     }
   }
   
@@ -1046,12 +1020,12 @@ function updateRealScale(effectiveZoom) {
 }
 
 function updateDimensions() {
-  const mapImage = cached.mapImage || document.getElementById("mapImage");
+  const mapImage = document.getElementById("mapImage");
   
   // FIX: Check naturalWidth to prevent "Stuck Zoom" bug on browser restore
   if (!mapImage.complete || mapImage.naturalWidth === 0) return;
   
-  const rect = (cached.mapContainer || document.getElementById("mapContainer")).getBoundingClientRect();
+  const rect = mapContainer.getBoundingClientRect();
   
   state.fitScale = Math.min(rect.width / mapImage.naturalWidth, rect.height / mapImage.naturalHeight);
   
@@ -1065,18 +1039,6 @@ function updateDimensions() {
 
   if (state.scale < MIN_ZOOM) state.scale = MIN_ZOOM;
   if (state.scale > MAX_ZOOM) state.scale = MAX_ZOOM;
-  
-  // Resize targeting canvas for performance optimization
-  if (targetingCanvas && targetingCtx) {
-    const rect = (cached.mapContainer || document.getElementById("mapContainer")).getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    
-    targetingCanvas.width = rect.width * dpr;
-    targetingCanvas.height = rect.height * dpr;
-    targetingCanvas.style.width = rect.width + "px";
-    targetingCanvas.style.height = rect.height + "px";
-    targetingCtx.scale(dpr, dpr);
-  }
 }
 
 function centerMap() {
@@ -1844,20 +1806,16 @@ function initArtyControls() {
       // 2. If clicking buttons, 'adjustTrajDistance' updates the input BEFORE calling this.
       // Removing this stops the "snap back" glitch on mobile.
 
-      // Update Text Displays (light immediate updates)
-      if (cached.trajCurrentMil) cached.trajCurrentMil.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
-      if (cached.trajCurrentMeter) cached.trajCurrentMeter.innerText = activeTarget.distance + "m";
+      // Update Text Displays
+      const milDisplay = document.getElementById('trajCurrentMil');
+      const meterDisplay = document.getElementById('trajCurrentMeter');
+      
+      if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
+      if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
 
-      // Heavy DOM updates throttled with RAF
-      if (!trajUpdatePending) {
-          trajUpdatePending = true;
-          requestAnimationFrame(() => {
-              renderMarkers();
-              renderTargeting();
-              render();
-              trajUpdatePending = false;
-          });
-      }
+      renderMarkers();
+      renderTargeting();
+      render();
   }
 
   // 3. Attach listeners to step buttons (Mozilla Mobile Double-Tap Fix)
@@ -1963,26 +1921,32 @@ function saveState() {
 }
 
 function loadState() {
-    try {
-        const savedState = localStorage.getItem('hllArtyCalculatorState');
-        if (!savedState) return null;
-        
-        const loaded = JSON.parse(savedState);
-        if (!loaded || !loaded.activeMapKey || !MAP_DATABASE[loaded.activeMapKey]) return null;
-        
-        activeMapKey = loaded.activeMapKey;
-        activeFaction = loaded.activeFaction || 'us';
-        activeGunIndex = loaded.activeGunIndex || 0;
-        manualCalcFaction = loaded.manualCalcFaction || 'us';
-        rulerEnabled = !!loaded.rulerEnabled;
-        hudEnabled = !!loaded.hudEnabled;
-        window.savedPanelHidden = !!loaded.panelHidden;
-        
-        return true; 
-    } catch (e) {
-        console.error("Load state failed", e);
-        return null;
-    }
+  try {
+    const savedState = localStorage.getItem('hllArtyCalculatorState');
+    if (!savedState) return null;
+    
+    const loaded = JSON.parse(savedState);
+    
+    // FAILSAFE: If the saved map doesn't exist anymore, abort load
+    if (!MAP_DATABASE[loaded.activeMapKey]) return null;
+    
+    // RESTORE VARIABLES
+    activeMapKey = loaded.activeMapKey;
+    activeFaction = loaded.activeFaction || 'us';
+    activeGunIndex = loaded.activeGunIndex || 0;
+    manualCalcFaction = loaded.manualCalcFaction || 'us';
+    rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : false;
+    hudEnabled = loaded.hudEnabled !== undefined ? loaded.hudEnabled : false;
+    
+    // Restore Panel State
+    window.savedPanelHidden = loaded.panelHidden || false;
+    
+    // NOTE: We do NOT restore zoom/pan. initMap() will center the map cleanly.
+    
+    return true; 
+  } catch (error) {
+    return null;
+  }
 }
 
 function clearSavedState() {
@@ -2175,98 +2139,47 @@ mapContainer.addEventListener("wheel", (e) => {
   }, 100); // Faster recovery time (100ms)
 }, { passive: false });
 
-// --- 4. PANNING LOGIC (DESKTOP - NO SLIDING) ---
-let panAnimationFrame;
-
+// --- 4. PANNING LOGIC (DESKTOP) ---
 mapContainer.addEventListener("mousedown", (e) => {
-    // Only handle left click
-    if (e.button !== 0) return;
-    
-    e.preventDefault();
-    
-    // 1. CRITICAL: Stop the "Wheel Zoom" timer from re-enabling animations mid-drag
-    if (window.wheelStopTimeout) {
-        clearTimeout(window.wheelStopTimeout);
-        window.wheelStopTimeout = null;
-    }
+  e.preventDefault();
+  
+  // FIX: Kill transitions on BOTH map and labels immediately
+  toggleTransitions(false); 
+  
+  state.panning = true;
+  isDragging = false; 
+  
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
 
-    // 2. Kill CSS Transitions Immediately
-    // We remove the class AND force the inline style to be sure
-    mapStage.classList.remove("zoom-transition");
-    mapStage.style.transition = "none";
-    
-    const labelLayer = document.getElementById("labelLayer");
-    if (labelLayer) {
-        labelLayer.classList.remove("zoom-transition");
-        labelLayer.style.transition = "none";
-    }
-    
-    state.panning = true;
-    isDragging = false; 
-    
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-
-    state.startX = e.clientX - state.pointX;
-    state.startY = e.clientY - state.pointY;
+  state.startX = e.clientX - state.pointX;
+  state.startY = e.clientY - state.pointY;
+  
+  // REMOVED: mapContainer.style.cursor = "grabbing"; 
+  // We don't change the cursor yet!
 });
 
 window.addEventListener("mousemove", (e) => {
-    if (!state.panning) return;
-    e.preventDefault();
+  if (!state.panning) return;
+  e.preventDefault();
 
-    // 1. Threshold check
-    if (!isDragging) {
-        const moveDist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
-        if (moveDist > DRAG_THRESHOLD) {
-            isDragging = true;
-            mapContainer.style.cursor = "grabbing";
-        }
-    }
+  const moveDist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+  
+  // FIX: Only start the logic if we crossed the threshold
+  if (!isDragging && moveDist > DRAG_THRESHOLD) {
+      isDragging = true;
+      mapContainer.style.cursor = "grabbing";
+  }
 
-    // 2. Movement Logic
-    if (isDragging) {
-        state.pointX = e.clientX - state.startX;
-        state.pointY = e.clientY - state.startY;
-
-        // Optimization: Apply transform directly during drag
-        // This bypasses the heavy render() loop for pure speed
-        if (!panAnimationFrame) {
-            panAnimationFrame = requestAnimationFrame(() => {
-                // Safety: Force transition off again in case a timer tried to add it
-                mapStage.style.transition = "none"; 
-                
-                const drawScale = state.scale * state.fitScale;
-                mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
-                
-                panAnimationFrame = null;
-            });
-        }
-    }
+  // FIX: Only pan the map if we are officially dragging
+  if (isDragging) {
+      handleMove(e.clientX, e.clientY);
+  }
 });
 
 window.addEventListener("mouseup", () => {
-    if (!state.panning) return;
-    
-    state.panning = false;
-    mapContainer.style.cursor = "";
-    
-    if (panAnimationFrame) {
-        cancelAnimationFrame(panAnimationFrame);
-        panAnimationFrame = null;
-    }
-    
-    // 3. Snap to final position and restore high-quality rendering
-    render(); 
-    saveState();
-    
-    // 4. Re-enable Smooth Zoom (only after drag is fully complete)
-    // We use a small delay to ensure the 'render()' snap doesn't get animated
-    setTimeout(() => {
-         mapStage.classList.add("zoom-transition");
-         mapStage.style.transition = ""; // Clear inline override so CSS takes over
-         document.getElementById("labelLayer")?.classList.add("zoom-transition");
-    }, 50);
+  state.panning = false;
+  mapContainer.style.cursor = ""; // Returns to the crosshair/dot cursor
 });
 
 // --- 5. PANNING LOGIC (MOBILE) ---
@@ -2301,26 +2214,16 @@ mapContainer.addEventListener("touchmove", (e) => {
   if (e.cancelable) e.preventDefault(); 
 
   if (e.touches.length === 1 && state.panning) {
-    // Threshold check
+    // Check Threshold
     const moveDist = Math.hypot(e.touches[0].clientX - dragStartX, e.touches[0].clientY - dragStartY);
     
     if (!isDragging && moveDist > DRAG_THRESHOLD) {
         isDragging = true;
     }
 
+    // FIX: Only move if confirmed dragging
     if (isDragging) {
-        // DIRECT UPDATE (like desktop)
-        state.pointX = e.touches[0].clientX - state.startX;
-        state.pointY = e.touches[0].clientY - state.startY;
-
-        // Optimized: Apply transform directly during drag via RAF (bypasses full render())
-        if (!panAnimationFrame) {
-            panAnimationFrame = requestAnimationFrame(() => {
-                const drawScale = state.scale * state.fitScale;
-                mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
-                panAnimationFrame = null;
-            });
-        }
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
     }
   } 
   else if (e.touches.length === 2 && initialPinchDistance) {
@@ -2356,18 +2259,26 @@ mapContainer.addEventListener("touchend", (e) => {
   }
   if (e.touches.length === 0) {
     state.panning = false;
-    isDragging = false;
-
-    if (panAnimationFrame) {
-        cancelAnimationFrame(panAnimationFrame);
-        panAnimationFrame = null;
-    }
-
-    // Final high-quality render + re-enable transitions
-    render();
-    toggleTransitions(true); // or setTimeout to re-add zoom-transition class
   }
 });
+
+// Shared Move Handler
+function handleMove(clientX, clientY) {
+  state.pointX = clientX - state.startX;
+  state.pointY = clientY - state.startY;
+  
+  if (!isRendering) {
+    isRendering = true;
+    requestAnimationFrame(() => {
+      render();
+      isRendering = false;
+    });
+  }
+  
+  // Auto-save pan changes (debounced)
+  clearTimeout(window.savePanTimeout);
+  window.savePanTimeout = setTimeout(saveState, 1000);
+}
 
 // Fix for "Sticky Hover" on mobile
 // (Mobile phones sometimes keep the :hover state after a tap)
@@ -2544,20 +2455,6 @@ if (toggleBtn && drawer) {
           saveState();
       });
   }
-  
-  // Initialize targeting canvas for performance optimization
-  targetingCanvas = document.getElementById("targetingCanvas");
-  if (targetingCanvas) {
-    targetingCtx = targetingCanvas.getContext("2d");
-  }
-  
-  // Cache frequently accessed DOM elements
-  cached.mapImage = document.getElementById("mapImage");
-  cached.markersLayer = document.getElementById("markers");
-  cached.mapContainer = document.getElementById("mapContainer");
-  cached.trajCurrentMil = document.getElementById("trajCurrentMil");
-  cached.trajCurrentMeter = document.getElementById("trajCurrentMeter");
-  cached.factionLabel = document.getElementById("factionLabel");
   
   // Inject version number into UI elements
   const versionEl = document.getElementById('appVersion');
@@ -3040,40 +2937,114 @@ function fireAtCenter() {
 }
 
 // ==========================================
-// 7. FINAL INITIALIZATION
+// 6. EXECUTION START
 // ==========================================
 
-// Cache often-used elements once
-cached.mapImage = document.getElementById("mapImage");
-cached.markersLayer = document.getElementById("markers");
-cached.mapContainer = document.getElementById("mapContainer");
-cached.trajCurrentMil = document.getElementById("trajCurrentMil");
-cached.trajCurrentMeter = document.getElementById("trajCurrentMeter");
-cached.factionLabel = document.getElementById("factionLabel");
+// Build initial UI
+renderMapGrid(""); 
 
-// Load Map Image and Start Rendering
+// Load saved data
+loadState();
+
+// 6. Load Map Image and Start Rendering
+const imgEl = document.getElementById("mapImage");
+
 const onInitLoadWithRetry = function() {
-    if (cached.mapImage.naturalWidth === 0) {
-        setTimeout(onInitLoadWithRetry, 50);
-        return;
-    }
+  // FIX: Loop until image has physical dimensions (Fixes "Stuck Zoom" on Reload)
+  if (imgEl.naturalWidth === 0) {
+      setTimeout(onInitLoadWithRetry, 50);
+      return;
+  }
 
-    if (MAP_DATABASE[activeMapKey]) {
-        updatePageTitle(MAP_DATABASE[activeMapKey].name);
-    }
+  // --- ADD THIS LINE HERE ---
+  if (MAP_DATABASE[activeMapKey]) {
+      updatePageTitle(MAP_DATABASE[activeMapKey].name);
+  }
 
-    initMap(); 
-    render();
-    syncToggleUI(); 
-    hideLoading();
+  initMap(); 
+  render();
+  syncToggleUI(); 
+  hideLoading();
 };
 
-// Start the engine
-if (MAP_DATABASE[activeMapKey]) {
-    cached.mapImage.src = MAP_DATABASE[activeMapKey].image;
-    if (cached.mapImage.complete) {
-        onInitLoadWithRetry();
-    } else {
-        cached.mapImage.onload = onInitLoadWithRetry;
-    }
+// Set image source and trigger load
+imgEl.src = MAP_DATABASE[activeMapKey].image;
+
+if (imgEl.complete) {
+  onInitLoadWithRetry();
+} else {
+  imgEl.onload = onInitLoadWithRetry;
 }
+
+// Ensure ResizeObserver doesn't trigger bad math if image isn't ready
+new ResizeObserver(() => { 
+    if (imgEl.naturalWidth > 0) {
+        updateDimensions(); 
+        render(); 
+    }
+}).observe(mapContainer);
+
+// --- PROJECTS MODAL LOGIC ---
+
+const btnOtherProjects = document.getElementById("btnOtherProjects");
+const projectsModal = document.getElementById("projectsModal");
+const closeProjectsBtn = document.getElementById("closeProjectsBtn");
+
+if (btnOtherProjects && projectsModal) {
+    // Open Modal
+    btnOtherProjects.addEventListener("click", (e) => {
+        e.preventDefault();
+        projectsModal.classList.add("active");
+        btnOtherProjects.blur(); // Blur opening button immediately
+    });
+
+    // Close Logic
+    const closeHub = () => {
+        projectsModal.classList.remove("active");
+        // Force browser to forget focus when closing (prevents sticking grey/yellow)
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+    };
+
+    if (closeProjectsBtn) closeProjectsBtn.onclick = closeHub;
+
+    // Close if clicking the dark background
+    projectsModal.onclick = (e) => {
+        if (e.target === projectsModal) closeHub();
+    };
+    
+    // NEW: Target all buttons inside the hub to clear focus (Mobile Sticky Fix)
+    const hubButtons = projectsModal.querySelectorAll('.footer-btn');
+    hubButtons.forEach(btn => {
+        // 1. Prevent focus from sticking on initial touch/click
+        btn.addEventListener('mousedown', () => {
+            setTimeout(() => btn.blur(), 0);
+        });
+
+        // 2. Ensure blur happens after action triggers
+        btn.addEventListener('click', () => {
+            setTimeout(() => {
+                btn.blur();
+                // Double safety: if user came back and it's still focused
+                if (document.activeElement === btn) btn.blur();
+            }, 100);
+        });
+    });
+}
+
+// Global reset when you switch back to the Artillery tab
+window.onfocus = function() {
+    document.querySelectorAll('button').forEach(b => b.blur());
+};
+
+// --- FORCE RESET ON TAB RETURN (Mobile Fix) ---
+window.addEventListener('pageshow', (event) => {
+    // If the page was restored from cache (bfcache) or just shown
+    if (event.persisted || document.visibilityState === 'visible') {
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+        document.querySelectorAll('.footer-btn').forEach(btn => btn.blur());
+    }
+});

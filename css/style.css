@@ -352,8 +352,8 @@ body {
 /* ==========================================
    DESKTOP SMOOTH ZOOM FIX (Safe for Mobile)
    ========================================== */
-/* CHANGE: Lowered from 1025px to 769px to enable GPU on ALL Desktops/Laptops */
-@media (min-width: 769px) {
+/* 1025px ensures this NEVER runs on phones (even Pro Max in landscape) */
+@media (min-width: 1025px) {
   
   /* 1. Hardware Acceleration (Desktop Only) */
   .map-stage {
@@ -376,14 +376,6 @@ body {
     transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
     will-change: transform;
   }
-}
-
-/* Mobile GPU Optimizations (Lighter than will-change) */
-.map-stage {
-  -webkit-backface-visibility: hidden; /* Common trick */
-  backface-visibility: hidden;
-  -webkit-perspective: 1000; /* Optional */
-  perspective: 1000;
 }
 
 .map-image {
@@ -453,21 +445,11 @@ body {
    MARKERS
    ========================================== */
 .markers-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none;
-  z-index: 10;
-}
-
-.targeting-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 9;
+  z-index: 50; /* Much higher than marker-label */
+  text-rendering: geometricPrecision;
+  shape-rendering: geometricPrecision;
 }
 
 .marker {
