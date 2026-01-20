@@ -50,26 +50,6 @@
   margin-top: 2px; 
 }
 
-/* Mobile Adjustment */
-@media (max-width: 768px) {
-  .modal-brand-header {
-    /* Ensure padding accommodates the X button on the right */
-    padding: 20px 50px 20px 20px; 
-    gap: 8px; /* Slightly tighter gap on mobile, but still separated */
-    min-height: 60px;
-  }
-
-  .main-title {
-    font-size: 24px !important;
-    letter-spacing: 1px;
-  }
-
-  .main-subtitle-credits {
-    font-size: 9px;
-    letter-spacing: 1.5px;
-  }
-}
-
 /* ==========================================
    TRAJECTORY STEPPER BUTTONS (Zoom Style Sync)
    ========================================== */
@@ -83,11 +63,15 @@
     /* Font Styling */
     font-family: 'GothamSS', sans-serif;
     font-weight: 900;
-    font-size: 14px; /* Matches zoom icons font size */
+    font-size: 14px; 
     
-    /* Layout */
-    width: 36px;  /* Square-ish shape like zoom buttons */
-    height: 36px;
+    /* Layout: THE SQUARE FIX */
+    width: 36px !important;  
+    height: 36px !important;
+    aspect-ratio: 1 / 1 !important; /* Forces a perfect square */
+    flex-shrink: 0 !important;      /* Prevents the buttons from squishing */
+    padding: 0 !important;          /* Removes padding that affects squareness */
+    
     display: flex;
     align-items: center;
     justify-content: center;
@@ -97,7 +81,7 @@
     transition: background-color 0.1s, color 0.1s, transform 0.1s;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    border-radius: 0; /* Keeps tactical square look */
+    border-radius: 0; 
 }
 
 /* Hover State (Desktop Only) */
@@ -199,7 +183,11 @@
     border-radius: 4px;
     
     padding: 12px 10px !important; 
-    z-index: 2500 !important; /* Higher than main panel */
+    
+    /* CHANGED: Lowered to 400.
+       This places it BELOW the Target Panel (2005) to prevent stacking conflicts. */
+    z-index: 400 !important; 
+    
     pointer-events: auto;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
@@ -242,15 +230,6 @@
     display: flex;
     gap: 5px;
     flex-shrink: 0;
-}
-
-/* Mobile Docking Fix */
-@media (max-width: 768px) {
-    .traj-slider-container {
-        bottom: 90px !important; 
-        width: 96vw !important;
-        padding: 10px 8px !important;
-    }
 }
 
 /* ==========================================
@@ -373,8 +352,8 @@ body {
 /* ==========================================
    DESKTOP SMOOTH ZOOM FIX (Safe for Mobile)
    ========================================== */
-/* 1025px ensures this NEVER runs on phones (even Pro Max in landscape) */
-@media (min-width: 1025px) {
+/* CHANGE: Lowered from 1025px to 769px to enable GPU on ALL Desktops/Laptops */
+@media (min-width: 769px) {
   
   /* 1. Hardware Acceleration (Desktop Only) */
   .map-stage {
@@ -397,6 +376,14 @@ body {
     transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
     will-change: transform;
   }
+}
+
+/* Mobile GPU Optimizations (Lighter than will-change) */
+.map-stage {
+  -webkit-backface-visibility: hidden; /* Common trick */
+  backface-visibility: hidden;
+  -webkit-perspective: 1000; /* Optional */
+  perspective: 1000;
 }
 
 .map-image {
@@ -466,11 +453,21 @@ body {
    MARKERS
    ========================================== */
 .markers-layer {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  z-index: 50; /* Much higher than marker-label */
-  text-rendering: geometricPrecision;
-  shape-rendering: geometricPrecision;
+  z-index: 10;
+}
+
+.targeting-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9;
 }
 
 .marker {
@@ -703,137 +700,6 @@ body {
 }
 
 /* ==========================================
-   MOBILE MAIN PANEL - FIXED POSITIONING FIX
-   ========================================== */
-@media (max-width: 768px) {
-
-    /* 1. DRAWER: Lock to screen edges (Stops sideways movement) */
-    .controls-drawer {
-        position: fixed !important; /* Breaks out of the moving shell */
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        
-        z-index: 2000 !important; /* Ensure it sits on top of map */
-        pointer-events: none; /* Allows touches to pass through empty space above */
-    }
-
-    /* 2. PRESERVE ANIMATION: Ensure it can still slide down */
-    .controls-drawer.closed {
-        transform: translateY(100%) !important;
-    }
-
-    /* 3. CONTENT: Full Width Box */
-    .controls-content {
-        pointer-events: auto; /* Re-enable clicks */
-        width: 100% !important;
-        max-width: none !important;
-        
-        display: flex;
-        flex-wrap: wrap; 
-        justify-content: space-between;
-        align-items: stretch;
-        
-        /* Visuals */
-        background-color: #181818 !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.3);
-        border-left: none !important;
-        border-right: none !important;
-        border-radius: 12px 12px 0 0 !important;
-        
-        /* Padding: Extra bottom space for iPhone Home Bar */
-        padding: 10px 10px 25px 10px !important; 
-        gap: 8px;
-    }
-
-    /* 4. BUTTON LAYOUT (T-Shape) */
-    /* Map Button (Top Row) */
-    .custom-dropdown:nth-child(1),
-    .btn-map-select:nth-child(1) {
-        width: 100% !important;
-        flex: 0 0 100% !important;
-    }
-
-    /* Faction & Gun Buttons (Bottom Row) */
-    .custom-dropdown:nth-child(2),
-    .custom-dropdown:nth-child(3) {
-        /* Use calc to split exactly 50% minus half of gap */
-        width: calc(50% - 4px) !important;
-        flex: 0 0 calc(50% - 4px) !important;
-        min-width: 0; /* Critical for text ellipsis to work */
-    }
-
-    /* 5. TEXT OVERLAP FIX */
-    .btn-map-select {
-        min-height: 48px !important;
-        padding: 0 10px !important;
-    }
-
-    #currentMapName, 
-    #factionLabel, 
-    #gunLabel {
-        font-size: 13px !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important; /* Adds "..." if text is too long */
-        display: block !important;
-        max-width: 100% !important;
-    }
-    
-    /* 6. TAB CENTERING */
-    .drawer-tab {
-        position: absolute !important;
-        top: -32px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: 80px !important;
-        pointer-events: auto;
-    }
-}
-
-/* ==========================================
-   MOBILE MAIN PANEL FIX (Docking & Width)
-   ========================================== */
-
-@media (max-width: 768px) {
-    /* 1. RESET PARENT CONTAINER
-       Removing 'transform' allows the child drawer's 'position: fixed' 
-       to work correctly relative to the viewport. */
-    .main-ui-overlay {
-        transform: none !important;   /* CRITICAL FIX: Stops breaking position:fixed */
-        left: 0 !important;           /* Reset centering hack */
-        width: 100% !important;       /* Force full width */
-        bottom: 0 !important;         
-        
-        /* Ensure scale bar stays centered visually */
-        align-items: center;
-        justify-content: flex-end;    /* Push content to bottom */
-    }
-
-    /* 2. ENSURE DRAWER IS LOCKED */
-    .controls-drawer {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
-        z-index: 2000 !important;
-    }
-
-    /* 3. ENSURE CONTENT FILLS WIDTH */
-    .controls-content {
-        width: 100% !important;
-        max-width: none !important;
-        border-radius: 12px 12px 0 0 !important; /* Rounded top corners only */
-        padding-bottom: max(20px, env(safe-area-inset-bottom)) !important; /* iPhone Home Bar Safety */
-    }
-}
-
-/* ==========================================
    UI CONTROLS
    ========================================== */
 /* 1. RAISE THE MAIN UI CONTAINER (Map/Faction/Gun Panel) */
@@ -984,23 +850,6 @@ svg.icon {
     }
 }
 
-/* Mobile: Ensure absolute centering stays perfect with the new size */
-@media (max-width: 768px) {
-    .modal-footer .footer-btn:first-child .icon {
-        width: 30px !important; /* Slightly larger on mobile for touch clarity */
-        height: 30px !important;
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-    }
-
-    .modal-footer .footer-btn:last-child .icon {
-        width: 24px !important; /* Keep the rocket slightly smaller than the square calc button */
-        height: 24px !important;
-    }
-}
-
 
 /* --- DESKTOP WHITE BLOCK FIX --- */
 @media (min-width: 769px) {
@@ -1055,37 +904,6 @@ svg.icon {
   }
 }
 
-/* --- MOBILE ICON SHARPNESS FIX --- */
-@media (max-width: 768px) {
-  /* Prevent the footer icons from stretching or blurring */
-  .modal-footer .footer-btn .icon {
-    /* 1. Reset dimensions to a standard tactical size */
-    width: 22px !important;
-    height: 22px !important;
-
-    /* 2. Absolute center inside the square button */
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-
-    /* 3. CRITICAL: Prevent browser scaling from thickening the lines */
-    vector-effect: non-scaling-stroke !important;
-    
-    /* 4. Ensure it doesn't try to 'fill' the interior */
-    fill: none !important;
-  }
-
-  /* Specific fix for the 'dots' in the calc icon so they remain visible */
-  .modal-footer .footer-btn svg.icon path,
-  .modal-footer .footer-btn svg.icon circle {
-    vector-effect: non-scaling-stroke !important;
-  }
-}
-
-/* ==========================================================================
-   Base Styles
-   ========================================================================== */
 /* ==========================================
    ALLOW 2-LINE TEXT WRAPPING
    ========================================== */
@@ -1347,38 +1165,6 @@ select.btn-map-select option {
   transform: scale(1.1); /* Subtle zoom only */
 }
 
-/* Mobile Tweak to keep it accessible */
-@media (max-width: 768px) {
-  .modal-brand-header {
-    font-size: 18px; 
-    padding: 18px 10px;
-    
-    /* CRITICAL FIX: Reserve space on the right for the X button 
-       so the text wraps instead of hiding the button */
-    padding-right: 50px; 
-    position: relative;
-  }
-  
-  .close-btn {
-    right: 10px;
-    top: 10px;
-    font-size: 32px;
-    
-    /* Add padding to make the touch target easier to hit */
-    padding: 10px; 
-  }
-  
-  .modal-subtitle {
-    font-size: 11px !important;
-    letter-spacing: 1px;
-    gap: 6px;
-  }
-  
-  .arrow-down {
-    font-size: 10px;
-  }
-}
-
 .map-grid {
   flex: 1;
   overflow-y: auto;
@@ -1451,15 +1237,6 @@ select.btn-map-select option {
     border-color: #28a745 !important;
 }
 
-/* Mobile: Disable hover effects that might hide images */
-@media (max-width: 768px) {
-    .map-card:hover {
-        transform: none;
-    }
-    .map-card-img {
-        opacity: 1 !important;
-    }
-}
 
 .map-card-name {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -1518,29 +1295,6 @@ select.btn-map-select option {
 /* Optional: Different style for "Other Projects" if you want */
 .footer-btn.secondary {
   border-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Mobile Tweak for Footer */
-@media (max-width: 768px) {
-  .modal-footer {
-    flex-direction: column;
-  }
-  .footer-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* Mobile Support for Map Grid */
-@media (max-width: 768px) {
-  .map-grid { 
-     /* CHANGE: Maintain the start alignment to prevent vertical centering gaps */
-     grid-template-columns: repeat(2, 1fr); 
-     grid-auto-rows: min-content;
-     align-content: start;
-     gap: 10px; 
-     padding: 10px; 
-  }
 }
 
 /* ==========================================
@@ -1789,30 +1543,50 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
 /* 1. Panel Container (Desktop) */
 .target-data-panel {
-  position: absolute; top: 110px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, rgba(20,20,20,0.95) 0%, rgba(10,10,10,0.95) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15); border-top: 4px solid #ffc107;
-  border-radius: 0 0 6px 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.9);
-  z-index: 500; 
-  height: auto; 
-  min-height: 70px; 
-  
-  /* Allow width to adjust based on content */
-  width: auto; 
-  min-width: 340px;
-  
-  pointer-events: none; transition: opacity 0.2s, top 0.2s;
-
-  /* THE FIX: Increased padding for desktop 
-     Top: 10px | Side: 15px | Bottom: 15px (Added +5px here) */
-  padding: 10px 15px 15px 15px; 
+    position: absolute; 
+    top: 110px; 
+    left: 50%; 
+    
+    /* THE MOZILLA-SAFE FIX: Centering + Clean Hardware Layer */
+    /* Removed will-change to prevent Chrome checkerboarding */
+    transform: translateX(-50%) !important;
+    
+    /* Forces Firefox to isolate this box without using 'will-change' */
+    filter: opacity(0.999); 
+    isolation: isolate !important;
+    
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    
+    /* Visuals: Near-solid background to prevent blending shifts */
+    background-color: rgb(20, 20, 20) !important; 
+    box-shadow: none !important; 
+    opacity: 1 !important;
+    
+    border: 1px solid rgba(255, 255, 255, 0.15); 
+    border-top: 4px solid #ffc107;
+    border-radius: 0 0 6px 6px; 
+    
+    /* Set Z-index higher than the slider container */
+    z-index: 2500 !important; 
+    
+    height: auto; 
+    min-height: 70px; 
+    width: auto; 
+    min-width: 340px;
+    pointer-events: none; 
+    
+    /* Strictly disable transitions to stop the "shifting" look on toggle */
+    transition: none !important; 
+    padding: 10px 15px 15px 15px; 
 }
 
+/* Force standard hidden behavior without transitions */
 .target-data-panel.hidden { 
-  opacity: 0; 
-  pointer-events: none; 
-  transition: none;
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 .data-divider {
@@ -1887,15 +1661,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   user-select: none;
   white-space: nowrap; 
   
-}
-
-/* Mobile Adjustment */
-@media (max-width: 768px) {
-  .panel-watermark {
-    font-size: 9px;
-    padding-bottom: 2px;
-    letter-spacing: 0.5px;
-  }
 }
 
 /* Force hide old classes to clean up */
@@ -2014,293 +1779,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         background-color: #e5ad06 !important; /* Slightly darker gold */
     }
 }
-
-/* ==========================================
-   MOBILE & TABLET OPTIMIZATIONS
-   ========================================== */
-/* ==========================================
-   MOBILE LAYOUT FIX (Stacking Context & Merge)
-   ========================================== */
-@media (max-width: 768px) {
-
-  /* 1. THE PANEL (Now Highest Layer) */
-  .controls-content {
-      z-index: 1300 !important; /* CHANGE: Higher than Tab */
-      position: relative;
-      background-color: #181818 !important;
-      
-      /* Borders */
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-bottom: none !important;
-      border-radius: 12px 12px 0 0 !important;
-      
-      /* Layout */
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      padding: 10px !important;
-      gap: 8px;
-  }
-
-  /* 2. THE VISUAL PATCH (Hides the border line) */
-  /* This creates a small black strip on top of the panel border 
-     where the tab sits, creating the "merged" look */
-  .controls-content::before {
-      content: "";
-      position: absolute;
-      top: -2px; /* Shift up to cover the border */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 78px; /* Slightly narrower than tab (80px) */
-      height: 4px; 
-      background-color: #181818; /* Matches Panel BG */
-      z-index: 1301;
-  }
-
-  /* 3. THE DRAWER TAB (Now Lower Layer) */
-  .drawer-tab {
-      top: -31px !important;
-      height: 32px !important;
-      width: 80px !important;
-      
-      z-index: 1000 !important; /* CHANGE: Lower than Panel */
-      
-      background-color: #181818 !important;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-bottom: none !important;
-      border-radius: 10px 10px 0 0 !important;
-      box-shadow: none !important;
-  }
-
-  /* 4. THE DROPDOWNS (Free to float on top) */
-  /* Now that the parent Panel is 1300, these are safe */
-  .custom-dropdown {
-      position: relative;
-      z-index: 1400 !important; 
-  }
-  
-  .dropdown-menu {
-      z-index: 1500 !important;
-  }
-
-  /* --- Rest of Layout Logic --- */
-  
-  /* Map Button - Full Width */
-  .custom-dropdown:nth-child(1) {
-      width: 100% !important;
-      flex: 0 0 100% !important;
-  }
-
-  /* Faction & Gun - 50% Split */
-  .custom-dropdown:nth-child(2),
-  .custom-dropdown:nth-child(3) {
-      width: calc(50% - 4px) !important;
-      flex: 0 0 calc(50% - 4px) !important;
-  }
-
-  /* Button Styling */
-  .btn-map-select {
-      font-size: 13px !important;
-      padding: 10px 12px !important;
-      min-height: 48px !important;
-      background: rgba(29, 31, 39, 0.9) !important;
-  }
-
-  /* Hide Desktop Elements */
-  #desktopCursorRings, #liveCursorHud { 
-      display: none !important; 
-  }
-
-  /* Prevent the default mobile tap highlight gray box on the ruler icon */
-  #rulerToggleBtn {
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.1s ease;
-  }
-
-  /* Visual feedback that it was pressed */
-  #rulerToggleBtn:active {
-    transform: scale(0.9);
-  }
-
-  .shell { padding: 0; }
-  .arty-icon { filter: none !important; }
-  .marker.active-gun::before { animation: none !important; box-shadow: 0 0 4px #ffc107; }
-  .marker-label { box-shadow: none !important; }
-
-  .modal-brand-header {
-    font-size: 18px; 
-    padding: 18px 40px; /* Equal padding left/right keeps text centered */
-    position: relative;
-    
-    /* Ensure text wraps nicely if too long */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 60px; /* Ensure enough height for the X button */
-  }
-  
-  .close-btn {
-    position: absolute;
-    right: 10px;
-    top: 15px;
-    font-size: 32px;
-    padding: 10px; /* Hit area */
-    line-height: 1;
-    z-index: 2005; 
-  }
-
-  /* --- MOBILE OPTIMIZATIONS --- */
-@media (max-width: 768px) {
-  .target-data-panel {
-    top: 50px; 
-    
-    /* Compact padding for mobile */
-    padding: 8px 10px 8px 10px; 
-    
-    min-width: 300px;
-    max-width: 95vw; 
-  }
-  
-  .data-label {
-    font-size: 9px;       
-    margin-bottom: 2px;   /* Tighter spacing for mobile */
-  }
-
-  .val-huge {
-    font-size: 32px; 
-    margin-top: 2px;      
-    line-height: 1;       
-  }
-  
-  .val-small { font-size: 14px; }
-  
-  /* Compact Columns for Mobile */
-  .target-data-panel .small-col { width: 50px; } 
-  .target-data-panel .main-col { padding: 0 5px; } 
-  .target-data-panel .data-divider { margin: 0 5px; } 
-}
-
-  /* Optional: Make text slightly smaller on mobile to fit */
-  .panel-credits {
-    font-size: 8px;
-    bottom: 3px;
-  }
-
-  .debug-overlay {
-    top: auto; bottom: 0; width: 100%; left: 0; transform: none;
-    background: none; /* Removed the dark linear-gradient shadow */
-    padding-bottom: env(safe-area-inset-bottom); pointer-events: none; z-index: 600;
-    display: flex; flex-direction: column; justify-content: flex-end;
-  }
-
-  /* 1. Container Row: Force items to stretch to equal height */
-  .controls-row {
-    pointer-events: auto; 
-    width: 100%; 
-    margin: 0; 
-    padding: 8px;
-    background: rgba(0,0,0,0.8); 
-    border-radius: 4px; 
-    gap: 8px; 
-    
-    /* CRITICAL FIXES: */
-    display: flex;             
-    flex-wrap: nowrap;         /* Keep them side-by-side */
-    align-items: stretch;      /* Force children to same height */
-    height: auto;              /* Let content dictate height, but they will match */
-  }
-
-  .scale-container {
-    pointer-events: auto; 
-    margin-bottom: 30px; 
-    padding-left: 0; 
-    padding-right: 0;
-    width: 100%;
-  }
-
-  /* 2. Dropdown Wrapper: Must grow to fill height */
-  .custom-dropdown {
-    flex: 1;          /* Each takes 50% space */
-    width: 50%;       
-    display: flex;    /* Make THIS a flex container too */
-    flex-direction: column;
-    height: auto;     /* Allow it to grow */
-  }
-
-  /* 3. The Button Itself: Fill the wrapper's height */
-  .btn-map-select {
-    width: 100%; 
-    font-size: 11px; 
-    padding: 6px 8px; 
-    
-    /* CRITICAL FIXES: */
-    flex-grow: 1;     /* Grow to fill vertical space */
-    height: 100% !important; /* Force full height of parent */
-    min-height: 44px; /* Minimum touch target size */
-    
-    /* Ensure text centers nicely if one is taller */
-    display: flex;
-    align-items: center; 
-  }
-  
-  /* Tweak font size for labels on mobile so "British 8th Army" fits */
-  #factionLabel, #gunLabel {
-      font-size: 10px !important; /* Slightly smaller to fit long names better */
-      line-height: 1.2;
-  }
-  
-  /* Ensure the map name also looks consistent */
-  #currentMapName {
-      font-size: 11px !important;
-  }
-
-  .hll-grid-label {
-    font-size: 18px !important; 
-    font-weight: 900; 
-    color: #ffffff;
-    text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px 2px black;
-    z-index: 55; 
-    pointer-events: none;
-  }
-
-  #labelLayer { pointer-events: none; }
-
-  .zoom-slider-container {
-    right: 5px; 
-    
-    /* --- CHANGE: Increased height from 180px to 260px --- */
-    height: 260px; 
-    /* ---------------------------------------------------- */
-    
-    top: 55%; /* Slightly adjusted centering to fit the taller slider */
-  }
-  
-  .map-grid { 
-     grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; 
-  }
-
-  /* --- INCREASE MOBILE TEXT SIZE (UPDATED) --- */
-  #currentMapName, 
-  #factionLabel, 
-  #gunLabel {
-      font-size: 14px !important;  /* Increased to 14px */
-      line-height: 1.1 !important; 
-      font-weight: 900 !important; 
-      letter-spacing: 0.5px;       
-  }
-
-  /* Make the dropdown arrows match */
-  .btn-map-select .icon {
-      font-size: 14px !important; 
-  }
-  
-  /* Ensure padding handles the larger text */
-  .btn-map-select {
-      padding: 8px 10px !important; 
-  }
-}
-
-/* --- MANUAL CALCULATOR STYLES --- */
 
 /* Specific Modal Size for Calc - FIX: Remove fixed height */
 .calc-content {
@@ -2492,7 +1970,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     position: fixed; /* Fixed relative to screen, JS updates top/left */
     /* CHANGE 1: Lower Z-Index significantly (below the drawer's 700) */
     z-index: 100 !important;   
-    background: rgba(15, 15, 15, 0.9);
+    background: rgba(15, 15, 15, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-left: 3px solid #ffc107;
     padding: 8px 12px;
@@ -2533,77 +2011,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
 .hud-value.text-yellow { color: #ffc107; }
 .hud-label.text-yellow { color: #ffc107; }
-
-/* 3. Mobile Adjustment: Fix HUD to bottom-left instead of following touch */
-@media (max-width: 768px) {
-    /* Increase Zoom Slider container height to fit the 4th button */
-    .zoom-slider-container {
-        height: 360px; /* Increased from 310px to fit the 5th button */
-        top: 50%;      /* Recenter */
-        pointer-events: none !important; /* Ensure mobile container also passes touches */
-    }
-
-    /* 1. Ensure scale container doesn't hide children */
-    .scale-container {
-        display: flex;
-        flex-direction: column; /* Stack scale bar and zoom text */
-        align-items: center;
-        width: 100%;
-        margin-bottom: 40px; /* Space for control panel */
-    }
-
-    /* 2. Reposition Zoom Indicator for Mobile */
-    .zoom-indicator-inline {
-        position: relative; /* Remove absolute 'right: -70px' from desktop */
-        right: auto;
-        bottom: auto;
-        margin-top: 10px; /* Space below scale bar */
-        display: block;
-        text-align: center;
-    }
-
-    #zoomIndicator {
-        /* EXACT DESKTOP STYLE */
-        color: #ffffff; 
-        font-family: "GothamSS", sans-serif; 
-        font-weight: 900;
-        font-size: 16px; 
-        /* Heavy multi-directional shadow for maximum clarity */
-        text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
-        display: block; 
-        line-height: 1; 
-        text-align: right;
-    }
-
-    .live-hud {
-        /* Dock to bottom left */
-        top: auto !important;
-        left: 10px !important;
-        bottom: 60px !important; /* Above the control panel */
-        border-left: 3px solid #ffc107;
-        background: rgba(0,0,0,0.95);
-    }
-
-    /* Increase the invisible touch area around the slider */
-    .zoom-slider-track {
-        width: 32px !important; /* Visual is 24px, but we expand for touch */
-        border: 4px solid transparent; /* Acts as a padding-buffer */
-        background-clip: padding-box;
-        touch-action: none;
-    }
-
-    /* Make the handle taller so it's easier to grab */
-    .zoom-slider-handle {
-        width: 30px !important;
-        height: 24px !important;
-        border-radius: 4px !important;
-    }
-
-    /* Ensure the fill is visible inside the wide track */
-    .zoom-slider-fill {
-        width: 100% !important;
-    }
-}
 
 /* --- TACTICAL INDICATOR TOOLTIPS --- */
 
@@ -2670,14 +2077,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   }
 }
 
-/* Strictly hide tooltips on mobile to prevent UI clutter */
-@media (max-width: 768px) {
-  [data-tooltip]::before,
-  [data-tooltip]::after {
-    display: none !important;
-  }
-}
-
 /* Hub specific content size */
 .projects-hub-content {
   max-width: 500px !important;
@@ -2728,17 +2127,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   font-size: 24px !important;
 }
 
-/* Increase main title size on mobile */
-@media (max-width: 768px) {
-  .main-title {
-    font-size: 24px !important;
-  }
-  
-  #projectsModal .main-title {
-    font-size: 20px !important;
-  }
-}
-
 /* ==========================================
    FIRE BUTTON GUIDE ARROWS (Above Panel)
    ========================================== */
@@ -2750,34 +2138,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
 .fire-guide-arrow {
     display: none;
-}
-
-@media (max-width: 768px) {
-    .fire-guide-arrow {
-        position: absolute;
-        /* Position them above the panel content */
-        top: -45px; 
-        font-size: 20px;
-        color: #ffc107;
-        text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 5px #ffc107;
-        pointer-events: none;
-        /* Set very high to be seen above the panel and tab */
-        z-index: 2000; 
-    }
-
-    .fire-guide-arrow.left  { left: 20%; }
-    .fire-guide-arrow.right { right: 20%; }
-
-    /* Logic: Show only when HUD active AND drawer is open */
-    body.hud-active .controls-drawer:not(.closed) .fire-guide-arrow {
-        display: block;
-        animation: arrow-point-down 1.2s infinite;
-    }
-
-    @keyframes arrow-point-down {
-        0%, 100% { transform: translateY(0); opacity: 0.5; }
-        50%      { transform: translateY(8px); opacity: 1; }
-    }
 }
 
 /* --- Mobile Fire Button (Centered & Lower) --- */
@@ -2927,69 +2287,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   box-shadow: 0 0 4px rgba(0,0,0,0.8);
 }
 
-/* --- Mobile HUD Positioning (Layering Fix) --- */
-@media (max-width: 768px) {
-  .live-hud {
-    /* Reset fixed positions */
-    bottom: auto !important;
-    right: auto !important;
-    
-    /* Position anchor at exact screen center */
-    top: 50% !important;
-    left: 50% !important;
-    
-    /* Offset: Top-Right Quadrant */
-    transform: translate(25px, calc(-100% - 10px));
-    
-    pointer-events: none;
-    background: rgba(15, 15, 15, 0.90); /* Slightly more opaque background */
-    border-left: 3px solid #ffc107;
-    padding: 6px 10px;
-    border-radius: 4px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.8); /* Stronger shadow for readability */
-    
-    /* LAYER FIX: Set higher than crosshair (200) so it sits ON TOP */
-    z-index: 300 !important; 
-    min-width: auto;
-  }
-  
-  .live-hud .hud-label { font-size: 9px; }
-  .live-hud .hud-value { font-size: 12px; }
-}
-
 /* Utility to hide them by default */
 .hidden { display: none !important; }
-
-/* Desktop: Always hide these elements */
-@media (min-width: 769px) {
-  .mobile-crosshair, .mobile-fire-btn {
-    display: none !important;
-  }
-}
-
-/* --- MOBILE SPECIFIC CLOSE BUTTON FIX --- */
-@media (max-width: 768px) {
-  .close-btn {
-    /* 1. Force the position you requested */
-    position: absolute !important;
-    right: 5px !important;
-    top: 5px !important;
-    
-    /* 2. Reset desktop transforms so it doesn't float away */
-    transform: none !important;
-    
-    /* 3. Fix the "X" alignment inside the box (Crucial for Firefox Mobile) */
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    
-    /* 4. Ensure it has a clickable size without padding issues */
-    width: 44px;
-    height: 44px;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
 
 /* --- INLINE STYLE REPLACEMENTS --- */
 .map-arrow {
@@ -3012,13 +2311,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   /* Ensure it sits above markers but below the control panel */
   z-index: 90; 
   pointer-events: none;
-}
-
-/* Hide it on mobile so we don't have double rings */
-@media (max-width: 768px) {
-  #desktopCursorRings {
-    display: none !important;
-  }
 }
 
 /* --- HUD CROSSHAIR (Center +) --- */
@@ -3074,272 +2366,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     align-self: center; /* Centers vertically if it's short */
 }
 
-/* ==========================================
-   MOBILE MAP MENU FIX (Absolute Centering)
-   ========================================== */
-@media (max-width: 768px) {
-  
-  /* 1. MAP MENU HEIGHT */
-  .modal-content {
-      height: 92vh !important; 
-      max-height: none !important;
-      margin: 0 !important;
-      width: 95% !important;
-      display: flex;
-      flex-direction: column;
-  }
-
-  /* 2. FOOTER LAYOUT */
-  .modal-footer {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: stretch !important;
-      gap: 10px !important;
-      padding: 12px 10px !important;
-      flex-shrink: 0 !important;
-  }
-
-  /* --- 3. CALCULATOR BUTTON (Square) --- */
-  .footer-btn:first-child {
-      position: relative !important; /* Anchor for absolute centering */
-      flex: 0 0 54px !important; 
-      width: 54px !important;
-      height: 54px !important; 
-      
-      /* Kill all padding/margins that could push the icon */
-      padding: 0 !important;
-      margin: 0 !important;
-      
-      font-size: 0 !important; /* Hide text */
-  }
-
-  /* NUCLEAR OPTION: Absolute Centering Icon */
-  .footer-btn:first-child .icon {
-      position: absolute !important;
-      top: 50% !important;
-      left: 50% !important;
-      transform: translate(-50%, -50%) !important; /* Pin center to center */
-      
-      width: 24px !important;
-      height: 24px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      display: block !important;
-  }
-
-  /* --- 4. PROJECTS BUTTON (Wide) --- */
-  .footer-btn:last-child {
-      flex: 1 !important; 
-      height: 54px !important;
-      
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important; 
-      
-      font-size: 11px !important;
-      padding: 0 10px !important;
-      white-space: nowrap !important;
-      margin: 0 !important;
-  }
-  
-  /* Rocket Icon Alignment */
-  .footer-btn:last-child .icon {
-      font-size: 16px !important;
-      margin-right: 10px !important; 
-      display: block !important;
-      flex-shrink: 0 !important;
-      position: static !important; /* Default behavior for this one */
-      transform: none !important;
-  }
-}
-
-/* ==========================================
-   MOBILE UI FIXES (Menu & Projects)
-   ========================================== */
-@media (max-width: 768px) {
-  
-  /* --- GLOBAL MODAL FIXES --- */
-  .modal-content {
-      height: 92vh !important; 
-      max-height: none !important;
-      margin: 0 !important;
-      width: 95% !important;
-      display: flex;
-      flex-direction: column;
-  }
-
-  /* ----------------------------------------------------
-     1. MAIN MENU FOOTER (The one with Calculator & Rocket)
-     ---------------------------------------------------- */
-  
-  /* Container Layout */
-  .modal-footer {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: stretch !important;
-      gap: 10px !important;
-      padding: 12px 10px !important;
-      flex-shrink: 0 !important;
-  }
-
-  /* CALC BUTTON (Square SVG) - Scoped to .modal-footer */
-  .modal-footer .footer-btn:first-child {
-      position: relative !important;
-      flex: 0 0 54px !important; 
-      width: 54px !important;
-      height: 54px !important; 
-      padding: 0 !important;
-      margin: 0 !important;
-      font-size: 0 !important; /* Hide Text */
-  }
-
-  /* CALC ICON (Absolute Center) */
-  .modal-footer .footer-btn:first-child .icon {
-      position: absolute !important;
-      top: 50% !important;
-      left: 50% !important;
-      transform: translate(-50%, -50%) !important;
-      
-      width: 24px !important;
-      height: 24px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      display: block !important;
-  }
-
-  /* PROJECTS BUTTON (Wide) - Scoped to .modal-footer */
-  .modal-footer .footer-btn:last-child {
-      flex: 1 !important; 
-      height: 54px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important; 
-      font-size: 11px !important;
-      padding: 0 10px !important;
-      white-space: nowrap !important;
-      margin: 0 !important;
-  }
-  
-  .modal-footer .footer-btn:last-child .icon {
-      font-size: 16px !important;
-      margin-right: 10px !important; 
-      display: block !important;
-      flex-shrink: 0 !important;
-      position: static !important;
-      transform: none !important;
-  }
-
-  /* ----------------------------------------------------
-     2. PROJECTS MODAL (The list of other apps)
-     ---------------------------------------------------- */
-     
-  .projects-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 20px 15px;
-      width: 100%;
-  }
-
-  /* RESET BUTTONS for Projects List */
-  .projects-list .footer-btn {
-      /* Force full width bars */
-      flex: 0 0 auto !important;
-      width: 100% !important;
-      height: auto !important;
-      min-height: 54px !important;
-      
-      /* Normal Text Display */
-      font-size: 13px !important; 
-      
-      /* Alignment */
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      justify-content: flex-start !important; /* Align left */
-      
-      padding: 12px 20px !important;
-      margin: 0 !important;
-  }
-
-  /* RESET ICONS inside Projects List */
-  .projects-list .footer-project-icon, 
-  .projects-list .icon {
-      width: 24px !important;
-      height: 24px !important;
-      margin-right: 15px !important;
-      margin-left: 0 !important;
-      display: block !important;
-      object-fit: contain !important;
-      
-      /* Ensure they don't inherit the absolute positioning from above */
-      position: static !important;
-      transform: none !important;
-      top: auto !important;
-      left: auto !important;
-  }
-}
-
-/* ==========================================
-   DESKTOP ICON SYNC (1:1 SIZE)
-   ========================================== */
-@media (min-width: 769px) {
-    /* 1. Force both icons to be EXACT same size */
-    .modal-footer .footer-btn .icon {
-        width: 26px !important; 
-        height: 26px !important;
-        margin-right: 12px !important;
-        
-        /* Remove ALL previous scaling and centering */
-        position: static !important;
-        transform: none !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        
-        /* Ensure stroke weight is consistent */
-        stroke-width: 2.2 !important;
-    }
-
-    /* 2. Specific fix for More Projects to ensure no extra scale is hiding */
-    #btnOtherProjects .icon {
-        width: 26px !important;
-        height: 26px !important;
-        transform: none !important; 
-    }
-
-    /* 3. Adjust button height to fit icons cleanly */
-    .modal-footer .footer-btn {
-        height: 54px !important;
-        padding: 0 20px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-}
-
-/* ==========================================
-   MOBILE UI FIX: INCREASE PROJECTS FONT
-   ========================================== */
-@media (max-width: 768px) {
-    /* Target the text inside the "More Projects" button in the footer */
-    .modal-footer .footer-btn:last-child {
-        font-size: 14px !important; /* Increased from 11px to 14px */
-        font-weight: 900 !important; /* Thickest weight for readability */
-        letter-spacing: 1px !important;
-        
-        /* Ensure it remains centered even with larger text */
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    /* Keep the "tactical Stack" icon aligned with the larger text */
-    .modal-footer .footer-btn:last-child .icon {
-        margin-right: 12px !important;
-        width: 22px !important; /* Balanced size for the larger text */
-        height: 22px !important;
-    }
-}
 
 /* ==========================================
    DESKTOP HOVER FIX: MORE PROJECTS
@@ -3357,43 +2383,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     .modal-footer #btnOtherProjects:hover .icon {
         stroke: #ffc107 !important;
         filter: none !important; /* Removes any grayscale if present */
-    }
-}
-
-/* --- MOBILE SPECIFIC: ENSURE NO STICKY HOVER --- */
-@media (max-width: 768px) {
-    /* Reset any potential lingering hover states on mobile */
-    .modal-footer #btnOtherProjects:hover {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border-color: rgba(255, 255, 255, 0.1) !important;
-        color: rgba(255, 255, 255, 0.8) !important;
-        box-shadow: none !important;
-    }
-    
-    /* Ensure icon stays muted grey on mobile hover */
-    .modal-footer #btnOtherProjects:hover .icon {
-        stroke: currentColor !important;
-        opacity: 0.8 !important;
-    }
-}
-
-/* ==========================================
-   MOBILE HUB: REMOVE EMPTY SPACE
-   ========================================== */
-@media (max-width: 768px) {
-    /* Target Projects Hub specifically to remove forced height */
-    #projectsModal .modal-content {
-        height: auto !important;      /* Shrink to fit the list */
-        min-height: unset !important;
-        max-height: 80vh !important;  /* Safety limit */
-        margin: auto !important;      /* Centers it vertically in the blur */
-        align-self: center !important;
-    }
-
-    /* Adjust the list padding for a tighter fit */
-    #projectsModal .projects-list {
-        padding: 15px !important;
-        gap: 10px !important;
     }
 }
 
@@ -3437,41 +2426,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     color: #ffc107;
     /* Subtle pop effect on hover */
     transform: translateX(2px); 
-}
-
-/* Mobile Tweak: Slightly larger icon for touch screens */
-@media (max-width: 768px) {
-    .external-link-icon {
-        width: 16px !important;
-        height: 16px !important;
-    }
-}
-
-/* ==========================================
-   CHROME & FIREFOX MOBILE ZOOM ANIMATION
-   ========================================== */
-@media (max-width: 768px) {
-  /* 1. Disable default browser highlights */
-  .zoom-icons span {
-    transition: transform 0.1s ease-out, background-color 0.2s ease;
-    -webkit-tap-highlight-color: transparent; 
-    outline: none !important;
-  }
-
-  /* 2. Firefox specific: remove inner dotted focus ring */
-  .zoom-icons span::-moz-focus-inner {
-    border: 0;
-  }
-
-  /* 3. The Pressed State (Triggered by JS) */
-  .zoom-icons span.pressed {
-    background-color: #ffc107 !important;
-    color: black !important;
-    border-color: #ffc107 !important;
-    transform: scale(0.82) !important; /* Slightly more aggressive for Firefox clarity */
-    transition: none !important; 
-    z-index: 10;
-  }
 }
 
 /* ==========================================
@@ -3530,43 +2484,197 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   }
 }
 
-/* ==========================================
-   MOBILE ZOOM BUTTON HIGHLIGHT FIX
-   ========================================== */
-/* Hard reset for mobile button highlights */
+/* ==========================================================================
+   FINAL UNIFIED MOBILE OPTIMIZATIONS (MAX-WIDTH: 768PX)
+   ========================================================================== */
 @media (max-width: 768px) {
-  .zoom-icons span {
-    -webkit-tap-highlight-color: transparent !important;
-    user-select: none !important;
-    touch-action: manipulation;
-  }
-  
-  /* Force removal of any "hover" state browser tries to emulate */
-  .zoom-icons span:hover {
-    background-color: rgba(20, 20, 20, 0.95) !important;
-    color: white !important;
-  }
-}
 
-/* ==========================================
-   MOBILE ZOOM & SCALE FIX (Lifted +50px)
-   ========================================== */
-
-@media (max-width: 768px) {
-    /* 1. Container: Lifted Up */
-    .scale-container {
-        display: block !important;        
-        width: 100% !important;
-        height: 40px !important;
-        position: relative !important;
-        
-        /* CHANGED: Increased from 25px to 75px to move everything up */
-        margin-bottom: 160px !important;   
-        
-        pointer-events: none !important;
+    /* --- 1. MAIN UI & DRAWER --- */
+    
+    /* THE FULL-SIZE FIX: Remove borders and padding from the main wrapper */
+    .shell {
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 100dvh !important;
+        width: 100vw !important;
     }
 
-    /* 2. Meter Scale: Force Absolute Centering */
+    /* THE FULL-SIZE FIX: Make the map container cover the entire screen */
+    .map-wrap {
+        border: none !important;      /* Removes the grey border line */
+        border-radius: 0 !important;  /* Square edges for full-screen look */
+        height: 100dvh !important;    /* Force full viewport height */
+        width: 100vw !important;      /* Force full viewport width */
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .main-ui-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        transform: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        z-index: 2000 !important;
+        pointer-events: none;
+    }
+
+    .controls-drawer {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        z-index: 2000 !important;
+        overflow: visible !important;
+    }
+
+    .controls-content {
+        width: 100% !important;
+        max-width: none !important;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 10px 10px 25px 10px !important;
+        gap: 8px;
+        background-color: #181818 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: stretch;
+        position: relative;
+        z-index: 1300 !important;
+    }
+
+    /* Eraser Patch */
+    .controls-content::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 78px;
+        height: 4px;
+        background-color: #181818;
+        z-index: 1301;
+    }
+
+    /* Drawer Tab */
+    .drawer-tab {
+        position: absolute !important;
+        top: -31px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        height: 32px !important;
+        width: 80px !important;
+        z-index: 1000 !important;
+        background-color: #181818 !important;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-bottom: none !important;
+        border-radius: 10px 10px 0 0 !important;
+        box-shadow: none !important;
+        pointer-events: auto;
+    }
+
+    /* --- 2. DROPDOWNS & BUTTONS --- */
+    .custom-dropdown {
+        position: relative;
+        z-index: 1400 !important;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .dropdown-menu { z-index: 1500 !important; }
+
+    /* Map Button (Full Width) */
+    .custom-dropdown:nth-child(1),
+    .btn-map-select:nth-child(1) {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+
+    /* Faction & Gun (50% Split) */
+    .custom-dropdown:nth-child(2),
+    .custom-dropdown:nth-child(3) {
+        width: calc(50% - 4px) !important;
+        flex: 0 0 calc(50% - 4px) !important;
+    }
+
+    /* Ensure the entire button area is a single hit-target for Firefox */
+    .btn-map-select {
+        font-size: 13px !important;
+        padding: 10px 12px !important;
+        min-height: 48px !important;
+        background: rgba(29, 31, 39, 0.9) !important;
+        
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-grow: 1;
+        
+        /* THE FIX: Ensure no internal elements block the click */
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* VITAL FOR FIREFOX: Force labels to pass clicks to the parent button */
+    #currentMapName, 
+    #factionLabel, 
+    #gunLabel,
+    .btn-map-select .item-text,
+    .btn-map-select .icon {
+        font-size: 14px !important;
+        line-height: 1.1 !important;
+        font-weight: 900 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        
+        /* THE FIX: Text/Icons won't "swallow" the touch event */
+        pointer-events: none !important; 
+    }
+
+    /* --- 3. TARGET DATA PANEL --- */
+    .target-data-panel {
+        top: 50px;
+        padding: 8px 10px;
+        min-width: 300px;
+        max-width: 95vw;
+        box-shadow: none !important;
+    }
+    .data-label { font-size: 9px; margin-bottom: 2px; }
+    .val-huge { font-size: 32px; margin-top: 2px; line-height: 1; }
+    .val-small { font-size: 14px; }
+    .target-data-panel .small-col { width: 50px; }
+    .target-data-panel .main-col { padding: 0 5px; }
+    .target-data-panel .data-divider { margin: 0 5px; }
+    .panel-watermark { font-size: 9px; padding-bottom: 2px; letter-spacing: 0.5px; }
+
+    /* --- 4. SCALE BAR (CENTERED) --- */
+    .scale-container {
+        pointer-events: none !important; /* Changed to none to allow clicking through to map */
+        
+        /* THE POSITION FIX: Moved up 50px */
+        /* Increased from your previous 30px to 80px */
+        margin-bottom: 190px !important; 
+        
+        padding: 0;
+        width: 100%;
+        display: block !important;
+        height: 40px !important;
+        position: relative !important;
+    }
+
     .scale-wrapper {
         position: absolute !important;
         left: 50% !important;
@@ -3574,29 +2682,316 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         bottom: 0 !important;
         margin: 0 !important;
         z-index: 5 !important;
+        pointer-events: none !important;
     }
 
-    /* 3. Zoom Indicator: Pinned to Right Edge */
-    .zoom-indicator-inline {
+    /* --- 5. ZOOM SLIDER (RIGHT SIDE) --- */
+    .zoom-slider-container {
         position: absolute !important;
-        right: 15px !important;
-        bottom: 15px !important;           /* Moved up 5px from 2px */
+        right: 5px !important; /* Keep on Right */
         left: auto !important;
+        height: 360px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none !important;
+        z-index: 2200 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .zoom-slider-track {
+        width: 32px !important;
+        border: 4px solid transparent;
+        background-clip: padding-box;
+        touch-action: none;
+        pointer-events: auto !important;
+    }
+
+    .zoom-slider-handle {
+        width: 30px !important;
+        height: 24px !important;
+        border-radius: 4px !important;
+    }
+
+    .zoom-icons span {
+        -webkit-tap-highlight-color: transparent !important;
+        touch-action: manipulation;
+        pointer-events: auto !important;
+    }
+    
+    /* Reset hover/pressed states for mobile */
+    .zoom-icons span:hover {
+        background-color: rgba(20, 20, 20, 0.95) !important;
+        color: white !important;
+    }
+    .zoom-icons span.pressed {
+        transform: scale(0.82) !important;
+    }
+
+    /* --- 6. ZOOM INDICATOR TEXT (LEFT SIDE) --- */
+    .zoom-indicator-inline {
+        position: fixed !important;
+        left: auto !important;  
+        right: 30px !important;
+        
+        /* THE POSITION FIX: Moved up 50px */
+        bottom: 208px !important; 
+        
         top: auto !important;
         width: auto !important;
         transform: none !important;
         margin: 0 !important;
-        z-index: 10 !important;
+        z-index: 3000 !important;
         display: block !important;
+        pointer-events: none !important;
     }
 
-    /* 4. Text Styling */
     #zoomIndicator {
-        text-align: right !important;
+        text-align: left !important;
         font-size: 16px !important;
         display: block !important;
         line-height: 1 !important;
-        text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
+        text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000 !important;
+        color: #fff;
+    }
+
+    /* --- 7. LIVE HUD (BOTTOM-RIGHT OF CROSSHAIR) --- */
+    .live-hud {
+        position: fixed !important;
+        /* Anchor to center */
+        top: 50% !important;
+        left: 50% !important;
+        
+        /* Push into Bottom-Right Quadrant */
+        transform: translate(25px, 25px) !important;
+        
+        /* Reset old conflicting anchors */
+        bottom: auto !important;
+        right: auto !important;
+        
+        background: rgba(15, 15, 15, 0.8) !important;
+        border-left: 3px solid #ffc107 !important;
+        border-radius: 4px;
+        padding: 6px 10px;
+        
+        z-index: 2500 !important;
+        pointer-events: none;
+        
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3px;
+        min-width: 80px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    }
+    .live-hud .hud-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .live-hud .hud-label { font-size: 9px; font-weight: 700; color: #aaa; }
+    .live-hud .hud-value { font-size: 12px; font-weight: 900; color: white; }
+    .live-hud.hidden { display: none !important; }
+
+    /* --- 8. TRAJECTORY SLIDER & SQUARE BUTTONS --- */
+    .traj-slider-container {
+        bottom: 50px !important;
+        width: 96vw !important;
+        padding: 10px 8px !important;
+        /* Ensure it sits below target panel */
+        z-index: 400 !important; 
+    }
+
+    /* THE SQUARE BUTTON FIX */
+    .traj-step-btn {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 12px !important;
+        aspect-ratio: 1 / 1 !important;
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .traj-controls-wrapper {
+        gap: 8px !important;
+    }
+
+    /* --- 9. MODALS & MENUS --- */
+    .modal-content {
+        height: 92vh !important;
+        max-height: none !important;
+        margin: 0 !important;
+        width: 95% !important;
+    }
+    /* 1. Header Container: Forced Symmetrical Padding */
+    .modal-brand-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;      /* Centers title and version horizontally */
+        justify-content: center !important;   /* Centers them vertically */
+        text-align: center !important;
+        
+        /* THE ALIGNMENT FIX: 50px on both sides balances the Close Button */
+        padding: 20px 50px !important; 
+        gap: 6px !important;
+        min-height: 70px !important;
+        position: relative !important;
+    }
+
+    /* 2. Main Title: Center Locked */
+    .main-title {
+        font-size: 22px !important;
+        letter-spacing: 1px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+
+    /* 3. Credits/Version: Center Locked */
+    .main-subtitle-credits {
+        font-size: 9px !important;
+        letter-spacing: 1.5px !important;
+        justify-content: center !important; /* Centers the flex content */
+        margin-top: 0 !important;
+        width: 100% !important;
+    }
+
+    /* 4. Close Button: Absolute Top-Right Corner */
+    .close-btn {
+        position: absolute !important;
+        right: 5px !important;    /* Tucked into the right edge */
+        top: 5px !important;      /* Tucked into the top edge */
+        
+        /* Reset centering from previous steps */
+        transform: none !important; 
+        
+        /* Tactical sizing & look */
+        width: 44px !important;
+        height: 44px !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        background: none !important;
+        border: none !important;
+        z-index: 3100 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .map-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    /* Footer Layout */
+    .modal-footer {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 12px 10px !important;
+        flex-shrink: 0 !important;
+    }
+    .modal-footer .footer-btn:first-child {
+        position: relative !important;
+        flex: 0 0 54px !important;
+        width: 54px !important;
+        height: 54px !important;
+        padding: 0 !important;
+        font-size: 0 !important;
+    }
+    .modal-footer .footer-btn:first-child .icon {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 24px !important;
+        height: 24px !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+    .modal-footer .footer-btn:last-child {
+        flex: 1 !important;
+        height: 54px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 14px !important;
+        padding: 0 10px !important;
+    }
+    .modal-footer .footer-btn:last-child .icon {
+        margin-right: 12px !important;
+        width: 22px !important;
+        height: 22px !important;
+    }
+
+    /* Projects Hub List Fix */
+    .projects-list .footer-btn {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 54px !important;
+        font-size: 13px !important;
+        padding: 12px 20px !important;
+        justify-content: flex-start !important;
+    }
+    .projects-list .footer-project-icon, 
+    .projects-list .icon {
+        position: static !important;
+        transform: none !important;
+        margin-right: 15px !important;
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    /* --- 10. HIDES & UTILITIES --- */
+    [data-tooltip]::before,
+    [data-tooltip]::after,
+    #desktopCursorRings,
+    .mobile-crosshair.hidden, 
+    .mobile-fire-btn.hidden {
+        display: none !important;
+    }
+    
+    .panel-credits { font-size: 8px; bottom: 3px; }
+    
+    /* --- 11. FIRE GUIDE ARROWS --- */
+    .fire-guide-arrow {
+        position: absolute;
+        top: -45px;
+        font-size: 20px;
+        color: #ffc107;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 5px #ffc107;
+        pointer-events: none;
+        z-index: 2000;
+        display: none;
+    }
+    .fire-guide-arrow.left { left: 20%; }
+    .fire-guide-arrow.right { right: 20%; }
+    
+    body.hud-active .controls-drawer:not(.closed) .fire-guide-arrow {
+        display: block;
+        animation: arrow-point-down 1.2s infinite;
+    }
+    @keyframes arrow-point-down {
+        0%, 100% { transform: translateY(0); opacity: 0.5; }
+        50%      { transform: translateY(8px); opacity: 1; }
+    }
+    
+    /* Mobile Fire Button */
+    .mobile-fire-btn {
+        position: absolute;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 500;
+    }
+    .mobile-fire-btn:active, .mobile-fire-btn.pressed {
+        transform: translateX(-50%) translateY(4px) scale(0.95) !important;
     }
 }
-
+/* END OF MOBILE MEDIA QUERY */   

@@ -22,6 +22,26 @@ let MAX_ZOOM = 10;
 const ZOOM_STEP = 0.5; 
 const MARKER_ROTATION_DEG = 0; 
 
+// Performance optimization: RAF throttling for trajectory updates
+let trajUpdatePending = false;
+
+// Performance optimization: Ruler label pooling
+let rulerLabelPool = [];
+
+// Performance optimization: Canvas for targeting visuals
+let targetingCanvas = null;
+let targetingCtx = null;
+
+// Performance optimization: Cache frequently accessed DOM elements
+const cached = {
+  mapImage: null,
+  markersLayer: null,
+  mapContainer: null,
+  trajCurrentMil: null,
+  trajCurrentMeter: null,
+  factionLabel: null
+};
+
 // Initial State
 let state = { scale: 1, fitScale: 1, panning: false, pointX: 0, pointY: 0, startX: 0, startY: 0 };
 let currentZoomLevel = 1;
@@ -727,7 +747,7 @@ function getActiveGunCoords() {
 }
 
 function renderTargeting() {
-  const layer = document.getElementById("markers");
+  const layer = cached.markersLayer || document.getElementById("markers");
   
   // 1. CLEANUP
   layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg, .ruler-mil-label').forEach(el => el.remove());
@@ -746,7 +766,7 @@ function renderTargeting() {
   if (panel) panel.classList.remove("hidden");
 
   const gunPos = getActiveGunCoords();
-  const mapImage = document.getElementById("mapImage");
+  const mapImage = cached.mapImage || document.getElementById("mapImage");
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   
@@ -769,7 +789,8 @@ function renderTargeting() {
   
   // Calculate total distance in meters based on the CORRECT scale
   const totalDistanceMeters = totalDistPx / pixelsPerMeter;
-  const intervalMeters = 50; 
+  // Performance optimization: Fewer markers at high zoom
+  const intervalMeters = state.scale > 5 ? 100 : 50; 
   const intervalPx = intervalMeters * pixelsPerMeter;
 
   // Calculate pixel size for 10m segments
@@ -805,9 +826,13 @@ function renderTargeting() {
     const numMarkers = Math.floor(lineLength / intervalPx);
     const MAX_RULER_DIST = 1600;
 
-    const factionLabel = document.getElementById("factionLabel").innerText;
+    const factionLabel = cached.factionLabel ? cached.factionLabel.innerText : "US";
     const cosAngle = Math.cos(angleRad);
     const sinAngle = Math.sin(angleRad);
+
+    // Clear existing ruler labels from pool
+    rulerLabelPool.forEach(label => label.remove());
+    rulerLabelPool = [];
 
     for (let i = 2; i <= numMarkers; i++) {
       const markerX = i * intervalPx;
@@ -826,7 +851,7 @@ function renderTargeting() {
       tick.setAttribute("class", "ruler-tick");
       lineSvg.appendChild(tick);
 
-      // 2. Standard DIV Label
+      // 2. Create/Reuse DIV Label
       const labelX = start.x + cosAngle * markerX;
       const labelY = start.y + sinAngle * markerX;
 
@@ -842,6 +867,7 @@ function renderTargeting() {
       milLabel.style.top = `${labelY}px`;
       
       layer.appendChild(milLabel);
+      rulerLabelPool.push(milLabel);
     }
   }
   
@@ -975,64 +1001,57 @@ let _lastScaleTextEnd = "";
 let _lastScaleTextMid = "";
 
 function updateRealScale(effectiveZoom) {
-  const mapImg = document.getElementById("mapImage");
-  if (!mapImg || mapImg.naturalWidth === 0) return;
+    const mapImg = document.getElementById("mapImage");
+    if (!mapImg || mapImg.naturalWidth === 0) return;
 
-  // --- FIX: Get EXACT dimensions for the active map ---
-  // This handles the difference between 2016m (Carentan) and 1984m (Driel)
-  const dims = getMapDimensions();
-  
-  // Calculate total meters based on the map's SDK width
-  // (SDK Width / 100 units per meter = Real Meters)
-  const totalMeters = dims.width / GAME_UNITS_PER_METER;
+    // 1. GET GRID DIMENSIONS
+    // We strictly use the 2000m SDK logic. 
+    // Even if a map image is 2016px wide, the grid logic assumes a 2000m playable area.
+    const TOTAL_PLAYABLE_METERS = 2000;
 
-  // Calculate pixels currently displayed on screen for the full map width
-  const currentMapPixelWidth = mapImg.naturalWidth * effectiveZoom;
-  
-  // Calculate precise Pixels Per Meter based on the SPECIFIC map size
-  const pixelsPerMeter = currentMapPixelWidth / totalMeters;
-  // ----------------------------------------------------
+    // 2. CALCULATE PIXELS PER METER
+    // currentMapPixelWidth is how many pixels the 2000m area occupies at the current zoom
+    const currentMapPixelWidth = mapImg.naturalWidth * effectiveZoom;
+    const pixelsPerMeter = currentMapPixelWidth / TOTAL_PLAYABLE_METERS;
 
-  // Detect Mobile
-  const isMobile = window.innerWidth <= 768;
-  let barMeters;
+    // 3. SELECT BAR SIZE BASED ON ZOOM
+    const isMobile = window.innerWidth <= 768;
+    let barMeters;
 
-  if (isMobile) {
-    // --- MOBILE SCALE LOGIC ---
-    barMeters = 600; 
-    if (state.scale > 1.5)  barMeters = 400;
-    if (state.scale > 2.5)  barMeters = 200;
-    if (state.scale > 5.0)  barMeters = 100;
-    if (state.scale > 10.0) barMeters = 50;
-    if (state.scale > 18.0) barMeters = 20;
-  } else {
-    // --- DESKTOP SCALE LOGIC ---
-    barMeters = 400;
-    if (state.scale > 1.5) barMeters = 200;
-    if (state.scale > 3.0) barMeters = 100;
-    if (state.scale > 7.0) barMeters = 50;
-    if (state.scale > 9.0) barMeters = 20;
-  }
+    if (isMobile) {
+        barMeters = 600; 
+        if (state.scale > 1.5)  barMeters = 400;
+        if (state.scale > 2.5)  barMeters = 200;
+        if (state.scale > 5.0)  barMeters = 100;
+        if (state.scale > 10.0) barMeters = 50;
+        if (state.scale > 18.0) barMeters = 20;
+    } else {
+        barMeters = 400;
+        if (state.scale > 1.5) barMeters = 200;
+        if (state.scale > 3.0) barMeters = 100;
+        if (state.scale > 7.0) barMeters = 50;
+        if (state.scale > 9.0) barMeters = 20;
+    }
 
-  const barPixels = barMeters * pixelsPerMeter;
-  const barPixelsRounded = Math.round(barPixels);
-  
-  const scaleWrapper = document.getElementById("scaleWrapper");
-  const elMid = document.getElementById("scaleTextMid");
-  const elEnd = document.getElementById("scaleTextEnd");
+    // 4. APPLY TO UI
+    const barPixelsRounded = Math.round(barMeters * pixelsPerMeter);
+    
+    const scaleWrapper = document.getElementById("scaleWrapper");
+    const elMid = document.getElementById("scaleTextMid");
+    const elEnd = document.getElementById("scaleTextEnd");
 
-  if (scaleWrapper) scaleWrapper.style.width = `${barPixelsRounded}px`;
-  if (elMid) elMid.innerText = `${barMeters / 2}m`;
-  if (elEnd) elEnd.innerText = `${barMeters}m`;
+    if (scaleWrapper) scaleWrapper.style.width = `${barPixelsRounded}px`;
+    if (elMid) elMid.innerText = `${barMeters / 2}m`;
+    if (elEnd) elEnd.innerText = `${barMeters}m`;
 }
 
 function updateDimensions() {
-  const mapImage = document.getElementById("mapImage");
+  const mapImage = cached.mapImage || document.getElementById("mapImage");
   
   // FIX: Check naturalWidth to prevent "Stuck Zoom" bug on browser restore
   if (!mapImage.complete || mapImage.naturalWidth === 0) return;
   
-  const rect = mapContainer.getBoundingClientRect();
+  const rect = (cached.mapContainer || document.getElementById("mapContainer")).getBoundingClientRect();
   
   state.fitScale = Math.min(rect.width / mapImage.naturalWidth, rect.height / mapImage.naturalHeight);
   
@@ -1046,6 +1065,18 @@ function updateDimensions() {
 
   if (state.scale < MIN_ZOOM) state.scale = MIN_ZOOM;
   if (state.scale > MAX_ZOOM) state.scale = MAX_ZOOM;
+  
+  // Resize targeting canvas for performance optimization
+  if (targetingCanvas && targetingCtx) {
+    const rect = (cached.mapContainer || document.getElementById("mapContainer")).getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    
+    targetingCanvas.width = rect.width * dpr;
+    targetingCanvas.height = rect.height * dpr;
+    targetingCanvas.style.width = rect.width + "px";
+    targetingCanvas.style.height = rect.height + "px";
+    targetingCtx.scale(dpr, dpr);
+  }
 }
 
 function centerMap() {
@@ -1782,11 +1813,20 @@ function initArtyControls() {
   // 2. Logic to update position (Only runs when moving slider)
   function updateTrajectoryFromDistance(newDistMeters) {
       const gunPos = getActiveGunCoords();
+      if (!gunPos) return;
+
       const newDistUnits = newDistMeters * GAME_UNITS_PER_METER;
 
       // Moves marker along the locked angle
-      const newX = gunPos.x + (newDistUnits * Math.cos(originalAngle));
-      const newY = gunPos.y + (newDistUnits * Math.sin(originalAngle));
+      let newX = gunPos.x + (newDistUnits * Math.cos(originalAngle));
+      let newY = gunPos.y + (newDistUnits * Math.sin(originalAngle));
+
+      // --- FIX: Clamp to Map Boundaries ---
+      // We clamp the coordinates for the VISUAL marker so it doesn't fly off-screen,
+      // but we allow the slider distance (newDistMeters) to remain whatever the user set.
+      newX = Math.max(GAME_LEFT, Math.min(GAME_RIGHT, newX));
+      newY = Math.max(GAME_BOTTOM, Math.min(GAME_TOP, newY));
+      // -----------------------------------
 
       const factionLabel = document.getElementById("factionLabel").innerText;
       const mils = getMil(newDistMeters, factionLabel); 
@@ -1798,14 +1838,29 @@ function initArtyControls() {
           mil: mils
       };
 
-      // NOTE: No text update logic here anymore.
-      
-      renderMarkers();
-      renderTargeting();
-      render();
+      // --- CRITICAL FIX: REMOVED INPUT SYNC ---
+      // We do NOT update 'trajInput.value' here. 
+      // 1. If dragging, the input is already correct (user's finger).
+      // 2. If clicking buttons, 'adjustTrajDistance' updates the input BEFORE calling this.
+      // Removing this stops the "snap back" glitch on mobile.
+
+      // Update Text Displays (light immediate updates)
+      if (cached.trajCurrentMil) cached.trajCurrentMil.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
+      if (cached.trajCurrentMeter) cached.trajCurrentMeter.innerText = activeTarget.distance + "m";
+
+      // Heavy DOM updates throttled with RAF
+      if (!trajUpdatePending) {
+          trajUpdatePending = true;
+          requestAnimationFrame(() => {
+              renderMarkers();
+              renderTargeting();
+              render();
+              trajUpdatePending = false;
+          });
+      }
   }
 
-  // 3. Attach listeners to step buttons (Mozilla Mobile Fix)
+  // 3. Attach listeners to step buttons (Mozilla Mobile Double-Tap Fix)
   document.querySelectorAll('.traj-step-btn').forEach(btn => {
       const newBtn = btn.cloneNode(true); // Clear old listeners
       btn.parentNode.replaceChild(newBtn, btn);
@@ -1814,48 +1869,64 @@ function initArtyControls() {
       let stepTouchTimeout = null;
 
       const handleStep = (e) => {
-          // GATEKEEPER: If we recently handled a touch, strictly ignore this 'click'
+          // 1. GATEKEEPER: If we just handled a touch, strictly ignore this 'click'
           if (e.type === 'click' && stepTouchHandled) {
-              e.preventDefault();
-              e.stopPropagation();
               return;
           }
 
-          // TOUCH START: Set flag immediately
-          if (e.type === 'touchstart') {
-              stepTouchHandled = true;
-              if (stepTouchTimeout) clearTimeout(stepTouchTimeout);
-              // Extended timeout (500ms) to catch lingering ghost clicks on Mozilla
-              stepTouchTimeout = setTimeout(() => { stepTouchHandled = false; }, 500);
-          }
-
-          // NUCLEAR OPTION: Stop browser handling (Zoom, Scroll, Emulated Click)
+          // 2. AGGRESSIVE PREVENTION: Stop browser from generating ghost clicks, zooming, or selecting
           if (e.cancelable) e.preventDefault();
           e.stopPropagation();
 
-          // Visual Feedback
+          // 3. TOUCH HANDLER: Set the flag
+          if (e.type === 'touchstart') {
+              stepTouchHandled = true;
+              
+              // Clear previous timer to prevent race conditions
+              if (stepTouchTimeout) clearTimeout(stepTouchTimeout);
+              
+              // Set a long timeout (500ms) to ensure the ghost click window has fully passed
+              stepTouchTimeout = setTimeout(() => { stepTouchHandled = false; }, 500);
+          }
+
+          // 4. VISUALS: Feedback
           newBtn.classList.add("pressed");
           setTimeout(() => newBtn.classList.remove("pressed"), 100);
 
-          // Logic
+          // 5. LOGIC: Execute adjustment
           const step = parseInt(newBtn.getAttribute('data-step'));
           adjustTrajDistance(step);
 
-          // Haptics
+          // 6. HAPTICS
           if (navigator.vibrate) navigator.vibrate(10);
       };
 
-      // Add listeners for both Touch and Click
-      // Passive: false is required to allow e.preventDefault() to work
+      // Add listeners
+      // 'passive: false' is REQUIRED to allow e.preventDefault() to work on touchstart
       newBtn.addEventListener('touchstart', handleStep, { passive: false });
       newBtn.addEventListener('click', handleStep);
   });
 
-  // 4. Link slider input
+  // 4. Link slider input (Mobile Isolation Fix)
   const rangeInput = document.getElementById('trajectoryRange');
   const newRange = rangeInput.cloneNode(true); // Clear old listeners
   rangeInput.parentNode.replaceChild(newRange, rangeInput);
-  
+
+  // --- CRITICAL FIX: ISOLATE SLIDER FROM MAP ---
+  // We must stop the touch events here so they don't bubble up to the map
+  // and trigger the panning logic, which causes the slider to "snap back".
+  const stopMapInteraction = (e) => {
+      e.stopPropagation(); 
+      // NOTE: Do NOT call preventDefault() here, or the slider won't move!
+  };
+
+  // Block the map from seeing these events
+  newRange.addEventListener('touchstart', stopMapInteraction, { passive: true });
+  newRange.addEventListener('touchmove', stopMapInteraction, { passive: true });
+  newRange.addEventListener('touchend', stopMapInteraction, { passive: true });
+  newRange.addEventListener('mousedown', stopMapInteraction); // For Desktop drag-select issues
+
+  // Handle the actual value change
   newRange.addEventListener('input', (e) => {
       updateTrajectoryFromDistance(parseInt(e.target.value));
   });
@@ -2110,47 +2181,98 @@ mapContainer.addEventListener("wheel", (e) => {
   }, 100); // Faster recovery time (100ms)
 }, { passive: false });
 
-// --- 4. PANNING LOGIC (DESKTOP) ---
-mapContainer.addEventListener("mousedown", (e) => {
-  e.preventDefault();
-  
-  // FIX: Kill transitions on BOTH map and labels immediately
-  toggleTransitions(false); 
-  
-  state.panning = true;
-  isDragging = false; 
-  
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
+// --- 4. PANNING LOGIC (DESKTOP - NO SLIDING) ---
+let panAnimationFrame;
 
-  state.startX = e.clientX - state.pointX;
-  state.startY = e.clientY - state.pointY;
-  
-  // REMOVED: mapContainer.style.cursor = "grabbing"; 
-  // We don't change the cursor yet!
+mapContainer.addEventListener("mousedown", (e) => {
+    // Only handle left click
+    if (e.button !== 0) return;
+    
+    e.preventDefault();
+    
+    // 1. CRITICAL: Stop the "Wheel Zoom" timer from re-enabling animations mid-drag
+    if (window.wheelStopTimeout) {
+        clearTimeout(window.wheelStopTimeout);
+        window.wheelStopTimeout = null;
+    }
+
+    // 2. Kill CSS Transitions Immediately
+    // We remove the class AND force the inline style to be sure
+    mapStage.classList.remove("zoom-transition");
+    mapStage.style.transition = "none";
+    
+    const labelLayer = document.getElementById("labelLayer");
+    if (labelLayer) {
+        labelLayer.classList.remove("zoom-transition");
+        labelLayer.style.transition = "none";
+    }
+    
+    state.panning = true;
+    isDragging = false; 
+    
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+
+    state.startX = e.clientX - state.pointX;
+    state.startY = e.clientY - state.pointY;
 });
 
 window.addEventListener("mousemove", (e) => {
-  if (!state.panning) return;
-  e.preventDefault();
+    if (!state.panning) return;
+    e.preventDefault();
 
-  const moveDist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
-  
-  // FIX: Only start the logic if we crossed the threshold
-  if (!isDragging && moveDist > DRAG_THRESHOLD) {
-      isDragging = true;
-      mapContainer.style.cursor = "grabbing";
-  }
+    // 1. Threshold check
+    if (!isDragging) {
+        const moveDist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+        if (moveDist > DRAG_THRESHOLD) {
+            isDragging = true;
+            mapContainer.style.cursor = "grabbing";
+        }
+    }
 
-  // FIX: Only pan the map if we are officially dragging
-  if (isDragging) {
-      handleMove(e.clientX, e.clientY);
-  }
+    // 2. Movement Logic
+    if (isDragging) {
+        state.pointX = e.clientX - state.startX;
+        state.pointY = e.clientY - state.startY;
+
+        // Optimization: Apply transform directly during drag
+        // This bypasses the heavy render() loop for pure speed
+        if (!panAnimationFrame) {
+            panAnimationFrame = requestAnimationFrame(() => {
+                // Safety: Force transition off again in case a timer tried to add it
+                mapStage.style.transition = "none"; 
+                
+                const drawScale = state.scale * state.fitScale;
+                mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
+                
+                panAnimationFrame = null;
+            });
+        }
+    }
 });
 
 window.addEventListener("mouseup", () => {
-  state.panning = false;
-  mapContainer.style.cursor = ""; // Returns to the crosshair/dot cursor
+    if (!state.panning) return;
+    
+    state.panning = false;
+    mapContainer.style.cursor = "";
+    
+    if (panAnimationFrame) {
+        cancelAnimationFrame(panAnimationFrame);
+        panAnimationFrame = null;
+    }
+    
+    // 3. Snap to final position and restore high-quality rendering
+    render(); 
+    saveState();
+    
+    // 4. Re-enable Smooth Zoom (only after drag is fully complete)
+    // We use a small delay to ensure the 'render()' snap doesn't get animated
+    setTimeout(() => {
+         mapStage.classList.add("zoom-transition");
+         mapStage.style.transition = ""; // Clear inline override so CSS takes over
+         document.getElementById("labelLayer")?.classList.add("zoom-transition");
+    }, 50);
 });
 
 // --- 5. PANNING LOGIC (MOBILE) ---
@@ -2185,16 +2307,26 @@ mapContainer.addEventListener("touchmove", (e) => {
   if (e.cancelable) e.preventDefault(); 
 
   if (e.touches.length === 1 && state.panning) {
-    // Check Threshold
+    // Threshold check
     const moveDist = Math.hypot(e.touches[0].clientX - dragStartX, e.touches[0].clientY - dragStartY);
     
     if (!isDragging && moveDist > DRAG_THRESHOLD) {
         isDragging = true;
     }
 
-    // FIX: Only move if confirmed dragging
     if (isDragging) {
-        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        // DIRECT UPDATE (like desktop)
+        state.pointX = e.touches[0].clientX - state.startX;
+        state.pointY = e.touches[0].clientY - state.startY;
+
+        // Optimized: Apply transform directly during drag via RAF (bypasses full render())
+        if (!panAnimationFrame) {
+            panAnimationFrame = requestAnimationFrame(() => {
+                const drawScale = state.scale * state.fitScale;
+                mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
+                panAnimationFrame = null;
+            });
+        }
     }
   } 
   else if (e.touches.length === 2 && initialPinchDistance) {
@@ -2230,26 +2362,18 @@ mapContainer.addEventListener("touchend", (e) => {
   }
   if (e.touches.length === 0) {
     state.panning = false;
+    isDragging = false;
+
+    if (panAnimationFrame) {
+        cancelAnimationFrame(panAnimationFrame);
+        panAnimationFrame = null;
+    }
+
+    // Final high-quality render + re-enable transitions
+    render();
+    toggleTransitions(true); // or setTimeout to re-add zoom-transition class
   }
 });
-
-// Shared Move Handler
-function handleMove(clientX, clientY) {
-  state.pointX = clientX - state.startX;
-  state.pointY = clientY - state.startY;
-  
-  if (!isRendering) {
-    isRendering = true;
-    requestAnimationFrame(() => {
-      render();
-      isRendering = false;
-    });
-  }
-  
-  // Auto-save pan changes (debounced)
-  clearTimeout(window.savePanTimeout);
-  window.savePanTimeout = setTimeout(saveState, 1000);
-}
 
 // Fix for "Sticky Hover" on mobile
 // (Mobile phones sometimes keep the :hover state after a tap)
@@ -2426,6 +2550,20 @@ if (toggleBtn && drawer) {
           saveState();
       });
   }
+  
+  // Initialize targeting canvas for performance optimization
+  targetingCanvas = document.getElementById("targetingCanvas");
+  if (targetingCanvas) {
+    targetingCtx = targetingCanvas.getContext("2d");
+  }
+  
+  // Cache frequently accessed DOM elements
+  cached.mapImage = document.getElementById("mapImage");
+  cached.markersLayer = document.getElementById("markers");
+  cached.mapContainer = document.getElementById("mapContainer");
+  cached.trajCurrentMil = document.getElementById("trajCurrentMil");
+  cached.trajCurrentMeter = document.getElementById("trajCurrentMeter");
+  cached.factionLabel = document.getElementById("factionLabel");
   
   // Inject version number into UI elements
   const versionEl = document.getElementById('appVersion');
