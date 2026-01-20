@@ -1963,32 +1963,26 @@ function saveState() {
 }
 
 function loadState() {
-  try {
-    const savedState = localStorage.getItem('hllArtyCalculatorState');
-    if (!savedState) return null;
-    
-    const loaded = JSON.parse(savedState);
-    
-    // FAILSAFE: If the saved map doesn't exist anymore, abort load
-    if (!MAP_DATABASE[loaded.activeMapKey]) return null;
-    
-    // RESTORE VARIABLES
-    activeMapKey = loaded.activeMapKey;
-    activeFaction = loaded.activeFaction || 'us';
-    activeGunIndex = loaded.activeGunIndex || 0;
-    manualCalcFaction = loaded.manualCalcFaction || 'us';
-    rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : false;
-    hudEnabled = loaded.hudEnabled !== undefined ? loaded.hudEnabled : false;
-    
-    // Restore Panel State
-    window.savedPanelHidden = loaded.panelHidden || false;
-    
-    // NOTE: We do NOT restore zoom/pan. initMap() will center the map cleanly.
-    
-    return true; 
-  } catch (error) {
-    return null;
-  }
+    try {
+        const savedState = localStorage.getItem('hllArtyCalculatorState');
+        if (!savedState) return null;
+        
+        const loaded = JSON.parse(savedState);
+        if (!loaded || !loaded.activeMapKey || !MAP_DATABASE[loaded.activeMapKey]) return null;
+        
+        activeMapKey = loaded.activeMapKey;
+        activeFaction = loaded.activeFaction || 'us';
+        activeGunIndex = loaded.activeGunIndex || 0;
+        manualCalcFaction = loaded.manualCalcFaction || 'us';
+        rulerEnabled = !!loaded.rulerEnabled;
+        hudEnabled = !!loaded.hudEnabled;
+        window.savedPanelHidden = !!loaded.panelHidden;
+        
+        return true; 
+    } catch (e) {
+        console.error("Load state failed", e);
+        return null;
+    }
 }
 
 function clearSavedState() {
@@ -3046,114 +3040,40 @@ function fireAtCenter() {
 }
 
 // ==========================================
-// 6. EXECUTION START
+// 7. FINAL INITIALIZATION
 // ==========================================
 
-// Build initial UI
-renderMapGrid(""); 
+// Cache often-used elements once
+cached.mapImage = document.getElementById("mapImage");
+cached.markersLayer = document.getElementById("markers");
+cached.mapContainer = document.getElementById("mapContainer");
+cached.trajCurrentMil = document.getElementById("trajCurrentMil");
+cached.trajCurrentMeter = document.getElementById("trajCurrentMeter");
+cached.factionLabel = document.getElementById("factionLabel");
 
-// Load saved data
-loadState();
-
-// 6. Load Map Image and Start Rendering
-const imgEl = document.getElementById("mapImage");
-
+// Load Map Image and Start Rendering
 const onInitLoadWithRetry = function() {
-  // FIX: Loop until image has physical dimensions (Fixes "Stuck Zoom" on Reload)
-  if (imgEl.naturalWidth === 0) {
-      setTimeout(onInitLoadWithRetry, 50);
-      return;
-  }
+    if (cached.mapImage.naturalWidth === 0) {
+        setTimeout(onInitLoadWithRetry, 50);
+        return;
+    }
 
-  // --- ADD THIS LINE HERE ---
-  if (MAP_DATABASE[activeMapKey]) {
-      updatePageTitle(MAP_DATABASE[activeMapKey].name);
-  }
+    if (MAP_DATABASE[activeMapKey]) {
+        updatePageTitle(MAP_DATABASE[activeMapKey].name);
+    }
 
-  initMap(); 
-  render();
-  syncToggleUI(); 
-  hideLoading();
+    initMap(); 
+    render();
+    syncToggleUI(); 
+    hideLoading();
 };
 
-// Set image source and trigger load
-imgEl.src = MAP_DATABASE[activeMapKey].image;
-
-if (imgEl.complete) {
-  onInitLoadWithRetry();
-} else {
-  imgEl.onload = onInitLoadWithRetry;
-}
-
-// Ensure ResizeObserver doesn't trigger bad math if image isn't ready
-new ResizeObserver(() => { 
-    if (imgEl.naturalWidth > 0) {
-        updateDimensions(); 
-        render(); 
+// Start the engine
+if (MAP_DATABASE[activeMapKey]) {
+    cached.mapImage.src = MAP_DATABASE[activeMapKey].image;
+    if (cached.mapImage.complete) {
+        onInitLoadWithRetry();
+    } else {
+        cached.mapImage.onload = onInitLoadWithRetry;
     }
-}).observe(mapContainer);
-
-// --- PROJECTS MODAL LOGIC ---
-
-const btnOtherProjects = document.getElementById("btnOtherProjects");
-const projectsModal = document.getElementById("projectsModal");
-const closeProjectsBtn = document.getElementById("closeProjectsBtn");
-
-if (btnOtherProjects && projectsModal) {
-    // Open Modal
-    btnOtherProjects.addEventListener("click", (e) => {
-        e.preventDefault();
-        projectsModal.classList.add("active");
-        btnOtherProjects.blur(); // Blur opening button immediately
-    });
-
-    // Close Logic
-    const closeHub = () => {
-        projectsModal.classList.remove("active");
-        // Force browser to forget focus when closing (prevents sticking grey/yellow)
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-    };
-
-    if (closeProjectsBtn) closeProjectsBtn.onclick = closeHub;
-
-    // Close if clicking the dark background
-    projectsModal.onclick = (e) => {
-        if (e.target === projectsModal) closeHub();
-    };
-    
-    // NEW: Target all buttons inside the hub to clear focus (Mobile Sticky Fix)
-    const hubButtons = projectsModal.querySelectorAll('.footer-btn');
-    hubButtons.forEach(btn => {
-        // 1. Prevent focus from sticking on initial touch/click
-        btn.addEventListener('mousedown', () => {
-            setTimeout(() => btn.blur(), 0);
-        });
-
-        // 2. Ensure blur happens after action triggers
-        btn.addEventListener('click', () => {
-            setTimeout(() => {
-                btn.blur();
-                // Double safety: if user came back and it's still focused
-                if (document.activeElement === btn) btn.blur();
-            }, 100);
-        });
-    });
 }
-
-// Global reset when you switch back to the Artillery tab
-window.onfocus = function() {
-    document.querySelectorAll('button').forEach(b => b.blur());
-};
-
-// --- FORCE RESET ON TAB RETURN (Mobile Fix) ---
-window.addEventListener('pageshow', (event) => {
-    // If the page was restored from cache (bfcache) or just shown
-    if (event.persisted || document.visibilityState === 'visible') {
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-        document.querySelectorAll('.footer-btn').forEach(btn => btn.blur());
-    }
-});
