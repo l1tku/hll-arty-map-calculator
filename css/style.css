@@ -170,7 +170,7 @@
 
 .traj-slider-container {
     position: fixed !important; /* Locks to screen glass, ignores map movement */
-    bottom: 50px; 
+    bottom: 40px; 
     left: 50%;
     transform: translateX(-50%);
     width: 600px !important;       
@@ -189,7 +189,6 @@
     z-index: 400 !important; 
     
     pointer-events: auto;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
 /* Forces slider track to expand between button groups */
@@ -431,12 +430,29 @@ body {
   pointer-events: none; z-index: 10; overflow: hidden;
 }
 
+/* ==========================================
+   LABELS (Sticky Axis)
+   ========================================== */
 .hll-grid-label {
   position: absolute;
   top: 0; left: 0;
-  font-family: 'GothamSS', sans-serif; font-weight: 900; font-size: 24px;
+  font-family: 'GothamSS', sans-serif; 
+  font-weight: 900; 
+  font-size: 24px;
   color: #ffffff;
-  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 3px 3px 4px rgba(0,0,0,0.9);
+  
+  /* --- THE FIX --- */
+  /* 1. Remove the old shadow hack */
+  text-shadow: none !important;
+  
+  /* 2. Add a real vector stroke (Black, 3px thick) */
+  -webkit-text-stroke: 3px #000000;
+  
+  /* 3. CRITICAL: Draw the stroke BEHIND the white fill */
+  /* Without this, the black line will cover half your white text */
+  paint-order: stroke fill;
+  /* ---------------- */
+  
   display: flex; align-items: center; justify-content: center;
   width: 0; height: 0; pointer-events: none; z-index: 3;
   transform-origin: center center;
@@ -726,9 +742,21 @@ body {
 .scale-bar-graphic {
   position: relative; height: 8px; width: 100%;
   box-sizing: border-box; 
-  border: 1px solid rgba(255,255,255,0.5); 
+  /* FIX: Sharp white border, no fuzzy shadow */
+  border: 1px solid #ffffff; 
   background: linear-gradient(to right, #ffffff 50%, #000000 50%);
-  box-shadow: 0 0 2px black;
+  box-shadow: none !important;
+}
+
+.scale-lbl {
+  position: absolute; bottom: 0; transform: translateX(-50%);
+  font-family: "GothamSS", sans-serif; font-weight: 900; 
+  font-size: 12px; color: #ffffff; white-space: nowrap; 
+  line-height: 1;
+  /* FIX: Use stroke instead of shadow */
+  text-shadow: none !important;
+  -webkit-text-stroke: 2px #000000;
+  paint-order: stroke fill;
 }
 
 .scale-tick { 
@@ -743,13 +771,6 @@ body {
   position: relative; width: 100%; height: 16px; margin-top: 4px; 
 }
 
-.scale-lbl {
-  position: absolute; bottom: 0; transform: translateX(-50%);
-  font-family: "GothamSS", sans-serif; font-weight: 900; 
-  font-size: 12px; color: #ffffff; white-space: nowrap; 
-  text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
-  line-height: 1;
-}
 .l-start { left: 0%; }
 .l-mid { left: 50%; }
 .l-end { left: 100%; }
@@ -762,9 +783,24 @@ body {
 }
 
 #zoomIndicator {
-  color: #ffffff; font-family: "GothamSS", sans-serif; font-weight: 900;
-  font-size: 16px; text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
-  display: block; line-height: 1; text-align: right;
+    text-align: left !important;
+    font-size: 16px !important;
+    display: block !important;
+    line-height: 1 !important;
+    color: #fff;
+    
+    /* --- THE FIXES --- */
+    /* 1. Force the font to be thick/heavy so the white shows through */
+    font-family: 'GothamSS', sans-serif !important;
+    font-weight: 900 !important; 
+
+    /* 2. Remove Shadow */
+    text-shadow: none !important;
+    
+    /* 3. Use a thinner stroke (1.5px) for this small text */
+    /* 2px was too thick for 16px text */
+    -webkit-text-stroke: 2px #000000;
+    paint-order: stroke fill;
 }
 
 .controls-row {
@@ -2521,7 +2557,10 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         width: 100% !important;
         max-width: none !important;
         border-radius: 12px 12px 0 0 !important;
-        padding: 10px 10px 25px 10px !important;
+        
+        /* FIX: Reduced bottom padding from 25px to 12px */
+        padding: 10px 10px 12px 10px !important; 
+        
         gap: 8px;
         background-color: #181818 !important;
         border-top: 1px solid rgba(255, 255, 255, 0.3);
@@ -2534,6 +2573,10 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         align-items: stretch;
         position: relative;
         z-index: 1300 !important;
+        
+        /* FIX: Force height to fit content exactly */
+        height: auto !important;
+        min-height: 0 !important;
     }
 
     /* Eraser Patch */
@@ -2736,8 +2779,20 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         font-size: 16px !important;
         display: block !important;
         line-height: 1 !important;
-        text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000 !important;
         color: #fff;
+
+        /* --- THE FIX --- */
+        /* 1. Ensure font is thick enough */
+        font-family: 'GothamSS', sans-serif !important;
+        font-weight: 900 !important;
+
+        /* 2. Remove Shadow */
+        text-shadow: none !important;
+        
+        /* 3. Add Sharp Outline (2px to match your preference) */
+        -webkit-text-stroke: 2px #000000;
+        paint-order: stroke fill;
+        /* ---------------- */
     }
 
     /* --- 7. LIVE HUD (BOTTOM-RIGHT OF CROSSHAIR) --- */
