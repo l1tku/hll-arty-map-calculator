@@ -40,11 +40,31 @@ let calcInputVal = ""; // Stores the string like "1250"
 // Trajectory Slider Variables
 let trajSliderEnabled = false;
 let originalAngle = 0; // Locks the bearing 
+let trajUpdatePending = false;
+
+// Performance optimization: Ruler label pool to avoid recreating DOM elements
+let rulerLabelPool = []; 
 
 // --- MOVE THESE HERE (Top of script) ---
 let _lastMobDist = null;
 let _lastMobMil = null;
 let _lastMobGrid = null;
+
+// Performance optimization: Cache frequently accessed DOM elements
+const cached = {
+    get mapImage() { return document.getElementById("mapImage"); },
+    get markersLayer() { return document.getElementById("markers"); },
+    get mapContainer() { return document.getElementById("mapContainer"); },
+    get mapStage() { return document.getElementById("mapStage"); },
+    get trajCurrentMil() { return document.getElementById("trajCurrentMil"); },
+    get trajCurrentMeter() { return document.getElementById("trajCurrentMeter"); },
+    get factionLabel() { return document.getElementById("factionLabel"); },
+    get targetDataPanel() { return document.getElementById("targetDataPanel"); },
+    get panelDist() { return document.getElementById("panelDist"); },
+    get panelMil() { return document.getElementById("panelMil"); },
+    get panelTime() { return document.getElementById("panelTime"); },
+    get zoomIndicator() { return document.getElementById("zoomIndicator"); }
+};
 
 // DOM Elements
 const mapContainer = document.getElementById("mapContainer");
@@ -727,16 +747,20 @@ function getActiveGunCoords() {
 }
 
 function renderTargeting() {
-  const layer = document.getElementById("markers");
+  const layer = cached.markersLayer;
   
   // 1. CLEANUP
   layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg, .ruler-mil-label').forEach(el => el.remove());
+  
+  // Clear ruler label pool
+  rulerLabelPool.forEach(label => label.remove());
+  rulerLabelPool = [];
 
   // UI Panel References
-  const panel = document.getElementById("targetDataPanel");
-  const elDist = document.getElementById("panelDist");
-  const elMil = document.getElementById("panelMil");
-  const elTime = document.getElementById("panelTime");
+  const panel = cached.targetDataPanel;
+  const elDist = cached.panelDist;
+  const elMil = cached.panelMil;
+  const elTime = cached.panelTime;
 
   // 2. CHECK IF TARGET EXISTS
   if (!activeTarget || !getActiveGunCoords()) {
@@ -746,7 +770,7 @@ function renderTargeting() {
   if (panel) panel.classList.remove("hidden");
 
   const gunPos = getActiveGunCoords();
-  const mapImage = document.getElementById("mapImage");
+  const mapImage = cached.mapImage;
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   
@@ -769,7 +793,8 @@ function renderTargeting() {
   
   // Calculate total distance in meters based on the CORRECT scale
   const totalDistanceMeters = totalDistPx / pixelsPerMeter;
-  const intervalMeters = 50; 
+  // Performance optimization: Fewer markers at high zoom
+  const intervalMeters = state.scale > 5 ? 100 : 50;
   const intervalPx = intervalMeters * pixelsPerMeter;
 
   // Calculate pixel size for 10m segments
@@ -805,7 +830,7 @@ function renderTargeting() {
     const numMarkers = Math.floor(lineLength / intervalPx);
     const MAX_RULER_DIST = 1600;
 
-    const factionLabel = document.getElementById("factionLabel").innerText;
+    const factionLabel = cached.factionLabel.innerText;
     const cosAngle = Math.cos(angleRad);
     const sinAngle = Math.sin(angleRad);
 
@@ -826,7 +851,7 @@ function renderTargeting() {
       tick.setAttribute("class", "ruler-tick");
       lineSvg.appendChild(tick);
 
-      // 2. Standard DIV Label
+      // 2. Standard DIV Label (pooled for performance)
       const labelX = start.x + cosAngle * markerX;
       const labelY = start.y + sinAngle * markerX;
 
@@ -842,6 +867,7 @@ function renderTargeting() {
       milLabel.style.top = `${labelY}px`;
       
       layer.appendChild(milLabel);
+      rulerLabelPool.push(milLabel);
     }
   }
   
@@ -909,7 +935,9 @@ function render() {
   const drawScale = state.scale * state.fitScale;
   
   // 1. CSS Variables
+  const mapContainer = cached.mapContainer;
   mapContainer.style.setProperty('--current-scale', drawScale); 
+  const mapStage = cached.mapStage;
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
   // 2. Move Map (Synchronous)
@@ -920,6 +948,7 @@ function render() {
   // Since we aren't animating 60fps, this calculation is fast enough for a single click.
   
   updateRealScale(drawScale);
+  const zoomIndicator = cached.zoomIndicator;
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
   // Label Scaling
@@ -1790,7 +1819,7 @@ function initArtyControls() {
       newY = Math.max(GAME_BOTTOM, Math.min(GAME_TOP, newY));
       // -----------------------------------
 
-      const factionLabel = document.getElementById("factionLabel").innerText;
+      const factionLabel = cached.factionLabel.innerText;
       const mils = getMil(newDistMeters, factionLabel); 
 
       activeTarget = {
@@ -1806,16 +1835,23 @@ function initArtyControls() {
       // 2. If clicking buttons, 'adjustTrajDistance' updates the input BEFORE calling this.
       // Removing this stops the "snap back" glitch on mobile.
 
-      // Update Text Displays
-      const milDisplay = document.getElementById('trajCurrentMil');
-      const meterDisplay = document.getElementById('trajCurrentMeter');
+      // Light immediate updates (no DOM write)
+      const milDisplay = cached.trajCurrentMil;
+      const meterDisplay = cached.trajCurrentMeter;
       
       if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
       if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
 
-      renderMarkers();
-      renderTargeting();
-      render();
+      // Throttle heavy render operations to ~60fps max
+      if (!trajUpdatePending) {
+          trajUpdatePending = true;
+          requestAnimationFrame(() => {
+              renderMarkers();
+              renderTargeting();
+              render();
+              trajUpdatePending = false;
+          });
+      }
   }
 
   // 3. Attach listeners to step buttons (Mozilla Mobile Double-Tap Fix)

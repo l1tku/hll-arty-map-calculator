@@ -346,7 +346,11 @@ body {
   top: 0; 
   left: 0;
   transition: opacity 0.4s ease-in-out;
-  /* ENSURE 'will-change' IS DELETED HERE TOO */
+  /* Mobile-friendly GPU hints (lighter than will-change) */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
 }
 
 /* ==========================================
@@ -355,10 +359,8 @@ body {
 /* 1025px ensures this NEVER runs on phones (even Pro Max in landscape) */
 @media (min-width: 1025px) {
   
-  /* 1. Hardware Acceleration (Desktop Only) */
-  .map-stage {
-    will-change: transform;
-  }
+  /* 1. Hardware Acceleration Removed (Fixes Mobile Chrome Checkerboarding) */
+  /* Modern Chrome auto-promotes transform elements without will-change */
   
   .marker, .marker-label, .hll-grid-line {
     -webkit-backface-visibility: hidden;
@@ -374,7 +376,7 @@ body {
 
   .label-layer.zoom-transition .hll-grid-label {
     transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
-    will-change: transform;
+    /* will-change: transform; REMOVED - causes checkerboarding on mobile Chrome */
   }
 }
 
