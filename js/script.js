@@ -1400,8 +1400,8 @@ function getFlagImage(teamName) {
   
   const lower = teamName.toLowerCase();
   
-  // GB / British
-  if (lower === "gb" || lower.includes("british") || lower.includes("8th")) {
+  // GB / British / Allies (Maps like El Alamein/Driel)
+  if (lower === "gb" || lower.includes("british") || lower.includes("8th") || lower.includes("allies")) {
       return "images/flags/gb.webp";
   }
 

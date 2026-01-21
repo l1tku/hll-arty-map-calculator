@@ -2717,29 +2717,75 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     .target-data-panel .data-divider { margin: 0 5px; }
     .panel-watermark { font-size: 9px; padding-bottom: 2px; letter-spacing: 0.5px; }
 
-    /* --- 4. SCALE BAR (CENTERED) --- */
+    /* --- 4. SCALE BAR (FLEXBOX FIX) --- */
     .scale-container {
-        pointer-events: none !important; /* Changed to none to allow clicking through to map */
+        /* 1. Use Flexbox to center the child wrapper */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: flex-end !important;
         
-        /* THE POSITION FIX: Moved up 50px */
-        /* Increased from your previous 30px to 80px */
+        /* 2. Position the container itself */
+        width: 100% !important;
+        height: 50px !important;
         margin-bottom: 190px !important; 
-        
-        padding: 0;
-        width: 100%;
-        display: block !important;
-        height: 40px !important;
         position: relative !important;
+        z-index: 5 !important;
+        pointer-events: none !important;
+        padding: 0 !important;
     }
 
     .scale-wrapper {
-        position: absolute !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        bottom: 0 !important;
+        /* 3. Disable Absolute/Stretching logic */
+        position: relative !important; 
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
         margin: 0 !important;
-        z-index: 5 !important;
+        
+        /* 4. Allow JS to control the width */
+        width: auto; 
+        /* The JavaScript style="width: 240px" will now apply correctly 
+           and Flexbox will keep it centered. */
+
+        /* 5. Performance & Safety */
+        transform: none !important; 
+        transition: none !important;
         pointer-events: none !important;
+    }
+
+    /* 6. VERTICAL SPACING FIX */
+    /* Pushes numbers down 15px so white tick lines don't cross them */
+    .scale-labels { 
+        position: relative; 
+        width: 100%; 
+        height: 16px; 
+        margin-top: 15px !important; 
+    }
+
+    /* 7. CLEAN TEXT STYLE (Readable on Mobile) */
+    .scale-lbl {
+        position: absolute; 
+        bottom: 0; 
+        transform: translateX(-50%);
+        
+        font-family: "GothamSS", sans-serif; 
+        font-weight: 900; 
+        font-size: 12px; 
+        color: #ffffff; 
+        white-space: nowrap; 
+        line-height: 1;
+        
+        /* Add spacing so numbers don't touch */
+        letter-spacing: 1px; 
+
+        /* Use a crisp shadow instead of thick stroke */
+        -webkit-text-stroke: 0px transparent;
+        text-shadow: 
+            -1px -1px 0 #000,  
+             1px -1px 0 #000,
+            -1px  1px 0 #000,
+             1px  1px 0 #000,
+             0 2px 2px rgba(0,0,0,0.8);
     }
 
     /* --- 5. ZOOM SLIDER (RIGHT SIDE) --- */

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.4] - 2026-01-19
+## [1.1.4] - 2026-01-21
 ### Added
 - **Trajectory Adjustment Slider**: Implemented a new tool (toggled via the control bar) allowing precise distance modification along the established bearing vector. Users can now "walk" shots back and forth along the trajectory line without losing the angle.
 
@@ -10,10 +10,13 @@ All notable changes to this project will be documented in this file.
 - **Mobile Fire Offset**: Recalibrated the `fireAtCenter` coordinate logic to align the impact marker more accurately with the visual crosshair center on mobile devices.
 - **Map Transition Flicker**: Resolved a rendering issue where the previous map's texture or label text would briefly flash during the loading sequence of a new map.
 - **Dynamic Page Titles**: Fixed a bug where the browser tab title (`document.title`) failed to update with the active map name (e.g., "HLL Arty Calculator - Carentan").
+- **Scale Bar Accuracy**: Rewrote the scale bar logic to strictly follow the 200m grid standard rather than the variable map image width (1984m vs 2016m). This ensures the "100m" label actually represents 100 meters regardless of the map's texture size.
+- **Scale Bar Rendering**: Resolved a visual bug where scale labels ("0m", "50m", "100m") would clump together or stretch incorrectly on mobile screens due to CSS/JS conflicts.
 - **Mobile UI Ergonomics**:
     - Relocated the mobile **Fire Button** lower on the screen to improve thumb reachability and prevent obstruction of the map view.
     - Removed unsightly drop shadows from the vertical zoom slider buttons for a cleaner, flatter aesthetic.
-- **Trajectory Slider Interaction**: Added "gatekeeper" logic to the trajectory stepper buttons (`-25`, `-10`, etc.) to prevent double-firing events on Firefox Mobile browsers.
+- **Mobile Checkerboarding**: Eliminated black "checkerboard" glitches on Chrome Mobile by replacing hardware-accelerated transforms (`translate3d`) with standard layout centering (`margin: auto`) for UI overlays like the scale bar and zoom indicator.
+- **Allies Flag Logic**: Updated the faction detection to correctly display the British (GB) flag instead of the US flag for maps labeled "Allies" (e.g., El Alamein, Driel).
 
 ### Performance
 - **Mobile Zoom Strategy**: Evaluated "smooth zoom" interpolation for mobile devices but reverted to standard step-zooming to preserve frame rates and prevent texture memory crashes on lower-end devices.
