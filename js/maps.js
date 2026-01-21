@@ -14,7 +14,7 @@ const MAP_DATABASE = {
     heightMeters: 2016, 
     // -------------------------------------------------
 
-    gunRotations: { "us": 90, "ger": -90 },
+    gunRotations: { "us": -90, "ger": 90 },
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
     strongpoints: [
@@ -65,7 +65,7 @@ const MAP_DATABASE = {
     widthMeters: 1984, 
     heightMeters: 1984, 
 
-    gunRotations: { "gb": 0, "ger": 180 },
+    gunRotations: { "gb": -180, "ger": 0 },
     gunSort: "x",
 
     guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
@@ -118,7 +118,7 @@ const MAP_DATABASE = {
     widthMeters: 1984, 
     heightMeters: 1984, 
 
-    gunRotations: { "gb": -90, "ger": 90 },
+    gunRotations: { "gb": 90, "ger": -90 },
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
     strongpoints: [
@@ -156,6 +156,66 @@ const MAP_DATABASE = {
       { label: "CLIFFSIDE VILLAGE", id: "B5", gameX: 68942.24, gameY: 39028.40, radius: 6000.0, team: "us", type: "strongpoint" }
     ],
   },
+  EBR: { 
+    name: "Elsenborn Ridge", 
+    image: "images/maps/TacMap_EBR_L_1944.webp", 
+    thumbnail: "images/maps/thumbnail/EBR.webp", 
+    teams: { t1: "UNITED STATES", t2: "GERMANY" },
+
+    // --- DIMENSIONS ---
+    // Calculated from LayoutMeta: 5 sectors * 40000 units = 2000m.
+    // 1 Game Unit = 1 cm. 100 units = 1m.
+    widthMeters: 2000, 
+    heightMeters: 2000, 
+
+    // --- SORTING CONFIG ---
+    // "x": Sorts guns Left-to-Right (West->East). Required for horizontal gun lines.
+    // "y": (Default) Sorts Top-to-Bottom. Used for most other maps.
+    gunSort: "x",
+
+    gunRotations: { "us": 0, "ger": 180 },
+
+    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    strongpoints: [
+      // --- METHOD: Y-INVERSION (Driel Method) ---
+      // The visual map is South->North.
+      // Raw Data: US is Negative Y (-91k). GER is Positive Y (+94k).
+      // Adjustment: Multiply ALL Y-coordinates  by -1 to flip them.
+
+      // --- ALLIES GUNS ---
+      { label: "", id: "US_A1", gameX: 1972.95, gameY: 91307.24, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A2", gameX: 2864.32, gameY: 91026.45, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A3", gameX: 3538.50, gameY: 91394.53, radius: 500, team: "us", type: "point" }, 
+
+      // --- AXIS GUNS ---
+      { label: "", id: "GER_A1", gameX: -7994.93, gameY: -94008.09, radius: 500, team: "ger", type: "point" }, 
+      { label: "", id: "GER_A2", gameX: -6399.25, gameY: -93262.29, radius: 500, team: "ger", type: "point" }, 
+      { label: "", id: "GER_A3", gameX: -4866.51, gameY: -94131.34, radius: 500, team: "ger", type: "point" },
+
+      // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
+
+      // --- ALLIES SECTORS ---
+      { label: "99TH COMMAND CENTRE", id: "B17", gameX: -39637.50, gameY: 67610.96, radius: 7500.0, team: "us", type: "strongpoint" },
+      { label: "GUN BATTERY", id: "B18", gameX: 420.0, gameY: 69376.0, radius: 8000.0, team: "us", type: "strongpoint" },
+      { label: "U.S. CAMP", id: "B16", gameX: 50979.02, gameY: 67675.0, radius: 7000.0, team: "us", type: "strongpoint" },
+      { label: "ELSENBORN RIDGE", id: "B19", gameX: -30950.0, gameY: 41967.96, radius: 7000.0, team: "us", type: "strongpoint" },
+      { label: "FARAHILDE FARM", id: "B20", gameX: 10158.0, gameY: 30210.0, radius: 8000.0, team: "us", type: "strongpoint" },
+      { label: "JENSIT PILLBOXES", id: "B21", gameX: 49674.99, gameY: 28085.95, radius: 7000.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "ROAD TO ELSENBORN RIDGE", id: "B22", gameX: -40964.0, gameY: -3317.0, radius: 8000.0, team: "neu", type: "strongpoint" },
+      { label: "DUGOUT TANKS", id: "B23", gameX: -9124.0, gameY: -2404.0, radius: 6000.0, team: "neu", type: "strongpoint" },
+      { label: "CHECKPOINT", id: "B25", gameX: 40444.91, gameY: -6529.14, radius: 5000.0, team: "neu", type: "strongpoint" },
+
+      // --- AXIS SECTORS ---
+      { label: "ERELSDELL FARMHOUSE", id: "B24", gameX: -41672.0, gameY: -38246.0, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "AA BATTERY", id: "B27", gameX: 8607.68, gameY: -33127.07, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "HINTERBERG", id: "B26", gameX: 39637.23, gameY: -39888.69, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "SUPPLY CACHE", id: "B29", gameX: -25666.0, gameY: -66300.0, radius: 5000.0, team: "ger", type: "strongpoint" },
+      { label: "FOXHOLES", id: "B28", gameX: 12223.86, gameY: -67172.27, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "FUEL DEPOT", id: "B30", gameX: 38049.76, gameY: -70408.04, radius: 7000.0, team: "ger", type: "strongpoint" }
+    ],
+  },
   FOY: { 
     name: "Foy", 
     image: "images/maps/map_foy.webp", 
@@ -169,8 +229,8 @@ const MAP_DATABASE = {
     // Sort Left-to-Right
     gunSort: "x",
 
-    // US (South) points North (0), GER (North) points South (180)
-    gunRotations: { "us": 0, "ger": 180 },
+    // US (South) points North (180), GER (North) points South (0)
+    gunRotations: { "us": 180, "ger": 0  },
 
     guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
     strongpoints: [
@@ -217,7 +277,7 @@ H4: {
     widthMeters: 1984, 
     heightMeters: 1984, 
     gunSort: "y",
-    gunRotations: { "us": 90, "ger": -90 },
+    gunRotations: { "us": -90, "ger": 90 },
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
     strongpoints: [
@@ -253,6 +313,54 @@ H4: {
       { label: "ROER RIVER CROSSING", id: "B13", gameX: 64685.836, gameY: 33321.977, radius: 3000.0, team: "ger", type: "strongpoint" },
       { label: "ZERKALL", id: "B14", gameX: 78823.555, gameY: 9569.677, radius: 5000.0, team: "ger", type: "strongpoint" },
       { label: "ESELSWEG JUNCTION", id: "B15", gameX: 26549.63, gameY: 41028.504, radius: 3000.0, team: "ger", type: "strongpoint" }
+    ],
+  },
+  HUR: {
+    name: "Hürtgen Forest",
+    image: "images/maps/map_hurtgen.webp", // Verify filename
+    thumbnail: "images/maps/thumbnail/HUR.webp",
+    teams: { t1: "UNITED STATES", t2: "GERMANY" },
+
+    widthMeters: 1984,
+    heightMeters: 1984,
+
+    gunSort: "y",
+    gunRotations: { us: -90, ger: 90 },
+
+    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    strongpoints: [
+      // --- AXIS GUNS (Germany) ---
+      // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
+      { label: "", id: "GER_A3", gameX: 91198.0, gameY: -10428.0, radius: 500, team: "ger", type: "point" }, // North
+      { label: "", id: "GER_A2", gameX: 91198.0, gameY: -11227.0, radius: 500, team: "ger", type: "point" }, // Mid
+      { label: "", id: "GER_A1", gameX: 91198.0, gameY: -11963.0, radius: 500, team: "ger", type: "point" }, // South
+
+      // --- ALLIES GUNS (United States) ---
+      // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
+      { label: "", id: "US_A3", gameX: -92088.86, gameY: 4955.032, radius: 500, team: "us", type: "point" },  // North
+      { label: "", id: "US_A2", gameX: -93577.97, gameY: 3982.9868, radius: 500, team: "us", type: "point" },  // Mid
+      { label: "", id: "US_A1", gameX: -92188.766, gameY: 2897.9956, radius: 500, team: "us", type: "point" },  // South
+
+      // --- ALLIES SECTORS (Col 1 & 2) ---
+      { label: "LUMBER YARD", id: "B1", gameX: -77356.0, gameY: -36029.0, radius: 4000.0, team: "us", type: "strongpoint" }, // Booster 9 (Scale 4.0 * 1000)
+      { label: "RESERVE STATION", id: "B2", gameX: -78776.0, gameY: -2238.0, radius: 4500.0, team: "us", type: "strongpoint" }, // Booster 11 (Scale 4.5 * 1000)
+      { label: "MAUSBACH APPROACH", id: "B3", gameX: -74423.0, gameY: 46733.0, radius: 4625.0, team: "us", type: "strongpoint" }, // Booster 20 (Scale 4.625 * 1000)
+      { label: "THE RUIN", id: "B4", gameX: -42793.0, gameY: -26141.0, radius: 4400.0, team: "us", type: "strongpoint" }, // Booster 7 (Scale 5.5 * Explicit 800)
+      { label: "KALL TRAIL", id: "B5", gameX: -35755.0, gameY: -2459.0, radius: 6000.0, team: "us", type: "strongpoint" }, // Booster 13 (Scale 6.0 * 1000)
+      { label: "WEHEBACH OVERLOOK", id: "B6", gameX: -38278.0, gameY: 34416.0, radius: 5031.25, team: "us", type: "strongpoint" }, // Booster 19 (Scale 5.03125 * 1000)
+
+      // --- NEUTRAL SECTORS (Col 3) ---
+      { label: "THE SIEGFRIED LINE", id: "B7", gameX: -3711.0, gameY: -42305.0, radius: 4500.0, team: "neu", type: "strongpoint" }, // Booster 31 (Scale 4.5 * 1000)
+      { label: "THE SCAR", id: "B8", gameX: -6935.0, gameY: -3328.0, radius: 3015.0, team: "neu", type: "strongpoint" }, // Booster 3 (Scale 2.25 * Explicit 1340)
+      { label: "NORTH PASS", id: "B9", gameX: 6540.0, gameY: 49329.0, radius: 4347.0, team: "neu", type: "strongpoint" }, // Booster 17 (Scale 3.25 * Explicit 1337)
+
+      // --- AXIS SECTORS (Col 4 & 5) ---
+      { label: "SALIENT 42", id: "B10", gameX: 40632.0, gameY: -50244.0, radius: 3250.0, team: "ger", type: "strongpoint" }, // Booster 26 (Scale 3.25 * 1000)
+      { label: "JACOB'S BARN", id: "B11", gameX: 37658.0, gameY: -8531.0, radius: 3500.0, team: "ger", type: "strongpoint" }, // Booster 15 (Scale 3.5 * 1000)
+      { label: "HILL 15", id: "B12", gameX: 45628.0, gameY: 34330.0, radius: 4500.0, team: "ger", type: "strongpoint" }, // Booster 22 (Scale 4.5 * 1000)
+      { label: "LOGGING CAMP", id: "B13", gameX: 64477.0, gameY: -51502.0, radius: 3750.0, team: "ger", type: "strongpoint" }, // Booster 28 (Scale 3.75 * 1000)
+      { label: "HURTGEN APPROACH", id: "B14", gameX: 67776.0, gameY: -6558.0, radius: 3500.0, team: "ger", type: "strongpoint" }, // Booster 1 (Scale 3.5 * 1000)
+      { label: "GROSSHAU APPROACH", id: "B15", gameX: 73663.0, gameY: 38895.0, radius: 3750.0, team: "ger", type: "strongpoint" }  // Booster 24 (Scale 3.75 * 1000)
     ],
   },
 KHA: {
@@ -313,8 +421,8 @@ KUR: {
     widthMeters: 1984, 
     heightMeters: 1984, 
     
-    // Soviets (North) face South (180), Germans (South) face North (0)
-    gunRotations: { "us": 180, "ger": 0 },
+    // Soviets (North) face South (0), Germans (South) face North (180)
+    gunRotations: { "us": 0, "ger": 180 },
     gunSort: "x", 
 
     guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
@@ -360,6 +468,87 @@ KUR: {
       { label: "", id: "SOV_A3", gameX: 5641.0, gameY: 91341.0, radius: 500, team: "us", type: "point" }  // East
     ] 
   },
+  MOR: { 
+    name: "Mortain", 
+    image: "images/maps/TacMap_MOR_L_1944.webp", 
+    thumbnail: "images/maps/thumbnail/MOR.webp", 
+    teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    
+    // --- DIMENSIONS FROM FModel LayoutMeta DATA ---
+    // Source: MOR_L_LayoutMeta (MapLayoutMetaDataAsset)
+    // SectorWidth: 40000.0 units × MapWidth: 5 sectors = 200,000 units = 2000m
+    // Calculation: 2000m × 100 units/meter = 200,000 units total
+    // Bounds: -100,000 to +100,000 units (centered at origin)
+    // 
+    // Verified: This matches Elsenborn Ridge pattern (5 sectors × 40,000 units = 2000m)
+    // Game coordinate system: 1 unit = 1 cm, so 100 units = 1 meter
+    // This size provides accurate distance calculations matching in-game values
+    bounds: {
+      minX: -100000,
+      maxX: 100000,
+      minY: -100000,
+      maxY: 100000
+    },
+    
+    // US guns on west point east (-90°), GER guns on east point west (90°)
+    gunRotations: { "us": -90, "ger": 90 },
+    
+    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    strongpoints: [
+      // --- STRONGPOINTS (OBJECTIVES) ---
+      // Names: MOR_WarfareMeta (GameModeMetaDataAsset) -> SectorDefinitions[].Name.SourceString
+      // Locations/Radii: SphereSectorCaptureBooster_01..15 -> TriggerShape (SphereComponent) -> RelativeLocation / SphereRadius
+      // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
+      // Team mapping: ETeam::Allies → "us", ETeam::Axis → "ger", ETeam::None → "neu"
+
+      // Booster_01
+      { label: "HOTEL DE LA POSTE", id: "B1", gameX: -71664.03, gameY: 47217.445, radius: 5000.0, team: "us", type: "strongpoint" },
+      // Booster_02
+      { label: "FORWARD BATTERY", id: "B2", gameX: -67949.4, gameY: -6438.873, radius: 6500.0, team: "us", type: "strongpoint" },
+      // Booster_03
+      { label: "SOUTHERN APPROACH", id: "B3", gameX: -70344.09, gameY: -46402.33, radius: 7500.0, team: "neu", type: "strongpoint" },
+      // Booster_04
+      { label: "MORTAIN OUTSKIRTS", id: "B4", gameX: -49136.977, gameY: 39819.566, radius: 6000.0, team: "ger", type: "strongpoint" },
+      // Booster_05
+      { label: "FORWARD MEDICAL AID STATION", id: "B5", gameX: -35275.574, gameY: 2194.1567, radius: 7000.0, team: "ger", type: "strongpoint" },
+      // Booster_06
+      { label: "MORTAIN APPROACH", id: "B6", gameX: -42775.5, gameY: -33050.027, radius: 7000.0, team: "us", type: "strongpoint" },
+      // Booster_07
+      { label: "HILL 314", id: "B7", gameX: -2425.1055, gameY: 38259.5, radius: 7000.0, team: "us", type: "strongpoint" },
+      // Booster_08
+      { label: "LA PETITE CHAPELLE SAINT-MICHEL", id: "B8", gameX: 1725.2772, gameY: -5918.17, radius: 5000.0, team: "neu", type: "strongpoint" },
+      // Booster_09
+      { label: "U.S. SOUTHERN ROADBLOCK", id: "B9", gameX: -11254.05, gameY: -49076.438, radius: 7000.0, team: "ger", type: "strongpoint" },
+      // Booster_10
+      { label: "DESTROYED GERMAN CONVOY", id: "B10", gameX: 35469.836, gameY: 42255.99, radius: 8000.0, team: "ger", type: "strongpoint" },
+      // Booster_11
+      { label: "GERMAN RECON CAMP", id: "B11", gameX: 40439.145, gameY: 2510.7285, radius: 6000.0, team: "us", type: "strongpoint" },
+      // Booster_12
+      { label: "LES AUBRILS FARM", id: "B12", gameX: 48018.547, gameY: -26619.574, radius: 6000.0, team: "us", type: "strongpoint" },
+      // Booster_13
+      { label: "ABANDONED GERMAN CHECKPOINT", id: "B13", gameX: 68651.26, gameY: 40271.47, radius: 6500.0, team: "neu", type: "strongpoint" },
+      // Booster_14
+      { label: "GERMAN DEFENSIVE CAMP", id: "B14", gameX: 68294.46, gameY: -1986.8845, radius: 7000.0, team: "ger", type: "strongpoint" },
+      // Booster_15
+      { label: "LE FERME DU DESCHAMPS", id: "B15", gameX: 71327.67, gameY: -36841.695, radius: 7000.0, team: "ger", type: "strongpoint" },
+
+      // --- US GUNS (WEST) ---
+      // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
+      // Sorted by Y descending (North to South) after inversion
+      // Spawner6 (most north), Spawner5, Spawner4 (most south)
+      { label: "", id: "US_A1", gameX: -88315.72, gameY: 6495.1196, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A2", gameX: -88402.46, gameY: 7784.2734, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A3", gameX: -88551.5, gameY: 8780.766, radius: 500, team: "us", type: "point" }, 
+
+      // --- GERMAN GUNS (EAST) ---
+      // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
+      // Sorted by Y descending (North to South) after inversion
+      // Spawner4 (most north), Spawner5, Spawner6 (most south)
+      { label: "", id: "GER_A1", gameX: 90334.24, gameY: 2615.621, radius: 500, team: "ger", type: "point" }, 
+      { label: "", id: "GER_A2", gameX: 90170.0, gameY: 4075.0, radius: 500, team: "ger", type: "point" }, 
+      { label: "", id: "GER_A3", gameX: 90346.56, gameY: 5372.948, radius: 500, team: "ger", type: "point" }
+    ]
+  },
   OMA: { 
     name: "Omaha Beach", 
     image: "images/maps/map_omaha.webp", 
@@ -379,8 +568,8 @@ KUR: {
     
     // --- GUN ROTATIONS ---
     // Germany West, US East (west<->east layout): rotate guns to face inward.
-    // US guns on east side point west (-90°), GER guns on west side point east (90°)
-    gunRotations: { us: -90, ger: 90 },
+    // US guns on east side point west (90°), GER guns on west side point east (-90°)
+    gunRotations: { us: 90, ger: -90 },
     
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
     strongpoints: [
@@ -454,8 +643,8 @@ PHL: {
     // Sort guns by X coordinate (west to east) since they're arranged horizontally
     gunSort: "x",
     
-    // US guns (north) point south (180°), German guns (south) point north (0°)
-    gunRotations: { "us": 180, "ger": 0 },
+    // US guns (north) point south (0°), German guns (south) point north (180°)
+    gunRotations: { "us": 0, "ger": 180 },
     
     guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
     strongpoints: [
@@ -511,8 +700,8 @@ REM: {
     
     gunSort: "x",
     
-    // US (South/West) faces North (0), GER (North/East) faces South (180)
-    gunRotations: { "us": 0, "ger": 180 },
+    // US (South/West) faces North (180), GER (North/East) faces South (0)
+    gunRotations: { "us": 180, "ger": 0 },
 
     guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
     strongpoints: [
@@ -563,8 +752,8 @@ SMM: {
     widthMeters: 1984, 
     heightMeters: 1984, 
     
-    // US (North) Faces South (180), GER (South) Faces North (0)
-    gunRotations: { "us": 180, "ger": 0 },
+    // US (North) Faces South (0), GER (South) Faces North (180)
+    gunRotations: { "us": 0, "ger": 180 },
     gunSort: "x", 
 
     guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
@@ -612,66 +801,7 @@ SMM: {
       { label: "", id: "GER_A3", gameX: -1324.40, gameY: -95453.88, radius: 500, team: "ger", type: "point" } // Estimated 3rd gun based on pattern if missing
     ] 
   },
-STA: { 
-    name: "Stalingrad", 
-    image: "images/maps/map_stalingrad.webp", 
-    thumbnail: "images/maps/thumbnail/STA.webp", 
-    teams: { t1: "SOVIET UNION", t2: "GERMANY" },
-    
-    // Confirmed 1984m (MbPBounds -99200 to 99200)
-    widthMeters: 1984, 
-    heightMeters: 1984, 
-    
-    // Soviets (East) face West (270), Germans (West) face East (90)
-    gunRotations: { "us": 270, "ger": 90 },
-    gunSort: "y", 
-
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
-    strongpoints: [
-      // NOTE: IDs updated to match SphereSectorCaptureBooster numbers.
-      // Coordinates: Exact Booster location (Y inverted).
-      // Radii: Confirmed from STA_gameplay file (Large radii: 7000-9500).
-
-      // --- AXIS SECTORS (West - Negative X) ---
-      // GER Base (Far West)
-      { label: "CITY OVERLOOK", id: "B11", gameX: -69346.0, gameY: -48417.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 11 (North)
-      { label: "NAIL FACTORY", id: "B10", gameX: -71016.0, gameY: -11068.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 10 (Mid)
-      { label: "MAMAYEV APPROACH", id: "B9", gameX: -69500.0, gameY: 47966.0, radius: 7000.0, team: "ger", type: "strongpoint" }, // Booster 9 (South)
-
-      // GER Mid (Mid-West)
-      { label: "KOMSOMOL HQ", id: "B14", gameX: -39683.0, gameY: -39676.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 14 (North)
-      { label: "YELLOW HOUSE", id: "B12", gameX: -39693.0, gameY: 1.5, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 12 (Mid)
-      { label: "DOLGIY RAVINE", id: "B8", gameX: -39681.0, gameY: 48845.0, radius: 7500.0, team: "ger", type: "strongpoint" }, // Booster 8 (South)
-
-      // --- NEUTRAL SECTORS (Center - Near X=0) ---
-      { label: "TRAIN STATION", id: "B15", gameX: 6.0, gameY: -39678.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Booster 15 (North)
-      { label: "CARRIAGE DEPOT", id: "B13", gameX: -15.0, gameY: -13.0, radius: 8500.0, team: "neu", type: "strongpoint" }, // Booster 13 (Mid)
-      { label: "RAILWAY CROSSING", id: "B7", gameX: 7.0, gameY: 39673.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Booster 7 (South)
-
-      // --- SOVIET SECTORS (East - Positive X) ---
-      // SOV Mid (Mid-East)
-      { label: "THE BREWERY", id: "B3", gameX: 39674.0, gameY: -41970.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 3 (North)
-      { label: "PAVLOV'S HOUSE", id: "B1", gameX: 48586.0, gameY: -1452.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Booster 1 (Mid)
-      { label: "HOUSE OF THE WORKERS", id: "B5", gameX: 36591.0, gameY: 40602.0, radius: 9500.0, team: "us", type: "strongpoint" }, // Booster 5 (South - Largest!)
-
-      // SOV Base (Far East)
-      { label: "VOLGA BANKS", id: "B4", gameX: 70121.0, gameY: -43351.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 4 (North)
-      { label: "GRUDININ'S MILL", id: "B2", gameX: 70063.0, gameY: 32.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Booster 2 (Mid)
-      { label: "L-SHAPED HOUSE", id: "B6", gameX: 68875.0, gameY: 35043.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 6 (South)
-
-      // --- GUN POSITIONS ---
-      // SOVIETS (East - Positive X)
-      { label: "", id: "SOV_A1", gameX: 78109.51, gameY: -5554.999, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "SOV_A2", gameX: 78366.555, gameY: -4298.889, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "SOV_A3", gameX: 78117.766, gameY: -3058.8193, radius: 500, team: "us", type: "point" }, 
-
-      // GERMANS (West - Negative X)
-      { label: "", id: "GER_A1", gameX: -93251.61, gameY: -5937.273, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -93397.79, gameY: -3805.0764, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -93916.195, gameY: -2579.355, radius: 500, team: "ger", type: "point" } 
-    ] 
-  },
-SME: { 
+  SME: { 
     name: "Sainte-Mère-Église", 
     image: "images/maps/map_stmereeglise.webp", 
     thumbnail: "images/maps/thumbnail/SME.webp", 
@@ -681,8 +811,8 @@ SME: {
     widthMeters: 1984, 
     heightMeters: 1984, 
     
-    // US (East) faces West (270), GER (West) faces East (90)
-    gunRotations: { "us": 270, "ger": 90 },
+    // US (East) faces West (90), GER (West) faces East (-90)
+    gunRotations: { "us": 90, "ger": -90 },
     gunSort: "y", 
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
@@ -729,207 +859,7 @@ SME: {
       { label: "", id: "GER_A3", gameX: -95177.37, gameY: -235.55342, radius: 500, team: "ger", type: "point" }
     ] 
   },
-UTA: { 
-    name: "Utah Beach", 
-    image: "images/maps/map_utahbeach.webp", 
-    thumbnail: "images/maps/thumbnail/UTA.webp", 
-    teams: { t1: "UNITED STATES", t2: "GERMANY" },
-    
-    // Confirmed 1984m (Standard Warfare Map)
-    widthMeters: 1984, 
-    heightMeters: 1984, 
-    
-    // US (East) faces West (270), GER (West) faces East (90)
-    gunRotations: { "us": 270, "ger": 90 },
-    gunSort: "y", 
-
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
-    strongpoints: [
-      // NOTE: Y-Coordinates Inverted.
-      // Sorted North (Negative Y) to South (Positive Y).
-      
-      // --- AXIS BASE (West - Negative X) ---
-      { label: "SAINTE MARIE APPROACH", id: "B17", gameX: -64837.0, gameY: -52705.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // North
-      { label: "FLOODED HOUSE", id: "B16", gameX: -66464.0, gameY: 2944.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // Mid
-      { label: "MAMMUT RADAR", id: "B15", gameX: -65158.0, gameY: 51522.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // South
-
-      // --- AXIS MID (Mid-West) ---
-      { label: "DROWNED FIELDS", id: "B13", gameX: -36400.0, gameY: -43928.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // North
-      { label: "LA GRANDE CRIQUE", id: "B12", gameX: -28986.0, gameY: -508.0, radius: 3294.0, team: "ger", type: "strongpoint" }, // Mid
-      { label: "SUNKEN BRIDGE", id: "B14", gameX: -30810.0, gameY: 47853.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // South
-
-      // --- NEUTRAL (Center) ---
-      { label: "WN7", id: "B9", gameX: 727.0, gameY: -50408.0, radius: 5000.0, team: "neu", type: "strongpoint" }, // North
-      { label: "THE CHAPEL", id: "B10", gameX: 10650.0, gameY: 7786.0, radius: 3000.0, team: "neu", type: "strongpoint" }, // Mid
-      { label: "WN4", id: "B11", gameX: 5359.0, gameY: 42267.0, radius: 3742.0, team: "neu", type: "strongpoint" }, // South (Note: Very tall oval shape in game)
-
-      // --- ALLIES MID (Mid-East) ---
-      { label: "WN5", id: "B8", gameX: 48763.0, gameY: -44080.0, radius: 3194.0, team: "us", type: "strongpoint" }, // North
-      { label: "HILL 5", id: "B7", gameX: 36131.0, gameY: 1838.0, radius: 3000.0, team: "us", type: "strongpoint" }, // Mid
-      { label: "AA BATTERY", id: "B18", gameX: 35101.0, gameY: 43589.0, radius: 3942.0, team: "us", type: "strongpoint" }, // South
-
-      // --- ALLIES BASE (East - Positive X) ---
-      { label: "UNCLE RED", id: "B5", gameX: 66675.0, gameY: -45162.0, radius: 2824.0, team: "us", type: "strongpoint" }, // North
-      { label: "RED ROOF HOUSE", id: "B4", gameX: 64923.67, gameY: -3144.0, radius: 3250.0, team: "us", type: "strongpoint" }, // Mid
-      { label: "TARE GREEN", id: "B3", gameX: 63845.0, gameY: 46581.0, radius: 3000.0, team: "us", type: "strongpoint" }, // South
-
-      // --- GUN POSITIONS ---
-      // SOVIETS (East - Positive X)
-      { label: "", id: "US_A1", gameX: 77788.36, gameY: -6617.35, radius: 500, team: "us", type: "point" }, // North
-      { label: "", id: "US_A2", gameX: 78334.16, gameY: -4627.70, radius: 500, team: "us", type: "point" }, // Mid
-      { label: "", id: "US_A3", gameX: 77932.25, gameY: -2639.21, radius: 500, team: "us", type: "point" }, // South
-
-      // GERMANS (West - Negative X)
-      { label: "", id: "GER_A1", gameX: -91738.08, gameY: -221.04, radius: 500, team: "ger", type: "point" }, // North
-      { label: "", id: "GER_A2", gameX: -91714.0, gameY: 752.0, radius: 500, team: "ger", type: "point" }, // Mid
-      { label: "", id: "GER_A3", gameX: -91649.22, gameY: 1828.61, radius: 500, team: "ger", type: "point" } // South
-    ] 
-  },
-EBR: { 
-    name: "Elsenborn Ridge", 
-    image: "images/maps/TacMap_EBR_L_1944.webp", 
-    thumbnail: "images/maps/thumbnail/EBR.webp", 
-    teams: { t1: "UNITED STATES", t2: "GERMANY" },
-
-    // --- DIMENSIONS ---
-    // Calculated from LayoutMeta: 5 sectors * 40000 units = 2000m.
-    // 1 Game Unit = 1 cm. 100 units = 1m.
-    widthMeters: 2000, 
-    heightMeters: 2000, 
-
-    // --- SORTING CONFIG ---
-    // "x": Sorts guns Left-to-Right (West->East). Required for horizontal gun lines.
-    // "y": (Default) Sorts Top-to-Bottom. Used for most other maps.
-    gunSort: "x",
-
-    // --- ROTATION ---
-    // US is North (Top), needs to point Down (180).
-    // GER is South (Bottom), needs to point Up (0).
-    gunRotations: { "us": 180, "ger": 0 },
-
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
-    strongpoints: [
-      // --- METHOD: Y-INVERSION (Driel Method) ---
-      // The visual map is South->North.
-      // Raw Data: US is Negative Y (-91k). GER is Positive Y (+94k).
-      // Adjustment: Multiply ALL Y-coordinates  by -1 to flip them.
-
-      // --- ALLIES GUNS ---
-      { label: "", id: "US_A1", gameX: 1972.95, gameY: 91307.24, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: 2864.32, gameY: 91026.45, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: 3538.50, gameY: 91394.53, radius: 500, team: "us", type: "point" }, 
-
-      // --- AXIS GUNS ---
-      { label: "", id: "GER_A1", gameX: -7994.93, gameY: -94008.09, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -6399.25, gameY: -93262.29, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -4866.51, gameY: -94131.34, radius: 500, team: "ger", type: "point" },
-
-      // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
-
-      // --- ALLIES SECTORS ---
-      { label: "99TH COMMAND CENTRE", id: "B17", gameX: -39637.50, gameY: 67610.96, radius: 7500.0, team: "us", type: "strongpoint" },
-      { label: "GUN BATTERY", id: "B18", gameX: 420.0, gameY: 69376.0, radius: 8000.0, team: "us", type: "strongpoint" },
-      { label: "U.S. CAMP", id: "B16", gameX: 50979.02, gameY: 67675.0, radius: 7000.0, team: "us", type: "strongpoint" },
-      { label: "ELSENBORN RIDGE", id: "B19", gameX: -30950.0, gameY: 41967.96, radius: 7000.0, team: "us", type: "strongpoint" },
-      { label: "FARAHILDE FARM", id: "B20", gameX: 10158.0, gameY: 30210.0, radius: 8000.0, team: "us", type: "strongpoint" },
-      { label: "JENSIT PILLBOXES", id: "B21", gameX: 49674.99, gameY: 28085.95, radius: 7000.0, team: "us", type: "strongpoint" },
-
-      // --- NEUTRAL SECTORS ---
-      { label: "ROAD TO ELSENBORN RIDGE", id: "B22", gameX: -40964.0, gameY: -3317.0, radius: 8000.0, team: "neu", type: "strongpoint" },
-      { label: "DUGOUT TANKS", id: "B23", gameX: -9124.0, gameY: -2404.0, radius: 6000.0, team: "neu", type: "strongpoint" },
-      { label: "CHECKPOINT", id: "B25", gameX: 40444.91, gameY: -6529.14, radius: 5000.0, team: "neu", type: "strongpoint" },
-
-      // --- AXIS SECTORS ---
-      { label: "ERELSDELL FARMHOUSE", id: "B24", gameX: -41672.0, gameY: -38246.0, radius: 8000.0, team: "ger", type: "strongpoint" },
-      { label: "AA BATTERY", id: "B27", gameX: 8607.68, gameY: -33127.07, radius: 7000.0, team: "ger", type: "strongpoint" },
-      { label: "HINTERBERG", id: "B26", gameX: 39637.23, gameY: -39888.69, radius: 8000.0, team: "ger", type: "strongpoint" },
-      { label: "SUPPLY CACHE", id: "B29", gameX: -25666.0, gameY: -66300.0, radius: 5000.0, team: "ger", type: "strongpoint" },
-      { label: "FOXHOLES", id: "B28", gameX: 12223.86, gameY: -67172.27, radius: 7000.0, team: "ger", type: "strongpoint" },
-      { label: "FUEL DEPOT", id: "B30", gameX: 38049.76, gameY: -70408.04, radius: 7000.0, team: "ger", type: "strongpoint" }
-    ],
-  },
-  MOR: { 
-    name: "Mortain", 
-    image: "images/maps/TacMap_MOR_L_1944.webp", 
-    thumbnail: "images/maps/thumbnail/MOR.webp", 
-    teams: { t1: "UNITED STATES", t2: "GERMANY" },
-    
-    // --- DIMENSIONS FROM FModel LayoutMeta DATA ---
-    // Source: MOR_L_LayoutMeta (MapLayoutMetaDataAsset)
-    // SectorWidth: 40000.0 units × MapWidth: 5 sectors = 200,000 units = 2000m
-    // Calculation: 2000m × 100 units/meter = 200,000 units total
-    // Bounds: -100,000 to +100,000 units (centered at origin)
-    // 
-    // Verified: This matches Elsenborn Ridge pattern (5 sectors × 40,000 units = 2000m)
-    // Game coordinate system: 1 unit = 1 cm, so 100 units = 1 meter
-    // This size provides accurate distance calculations matching in-game values
-    bounds: {
-      minX: -100000,
-      maxX: 100000,
-      minY: -100000,
-      maxY: 100000
-    },
-    
-    // US guns on west point east (90°), GER guns on east point west (-90°)
-    gunRotations: { "us": 90, "ger": -90 },
-    
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
-    strongpoints: [
-      // --- STRONGPOINTS (OBJECTIVES) ---
-      // Names: MOR_WarfareMeta (GameModeMetaDataAsset) -> SectorDefinitions[].Name.SourceString
-      // Locations/Radii: SphereSectorCaptureBooster_01..15 -> TriggerShape (SphereComponent) -> RelativeLocation / SphereRadius
-      // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
-      // Team mapping: ETeam::Allies → "us", ETeam::Axis → "ger", ETeam::None → "neu"
-
-      // Booster_01
-      { label: "HOTEL DE LA POSTE", id: "B1", gameX: -71664.03, gameY: 47217.445, radius: 5000.0, team: "us", type: "strongpoint" },
-      // Booster_02
-      { label: "FORWARD BATTERY", id: "B2", gameX: -67949.4, gameY: -6438.873, radius: 6500.0, team: "us", type: "strongpoint" },
-      // Booster_03
-      { label: "SOUTHERN APPROACH", id: "B3", gameX: -70344.09, gameY: -46402.33, radius: 7500.0, team: "neu", type: "strongpoint" },
-      // Booster_04
-      { label: "MORTAIN OUTSKIRTS", id: "B4", gameX: -49136.977, gameY: 39819.566, radius: 6000.0, team: "ger", type: "strongpoint" },
-      // Booster_05
-      { label: "FORWARD MEDICAL AID STATION", id: "B5", gameX: -35275.574, gameY: 2194.1567, radius: 7000.0, team: "ger", type: "strongpoint" },
-      // Booster_06
-      { label: "MORTAIN APPROACH", id: "B6", gameX: -42775.5, gameY: -33050.027, radius: 7000.0, team: "us", type: "strongpoint" },
-      // Booster_07
-      { label: "HILL 314", id: "B7", gameX: -2425.1055, gameY: 38259.5, radius: 7000.0, team: "us", type: "strongpoint" },
-      // Booster_08
-      { label: "LA PETITE CHAPELLE SAINT-MICHEL", id: "B8", gameX: 1725.2772, gameY: -5918.17, radius: 5000.0, team: "neu", type: "strongpoint" },
-      // Booster_09
-      { label: "U.S. SOUTHERN ROADBLOCK", id: "B9", gameX: -11254.05, gameY: -49076.438, radius: 7000.0, team: "ger", type: "strongpoint" },
-      // Booster_10
-      { label: "DESTROYED GERMAN CONVOY", id: "B10", gameX: 35469.836, gameY: 42255.99, radius: 8000.0, team: "ger", type: "strongpoint" },
-      // Booster_11
-      { label: "GERMAN RECON CAMP", id: "B11", gameX: 40439.145, gameY: 2510.7285, radius: 6000.0, team: "us", type: "strongpoint" },
-      // Booster_12
-      { label: "LES AUBRILS FARM", id: "B12", gameX: 48018.547, gameY: -26619.574, radius: 6000.0, team: "us", type: "strongpoint" },
-      // Booster_13
-      { label: "ABANDONED GERMAN CHECKPOINT", id: "B13", gameX: 68651.26, gameY: 40271.47, radius: 6500.0, team: "neu", type: "strongpoint" },
-      // Booster_14
-      { label: "GERMAN DEFENSIVE CAMP", id: "B14", gameX: 68294.46, gameY: -1986.8845, radius: 7000.0, team: "ger", type: "strongpoint" },
-      // Booster_15
-      { label: "LE FERME DU DESCHAMPS", id: "B15", gameX: 71327.67, gameY: -36841.695, radius: 7000.0, team: "ger", type: "strongpoint" },
-
-      // --- US GUNS (WEST) ---
-      // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
-      // Sorted by Y descending (North to South) after inversion
-      // Spawner6 (most north), Spawner5, Spawner4 (most south)
-      { label: "", id: "US_A1", gameX: -88315.72, gameY: 6495.1196, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: -88402.46, gameY: 7784.2734, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: -88551.5, gameY: 8780.766, radius: 500, team: "us", type: "point" }, 
-
-      // --- GERMAN GUNS (EAST) ---
-      // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
-      // Sorted by Y descending (North to South) after inversion
-      // Spawner4 (most north), Spawner5, Spawner6 (most south)
-      { label: "", id: "GER_A1", gameX: 90334.24, gameY: 2615.621, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: 90170.0, gameY: 4075.0, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: 90346.56, gameY: 5372.948, radius: 500, team: "ger", type: "point" }
-    ]
-  },
-SMO: { 
+  SMO: { 
     name: "Smolensk", 
     image: "images/maps/TacMap_SMO_L_1943.webp", 
     thumbnail: "images/maps/thumbnail/SMO.webp", 
@@ -939,8 +869,8 @@ SMO: {
     widthMeters: 2000, 
     heightMeters: 2000, 
     
-    // Soviets (East) face West (270), Germans (West) face East (90)
-    gunRotations: { "us": 270, "ger": 90 },
+    // Soviets (East) face West (90), Germans (West) face East (-90)
+    gunRotations: { "us": 90, "ger": -90 },
     gunSort: "y", 
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
@@ -989,17 +919,76 @@ SMO: {
       { label: "", id: "GER_A3", gameX: -98800.0, gameY: 2695.0, radius: 500, team: "ger", type: "point" }
     ] 
   },
-TOB: {
+STA: { 
+    name: "Stalingrad", 
+    image: "images/maps/map_stalingrad.webp", 
+    thumbnail: "images/maps/thumbnail/STA.webp", 
+    teams: { t1: "SOVIET UNION", t2: "GERMANY" },
+    
+    // Confirmed 1984m (MbPBounds -99200 to 99200)
+    widthMeters: 1984, 
+    heightMeters: 1984, 
+    
+    // Soviets (East) face West (90), Germans (West) face East (-90)
+    gunRotations: { "us": 90, "ger": -90 },
+    gunSort: "y", 
+
+    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    strongpoints: [
+      // NOTE: IDs updated to match SphereSectorCaptureBooster numbers.
+      // Coordinates: Exact Booster location (Y inverted).
+      // Radii: Confirmed from STA_gameplay file (Large radii: 7000-9500).
+
+      // --- AXIS SECTORS (West - Negative X) ---
+      // GER Base (Far West)
+      { label: "CITY OVERLOOK", id: "B11", gameX: -69346.0, gameY: -48417.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 11 (North)
+      { label: "NAIL FACTORY", id: "B10", gameX: -71016.0, gameY: -11068.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 10 (Mid)
+      { label: "MAMAYEV APPROACH", id: "B9", gameX: -69500.0, gameY: 47966.0, radius: 7000.0, team: "ger", type: "strongpoint" }, // Booster 9 (South)
+
+      // GER Mid (Mid-West)
+      { label: "KOMSOMOL HQ", id: "B14", gameX: -39683.0, gameY: -39676.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 14 (North)
+      { label: "YELLOW HOUSE", id: "B12", gameX: -39693.0, gameY: 1.5, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 12 (Mid)
+      { label: "DOLGIY RAVINE", id: "B8", gameX: -39681.0, gameY: 48845.0, radius: 7500.0, team: "ger", type: "strongpoint" }, // Booster 8 (South)
+
+      // --- NEUTRAL SECTORS (Center - Near X=0) ---
+      { label: "TRAIN STATION", id: "B15", gameX: 6.0, gameY: -39678.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Booster 15 (North)
+      { label: "CARRIAGE DEPOT", id: "B13", gameX: -15.0, gameY: -13.0, radius: 8500.0, team: "neu", type: "strongpoint" }, // Booster 13 (Mid)
+      { label: "RAILWAY CROSSING", id: "B7", gameX: 7.0, gameY: 39673.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Booster 7 (South)
+
+      // --- SOVIET SECTORS (East - Positive X) ---
+      // SOV Mid (Mid-East)
+      { label: "THE BREWERY", id: "B3", gameX: 39674.0, gameY: -41970.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 3 (North)
+      { label: "PAVLOV'S HOUSE", id: "B1", gameX: 48586.0, gameY: -1452.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Booster 1 (Mid)
+      { label: "HOUSE OF THE WORKERS", id: "B5", gameX: 36591.0, gameY: 40602.0, radius: 9500.0, team: "us", type: "strongpoint" }, // Booster 5 (South - Largest!)
+
+      // SOV Base (Far East)
+      { label: "VOLGA BANKS", id: "B4", gameX: 70121.0, gameY: -43351.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 4 (North)
+      { label: "GRUDININ'S MILL", id: "B2", gameX: 70063.0, gameY: 32.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Booster 2 (Mid)
+      { label: "L-SHAPED HOUSE", id: "B6", gameX: 68875.0, gameY: 35043.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 6 (South)
+
+      // --- GUN POSITIONS ---
+      // SOVIETS (East - Positive X)
+      { label: "", id: "SOV_A1", gameX: 78109.51, gameY: -5554.999, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "SOV_A2", gameX: 78366.555, gameY: -4298.889, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "SOV_A3", gameX: 78117.766, gameY: -3058.8193, radius: 500, team: "us", type: "point" }, 
+
+      // GERMANS (West - Negative X)
+      { label: "", id: "GER_A1", gameX: -93251.61, gameY: -5937.273, radius: 500, team: "ger", type: "point" }, 
+      { label: "", id: "GER_A2", gameX: -93397.79, gameY: -3805.0764, radius: 500, team: "ger", type: "point" }, 
+      { label: "", id: "GER_A3", gameX: -93916.195, gameY: -2579.355, radius: 500, team: "ger", type: "point" } 
+    ] 
+  },
+  TOB: {
     name: "Tobruk",
     image: "images/maps/TacMap_TOB_L_1942.webp",
     thumbnail: "images/maps/thumbnail/TOB.webp",
     teams: { t1: "BRITISH 8TH ARMY", t2: "GERMANY" },
 
-    widthMeters: 2016, // Standard HLL Map Width
-    heightMeters: 2016,
+    widthMeters: 2000,
+    heightMeters: 2000,
 
     gunSort: "y",
-    gunRotations: { "us": 0, "ger": 180 },
+    gunRotations: { "us": 90, "ger": -90 },
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
     strongpoints: [
@@ -1037,52 +1026,60 @@ TOB: {
       { label: "CARGO WAREHOUSES", id: "B15", gameX: 70047.3, gameY: -41171.9, radius: 8000.0, team: "us", type: "strongpoint" }
     ],
   },
-HUR: {
-    name: "Hürtgen Forest",
-    image: "images/maps/map_hurtgen.webp", // Verify filename
-    thumbnail: "images/maps/thumbnail/HUR.webp",
+UTA: { 
+    name: "Utah Beach", 
+    image: "images/maps/map_utahbeach.webp", 
+    thumbnail: "images/maps/thumbnail/UTA.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
-
-    widthMeters: 1984,
-    heightMeters: 1984,
-
-    gunSort: "y",
-    gunRotations: { us: 90, ger: -90 },
+    
+    // Confirmed 1984m (Standard Warfare Map)
+    widthMeters: 1984, 
+    heightMeters: 1984, 
+    
+    // US (East) faces West (90), GER (West) faces East (-90)
+    gunRotations: { "us": 90, "ger": -90 },
+    gunSort: "y", 
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
     strongpoints: [
-      // --- AXIS GUNS (Germany) ---
-      // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
-      { label: "", id: "GER_A3", gameX: 91198.0, gameY: -10428.0, radius: 500, team: "ger", type: "point" }, // North
-      { label: "", id: "GER_A2", gameX: 91198.0, gameY: -11227.0, radius: 500, team: "ger", type: "point" }, // Mid
-      { label: "", id: "GER_A1", gameX: 91198.0, gameY: -11963.0, radius: 500, team: "ger", type: "point" }, // South
+      // NOTE: Y-Coordinates Inverted.
+      // Sorted North (Negative Y) to South (Positive Y).
+      
+      // --- AXIS BASE (West - Negative X) ---
+      { label: "SAINTE MARIE APPROACH", id: "B17", gameX: -64837.0, gameY: -52705.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // North
+      { label: "FLOODED HOUSE", id: "B16", gameX: -66464.0, gameY: 2944.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // Mid
+      { label: "MAMMUT RADAR", id: "B15", gameX: -65158.0, gameY: 51522.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // South
 
-      // --- ALLIES GUNS (United States) ---
-      // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
-      { label: "", id: "US_A3", gameX: -92088.86, gameY: 4955.032, radius: 500, team: "us", type: "point" },  // North
-      { label: "", id: "US_A2", gameX: -93577.97, gameY: 3982.9868, radius: 500, team: "us", type: "point" },  // Mid
-      { label: "", id: "US_A1", gameX: -92188.766, gameY: 2897.9956, radius: 500, team: "us", type: "point" },  // South
+      // --- AXIS MID (Mid-West) ---
+      { label: "DROWNED FIELDS", id: "B13", gameX: -36400.0, gameY: -43928.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // North
+      { label: "LA GRANDE CRIQUE", id: "B12", gameX: -28986.0, gameY: -508.0, radius: 3294.0, team: "ger", type: "strongpoint" }, // Mid
+      { label: "SUNKEN BRIDGE", id: "B14", gameX: -30810.0, gameY: 47853.0, radius: 3000.0, team: "ger", type: "strongpoint" }, // South
 
-      // --- ALLIES SECTORS (Col 1 & 2) ---
-      { label: "LUMBER YARD", id: "B1", gameX: -77356.0, gameY: -36029.0, radius: 4000.0, team: "us", type: "strongpoint" }, // Booster 9 (Scale 4.0 * 1000)
-      { label: "RESERVE STATION", id: "B2", gameX: -78776.0, gameY: -2238.0, radius: 4500.0, team: "us", type: "strongpoint" }, // Booster 11 (Scale 4.5 * 1000)
-      { label: "MAUSBACH APPROACH", id: "B3", gameX: -74423.0, gameY: 46733.0, radius: 4625.0, team: "us", type: "strongpoint" }, // Booster 20 (Scale 4.625 * 1000)
-      { label: "THE RUIN", id: "B4", gameX: -42793.0, gameY: -26141.0, radius: 4400.0, team: "us", type: "strongpoint" }, // Booster 7 (Scale 5.5 * Explicit 800)
-      { label: "KALL TRAIL", id: "B5", gameX: -35755.0, gameY: -2459.0, radius: 6000.0, team: "us", type: "strongpoint" }, // Booster 13 (Scale 6.0 * 1000)
-      { label: "WEHEBACH OVERLOOK", id: "B6", gameX: -38278.0, gameY: 34416.0, radius: 5031.25, team: "us", type: "strongpoint" }, // Booster 19 (Scale 5.03125 * 1000)
+      // --- NEUTRAL (Center) ---
+      { label: "WN7", id: "B9", gameX: 727.0, gameY: -50408.0, radius: 5000.0, team: "neu", type: "strongpoint" }, // North
+      { label: "THE CHAPEL", id: "B10", gameX: 10650.0, gameY: 7786.0, radius: 3000.0, team: "neu", type: "strongpoint" }, // Mid
+      { label: "WN4", id: "B11", gameX: 5359.0, gameY: 42267.0, radius: 3742.0, team: "neu", type: "strongpoint" }, // South (Note: Very tall oval shape in game)
 
-      // --- NEUTRAL SECTORS (Col 3) ---
-      { label: "THE SIEGFRIED LINE", id: "B7", gameX: -3711.0, gameY: -42305.0, radius: 4500.0, team: "neu", type: "strongpoint" }, // Booster 31 (Scale 4.5 * 1000)
-      { label: "THE SCAR", id: "B8", gameX: -6935.0, gameY: -3328.0, radius: 3015.0, team: "neu", type: "strongpoint" }, // Booster 3 (Scale 2.25 * Explicit 1340)
-      { label: "NORTH PASS", id: "B9", gameX: 6540.0, gameY: 49329.0, radius: 4347.0, team: "neu", type: "strongpoint" }, // Booster 17 (Scale 3.25 * Explicit 1337)
+      // --- ALLIES MID (Mid-East) ---
+      { label: "WN5", id: "B8", gameX: 48763.0, gameY: -44080.0, radius: 3194.0, team: "us", type: "strongpoint" }, // North
+      { label: "HILL 5", id: "B7", gameX: 36131.0, gameY: 1838.0, radius: 3000.0, team: "us", type: "strongpoint" }, // Mid
+      { label: "AA BATTERY", id: "B18", gameX: 35101.0, gameY: 43589.0, radius: 3942.0, team: "us", type: "strongpoint" }, // South
 
-      // --- AXIS SECTORS (Col 4 & 5) ---
-      { label: "SALIENT 42", id: "B10", gameX: 40632.0, gameY: -50244.0, radius: 3250.0, team: "ger", type: "strongpoint" }, // Booster 26 (Scale 3.25 * 1000)
-      { label: "JACOB'S BARN", id: "B11", gameX: 37658.0, gameY: -8531.0, radius: 3500.0, team: "ger", type: "strongpoint" }, // Booster 15 (Scale 3.5 * 1000)
-      { label: "HILL 15", id: "B12", gameX: 45628.0, gameY: 34330.0, radius: 4500.0, team: "ger", type: "strongpoint" }, // Booster 22 (Scale 4.5 * 1000)
-      { label: "LOGGING CAMP", id: "B13", gameX: 64477.0, gameY: -51502.0, radius: 3750.0, team: "ger", type: "strongpoint" }, // Booster 28 (Scale 3.75 * 1000)
-      { label: "HURTGEN APPROACH", id: "B14", gameX: 67776.0, gameY: -6558.0, radius: 3500.0, team: "ger", type: "strongpoint" }, // Booster 1 (Scale 3.5 * 1000)
-      { label: "GROSSHAU APPROACH", id: "B15", gameX: 73663.0, gameY: 38895.0, radius: 3750.0, team: "ger", type: "strongpoint" }  // Booster 24 (Scale 3.75 * 1000)
-    ],
+      // --- ALLIES BASE (East - Positive X) ---
+      { label: "UNCLE RED", id: "B5", gameX: 66675.0, gameY: -45162.0, radius: 2824.0, team: "us", type: "strongpoint" }, // North
+      { label: "RED ROOF HOUSE", id: "B4", gameX: 64923.67, gameY: -3144.0, radius: 3250.0, team: "us", type: "strongpoint" }, // Mid
+      { label: "TARE GREEN", id: "B3", gameX: 63845.0, gameY: 46581.0, radius: 3000.0, team: "us", type: "strongpoint" }, // South
+
+      // --- GUN POSITIONS ---
+      // SOVIETS (East - Positive X)
+      { label: "", id: "US_A1", gameX: 77788.36, gameY: -6617.35, radius: 500, team: "us", type: "point" }, // North
+      { label: "", id: "US_A2", gameX: 78334.16, gameY: -4627.70, radius: 500, team: "us", type: "point" }, // Mid
+      { label: "", id: "US_A3", gameX: 77932.25, gameY: -2639.21, radius: 500, team: "us", type: "point" }, // South
+
+      // GERMANS (West - Negative X)
+      { label: "", id: "GER_A1", gameX: -91738.08, gameY: -221.04, radius: 500, team: "ger", type: "point" }, // North
+      { label: "", id: "GER_A2", gameX: -91714.0, gameY: 752.0, radius: 500, team: "ger", type: "point" }, // Mid
+      { label: "", id: "GER_A3", gameX: -91649.22, gameY: 1828.61, radius: 500, team: "ger", type: "point" } // South
+    ] 
   },
 };

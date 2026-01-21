@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.4"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
+const APP_VERSION = "v1.1.5"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
 
 // Map Dimensions
 const MAP_WIDTH_METERS = 2000.0; 
@@ -310,26 +310,14 @@ function getGridRef(gameX, gameY) {
   return `${colChar}${rowChar}`;
 }
 
+// --- FORCE ANIMATIONS OFF (RESPONSIVE STYLE) ---
 function toggleTransitions(enable) {
+  // Always remove the class, never add it.
+  // This ensures instant snapping on both Desktop and Mobile.
+  mapStage.classList.remove("zoom-transition");
   const labelLayer = document.getElementById("labelLayer");
-  
-  if (enable) {
-    // We want transitions ON
-    mapStage.classList.add("zoom-transition");
-    labelLayer?.classList.add("zoom-transition");
-    mapStage.style.transition = "";
-  } else {
-    // We want transitions OFF (Instant Snap)
-    mapStage.classList.remove("zoom-transition");
-    labelLayer?.classList.remove("zoom-transition");
-    mapStage.style.transition = "none";
-    
-    // --- THE FIX: FORCE BROWSER REFLOW ---
-    // This forces the browser to apply the "no-transition" state NOW.
-    void mapStage.offsetWidth; 
-    if (labelLayer) void labelLayer.offsetWidth;
-    // -------------------------------------
-  }
+  if (labelLayer) labelLayer.classList.remove("zoom-transition");
+  mapStage.style.transition = "none";
 }
 
 function setZoomLevel(newLevel, mouseX = null, mouseY = null) {
@@ -338,12 +326,8 @@ function setZoomLevel(newLevel, mouseX = null, mouseY = null) {
   currentZoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newLevel));
   state.scale = currentZoomLevel;
   
-  // Make sure we DON'T remove zoom-transition if we aren't dragging/panning
-  if (!state.panning) {
-      mapStage.classList.add("zoom-transition");
-      // NEW: Sync labels
-      document.getElementById("labelLayer")?.classList.add("zoom-transition"); 
-  }
+  // REMOVED: The block that added 'zoom-transition' 
+  // This keeps the zoom instant/responsive.
   
   const newZoom = getEffectiveZoom();
   
@@ -352,7 +336,7 @@ function setZoomLevel(newLevel, mouseX = null, mouseY = null) {
     const worldX = (mouseX - state.pointX) / prevZoom;
     const worldY = (mouseY - state.pointY) / prevZoom;
     
-    // Calculate what the new pan position should be to keep the same world point under the mouse
+    // Calculate what the new pan position should be
     state.pointX = mouseX - worldX * newZoom;
     state.pointY = mouseY - worldY * newZoom;
   }
@@ -570,7 +554,7 @@ function renderMarkers() {
   markersLayer.innerHTML = ""; 
   labelCache = [];
   
-  // 2. Create Fragment (Off-screen DOM) - PERFORMANCE OPTIMIZATION
+  // 2. Create Fragment
   const fragment = document.createDocumentFragment();
   
   const mapImage = document.getElementById("mapImage");
@@ -627,38 +611,65 @@ function renderMarkers() {
         img.src = "images/ui/artillery_position.webp"; 
         img.className = "arty-icon";
         
+        // --- ROTATION LOGIC START ---
         if (isActiveGun && activeTarget) {
-           // Dynamic Rotation
+           // 1. DYNAMIC (Aiming)
            const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
            const dy = targetPos.y - pos.y; 
            const dx = targetPos.x - pos.x;
-           let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-           angle += 90; 
            
-           // CHANGE THIS LINE: Remove translateZ(0)
-           img.style.transform = `rotate(${angle}deg) scaleX(-1)`;
-       } else {
-           // Static Rotation
+           let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+           angle -= 90; // Adjust for icon orientation
+           
+           img.style.transform = `rotate(${angle}deg)`;
+           
+        } else {
+           // 2. STATIC (Parked) - FIX APPLIED HERE
            let baseRotation = 0; 
            const teamKey = point.team.toLowerCase(); 
-           const isAxis = ["ger", "axis", "afrika", "rus", "soviet"].some(x => teamKey.includes(x));
            
+           // FIX: Removed "gb", "british", "allies" from this list.
+           // They were causing GB to be treated as GER.
+           const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
+           const isSoviet = ["rus", "soviet"].some(x => teamKey.includes(x));
+           const isBritish = ["gb", "british", "commonwealth", "8th"].some(x => teamKey.includes(x));
+
            if (mapConfig && mapConfig.gunRotations) {
-                const rotKey = isAxis ? "ger" : "us"; 
-                const finalKey = mapConfig.gunRotations[teamKey] !== undefined ? teamKey : rotKey;
-                baseRotation = mapConfig.gunRotations[finalKey];
-                if (baseRotation === undefined) baseRotation = 0;
+                // Priority 1: Exact Match (e.g. "allies", "ger")
+                if (mapConfig.gunRotations[teamKey] !== undefined) {
+                    baseRotation = mapConfig.gunRotations[teamKey];
+                }
+                // Priority 2: Role Match
+                else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) {
+                    baseRotation = mapConfig.gunRotations["ger"];
+                }
+                else if (isSoviet && mapConfig.gunRotations["rus"] !== undefined) {
+                    baseRotation = mapConfig.gunRotations["rus"];
+                }
+                else if (isBritish && mapConfig.gunRotations["gb"] !== undefined) {
+                    baseRotation = mapConfig.gunRotations["gb"];
+                }
+                // Priority 3: Fallback for generic "Allies" that should use "gb" config
+                else if (mapConfig.gunRotations["gb"] !== undefined && !isAxis && !isSoviet) {
+                     baseRotation = mapConfig.gunRotations["gb"];
+                }
+                // Priority 4: Default US
+                else if (mapConfig.gunRotations["us"] !== undefined) {
+                    baseRotation = mapConfig.gunRotations["us"];
+                }
            } else {
+               // Default Fallback if no map config exists
                if (sortMode === "x") {
-                   if (isAxis) baseRotation = -90; else baseRotation = 90;
+                   baseRotation = isAxis ? -90 : 90;
                } else {
-                   if (isAxis) baseRotation = 180; else baseRotation = 0;
+                   baseRotation = isAxis ? 180 : 0;
                }
            }
            
-           // CHANGE THIS LINE: Remove translateZ(0)
            img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
-       }
+        }
+        // --- ROTATION LOGIC END ---
+
         el.appendChild(img);
     } 
     else if (point.type === 'strongpoint') {
@@ -687,7 +698,7 @@ function renderMarkers() {
       labelCache.push(labelSpan);
     }
 
-    // Optimization: Add to fragment instead of DOM
+    // Optimization
     if (isActiveGun) {
         activeGunEl = el; 
     } else {
@@ -699,7 +710,6 @@ function renderMarkers() {
       fragment.appendChild(activeGunEl);
   }
 
-  // 3. Single Paint Operation
   markersLayer.appendChild(fragment);
 }
 
@@ -949,8 +959,17 @@ function render() {
   const mapStage = cached.mapStage;
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
-  // 2. Move Map (Synchronous)
-  mapStage.style.transform = `translate(${state.pointX}px, ${state.pointY}px) scale(${drawScale})`;
+  // 2. Move Map (Conditional Precision)
+  
+  // DETECT HIGH-DPI (Mobile/Retina):
+  // If ratio > 1, we are on a high-density screen (Mobile). Use precise floating-point math.
+  // If ratio === 1, we are on a standard Desktop monitor. Round to integer to prevent blur.
+  const isHighDPI = window.devicePixelRatio > 1;
+  
+  const finalX = isHighDPI ? state.pointX : Math.round(state.pointX);
+  const finalY = isHighDPI ? state.pointY : Math.round(state.pointY);
+  
+  mapStage.style.transform = `translate(${finalX}px, ${finalY}px) scale(${drawScale})`;
   
   // 3. Update Text & Grid (Synchronous)
   // We do this immediately in the same frame so Chrome paints everything at once.
@@ -1107,11 +1126,10 @@ function initMap() {
   renderMarkers();
   renderTargeting();
   currentZoomLevel = state.scale;
-  mapStage.classList.add("zoom-transition");
   
-  // --- CLEAR CURSOR STYLE TO ALLOW CSS TO WORK ---
+  // REMOVED: mapStage.classList.add("zoom-transition"); 
+  
   mapContainer.style.cursor = ""; 
-  // -------------------------------------------
   
   render();
   
@@ -1119,7 +1137,7 @@ function initMap() {
     e.preventDefault(); 
     return false;
   });
-} // Added closing brace here
+}
 
 // ==========================================
 // VISUAL MAP SELECTOR (MODAL LOGIC)
@@ -1461,7 +1479,7 @@ function updateFactionUI(config) {
 }
 
 // ==========================================
-// GUN UI UPDATES
+// GUN UI UPDATES (FIXED: No Animation on Switch)
 // ==========================================
 function updateGunUI(config) {
   const gunNames = config.guns || ["Gun 1 (Left)", "Gun 2 (Mid)", "Gun 3 (Right)"];
@@ -1469,7 +1487,6 @@ function updateGunUI(config) {
   const menu = gunDropdown.querySelector('.dropdown-menu');
   const label = document.getElementById("gunLabel");
   
-  // Prevent invalid gun index after map switch
   if (activeGunIndex >= gunNames.length) {
     activeGunIndex = 0;
   }
@@ -1488,35 +1505,30 @@ function updateGunUI(config) {
       menu.classList.add('hidden');
       document.getElementById("gunBtn").classList.remove('active');
       
-      // 1. Update Active Gun
+      // 1. Kill Animations & Force Reflow
+      toggleTransitions(false);
+
+      // 2. Update Data
       activeGunIndex = index;
       
-      // 2. RECALCULATE TARGETING (The Fix)
-      // If we have an active target, we must update its distance/mil relative to the NEW gun position
+      // 3. Recalculate Target (if exists)
       if (activeTarget) {
           const gunPos = getActiveGunCoords();
           if (gunPos) {
               const factionLabel = document.getElementById("factionLabel").innerText;
-              
-              // Recalculate distance from NEW gun to OLD target
               const dx = activeTarget.gameX - gunPos.x;
               const dy = activeTarget.gameY - gunPos.y;
-              
               const distanceUnits = Math.sqrt(dx*dx + dy*dy);
               const rawDistanceMeters = distanceUnits / GAME_UNITS_PER_METER;
-              
               const correctedDistance = Math.round(rawDistanceMeters);
-              
-              // Get new MILs
               const newMil = getMil(correctedDistance, factionLabel);
               
-              // Update the target object
               activeTarget.distance = correctedDistance;
               activeTarget.mil = newMil;
           }
       }
 
-      // --- ADD THIS BLOCK HERE ---
+      // 4. Update Slider (if active)
       if (trajSliderEnabled && activeTarget) {
           const gunPos = getActiveGunCoords();
           if (gunPos) {
@@ -1527,7 +1539,6 @@ function updateGunUI(config) {
               const trajInput = document.getElementById('trajectoryRange');
               if (trajInput) trajInput.value = activeTarget.distance;
 
-              // THE FIX: Sync text on gun switch
               const milDisplay = document.getElementById('trajCurrentMil');
               const meterDisplay = document.getElementById('trajCurrentMeter');
               
@@ -1535,19 +1546,22 @@ function updateGunUI(config) {
               if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
           }
       }
-      // ---------------------------
       
-      // 3. RENDER EVERYTHING IN ORDER
-      renderMarkers();   // Draws guns (and rotates active gun to target)
-      renderTargeting(); // Draws the red line and circles
-      render();          // Updates scale/grid
-      saveState();       // Save the new gun selection
+      // 5. RENDER EVERYTHING
+      renderMarkers();   
+      renderTargeting(); 
+      render();          
+      saveState();       
+
+      // --- THE FIX: Use setTimeout (not RequestAnimationFrame) ---
+      // This forces the browser to paint the new labels INSTANTLY.
+      // REMOVED: setTimeout hack to re-enable animations
+      // -----------------------------------------------------------
     });
     
     menu.appendChild(item);
   });
 
-  // Ensure activeGunIndex is within bounds, but don't reset to 0 unnecessarily
   if (activeGunIndex >= gunNames.length) {
     activeGunIndex = Math.min(activeGunIndex, gunNames.length - 1);
   }
@@ -1595,9 +1609,13 @@ function setupDropdown(containerId, buttonId, labelId, onSelect) {
 }
 
 function initArtyControls() {
-  // 1. Setup Faction Dropdown
+  // 1. Setup Faction Dropdown (FIXED: No Animation)
   setupDropdown('factionDropdown', 'factionBtn', 'factionLabel', (value) => {
     if (activeFaction !== value) {
+      
+      // 1. Kill Animations
+      toggleTransitions(false);
+
       activeFaction = value;
       activeTarget = null;
       
@@ -1615,6 +1633,8 @@ function initArtyControls() {
       renderTargeting(); 
       render();
       saveState();
+
+      // REMOVED: setTimeout hack to re-enable animations
     }
   });
 
@@ -1822,8 +1842,6 @@ function initArtyControls() {
       let newY = gunPos.y + (newDistUnits * Math.sin(originalAngle));
 
       // --- FIX: Clamp to Map Boundaries ---
-      // We clamp the coordinates for the VISUAL marker so it doesn't fly off-screen,
-      // but we allow the slider distance (newDistMeters) to remain whatever the user set.
       newX = Math.max(GAME_LEFT, Math.min(GAME_RIGHT, newX));
       newY = Math.max(GAME_BOTTOM, Math.min(GAME_TOP, newY));
       // -----------------------------------
@@ -1838,12 +1856,6 @@ function initArtyControls() {
           mil: mils
       };
 
-      // --- CRITICAL FIX: REMOVED INPUT SYNC ---
-      // We do NOT update 'trajInput.value' here. 
-      // 1. If dragging, the input is already correct (user's finger).
-      // 2. If clicking buttons, 'adjustTrajDistance' updates the input BEFORE calling this.
-      // Removing this stops the "snap back" glitch on mobile.
-
       // Light immediate updates (no DOM write)
       const milDisplay = cached.trajCurrentMil;
       const meterDisplay = cached.trajCurrentMeter;
@@ -1855,10 +1867,23 @@ function initArtyControls() {
       if (!trajUpdatePending) {
           trajUpdatePending = true;
           requestAnimationFrame(() => {
+              
+              // --- FIX START: Kill Animations (Prevent Flying Labels) ---
+              toggleTransitions(false);
+              // --------------------------------------------------------
+
               renderMarkers();
               renderTargeting();
               render();
+              
               trajUpdatePending = false;
+
+              // --- FIX START: Debounced Restore ---
+              // We clear the previous timeout so animations stay OFF while dragging
+              if (window.trajRestoreTimeout) clearTimeout(window.trajRestoreTimeout);
+              
+              // REMOVED: setTimeout hack to re-enable animations
+              // ------------------------------------
           });
       }
   }
@@ -2138,20 +2163,16 @@ mapContainer.addEventListener("click", (e) => {
   renderTargeting();  
   render();            
 
-  // --- FIX END: RESTORE ANIMATIONS AFTER SHORT DELAY ---
-  // A small 50ms delay ensures the browser has finished painting the "Snap"
-  setTimeout(() => {
-      toggleTransitions(true);
-  }, 50);           
+  // REMOVED: setTimeout hack to re-enable animations           
 });
 
-// --- 3. HIGH-SPEED SMOOTH WHEEL ZOOM ---
+// --- 3. HIGH-SPEED RESPONSIVE WHEEL ZOOM ---
 let isWheelThrottled = false;
 
 mapContainer.addEventListener("wheel", (e) => {
   e.preventDefault();
   
-  // 1. Kill transition for instant response during the scroll
+  // Ensure transitions are strictly OFF
   mapStage.classList.remove("zoom-transition");
   document.getElementById("labelLayer")?.classList.remove("zoom-transition");
   mapStage.style.transition = "none";
@@ -2162,13 +2183,10 @@ mapContainer.addEventListener("wheel", (e) => {
     requestAnimationFrame(() => {
       const direction = e.deltaY > 0 ? -1 : 1;
       
-      // SPEED FIX: Increased from 0.2 to 0.8 for faster travel
-      // This means 1 notch = 80% of a zoom level
+      // Kept your faster scroll speed
       const SCROLL_SPEED = 0.8; 
       
       let newZoom = currentZoomLevel + (direction * SCROLL_SPEED);
-      
-      // Round to 2 decimals to keep math precise but clean
       newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
 
       const rect = mapContainer.getBoundingClientRect();
@@ -2183,14 +2201,8 @@ mapContainer.addEventListener("wheel", (e) => {
     });
   }
 
-  // 2. The "Soft Landing" - Restores smoothness when you STOP scrolling
-  clearTimeout(window.wheelStopTimeout);
-  window.wheelStopTimeout = setTimeout(() => {
-    mapStage.classList.add("zoom-transition");
-    // NEW: Sync labels
-    document.getElementById("labelLayer")?.classList.add("zoom-transition");
-    mapStage.style.transition = ""; 
-  }, 100); // Faster recovery time (100ms)
+  // REMOVED: The "Soft Landing" setTimeout block.
+  // We no longer want to re-enable animations after scrolling stops.
 }, { passive: false });
 
 // --- 4. PANNING LOGIC (DESKTOP) ---
@@ -2343,6 +2355,11 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     // Only act if there is currently a target selected
     if (activeTarget) {
+      
+      // --- FIX START: Kill Animations ---
+      toggleTransitions(false);
+      // ----------------------------------
+
       activeTarget = null; // Clear target data
       
       // Disable trajectory slider when target is cleared
@@ -2356,6 +2373,9 @@ document.addEventListener("keydown", (e) => {
       renderMarkers();     // Resets gun rotation (stops pointing at target)
       renderTargeting();   // Removes red line/circles AND hides the panel
       render();            // Refreshes the map
+
+      // REMOVED: setTimeout hack to re-enable animations
+      // -----------------------------------
     }
   }
 });
@@ -2420,7 +2440,7 @@ function initZoomControls() {
 
   const endDrag = () => {
     isDraggingSlider = false;
-    mapStage.classList.add("zoom-transition");
+    // REMOVED: mapStage.classList.add("zoom-transition");
   };
 
   // Track Listeners
