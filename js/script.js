@@ -312,14 +312,23 @@ function getGridRef(gameX, gameY) {
 
 function toggleTransitions(enable) {
   const labelLayer = document.getElementById("labelLayer");
+  
   if (enable) {
+    // We want transitions ON
     mapStage.classList.add("zoom-transition");
     labelLayer?.classList.add("zoom-transition");
     mapStage.style.transition = "";
   } else {
+    // We want transitions OFF (Instant Snap)
     mapStage.classList.remove("zoom-transition");
     labelLayer?.classList.remove("zoom-transition");
     mapStage.style.transition = "none";
+    
+    // --- THE FIX: FORCE BROWSER REFLOW ---
+    // This forces the browser to apply the "no-transition" state NOW.
+    void mapStage.offsetWidth; 
+    if (labelLayer) void labelLayer.offsetWidth;
+    // -------------------------------------
   }
 }
 
@@ -2103,7 +2112,10 @@ mapContainer.addEventListener("click", (e) => {
     mil: mil
   };
 
-  // Refresh slider state if it's currently enabled
+  // --- FIX START: DISABLE ANIMATIONS MOMENTARILY ---
+  // This stops the labels from "flying in" when they are redrawn
+  toggleTransitions(false); 
+
   if (trajSliderEnabled) {
     // 1. Re-calculate and "Lock" new angle
     const dx = activeTarget.gameX - gunPos.x;
@@ -2124,7 +2136,13 @@ mapContainer.addEventListener("click", (e) => {
 
   renderMarkers();    
   renderTargeting();  
-  render();           
+  render();            
+
+  // --- FIX END: RESTORE ANIMATIONS AFTER SHORT DELAY ---
+  // A small 50ms delay ensures the browser has finished painting the "Snap"
+  setTimeout(() => {
+      toggleTransitions(true);
+  }, 50);           
 });
 
 // --- 3. HIGH-SPEED SMOOTH WHEEL ZOOM ---
@@ -2903,35 +2921,27 @@ function updateMobileHud() {
   }
 }
 
-// --- NEW: Mobile Fire Logic (Fixed Center Calculation) ---
+// --- NEW: Mobile Fire Logic (Optimized - No Transition Code) ---
 function fireAtCenter() {
   const mapImage = document.getElementById("mapImage");
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   
-  // Get exact map container dimensions and position
+  // 1. Calculate Target from Center
   const rect = mapContainer.getBoundingClientRect();
-
-  // Calculate the VISUAL center of the container (where the crosshair is)
-  // This is relative to the container's top-left corner
   const visualCenterX = rect.width / 2;
   const visualCenterY = rect.height / 2;
 
-  // Convert visual center to raw image coordinates (before zoom/pan)
-  // Logic: (VisualCenter - PanOffset) / CurrentZoom
   const effectiveZoom = state.scale * state.fitScale;
   const rawImgX = (visualCenterX - state.pointX) / effectiveZoom;
   const rawImgY = (visualCenterY - state.pointY) / effectiveZoom;
 
-  // Convert to Game Coords
   const targetPos = imagePixelsToGame(rawImgX, rawImgY, w, h);
 
-  // --- STANDARD SHOOTING LOGIC (Copied from Click Handler) ---
   const gunPos = getActiveGunCoords();
-  if (!gunPos) {
-      return;
-  }
+  if (!gunPos) return;
 
+  // 2. Ballistics Math
   const dx = targetPos.x - gunPos.x;
   const dy = targetPos.y - gunPos.y;
   
@@ -2949,27 +2959,25 @@ function fireAtCenter() {
     mil: mil
   };
 
-  // --- FIX START ---
+  // 3. Update Trajectory Slider Data (Silent update)
   if (trajSliderEnabled) {
-      const dx = activeTarget.gameX - gunPos.x;
-      const dy = activeTarget.gameY - gunPos.y;
-      originalAngle = Math.atan2(dy, dx);
+      originalAngle = Math.atan2(dy, dx); // Lock Angle
 
       const trajInput = document.getElementById('trajectoryRange');
       if (trajInput) trajInput.value = activeTarget.distance;
 
-      // Update Text Displays
       const milDisplay = document.getElementById('trajCurrentMil');
       const meterDisplay = document.getElementById('trajCurrentMeter');
       
       if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
       if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
   }
-  // --- FIX END ---
 
+  // 4. Render Instantly
+  // No toggleTransitions() needed because CSS already disables animations on mobile
   renderMarkers();    
   renderTargeting();  
-  render();           
+  render();            
 }
 
 // ==========================================

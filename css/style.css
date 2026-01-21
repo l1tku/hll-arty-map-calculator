@@ -377,6 +377,21 @@ body {
     transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
     /* will-change: transform; REMOVED - causes checkerboarding on mobile Chrome */
   }
+
+  /* FIX: Smooth out BOTH position and scale */
+  .map-stage.zoom-transition .marker-label {
+    transition: 
+        transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0),
+        top 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+        
+    /* Tells the GPU to get ready to animate these properties */
+    will-change: transform, top; 
+  }
+
+  /* FIX: Smooth out the arrow fading too */
+  .map-stage.zoom-transition .marker-label::after {
+    transition: opacity 0.25s cubic-bezier(0.1, 0.2, 0.1, 1.0) !important;
+  }
 }
 
 .map-image {
@@ -1559,7 +1574,6 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 }
 
 /* --- FIRE CONTROL PANEL UPDATES --- */
-/* --- FIRE CONTROL PANEL UPDATES --- */
 
 /* 1. Panel Container (Desktop) */
 .target-data-panel {
@@ -2579,27 +2593,43 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         min-height: 0 !important;
     }
 
-    /* Eraser Patch */
+    /* Eraser Patch (Centered without translateX) */
     .controls-content::before {
         content: "";
         position: absolute;
         top: -2px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 78px;
+        
+        /* THE GPU-SAFE CENTERING FIX */
+        left: 0;
+        right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        width: 78px; /* Fixed width matching the tab's inner seam */
+        
+        /* Remove transform to prevent checkerboarding */
+        transform: none !important; 
+        
         height: 4px;
         background-color: #181818;
         z-index: 1301;
     }
 
-    /* Drawer Tab */
+    /* Drawer Tab (Centered without translateX) */
     .drawer-tab {
         position: absolute !important;
         top: -31px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
+        
+        /* THE GPU-SAFE CENTERING FIX */
+        left: 0 !important;
+        right: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        width: 80px !important; /* Specific width allows margin:auto to work */
+        
+        /* Remove transform to avoid checkerboarding */
+        transform: none !important; 
+        
         height: 32px !important;
-        width: 80px !important;
         z-index: 1000 !important;
         background-color: #181818 !important;
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -2756,45 +2786,43 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         transform: scale(0.82) !important;
     }
 
-    /* --- 6. ZOOM INDICATOR TEXT (LEFT SIDE) --- */
+    /* --- 6. ZOOM INDICATOR TEXT (CENTERED - NO TRANSFORMS) --- */
     .zoom-indicator-inline {
         position: fixed !important;
-        left: auto !important;  
-        right: 30px !important;
         
-        /* THE POSITION FIX: Moved up 50px */
-        bottom: 208px !important; 
+        /* THE GPU-SAFE CENTERING FIX */
+        left: 0 !important;
+        right: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        width: 100px !important; /* Set a fixed width to allow margin:auto to work */
+        
+        /* Removed transform: translateX to prevent checkerboarding */
+        transform: none !important; 
+        
+        /* Vertical position */
+        bottom: 170px !important; 
         
         top: auto !important;
-        width: auto !important;
-        transform: none !important;
-        margin: 0 !important;
         z-index: 3000 !important;
         display: block !important;
         pointer-events: none !important;
     }
 
     #zoomIndicator {
-        text-align: left !important;
+        text-align: center !important; 
         font-size: 16px !important;
         display: block !important;
         line-height: 1 !important;
-        color: #fff;
-
-        /* --- THE FIX --- */
-        /* 1. Ensure font is thick enough */
+        
+        /* Unified Sharp Style */
         font-family: 'GothamSS', sans-serif !important;
         font-weight: 900 !important;
-
-        /* 2. Remove Shadow */
         text-shadow: none !important;
-        
-        /* 3. Add Sharp Outline (2px to match your preference) */
         -webkit-text-stroke: 2px #000000;
         paint-order: stroke fill;
-        /* ---------------- */
+        color: #fff;
     }
-
     /* --- 7. LIVE HUD (BOTTOM-RIGHT OF CROSSHAIR) --- */
     .live-hud {
         position: fixed !important;
@@ -3021,16 +3049,35 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         50%      { transform: translateY(8px); opacity: 1; }
     }
     
-    /* Mobile Fire Button */
+    /* Mobile Fire Button (Centered without translateX) */
     .mobile-fire-btn {
         position: absolute;
         bottom: 120px;
-        left: 50%;
-        transform: translateX(-50%);
+        
+        /* THE GPU-SAFE CENTERING FIX */
+        left: 0;
+        right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        width: fit-content; /* Shrinks to text width */
+        min-width: 160px;   /* Ensures a good hit area */
+        
+        /* Removed translateX to prevent checkerboarding */
+        transform: none; 
         z-index: 500;
     }
-    .mobile-fire-btn:active, .mobile-fire-btn.pressed {
-        transform: translateX(-50%) translateY(4px) scale(0.95) !important;
+
+    /* Vertical-only movement on press */
+    .mobile-fire-btn:active, 
+    .mobile-fire-btn.pressed {
+        /* FIX: Only use Y and Scale. X centering is handled by margins. */
+        transform: translateY(4px) scale(0.95) !important;
+        
+        background-color: #ffc107 !important;
+        color: black !important;
+        border-color: transparent !important;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.4) !important; 
     }
-}
-/* END OF MOBILE MEDIA QUERY */   
+ }
+ 
+/* END OF MOBILE MEDIA QUERY */  
