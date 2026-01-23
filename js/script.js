@@ -25,8 +25,8 @@ const MARKER_ROTATION_DEG = 0;
 // Initial State
 let state = { scale: 1, fitScale: 1, panning: false, pointX: 0, pointY: 0, startX: 0, startY: 0 };
 let currentZoomLevel = 1;
-let activeFaction = "us"; 
-let activeGunIndex = 0;   
+let activeFaction = null; 
+let activeGunIndex = -1;   
 let activeTarget = null;
 let activeMapKey = "CAR"; 
 let rulerEnabled = false; // Ruler toggle state 
@@ -446,12 +446,17 @@ function updateStickyLabels(currentDrawScale) {
 
 function buildGrid() {
   let gridLayer = document.getElementById("gridLayer");
+  
   if (!gridLayer) {
     gridLayer = document.createElement("div");
     gridLayer.id = "gridLayer";
     gridLayer.className = "grid-layer";
-    const markers = document.getElementById("markers");
-    mapStage.insertBefore(gridLayer, markers);
+    
+    // FIX: 'markers' is no longer a child of mapStage (it's in mapContainer now).
+    // So we cannot use insertBefore(gridLayer, markers).
+    // Instead, we just append the grid to the mapStage.
+    // The Z-Index in CSS (z-index: 2) ensures it sits above the map image.
+    document.getElementById("mapStage").appendChild(gridLayer);
   }
   
   gridLayer.innerHTML = ""; 
@@ -586,12 +591,86 @@ function renderMarkers() {
     
     if (point.type === 'point' && point.team === activeFaction) {
        const idx = teamArty.findIndex(gun => gun.id === point.id);
-       if (idx === activeGunIndex) {
+       
+       // --- NEW: GUN SelectION CLICK LISTENER ---
+       el.style.cursor = "pointer"; // Indicate it's clickable
+       el.onclick = (e) => {
+           // 1. Stop the click from hitting the map (Prevents shooting at your own gun)
+           e.stopPropagation(); 
+           e.preventDefault();
+
+           // Only act if clicking a different gun
+           if (activeGunIndex !== idx) {
+               
+               // A. Haptic Feedback (Mobile)
+               if (navigator.vibrate) navigator.vibrate(20);
+
+               // B. Update Global State
+               activeGunIndex = idx;
+
+               // C. Update UI Label (Sync the top-right dropdown text)
+               const gunNames = mapConfig.guns || ["Gun 1", "Gun 2", "Gun 3"];
+               const gunLabel = document.getElementById("gunLabel");
+               if (gunLabel) {
+                   gunLabel.innerText = gunNames[idx] || `Gun ${idx + 1}`;
+                   gunLabel.style.color = "#ffffff"; // Reset color to white
+               }
+
+               // D. Recalculate Target (If one exists)
+               if (activeTarget) {
+                   const gunPos = { x: point.gameX, y: point.gameY };
+                   const factionLabel = document.getElementById("factionLabel").innerText;
+                   
+                   const dx = activeTarget.gameX - gunPos.x;
+                   const dy = activeTarget.gameY - gunPos.y;
+                   const distanceUnits = Math.sqrt(dx*dx + dy*dy);
+                   const rawDistanceMeters = distanceUnits / GAME_UNITS_PER_METER;
+                   const correctedDistance = Math.round(rawDistanceMeters);
+                   
+                   const newMil = getMil(correctedDistance, factionLabel);
+
+                   activeTarget.distance = correctedDistance;
+                   activeTarget.mil = newMil;
+
+                   // Update Trajectory Slider if active
+                   if (trajSliderEnabled) {
+                        originalAngle = Math.atan2(dy, dx);
+                        const trajInput = document.getElementById('trajectoryRange');
+                        if (trajInput) trajInput.value = correctedDistance;
+                        
+                        const milDisplay = document.getElementById('trajCurrentMil');
+                        const meterDisplay = document.getElementById('trajCurrentMeter');
+                        if (milDisplay) milDisplay.innerText = newMil !== null ? newMil : "OUT";
+                        if (meterDisplay) meterDisplay.innerText = correctedDistance + "m";
+                   }
+               }
+
+               // E. Re-Render Everything
+               renderMarkers();
+               renderTargeting();
+               render();
+               saveState();
+           }
+       };
+       // -----------------------------------------
+
+       // --- VISIBILITY LOGIC START ---
+       if (activeGunIndex === -1) {
+           // Case A: No Gun Selected. Show ALL guns fully opaque.
+           // Do NOT add 'active-gun' or 'dimmed-gun'.
+           // This makes them stand out equally.
+           el.style.opacity = "1";
+           el.style.filter = "none";
+           el.style.zIndex = "100";
+       } else if (idx === activeGunIndex) {
+           // Case B: This is the Selected gun.
            el.classList.add("active-gun");
            isActiveGun = true;
        } else {
+           // Case C: This is a parked gun.
            el.classList.add("dimmed-gun");
        }
+       // --- VISIBILITY LOGIC END ---
     }
 
     const pos = gameToImagePixels(point.gameX, point.gameY, w, h);
@@ -599,13 +678,9 @@ function renderMarkers() {
     const finalY = Math.round(pos.y);
     
     if (point.type === 'point') {
-        const size = 32; 
-        el.style.width = `${size}px`;
-        el.style.height = `${size}px`;
+        // CSS handles sizing dynamically via --dynamic-icon-size variable
         el.style.left = `${finalX}px`; 
-        el.style.top = `${finalY}px`; 
-        el.style.marginLeft = `-${size/2}px`;
-        el.style.marginTop = `-${size/2}px`;
+        el.style.top = `${finalY}px`;
 
         const img = document.createElement("img");
         img.src = "images/ui/artillery_position.webp"; 
@@ -624,22 +699,18 @@ function renderMarkers() {
            img.style.transform = `rotate(${angle}deg)`;
            
         } else {
-           // 2. STATIC (Parked) - FIX APPLIED HERE
+           // 2. STATIC (Parked)
            let baseRotation = 0; 
            const teamKey = point.team.toLowerCase(); 
            
-           // FIX: Removed "gb", "british", "allies" from this list.
-           // They were causing GB to be treated as GER.
            const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
            const isSoviet = ["rus", "soviet"].some(x => teamKey.includes(x));
            const isBritish = ["gb", "british", "commonwealth", "8th"].some(x => teamKey.includes(x));
 
            if (mapConfig && mapConfig.gunRotations) {
-                // Priority 1: Exact Match (e.g. "allies", "ger")
                 if (mapConfig.gunRotations[teamKey] !== undefined) {
                     baseRotation = mapConfig.gunRotations[teamKey];
                 }
-                // Priority 2: Role Match
                 else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) {
                     baseRotation = mapConfig.gunRotations["ger"];
                 }
@@ -649,16 +720,13 @@ function renderMarkers() {
                 else if (isBritish && mapConfig.gunRotations["gb"] !== undefined) {
                     baseRotation = mapConfig.gunRotations["gb"];
                 }
-                // Priority 3: Fallback for generic "Allies" that should use "gb" config
                 else if (mapConfig.gunRotations["gb"] !== undefined && !isAxis && !isSoviet) {
                      baseRotation = mapConfig.gunRotations["gb"];
                 }
-                // Priority 4: Default US
                 else if (mapConfig.gunRotations["us"] !== undefined) {
                     baseRotation = mapConfig.gunRotations["us"];
                 }
            } else {
-               // Default Fallback if no map config exists
                if (sortMode === "x") {
                    baseRotation = isAxis ? -90 : 90;
                } else {
@@ -742,13 +810,13 @@ function getMil(distance, factionName) {
 }
 
 function getActiveGunCoords() {
-  if (!currentStrongpoints) return null;
+  // If no gun Selected (-1), return null immediately
+  if (activeGunIndex === -1 || !currentStrongpoints) return null;
 
   const teamArty = currentStrongpoints.filter(p => p.team === activeFaction && p.type === 'point');
   
   if (!teamArty || teamArty.length === 0) return null;
   
-  // --- NEW SORTING LOGIC (Must match renderMarkers) ---
   const mapConfig = MAP_DATABASE[activeMapKey];
   const sortMode = mapConfig ? mapConfig.gunSort : "y"; 
 
@@ -757,7 +825,6 @@ function getActiveGunCoords() {
   } else {
       teamArty.sort((a, b) => b.gameY - a.gameY);
   }
-  // ----------------------------------------------------
 
   const index = activeGunIndex % teamArty.length;
   const gun = teamArty[index];
@@ -769,12 +836,9 @@ function renderTargeting() {
   const layer = cached.markersLayer;
   
   // 1. CLEANUP
-  layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg, .ruler-mil-label').forEach(el => el.remove());
+  // FIX: Only remove the SVG lines/circles. Do NOT remove .ruler-mil-label (we recycle them).
+  layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg').forEach(el => el.remove());
   
-  // Clear ruler label pool
-  rulerLabelPool.forEach(label => label.remove());
-  rulerLabelPool = [];
-
   // UI Panel References
   const panel = cached.targetDataPanel;
   const elDist = cached.panelDist;
@@ -783,7 +847,9 @@ function renderTargeting() {
 
   // 2. CHECK IF TARGET EXISTS
   if (!activeTarget || !getActiveGunCoords()) {
-      if (panel) panel.classList.add("hidden"); 
+      if (panel) panel.classList.add("hidden");
+      // Hide all pooled labels if we aren't targeting
+      rulerLabelPool.forEach(el => el.style.display = 'none');
       return;
   }
   if (panel) panel.classList.remove("hidden");
@@ -797,12 +863,8 @@ function renderTargeting() {
   const start = gameToImagePixels(gunPos.x, gunPos.y, w, h);
   
   // 3. DRAW VISUALS
-  
-  // --- FIX: Use dynamic map dimensions instead of global constant ---
-  // This ensures 1984m maps (El Alamein) scale the ruler correctly vs 2000m maps (Carentan)
   const dims = getMapDimensions();
   const pixelsPerMeter = (w / dims.width) * GAME_UNITS_PER_METER; 
-  // -----------------------------------------------------------------
   
   // --- A. TRAJECTORY LINE WITH RULER MARKERS (SVG) ---
   const totalDistPx = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
@@ -810,13 +872,11 @@ function renderTargeting() {
   const lineLength = Math.max(0, totalDistPx - dangerZoneRadiusPx);
   const angleRad = Math.atan2(end.y - start.y, end.x - start.x);
   
-  // Calculate total distance in meters based on the CORRECT scale
   const totalDistanceMeters = totalDistPx / pixelsPerMeter;
-  // Performance optimization: Fewer markers at high zoom
-  const intervalMeters = state.scale > 5 ? 100 : 50;
+  
+  // FORCE 50m intervals always (Matches Desktop behavior)
+  const intervalMeters = 50; 
   const intervalPx = intervalMeters * pixelsPerMeter;
-
-  // Calculate pixel size for 10m segments
   const tenMeterPx = 10 * pixelsPerMeter;
 
   const lineSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -828,11 +888,9 @@ function renderTargeting() {
   lineSvg.style.pointerEvents = "none";
   lineSvg.style.zIndex = "100";
   
-  // Rotate entire SVG container
   lineSvg.style.transformOrigin = "0 0";
   lineSvg.style.transform = `rotate(${angleRad * (180 / Math.PI)}deg)`;
 
-  // Main trajectory line
   const linePath = document.createElementNS("http://www.w3.org/2000/svg", "line");
   linePath.setAttribute("x1", "0");
   linePath.setAttribute("y1", "0");
@@ -844,7 +902,9 @@ function renderTargeting() {
   
   lineSvg.appendChild(linePath);
   
-  // Add ruler markers
+  // Track how many labels we use this frame
+  let poolIdx = 0;
+
   if (rulerEnabled) {
     const numMarkers = Math.floor(lineLength / intervalPx);
     const MAX_RULER_DIST = 1600;
@@ -859,10 +919,14 @@ function renderTargeting() {
 
       if (distanceAtMarker > MAX_RULER_DIST) break;
       if (markerX > lineLength) break;
+
+      // NEW: Hide label if it's too close to the Impact Circle (60m Buffer)
+      // This prevents the text from overlapping the red dispersion visual.
+      if ((totalDistanceMeters - distanceAtMarker) < 40) continue; 
       
       const mils = getMilFromTable(distanceAtMarker, factionLabel);
 
-      // 1. Draw the Red Ball
+      // 1. Draw the Red Ball (SVG is fast, keep creating these)
       const tick = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       tick.setAttribute("cx", markerX);
       tick.setAttribute("cy", "0");
@@ -870,24 +934,44 @@ function renderTargeting() {
       tick.setAttribute("class", "ruler-tick");
       lineSvg.appendChild(tick);
 
-      // 2. Standard DIV Label (pooled for performance)
+      // 2. OPTIMIZED LABEL POOLING
       const labelX = start.x + cosAngle * markerX;
       const labelY = start.y + sinAngle * markerX;
 
-      const milLabel = document.createElement("div");
-      milLabel.className = "ruler-mil-label";
+      // Recycle existing div or create new one
+      let milLabel = rulerLabelPool[poolIdx];
+
+      if (!milLabel) {
+          milLabel = document.createElement("div");
+          milLabel.className = "ruler-mil-label";
+          // FIX: Use 0,0 and move with transform for performance
+          milLabel.style.left = "0px";
+          milLabel.style.top = "0px";
+          rulerLabelPool.push(milLabel);
+      }
+
+      // If renderMarkers() wiped the layer, we must re-attach the pooled element
+      if (milLabel.parentNode !== layer) {
+          layer.appendChild(milLabel);
+      }
+      
+      milLabel.style.display = "block";
+      
+      // FIX: Use 2D translate. Safer for memory, prevents checkerboarding, still fast.
+      milLabel.style.transform = `translate(${labelX}px, ${labelY}px) translate(-50%, -100%)`;
       
       milLabel.innerHTML = `
         <div class="mil-value">${mils}</div>
         <div class="meter-subtext">${distanceAtMarker}m</div>
       `;
       
-      milLabel.style.left = `${labelX}px`;
-      milLabel.style.top = `${labelY}px`;
-      
-      layer.appendChild(milLabel);
-      rulerLabelPool.push(milLabel);
+      poolIdx++;
     }
+  }
+  
+  // HIDE UNUSED LABELS (Don't delete them)
+  for (let k = poolIdx; k < rulerLabelPool.length; k++) {
+      rulerLabelPool[k].style.display = "none";
   }
   
   layer.prepend(lineSvg);
@@ -959,6 +1043,30 @@ function render() {
   const mapStage = cached.mapStage;
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
+  // --- FIXED: RESPONSIVE DYNAMIC ICON SCALING ---
+  const isMobileDevice = window.innerWidth <= 768;
+
+  let baseSize, minSize, iconExponent;
+
+  if (isMobileDevice) {
+      // MOBILE: Starts bigger (140px), shrinks slower (0.5), stays tappable (42px min)
+      baseSize = 200; 
+      minSize = 32; 
+      iconExponent = 0.7; 
+  } else {
+      // DESKTOP: Starts at 120px, shrinks fast (0.7) for precision aiming
+      baseSize = 120;
+      minSize = 32; 
+      iconExponent = 0.8; 
+  }
+
+  // Calculate using exponential decay
+  const rawSize = baseSize / Math.pow(state.scale, iconExponent);
+  const dynSize = Math.max(minSize, rawSize);
+
+  mapContainer.style.setProperty('--dynamic-icon-size', `${dynSize}px`);
+  // ---------------------------------
+  
   // 2. Move Map (Conditional Precision)
   
   // DETECT HIGH-DPI (Mobile/Retina):
@@ -969,7 +1077,17 @@ function render() {
   const finalX = isHighDPI ? state.pointX : Math.round(state.pointX);
   const finalY = isHighDPI ? state.pointY : Math.round(state.pointY);
   
-  mapStage.style.transform = `translate(${finalX}px, ${finalY}px) scale(${drawScale})`;
+  // Create the transform string once
+  const transformString = `translate(${finalX}px, ${finalY}px) scale(${drawScale})`;
+  
+  // A. Apply to Map Image
+  mapStage.style.transform = transformString;
+  
+  // B. Apply to Markers Layer (Sync movement so they stay attached)
+  const markersLayer = document.getElementById("markers");
+  if (markersLayer) {
+      markersLayer.style.transform = transformString;
+  }
   
   // 3. Update Text & Grid (Synchronous)
   // We do this immediately in the same frame so Chrome paints everything at once.
@@ -1045,7 +1163,7 @@ function updateRealScale(effectiveZoom) {
     const currentMapPixelWidth = mapImg.naturalWidth * effectiveZoom;
     const pixelsPerMeter = currentMapPixelWidth / TOTAL_PLAYABLE_METERS;
 
-    // 3. SELECT BAR SIZE BASED ON ZOOM
+    // 3. Select BAR SIZE BASED ON ZOOM
     const isMobile = window.innerWidth <= 768;
     let barMeters;
 
@@ -1110,6 +1228,28 @@ function centerMap() {
 }
 
 function initMap() {
+    // --- 1. DOM RESTRUCTURING (Fix Z-Index Stacking) ---
+    // We move the 'markers' layer OUT of 'mapStage' and into 'mapContainer'
+    // This allows markers to sit physically ABOVE the sticky labels.
+    const markersLayer = document.getElementById("markers");
+    const mapContainer = document.getElementById("mapContainer");
+    const labelLayer = document.getElementById("labelLayer");
+    
+    if (markersLayer && mapContainer) {
+        // If markers are not already a direct child of container, move them
+        if (markersLayer.parentElement !== mapContainer) {
+            mapContainer.appendChild(markersLayer);
+        }
+        
+        // VISUAL ORDER: 
+        // 1. mapStage (Bottom)
+        // 2. labelLayer (Middle)
+        // 3. markersLayer (Top) - Ensure high Z-Index
+        markersLayer.style.zIndex = "100"; 
+        markersLayer.style.transformOrigin = "0 0"; // Critical for alignment
+    }
+    // ---------------------------------------------------
+
     // --- NO OPACITY CODE HERE ---
     const controlsDrawer = document.getElementById("controlsDrawer");
     if (controlsDrawer) {
@@ -1140,7 +1280,7 @@ function initMap() {
 }
 
 // ==========================================
-// VISUAL MAP SELECTOR (MODAL LOGIC)
+// VISUAL MAP SelectOR (MODAL LOGIC)
 // ==========================================
 
 function initMapSelector() {
@@ -1194,7 +1334,7 @@ function initMapSelector() {
   const btnManual = document.getElementById("btnManualCalc");
   if (btnManual) {
       btnManual.addEventListener("click", () => {
-          closeMapSelector(); // Close map selector
+          closeMapSelector(); // Close map Selector
           openManualCalculator(); // Open new calc
       });
   }
@@ -1236,7 +1376,7 @@ function renderMapGrid(filter = "") {
         card.dataset.mapKey = key; // <-- RELIABLE KEY STORAGE
         if (key === activeMapKey) card.classList.add('active');
        
-        card.onclick = () => selectMapFromGrid(key);
+        card.onclick = () => SelectMapFromGrid(key);
        
         const img = document.createElement("img");
         img.className = "map-card-img";
@@ -1265,7 +1405,7 @@ function renderMapGrid(filter = "") {
 }
 
 // ==========================================
-// OPEN MAP SELECTOR - ALWAYS REFRESH HIGHLIGHT
+// OPEN MAP SelectOR - ALWAYS REFRESH HIGHLIGHT
 // ==========================================
 function openMapSelector() {
   const searchInput = document.getElementById("mapSearchInput");
@@ -1283,7 +1423,7 @@ function openMapSelector() {
 }
 
 // ==========================================
-// CLOSE MAP SELECTOR
+// CLOSE MAP SelectOR
 // ==========================================
 function closeMapSelector() {
     const modal = document.getElementById("mapModal");
@@ -1304,21 +1444,25 @@ function closeMapSelector() {
 // KEY FIXES APPLIED
 // ==========================================
 // 1. Map save state now works correctly on refresh
-//    → activeMapKey is set immediately on selection and saved before switchMap()
-// 2. Map selection panel green highlight now appears correctly
+//    → activeMapKey is set immediately on Selection and saved before switchMap()
+// 2. Map Selection panel green highlight now appears correctly
 //    → renderMapGrid("") is called after activeMapKey is updated
 // 3. Flicker/text flicker when switching maps is eliminated
 //    → Current map name, faction UI, gun UI, and strongpoints are updated immediately
 //    → Fade-out/fade-in is smoother with proper transition handling
 //    → Loading overlay stays until fully ready
 
-function selectMapFromGrid(key) {
+function SelectMapFromGrid(key) {
     closeMapSelector();
 
     // 1. Reset Global Targeting State
-    activeTarget = null; // <--- ADD THIS: Clears the coordinates/math for the target
+    activeTarget = null; 
+    
+    // 2. FORCE RESET: Clear both Gun and Faction on map change
+    activeGunIndex = -1; 
+    activeFaction = null; // <--- NEW: Force faction Selection
 
-    // 2. Reset Slider State
+    // 3. Reset Slider State
     trajSliderEnabled = false;
     const trajToggleBtn = document.getElementById('trajToggleBtn');
     const trajContainer = document.getElementById('trajSliderContainer');
@@ -1326,7 +1470,7 @@ function selectMapFromGrid(key) {
     if (trajToggleBtn) trajToggleBtn.classList.remove('active');
     if (trajContainer) trajContainer.classList.add('hidden');
 
-    // 3. Update Page Config
+    // 4. Update Page Config
     const config = MAP_DATABASE[key];
     if (!config) return;
 
@@ -1338,16 +1482,16 @@ function selectMapFromGrid(key) {
     const currentMapLbl = document.getElementById("currentMapName");
     if (currentMapLbl) currentMapLbl.innerText = config.name;
 
-    updateFactionUI(config);
-    updateGunUI(config);
+    updateFactionUI(config); // Will now see null and show "Select TEAM"
+    updateGunUI(config);     // Will now see -1 and show "Select GUN"
 
-    // Save the new map selection immediately
+    // Save new map Selection immediately
     saveState();
 
-    // Highlight the selected card in the grid
+    // Highlight Selected card in the grid
     renderMapGrid("");
 
-    // 4. Trigger Map Transition
+    // 5. Trigger Map Transition
     switchMap(key);
 }
 
@@ -1462,18 +1606,29 @@ function updateFactionUI(config) {
     item2.querySelector('.item-flag').src = t2Flag;
   }
 
-  // 4. THE FIX: Force the main button to show the map-specific name
+  // 4. THE FIX: Handle "No Faction Selected" State
   const mainLabel = document.getElementById("factionLabel");
   const mainFlag = document.getElementById("currentFactionFlag");
 
   if (mainLabel && mainFlag) {
-    // If activeFaction is 'us' (Team 1), use Team 1's specific name for this map
-    if (activeFaction === 'us' || activeFaction === 'allies') {
-      mainLabel.innerText = t1Label;
-      mainFlag.src = t1Flag;
-    } else {
-      mainLabel.innerText = t2Label;
-      mainFlag.src = t2Flag;
+    if (activeFaction === null) {
+        // STATE: No Selection
+        mainLabel.innerText = "Select TEAM";
+        mainLabel.style.color = "#ffc107"; // Tactical Yellow
+        mainFlag.style.display = "none";   // Hide flag until Selected
+    } 
+    else {
+        // STATE: Selected
+        mainLabel.style.color = "#ffffff"; // White
+        mainFlag.style.display = "inline-block"; // Show flag
+
+        if (activeFaction === 'us' || activeFaction === 'allies') {
+            mainLabel.innerText = t1Label;
+            mainFlag.src = t1Flag;
+        } else {
+            mainLabel.innerText = t2Label;
+            mainFlag.src = t2Flag;
+        }
     }
   }
 }
@@ -1487,8 +1642,9 @@ function updateGunUI(config) {
   const menu = gunDropdown.querySelector('.dropdown-menu');
   const label = document.getElementById("gunLabel");
   
+  // Safety check
   if (activeGunIndex >= gunNames.length) {
-    activeGunIndex = 0;
+    activeGunIndex = -1; // Reset to "Select" if map changes configuration
   }
   
   menu.innerHTML = "";
@@ -1502,16 +1658,17 @@ function updateGunUI(config) {
     item.addEventListener('click', (e) => {
       e.stopPropagation();
       label.innerText = name;
+      label.style.color = "#ffffff"; // Reset color to white on Selection
+      
       menu.classList.add('hidden');
       document.getElementById("gunBtn").classList.remove('active');
       
-      // 1. Kill Animations & Force Reflow
       toggleTransitions(false);
 
-      // 2. Update Data
+      // Set the active gun
       activeGunIndex = index;
       
-      // 3. Recalculate Target (if exists)
+      // Recalculate target logic...
       if (activeTarget) {
           const gunPos = getActiveGunCoords();
           if (gunPos) {
@@ -1519,8 +1676,7 @@ function updateGunUI(config) {
               const dx = activeTarget.gameX - gunPos.x;
               const dy = activeTarget.gameY - gunPos.y;
               const distanceUnits = Math.sqrt(dx*dx + dy*dy);
-              const rawDistanceMeters = distanceUnits / GAME_UNITS_PER_METER;
-              const correctedDistance = Math.round(rawDistanceMeters);
+              const correctedDistance = Math.round(distanceUnits / GAME_UNITS_PER_METER);
               const newMil = getMil(correctedDistance, factionLabel);
               
               activeTarget.distance = correctedDistance;
@@ -1528,44 +1684,24 @@ function updateGunUI(config) {
           }
       }
 
-      // 4. Update Slider (if active)
-      if (trajSliderEnabled && activeTarget) {
-          const gunPos = getActiveGunCoords();
-          if (gunPos) {
-              const dx = activeTarget.gameX - gunPos.x;
-              const dy = activeTarget.gameY - gunPos.y;
-              originalAngle = Math.atan2(dy, dx);
-
-              const trajInput = document.getElementById('trajectoryRange');
-              if (trajInput) trajInput.value = activeTarget.distance;
-
-              const milDisplay = document.getElementById('trajCurrentMil');
-              const meterDisplay = document.getElementById('trajCurrentMeter');
-              
-              if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
-              if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
-          }
-      }
-      
-      // 5. RENDER EVERYTHING
+      // Render & Save
       renderMarkers();   
       renderTargeting(); 
       render();          
-      saveState();       
-
-      // --- THE FIX: Use setTimeout (not RequestAnimationFrame) ---
-      // This forces the browser to paint the new labels INSTANTLY.
-      // REMOVED: setTimeout hack to re-enable animations
-      // -----------------------------------------------------------
+      saveState();        
     });
     
     menu.appendChild(item);
   });
 
-  if (activeGunIndex >= gunNames.length) {
-    activeGunIndex = Math.min(activeGunIndex, gunNames.length - 1);
+  // --- NEW: Handle "Select Gun" State ---
+  if (activeGunIndex === -1) {
+      label.innerText = "Select GUN";
+      label.style.color = "#ffc107"; // Tactical Yellow to grab attention
+  } else {
+      label.innerText = gunNames[activeGunIndex];
+      label.style.color = "#ffffff";
   }
-  label.innerText = gunNames[activeGunIndex];
 }
 
 function setupDropdown(containerId, buttonId, labelId, onSelect) {
@@ -1584,7 +1720,7 @@ function setupDropdown(containerId, buttonId, labelId, onSelect) {
     
     // Reset all
     document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.btn-map-select').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.btn-map-Select').forEach(el => el.classList.remove('active'));
 
     if (!isCurrentlyOpen) {
       menu.classList.remove('hidden');
@@ -1602,7 +1738,7 @@ function setupDropdown(containerId, buttonId, labelId, onSelect) {
       menu.classList.add('hidden');
       btn.classList.remove('active');
       
-      // Trigger the selection logic (this calls the function in initArtyControls)
+      // Trigger the Selection logic (this calls the function in initArtyControls)
       onSelect(value);
     });
   });
@@ -1611,30 +1747,35 @@ function setupDropdown(containerId, buttonId, labelId, onSelect) {
 function initArtyControls() {
   // 1. Setup Faction Dropdown (FIXED: No Animation)
   setupDropdown('factionDropdown', 'factionBtn', 'factionLabel', (value) => {
+    // Even if value is same, we might need to "wake up" from null state
     if (activeFaction !== value) {
       
-      // 1. Kill Animations
       toggleTransitions(false);
 
       activeFaction = value;
+      // Note: We do NOT reset activeGunIndex here if it was already set, 
+      // but usually if you switch teams you might want to reset guns. 
+      // For now, let's keep gun Selection if valid, or let it stick.
+      // Ideally, switching teams SHOULD reset the gun index to -1 as well 
+      // because Gun 1 (US) is not Gun 1 (GER).
+      activeGunIndex = -1; // FORCE GUN RESET ON TEAM SWAP
       activeTarget = null;
       
-      // Disable trajectory slider when target is cleared
+      // Disable trajectory slider
       trajSliderEnabled = false;
       const trajToggleBtn = document.getElementById('trajToggleBtn');
       const trajContainer = document.getElementById('trajSliderContainer');
       if (trajToggleBtn) trajToggleBtn.classList.remove('active');
       if (trajContainer) trajContainer.classList.add('hidden');
       
-      // Refresh the UI labels
+      // Refresh UI (This will revert color to white via updateFactionUI)
       updateFactionUI(MAP_DATABASE[activeMapKey]); 
+      updateGunUI(MAP_DATABASE[activeMapKey]); // Update gun label to "Select GUN"
       
       renderMarkers(); 
       renderTargeting(); 
       render();
       saveState();
-
-      // REMOVED: setTimeout hack to re-enable animations
     }
   });
 
@@ -1648,7 +1789,7 @@ function initArtyControls() {
           const wasHidden = gunMenu.classList.contains('hidden');
           
           document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
-          document.querySelectorAll('.btn-map-select').forEach(el => el.classList.remove('active'));
+          document.querySelectorAll('.btn-map-Select').forEach(el => el.classList.remove('active'));
 
           if (wasHidden) {
               gunMenu.classList.remove('hidden');
@@ -1737,7 +1878,7 @@ function initArtyControls() {
   // 3. Global Click Listener
   window.addEventListener('click', () => {
     document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.btn-map-select').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.btn-map-Select').forEach(el => el.classList.remove('active'));
   });
 
   // 5. Setup Sidebar Calculator Button
@@ -1789,7 +1930,86 @@ function initArtyControls() {
 
       if (e.cancelable) e.preventDefault();
       e.stopPropagation();
-      if (!activeTarget) return; 
+      
+      // --- ERROR FEEDBACK LOGIC (Universal & Safe) ---
+      if (!activeTarget) {
+          // 1. Shake the button (Visual cue)
+          trajToggleBtn.classList.add('btn-error');
+
+          // 2. Physical Tooltip (Fixes Mobile Visibility & Clipping)
+          // Remove old if exists
+          const existingTip = document.getElementById('error-toast');
+          if (existingTip) existingTip.remove();
+
+          const tip = document.createElement('div');
+          tip.id = 'error-toast';
+          tip.innerText = "SHOOT FIRST";
+          
+          // Position relative to button
+          const rect = trajToggleBtn.getBoundingClientRect();
+          
+          // Apply Styles (Inline ensures it works everywhere)
+          Object.assign(tip.style, {
+              position: 'fixed',
+              top: (rect.top + (rect.height / 2)) + 'px', 
+              right: (window.innerWidth - rect.left + 15) + 'px', // 15px Left of button
+              transform: 'translateY(-50%)',
+              
+              backgroundColor: '#ff4444',
+              color: 'white',
+              fontFamily: "'GothamSS', sans-serif",
+              fontWeight: '900',
+              fontSize: '13px',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              zIndex: '10000', // Above everything
+              pointerEvents: 'none', 
+              opacity: '0',
+              transition: 'opacity 0.2s ease',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+          });
+
+          // Create Arrow
+          const arrow = document.createElement('div');
+          Object.assign(arrow.style, {
+              position: 'absolute',
+              right: '-6px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              borderTop: '6px solid transparent',
+              borderBottom: '6px solid transparent',
+              borderLeft: '6px solid #ff4444'
+          });
+          tip.appendChild(arrow);
+          document.body.appendChild(tip);
+
+          // Trigger Fade In
+          requestAnimationFrame(() => { tip.style.opacity = '1'; });
+
+          // 3. Haptic Feedback (Safe Check Fixes Console Error)
+          if (navigator.vibrate) {
+             // Only vibrate if the browser says the user is "active"
+             // This silences the [Intervention] error
+             if (!navigator.userActivation || navigator.userActivation.hasBeenActive) {
+                 navigator.vibrate([50, 50, 50]);
+             }
+          }
+
+          // 4. Cleanup Timer
+          if (window.trajErrorTimeout) clearTimeout(window.trajErrorTimeout);
+          
+          window.trajErrorTimeout = setTimeout(() => {
+              trajToggleBtn.classList.remove('btn-error');
+              if(tip) {
+                  tip.style.opacity = '0';
+                  setTimeout(() => tip.remove(), 200);
+              }
+          }, 1200);
+
+          return; // Stop execution
+      }
+      // ---------------------------- 
 
       trajSliderEnabled = !trajSliderEnabled;
       trajToggleBtn.classList.toggle('active', trajSliderEnabled);
@@ -1902,7 +2122,7 @@ function initArtyControls() {
               return;
           }
 
-          // 2. AGGRESSIVE PREVENTION: Stop browser from generating ghost clicks, zooming, or selecting
+          // 2. AGGRESSIVE PREVENTION: Stop browser from generating ghost clicks, zooming, or Selecting
           if (e.cancelable) e.preventDefault();
           e.stopPropagation();
 
@@ -1952,7 +2172,7 @@ function initArtyControls() {
   newRange.addEventListener('touchstart', stopMapInteraction, { passive: true });
   newRange.addEventListener('touchmove', stopMapInteraction, { passive: true });
   newRange.addEventListener('touchend', stopMapInteraction, { passive: true });
-  newRange.addEventListener('mousedown', stopMapInteraction); // For Desktop drag-select issues
+  newRange.addEventListener('mousedown', stopMapInteraction); // For Desktop drag-Select issues
 
   // Handle the actual value change
   newRange.addEventListener('input', (e) => {
@@ -1993,28 +2213,35 @@ function saveState() {
 function loadState() {
   try {
     const savedState = localStorage.getItem('hllArtyCalculatorState');
-    if (!savedState) return null;
+    
+    // IF NO SAVE FOUND: Default both to unSelected
+    if (!savedState) {
+        activeGunIndex = -1; 
+        activeFaction = null; // Default to no faction
+        return null;
+    }
     
     const loaded = JSON.parse(savedState);
     
-    // FAILSAFE: If the saved map doesn't exist anymore, abort load
     if (!MAP_DATABASE[loaded.activeMapKey]) return null;
     
-    // RESTORE VARIABLES
     activeMapKey = loaded.activeMapKey;
-    activeFaction = loaded.activeFaction || 'us';
-    activeGunIndex = loaded.activeGunIndex || 0;
+    
+    // FIX: Respect saved faction, or default to null if missing/new user
+    activeFaction = loaded.activeFaction || null;
+    
+    activeGunIndex = (loaded.activeGunIndex !== undefined) ? loaded.activeGunIndex : -1;
+    
     manualCalcFaction = loaded.manualCalcFaction || 'us';
     rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : false;
     hudEnabled = loaded.hudEnabled !== undefined ? loaded.hudEnabled : false;
     
-    // Restore Panel State
     window.savedPanelHidden = loaded.panelHidden || false;
-    
-    // NOTE: We do NOT restore zoom/pan. initMap() will center the map cleanly.
     
     return true; 
   } catch (error) {
+    activeGunIndex = -1;
+    activeFaction = null;
     return null;
   }
 }
@@ -2184,7 +2411,7 @@ mapContainer.addEventListener("wheel", (e) => {
       const direction = e.deltaY > 0 ? -1 : 1;
       
       // Kept your faster scroll speed
-      const SCROLL_SPEED = 0.8; 
+      const SCROLL_SPEED = 1.0; 
       
       let newZoom = currentZoomLevel + (direction * SCROLL_SPEED);
       newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
@@ -2353,7 +2580,7 @@ document.addEventListener("touchstart", function(){}, true);
 // --- 6. ESCAPE KEY TO CLEAR TARGET ---
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    // Only act if there is currently a target selected
+    // Only act if there is currently a target Selected
     if (activeTarget) {
       
       // --- FIX START: Kill Animations ---
@@ -2495,6 +2722,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.savedPanelHidden) {
       // Apply hidden state immediately
       controlsDrawer.classList.add("closed");
+      // NEW: If starting closed, assume user knows the UI or arrows aren't needed
+      document.body.classList.add("guides-dismissed");
     }
   }
   
@@ -2509,6 +2738,13 @@ document.addEventListener('DOMContentLoaded', function() {
 if (toggleBtn && drawer) {
       toggleBtn.addEventListener("click", () => {
           drawer.classList.toggle("closed");
+
+          // --- NEW: PERMANENTLY HIDE ARROWS ON CLOSE ---
+          // Once closed (even once), we never show arrows again this session
+          if (drawer.classList.contains("closed")) {
+              document.body.classList.add("guides-dismissed");
+          }
+          // ---------------------------------------------
           
           // Update aria-expanded attribute for accessibility
           const isClosed = drawer.classList.contains("closed");
@@ -2522,7 +2758,7 @@ if (toggleBtn && drawer) {
           // Safety: Close dropdowns if we minimize
           if (drawer.classList.contains("closed")) {
                document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
-               document.querySelectorAll('.btn-map-select').forEach(el => el.classList.remove('active'));
+               document.querySelectorAll('.btn-map-Select').forEach(el => el.classList.remove('active'));
           }
            
           // Save panel state
@@ -2623,7 +2859,7 @@ if (factionToggleBtn) {
         isToggleCooldown = true;
         setTimeout(() => { isToggleCooldown = false; }, 200);
 
-        // Prevent default browser behaviors (zoom, selection)
+        // Prevent default browser behaviors (zoom, Selection)
         if (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -2852,7 +3088,12 @@ document.addEventListener("mousemove", (e) => {
                     
                     document.getElementById("hudDist").innerText = dist + "m";
                     document.getElementById("hudMil").innerText = mil !== null ? mil : "---";
+                } else {
+                    // --- FIX: CLEAR DESKTOP HUD IF NO GUN ---
+                    document.getElementById("hudDist").innerText = "---";
+                    document.getElementById("hudMil").innerText = "---";
                 }
+                
                 document.getElementById("hudGrid").innerText = getGridRef(targetPos.x, targetPos.y);
             }
             
@@ -2908,8 +3149,8 @@ function updateMobileHud() {
       
       const factionLabel = document.getElementById("factionLabel").innerText;
       
-      // OPTIMIZATION: Only calculate Mil if distance changed
-      if (dist !== _lastMobDist) {
+      // OPTIMIZATION: Only calculate Mil if distance changed OR if we have no cached mil value
+      if (dist !== _lastMobDist || _lastMobMil === null) {
           const mil = getMil(dist, factionLabel);
           _lastMobMil = mil; // Update cache
           
@@ -2924,12 +3165,18 @@ function updateMobileHud() {
           }
           _lastMobDist = dist;
       }
+  } else {
+      // --- FIX: CLEAR HUD WHEN NO GUN IS SELECTED ---
+      // This runs when you switch factions (activeGunIndex becomes -1)
+      const hudMil = document.getElementById("hudMil");
+      if (hudMil && hudMil.innerText !== "---") hudMil.innerText = "---";
       
-      // Handle case when no gun position is available
-      if (!gunPos) {
-          const hudMil = document.getElementById("hudMil");
-          if (hudMil && hudMil.innerText !== "---") hudMil.innerText = "---";
-      }
+      const hudDist = document.getElementById("hudDist");
+      if (hudDist && hudDist.innerText !== "---") hudDist.innerText = "---";
+
+      // Reset cache so it updates instantly when a gun IS selected later
+      _lastMobDist = null;
+      _lastMobMil = null;
   }
   
   // Grid Ref optimization

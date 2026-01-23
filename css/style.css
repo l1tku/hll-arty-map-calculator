@@ -522,21 +522,45 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 
+/* --- ARTILLERY ICONS (Dynamic Scaling Fix) --- */
 .marker.point {
-  width: 32px; height: 32px; z-index: 10;
-  display: flex; align-items: center; justify-content: center;
-  background-color: transparent; border: none; border-radius: 0;
+    /* 1. DYNAMIC SIZING */
+    width: var(--dynamic-icon-size, 32px) !important;
+    height: var(--dynamic-icon-size, 32px) !important;
+    
+    /* 2. INSTANT CENTERING */
+    margin-left: calc(var(--dynamic-icon-size, 32px) / -2) !important;
+    margin-top: calc(var(--dynamic-icon-size, 32px) / -2) !important;
+    
+    /* 3. PERFORMANCE: NO TRANSITIONS */
+    transition: none !important; 
+    
+    /* 4. ALIGNMENT & LAYER */
+    z-index: 100; /* Stays above labels */
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    position: absolute;
+    pointer-events: auto; /* Keeps them clickable for gun switching */
 }
 
 .arty-icon {
-  width: 70%; height: 70%; display: block; pointer-events: none;
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 1px black);
-  transition: transform 0.2s ease-out;
-  outline: 1px solid transparent;
-  image-rendering: auto; 
+    /* Force the image to fill the dynamic container completely */
+    width: 100% !important; 
+    height: 100% !important;
+    
+    display: block; 
+    pointer-events: none;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 1px black);
+    
+    /* Rotation transition remains */
+    transition: transform 0.2s ease-out;
+    
+    outline: 1px solid transparent;
+    image-rendering: auto; 
 }
 
-.marker.dimmed-gun { opacity: 1 !important; transition: opacity 0.2s ease; filter: none !important; }
+.marker.dimmed-gun { opacity: 1.0 !important; transition: opacity 0.2s ease; filter: none !important; }
 
 /* Ensure the active gun is above the trajectory line (100) */
 .marker.active-gun { 
@@ -554,12 +578,21 @@ body {
     z-index: 100 !important;
 }
 
-/* Ensure other guns stay below the line */
+/* --- UNSELECTED GUNS (Dimmed State) --- */
 .marker.dimmed-gun {
-    z-index: 10 !important;
-    opacity: 1 !important;
-    filter: none !important;
+    /* Sit below the active gun (105) and trajectory (100) */
+    z-index: 90 !important; 
+    
+    /* VISUAL FIX: Reduce opacity to 60% */
+    opacity: 0.6 !important; 
+    
+    /* VISUAL FIX: Slight grayscale makes the active gun color pop more */
+    filter: grayscale(0.8) !important; 
+    
+    /* REMOVED TRANSITION: Instant state change */
+    transition: none !important;
 }
+
 .marker.active-gun .arty-icon {
   filter: invert(1) drop-shadow(0 0 2px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
 }
@@ -638,7 +671,7 @@ body {
     /* Your custom size (Keep this) */
     border-left: 20px solid transparent;   
     border-right: 20px solid transparent;  
-    border-top: 20px solid rgba(20, 20, 20, 0.85); 
+    border-top: 20px solid rgba(20, 20, 20, 0.70); 
     
     opacity: var(--arrow-opacity, 0); 
     
@@ -978,29 +1011,74 @@ svg.icon {
   }
 }
 
-/* --- DESKTOP FOOTER ICON ALIGNMENT --- */
+/* --- DESKTOP FOOTER: UNIFIED SPACING & SIZE --- */
 @media (min-width: 769px) {
-  /* Fix icon position so it sits next to the text */
-  .modal-footer .footer-btn .icon {
-    position: static !important; /* Removes the absolute centering used for mobile */
-    transform: none !important;
-    width: 20px !important;
-    height: 20px !important;
-    margin-right: 12px !important; /* Spacing between icon and "MANUAL CALCULATOR" */
+  
+  /* Target BOTH buttons explicitly to override any specific previous rules */
+  .modal-footer .footer-btn,
+  .modal-footer .footer-btn:first-child, 
+  .modal-footer .footer-btn:last-child {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    height: 54px !important;
+    width: auto !important;
+    
+    /* THE FIX: Identical spacing for BOTH buttons */
+    padding-left: 15px !important;  /* Edge -> Icon */
+    gap: 15px !important;           /* Icon -> Text */
+    padding-right: 25px !important; /* Text -> Edge */
+  }
+
+  /* 1. Calculator Icon (Keep it slightly larger as requested before) */
+  #btnOpenManualCalc .icon {
+    position: static !important;
+    width: 32px !important;  
+    height: 32px !important; 
+    margin: 0 !important; 
     display: inline-block !important;
     vertical-align: middle;
   }
 
-  /* Ensure the button itself uses flex for horizontal layout */
-  .modal-footer .footer-btn {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 54px !important;
-    width: auto !important; /* Allows button to expand horizontally */
-    padding: 0 25px !important;
+  /* 2. More Projects Icon (Standard Size) */
+  #btnOtherProjects .icon {
+    position: static !important;
+    width: 28px !important;
+    height: 28px !important;
+    margin: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle;
   }
+}
+
+/* ==========================================
+   ERROR FEEDBACK ANIMATION
+   ========================================== */
+
+/* Margin-based shake (Safe for Mobile layers) */
+@keyframes shake-red-safe {
+    0%, 100% { margin-left: 0; }
+    20% { margin-left: -4px; border-color: #ff4444; color: #ff4444; }
+    40% { margin-left: 4px; border-color: #ff4444; color: #ff4444; }
+    60% { margin-left: -4px; border-color: #ff4444; color: #ff4444; }
+    80% { margin-left: 4px; border-color: #ff4444; color: #ff4444; }
+}
+
+.btn-error {
+    animation: shake-red-safe 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    /* Force colors */
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+    /* Ensure relative positioning for margins to work */
+    position: relative; 
+}
+
+/* Hide the default tooltip if the error is active 
+   (Prevents double text on Desktop) */
+.btn-error::before,
+.btn-error::after {
+    display: none !important;
 }
 
 /* ==========================================
@@ -1496,7 +1574,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     transform: translate(-50%, -50%); 
     pointer-events: none;
     z-index: 120 !important;
-    opacity: 0.7; /* Reduced opacity */
+    opacity: 0.9; /* Reduced opacity */
 }
 
 .impact-marker::before,
@@ -1630,7 +1708,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* --- THE FIX FOR BLURRY RED CIRCLE --- */
 .blast-circle {
   stroke: none; 
-  fill: rgba(255, 0, 0, 0.4); 
+  fill: rgba(255, 0, 0, 0.5); 
   
   /* FIX: REMOVED 'transform: translateZ(0)' 
      This forces Chrome to re-draw the vector at high quality 
@@ -2312,36 +2390,30 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   box-sizing: border-box;
 }
 
-/* 1. Dispersion Circle (20m Radius / 100% Size) */
+/* 1. Dispersion Circle (20m Radius / 40m Width) */
 .m-ring.dispersion {
   width: 100%;
   height: 100%;
-  
-  /* CHANGED: Thinner line (1px) looks closer to SVG on high-DPI mobile screens */
-  /* CHANGED: Slightly lower opacity (0.7) to match the "ghostly" look of the map marker */
+  /* Dashed line to match your screenshot */
   border: 2px dashed rgba(255, 255, 255, 0.7); 
-  
-  /* Keep background faint */
   background-color: rgba(255, 0, 0, 0.1); 
-  
-  /* CHANGED: Remove heavy outer shadow, keep slight inner glow for definition */
   box-shadow: inset 0 0 5px rgba(255, 0, 0, 0.1); 
 }
 
-/* 2. Deadzone Circle (10m Radius / 50% Size) */
+/* 2. Deadzone Circle (10m Radius / 50% Size) - FIXED */
 .m-ring.deadzone {
-  width: 50%;   /* 10m is half of 20m */
+  width: 50%;   /* 10m / 20m = 50% */
   height: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.5); /* Faint solid line */
-  background-color: rgba(255, 0, 0, 0.15);    /* Slightly darker red */
+  border: 1px solid rgba(255, 255, 255, 0.5); 
+  background-color: rgba(255, 0, 0, 0.15);    
 }
 
 /* 3. Blast Circle (5m Radius / 25% Size) */
 .m-ring.blast {
-  width: 25%;   /* 5m is quarter of 20m */
+  width: 25%;   /* 5m / 20m = 25% */
   height: 25%;
-  background-color: rgba(255, 0, 0, 0.5); /* Dark red center */
-  border: 1px solid rgba(255, 255, 255, 0.6); /* Solid white outline */
+  background-color: rgba(255, 0, 0, 0.5); 
+  border: 1px solid rgba(255, 255, 255, 0.6); 
   box-shadow: 0 0 4px rgba(0,0,0,0.8);
 }
 
@@ -2825,47 +2897,45 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         margin-top: 4px !important; 
     }
 
-    /* 7. CLEAN TEXT STYLE (GPU Safe: No Transforms) */
+    /* 7. CLEAN TEXT STYLE (Stroke Method) */
     .scale-lbl {
         position: absolute; 
         bottom: 0; 
         
-        /* FIX: Remove Transform to prevent checkerboarding */
+        /* 1. GPU-SAFE CENTERING */
         transform: none !important;
+        width: 40px; 
+        margin-left: -20px; 
+        text-align: center; 
         
-        /* FIX: Use Layout Math to center instead */
-        width: 40px;          /* Give it a specific hit-box */
-        margin-left: -20px;   /* Pull back by half the width to center on the tick */
-        text-align: center;   /* Center the text inside the box */
-        
+        /* 2. FONT STYLING */
         font-family: "GothamSS", sans-serif; 
         font-weight: 900; 
         font-size: 12px; 
-        
-        /* Force White Color */
         color: #ffffff !important; 
         white-space: nowrap; 
         line-height: 1;
-        
-        /* Add spacing so numbers don't touch */
         letter-spacing: 1px; 
 
-        /* Use a crisp shadow (Outline) instead of thick stroke */
-        -webkit-text-stroke: 0px transparent !important;
-        text-shadow: 
-            -1px -1px 0 #000,  
-             1px -1px 0 #000,
-            -1px  1px 0 #000,
-             1px  1px 0 #000,
-             0 1px 2px rgba(0,0,0,1) !important;
+        /* 3. THE FIX: SIMPLE STROKE */
+        /* We remove the complex shadow and use a real vector stroke */
+        text-shadow: none !important;
+        -webkit-text-stroke: 2px #000000;
+        
+        /* This ensures the stroke stays BEHIND the white fill */
+        paint-order: stroke fill;
     }
 
-    /* --- 5. ZOOM SLIDER (RIGHT SIDE) --- */
+    /* --- 5. ZOOM SLIDER (RIGHT SIDE - ADJUSTED) --- */
     .zoom-slider-container {
         position: absolute !important;
-        right: 5px !important; /* Keep on Right */
+        right: 5px !important;
         left: auto !important;
-        height: 360px;
+        
+        /* CHANGE: Reduced from 480px to 420px */
+        height: 420px !important;
+        max-height: 85vh !important; 
+        
         top: 50%;
         transform: translateY(-50%);
         pointer-events: none !important;
@@ -3009,6 +3079,17 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         margin: 0 !important;
         width: 95% !important;
     }
+
+    /* --- THE FIX: Force Projects Modal to shrink to fit content --- */
+    .modal-content.projects-hub-content {
+        height: auto !important;       /* Disable the fixed 92vh height */
+        min-height: auto !important;   /* Allow shrinking */
+        flex: 0 1 auto !important;     /* Flexbox: Don't grow, allow shrink */
+        
+        /* Optional: Vertical centering if the overlay uses flex */
+        margin: auto !important;       
+        max-height: 85vh !important;   /* Safety cap */
+    }
     /* 1. Header Container: Forced Symmetrical Padding */
     .modal-brand-header {
         display: flex !important;
@@ -3099,19 +3180,40 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         margin: 0 !important;
         display: block !important;
     }
-    .modal-footer .footer-btn:last-child {
+    /* 2. PROJECTS BUTTON (Mobile: Icon Left, Text Centered in Remaining Space) */
+    .modal-footer #btnOtherProjects {
         flex: 1 !important;
         height: 54px !important;
         display: flex !important;
         align-items: center !important;
-        justify-content: center !important;
-        font-size: 14px !important;
-        padding: 0 10px !important;
+        
+        /* 1. Alignment: Icon stays Left */
+        justify-content: flex-start !important;
+        
+        /* 2. Spacing: 20px Left of Icon, 20px Right of Icon */
+        padding-left: 20px !important; 
+        gap: 20px !important;
+        
+        /* 3. Right Padding: Matches left to frame the text area */
+        padding-right: 20px !important;
+        
+        font-size: 16px !important;
     }
-    .modal-footer .footer-btn:last-child .icon {
-        margin-right: 12px !important;
-        width: 22px !important;
-        height: 22px !important;
+
+    /* TEXT POSITION: Fills the remaining space and centers itself */
+    .modal-footer #btnOtherProjects span {
+        flex-grow: 1 !important;       /* Takes all available width */
+        text-align: center !important; /* Centers text within that width */
+        display: block !important;
+        line-height: 1 !important;
+    }
+
+    /* ICON: Size unchanged */
+    .modal-footer #btnOtherProjects .icon {
+        margin: 0 !important; 
+        width: 30px !important; /* Kept your 30px size from the file */
+        height: 30px !important;
+        flex-shrink: 0 !important; 
     }
 
     /* Projects Hub List Fix */
@@ -3147,18 +3249,19 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     /* --- 11. FIRE GUIDE ARROWS --- */
     .fire-guide-arrow {
         position: absolute;
-        top: -45px;
-        font-size: 20px;
+        top: -55px;
+        font-size: 32px;
         color: #ffc107;
         text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 5px #ffc107;
         pointer-events: none;
         z-index: 2000;
         display: none;
     }
-    .fire-guide-arrow.left { left: 20%; }
-    .fire-guide-arrow.right { right: 20%; }
+    .fire-guide-arrow.left { left: 10%; }
+    .fire-guide-arrow.right { right: 10%; }
     
-    body.hud-active .controls-drawer:not(.closed) .fire-guide-arrow {
+    /* Show ONLY if: HUD active + NOT dismissed + Panel OPEN */
+    body.hud-active:not(.guides-dismissed) .controls-drawer:not(.closed) .fire-guide-arrow {
         display: block;
         animation: arrow-point-down 1.2s infinite;
     }
@@ -3196,6 +3299,14 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         border-color: transparent !important;
         box-shadow: 0 1px 5px rgba(0,0,0,0.4) !important; 
     }
- }
- 
-/* END OF MOBILE MEDIA QUERY */  
+
+    /* REDUCE STICKY GRID LABELS (Mobile) */
+    .hll-grid-label {
+        font-size: 20px !important; /* Reduced from 24px */
+        
+        /* Adjust black outline thickness for smaller text */
+        -webkit-text-stroke: 2px #000000 !important; 
+    }
+  }
+  
+ /* END OF MOBILE MEDIA QUERY */

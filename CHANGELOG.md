@@ -2,6 +2,62 @@
 
 All notable changes to this project will be documented in this file.
 
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [1.1.5] - 2026-01-23
+### Changed
+- **Responsiveness Overhaul**: Completely removed zoom and panning interpolation animations on Desktop. The map now responds instantly to input for a snappier, tactical feel.
+- **Artillery Icon Scaling**: Implemented dynamic scaling logic for artillery icons. Icons now adjust their size intelligently based on the zoom level to remain visible without cluttering the view.
+- **Gun Visibility**: Removed the "dimming" effect on non-selected artillery guns. All active friendly guns now display at full opacity for better situational awareness.
+- **Mobile Ruler Precision**: Enforced a **50m interval** for the distance ruler on mobile devices (previously switched to 100m), matching the precision of the desktop experience.
+- **Mobile Zoom Slider**: Increased the vertical height and touch target size of the mobile zoom slider for finer control.
+- **Sticky Labels**: Slightly reduced the font size of the sticky grid labels (A-J, 1-10) on mobile to maximize map visibility.
+
+### Fixed
+- **Map Switch State**: Fixed a bug where the Faction and Gun selection dropdowns retained old values when changing maps. They now correctly reset to **"Select TEAM"** and **"Select GUN"**.
+- **Gun Rotation**: Corrected the rotation logic for artillery icons ensuring barrels point accurately towards the active target or their default bearing.
+- **Strongpoint Rendering**: 
+    - Resolved an issue causing strongpoint text labels to appear blurry on Chrome.
+    - Fixed an opacity mismatch where the "arrow down" indicator did not fade out in sync with the strongpoint name label.
+- **Grid Artifacts**: Eliminated white outline artifacts appearing around grid lines at certain zoom levels.
+- **Projects Modal**: Fixed the mobile layout of the "Other Projects" hub to fit its content naturally instead of forcing a full-height (92vh) modal with empty space.
+- **Calculator Icon**: Increased the visual size of the Manual Calculator button icon on both desktop and mobile for better accessibility.
+
+### Added
+- **Direct Gun Selection**: Users can now tap or click directly on an artillery gun icon on the map to select it as the active weapon.
+- **Trajectory Safety Check**: Added a "SHOOT FIRST" visual cue and button shake animation to the Trajectory Slider if a user attempts to open it without an active target.
+- **Range Verification**: Confirmed and locked the maximum ballistic calculation range to **1600m** across all factions to match current game values.
+
+## [1.1.4] - 2026-01-21
+### Added
+- **Trajectory Adjustment Slider**: Implemented a new tool (toggled via the control bar) allowing precise distance modification along the established bearing vector. Users can now "walk" shots back and forth along the trajectory line without losing the angle.
+
+### Fixed
+- **Mobile Fire Offset**: Recalibrated the `fireAtCenter` coordinate logic to align the impact marker more accurately with the visual crosshair center on mobile devices.
+- **Map Transition Flicker**: Resolved a rendering issue where the previous map's texture or label text would briefly flash during the loading sequence of a new map.
+- **Dynamic Page Titles**: Fixed a bug where the browser tab title (`document.title`) failed to update with the active map name (e.g., "HLL Arty Calculator - Carentan").
+- **Scale Bar Accuracy**: Rewrote the scale bar logic to strictly follow the 200m grid standard rather than the variable map image width (1984m vs 2016m). This ensures the "100m" label actually represents 100 meters regardless of the map's texture size.
+- **Scale Bar Rendering**: Resolved a visual bug where scale labels ("0m", "50m", "100m") would clump together or stretch incorrectly on mobile screens due to CSS/JS conflicts.
+- **Mobile UI Ergonomics**:
+    - Relocated the mobile **Fire Button** lower on the screen to improve thumb reachability and prevent obstruction of the map view.
+    - Removed unsightly drop shadows from the vertical zoom slider buttons for a cleaner, flatter aesthetic.
+- **Mobile Checkerboarding**: Eliminated black "checkerboard" glitches on Chrome Mobile by replacing hardware-accelerated transforms (`translate3d`) with standard layout centering (`margin: auto`) for UI overlays like the scale bar and zoom indicator.
+- **Allies Flag Logic**: Updated the faction detection to correctly display the British (GB) flag instead of the US flag for maps labeled "Allies" (e.g., El Alamein, Driel).
+
+### Performance
+- **Mobile Zoom Strategy**: Evaluated "smooth zoom" interpolation for mobile devices but reverted to standard step-zooming to preserve frame rates and prevent texture memory crashes on lower-end devices.
+
+## [1.1.3] - 2026-01-17
+### Fixed
+- **Desktop Stutter**: Eliminated micro-stutter during mouse-wheel zooming on desktop browsers by re-enabling `will-change: transform` strictly for non-mobile devices.
+
+### Performance
+- **Hybrid Rendering Pipeline**: Implemented a split rendering strategy:
+    - **Desktop**: Uses GPU acceleration (`will-change`) for maximum frame rate.
+    - **
+
 ## [1.1.4] - 2026-01-21
 ### Added
 - **Trajectory Adjustment Slider**: Implemented a new tool (toggled via the control bar) allowing precise distance modification along the established bearing vector. Users can now "walk" shots back and forth along the trajectory line without losing the angle.
