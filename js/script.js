@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.5"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
+const APP_VERSION = "v1.1.6"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
 
 // Map Dimensions
 const MAP_WIDTH_METERS = 2000.0; 
@@ -58,20 +58,29 @@ let _lastMobGrid = null;
 let filterMode = false;       // Is the setup menu open?
 let confirmedPoints = new Set(); // Stores IDs of the "Chosen" points
 
-// Performance optimization: Cache frequently accessed DOM elements
+// Performance optimization: Real Cache (Lazy Loaded)
 const cached = {
-    get mapImage() { return document.getElementById("mapImage"); },
-    get markersLayer() { return document.getElementById("markers"); },
-    get mapContainer() { return document.getElementById("mapContainer"); },
-    get mapStage() { return document.getElementById("mapStage"); },
-    get trajCurrentMil() { return document.getElementById("trajCurrentMil"); },
-    get trajCurrentMeter() { return document.getElementById("trajCurrentMeter"); },
-    get factionLabel() { return document.getElementById("factionLabel"); },
-    get targetDataPanel() { return document.getElementById("targetDataPanel"); },
-    get panelDist() { return document.getElementById("panelDist"); },
-    get panelMil() { return document.getElementById("panelMil"); },
-    get panelTime() { return document.getElementById("panelTime"); },
-    get zoomIndicator() { return document.getElementById("zoomIndicator"); }
+    _ele: {}, // Internal storage
+    getElem(id) {
+        if (!this._ele[id]) this._ele[id] = document.getElementById(id);
+        return this._ele[id];
+    },
+    get mapImage() { return this.getElem("mapImage"); },
+    get markersLayer() { return this.getElem("markers"); },
+    get mapContainer() { return this.getElem("mapContainer"); },
+    get mapStage() { return this.getElem("mapStage"); },
+    get trajCurrentMil() { return this.getElem("trajCurrentMil"); },
+    get trajCurrentMeter() { return this.getElem("trajCurrentMeter"); },
+    get factionLabel() { return this.getElem("factionLabel"); },
+    get targetDataPanel() { return this.getElem("targetDataPanel"); },
+    get panelDist() { return this.getElem("panelDist"); },
+    get panelMil() { return this.getElem("panelMil"); },
+    get panelTime() { return this.getElem("panelTime"); },
+    get zoomIndicator() { return this.getElem("zoomIndicator"); },
+    // Add scale elements to cache too
+    get scaleWrapper() { return this.getElem("scaleWrapper"); },
+    get scaleTextMid() { return this.getElem("scaleTextMid"); },
+    get scaleTextEnd() { return this.getElem("scaleTextEnd"); }
 };
 
 // DOM Elements
@@ -582,12 +591,12 @@ function imagePixelsToGame(imgX, imgY, imgW, imgH) {
 }
 
 function renderMarkers() {
-  const markersLayer = document.getElementById("markers");
+  const markersLayer = cached.markersLayer;
   if (!markersLayer) return;
   markersLayer.innerHTML = ""; 
   labelCache = [];
   const fragment = document.createDocumentFragment();
-  const mapImage = document.getElementById("mapImage");
+  const mapImage = cached.mapImage;
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   if (!currentStrongpoints) return;
@@ -623,7 +632,7 @@ function renderMarkers() {
   currentStrongpoints.forEach(point => {
     if (point.type === 'point' && point.team !== activeFaction) return; 
 
-    // --- SETUP LOGIC ---
+    // --- SETUP VISIBILITY LOGIC ---
     if (point.type === 'strongpoint') {
         const isConfirmed = confirmedPoints.has(point.id);
         const mySector = getPointSector(point, isVerticalMap);
@@ -721,11 +730,10 @@ function renderMarkers() {
            } 
            else if (sectorHasConfirmation) {
                el.classList.add("is-rejected");
-               el.classList.add("setup-active"); 
+               el.classList.add("setup-active"); // Allows swapping
            }
            else if (mySector === targetSector) {
-               // Active Sector -> Default Look + Clickable
-               el.classList.add("is-open"); // Or remove if you want pure black
+               el.classList.add("is-open"); 
                el.classList.add("setup-active"); 
            } 
            else if (mySector > targetSector) {
@@ -735,30 +743,20 @@ function renderMarkers() {
                el.classList.add("is-rejected"); 
            }
 
-           // 2. ROBUST INTERACTION HANDLER (Chrome Mobile Fix)
+           // 2. PAN-SAFE INTERACTION HANDLER (Use 'click')
            if (el.classList.contains("setup-active")) {
-               let touchHandled = false;
+               el.onclick = (e) => {
+                   // Prevent map from receiving this click
+                   e.preventDefault(); 
+                   e.stopPropagation();
 
-               const handleSelect = (e) => {
-                   // Gatekeeper: If click fired after touch, ignore it
-                   if (e.type === 'click' && touchHandled) return;
-                   
-                   // If touch, set flag to ignore upcoming ghost click
-                   if (e.type === 'touchstart') {
-                       touchHandled = true;
-                       setTimeout(() => { touchHandled = false; }, 500);
-                   }
-
-                   e.preventDefault(); e.stopPropagation();
-                   
-                   // --- VIBRATION (20ms) ---
+                   // Vibrate on success
                    if (navigator.vibrate) navigator.vibrate(20);
 
-                   // LOGIC
                    if (confirmedPoints.has(point.id)) {
                        confirmedPoints.delete(point.id); // Toggle Off
                    } else {
-                       // Toggle On (and clear siblings)
+                       // Toggle On (Switching)
                        currentStrongpoints.forEach(p => {
                            if (p.type === 'strongpoint' && 
                                getPointSector(p, isVerticalMap) === mySector) {
@@ -778,10 +776,6 @@ function renderMarkers() {
                    render();
                    updateSetupGuide();
                };
-
-               // Bind BOTH listeners
-               el.addEventListener('touchstart', handleSelect, { passive: false });
-               el.addEventListener('click', handleSelect);
            }
        }
     }
@@ -1374,16 +1368,13 @@ let _lastScaleTextEnd = "";
 let _lastScaleTextMid = "";
 
 function updateRealScale(effectiveZoom) {
-    const mapImg = document.getElementById("mapImage");
+    const mapImg = cached.mapImage;
     if (!mapImg || mapImg.naturalWidth === 0) return;
 
-    // 1. GET GRID DIMENSIONS
-    // We strictly use the 2000m SDK logic. 
-    // Even if a map image is 2016px wide, the grid logic assumes a 2000m playable area.
+    // 1. GET GRID DIMENSIONS (2000m SDK logic)
     const TOTAL_PLAYABLE_METERS = 2000;
 
     // 2. CALCULATE PIXELS PER METER
-    // currentMapPixelWidth is how many pixels the 2000m area occupies at the current zoom
     const currentMapPixelWidth = mapImg.naturalWidth * effectiveZoom;
     const pixelsPerMeter = currentMapPixelWidth / TOTAL_PLAYABLE_METERS;
 
@@ -1406,16 +1397,22 @@ function updateRealScale(effectiveZoom) {
         if (state.scale > 9.0) barMeters = 20;
     }
 
-    // 4. APPLY TO UI
+    // 4. APPLY TO UI (Using Cache)
     const barPixelsRounded = Math.round(barMeters * pixelsPerMeter);
     
-    const scaleWrapper = document.getElementById("scaleWrapper");
-    const elMid = document.getElementById("scaleTextMid");
-    const elEnd = document.getElementById("scaleTextEnd");
+    // Use Cached Elements
+    const scaleWrapper = cached.scaleWrapper;
+    const elMid = cached.scaleTextMid;
+    const elEnd = cached.scaleTextEnd;
 
     if (scaleWrapper) scaleWrapper.style.width = `${barPixelsRounded}px`;
-    if (elMid) elMid.innerText = `${barMeters / 2}m`;
-    if (elEnd) elEnd.innerText = `${barMeters}m`;
+    
+    // Optimization: Only write text if it changed
+    const midText = `${barMeters / 2}m`;
+    const endText = `${barMeters}m`;
+    
+    if (elMid && elMid.innerText !== midText) elMid.innerText = midText;
+    if (elEnd && elEnd.innerText !== endText) elEnd.innerText = endText;
 }
 
 function updateDimensions() {
