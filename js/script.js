@@ -45,6 +45,10 @@ let trajUpdatePending = false;
 // Performance optimization: Ruler label pool to avoid recreating DOM elements
 let rulerLabelPool = []; 
 
+// --- PERFORMANCE CACHE ---
+let stickyLabelsCache = { cols: [], rows: [] }; // Stores grid label elements
+let cachedSubGrid = null; // Stores the keypad grid element
+
 // --- MOVE THESE HERE (Top of script) ---
 let _lastMobDist = null;
 let _lastMobMil = null;
@@ -265,10 +269,17 @@ function updateDesktopRingScale() {
 showLoading();
 
 function toggleSubGrid(currentZoom) {
-  const subGrid = document.querySelector('.keypad-grid');
-  if (!subGrid) return;
-  if (currentZoom >= 3.0) subGrid.style.opacity = "0.4"; 
-  else subGrid.style.opacity = "0";   
+  // Lazy load cache
+  if (!cachedSubGrid) {
+      cachedSubGrid = document.querySelector('.keypad-grid');
+  }
+  
+  if (!cachedSubGrid) return;
+
+  // Simple state check to avoid DOM writes if not needed could be added here, 
+  // but opacity style change is generally cheap.
+  if (currentZoom >= 3.0) cachedSubGrid.style.opacity = "0.4"; 
+  else cachedSubGrid.style.opacity = "0";   
 }
 
 function getEffectiveZoom() {
@@ -386,27 +397,38 @@ function createStickyLabels() {
     labelLayer.className = "label-layer";
     mapContainer.appendChild(labelLayer);
   }
+  
   labelLayer.innerHTML = "";
+  
+  // Reset Cache
+  stickyLabelsCache.cols = [];
+  stickyLabelsCache.rows = [];
+
+  // Create Columns (Letters)
   for (let i = 0; i < 10; i++) {
     const el = document.createElement("div");
     el.className = "hll-grid-label";
-    el.id = `label-col-${i}`;
-    if (i === 0) el.innerText = "A1";
-    else el.innerText = letters[i];
+    el.innerText = (i === 0) ? "A1" : letters[i];
     labelLayer.appendChild(el);
+    stickyLabelsCache.cols.push(el); // Save to cache
   }
+
+  // Create Rows (Numbers)
   for (let i = 1; i < 10; i++) {
     const el = document.createElement("div");
     el.className = "hll-grid-label";
-    el.id = `label-row-${i}`;
     el.innerText = i + 1;
     labelLayer.appendChild(el);
+    stickyLabelsCache.rows.push(el); // Save to cache
   }
 }
 
 // === FIX #2: Sticky Labels using 2D Transform ===
 function updateStickyLabels(currentDrawScale) {
-  const mapImage = document.getElementById("mapImage");
+  // Use cached map image if available
+  const mapImage = cached.mapImage; 
+  if (!mapImage) return;
+
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   const stepX = (w / 10) * currentDrawScale; 
@@ -421,30 +443,33 @@ function updateStickyLabels(currentDrawScale) {
   let fontScale = 0.7 + ((state.scale - 1) * 0.15);
   if (fontScale > 1.0) fontScale = 1.0;
 
-  for (let i = 0; i < 10; i++) {
-    const el = document.getElementById(`label-col-${i}`);
-    if (!el) continue;
+  // 1. Update Columns (A-J) using Cache
+  for (let i = 0; i < stickyLabelsCache.cols.length; i++) {
+    const el = stickyLabelsCache.cols[i];
     
     const colScreenX = state.pointX + (i * stepX);
     const finalX = colScreenX + padding;
     
     let finalY;
     if (i === 0) finalY = state.pointY + padding; 
-    else finalY = stickyTopY + padding;    
+    else finalY = stickyTopY + padding;     
     
-    // FIX: Using translate (2D) instead of translate3d
     el.style.transform = `translate(${Math.round(finalX)}px, ${Math.round(finalY)}px) scale(${fontScale})`;
   }
 
-  for (let i = 1; i < 10; i++) {
-    const el = document.getElementById(`label-row-${i}`);
-    if (!el) continue;
+  // 2. Update Rows (2-10) using Cache
+  for (let i = 0; i < stickyLabelsCache.rows.length; i++) {
+    const el = stickyLabelsCache.rows[i];
+    // Note: Rows array starts at 2 (index 0 is row 2), so logic matches index + 1
+    // But physically in loop i=0 corresponds to row 2.
+    // The previous loop started at i=1 for creating elements.
+    // Let's align math: i here is 0..8. The actual grid index is i+1.
     
+    const gridIndex = i + 1; 
     const finalX = stickyLeftX + padding;
-    const rowScreenY = state.pointY + (i * stepY);
+    const rowScreenY = state.pointY + (gridIndex * stepY);
     const finalY = rowScreenY + padding;
     
-    // FIX: Using translate (2D) instead of translate3d
     el.style.transform = `translate(${Math.round(finalX)}px, ${Math.round(finalY)}px) scale(${fontScale})`;
   }
 }
@@ -1012,42 +1037,41 @@ function getActiveGunCoords() {
 function renderTargeting() {
     const layer = cached.markersLayer;
     const panel = cached.targetDataPanel;
-    const mobileFireBtn = document.querySelector(".mobile-fire-btn"); 
+    const mobileFireBtn = document.getElementById("mobileFireBtn"); 
 
-    // 1. ALWAYS Clear Visuals first (Wipe the slate clean)
-    // FIX: Only remove the SVG lines/circles. Do NOT remove .ruler-mil-label (we recycle them).
+    // 1. ALWAYS Clear Visuals first
     layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg').forEach(el => el.remove());
 
-    // 2. SETUP MODE GUARD: If Setup is ON, Hide UI & Stop here.
+    // 2. SETUP MODE GUARD
     if (filterMode) {
         if (panel) panel.classList.add("hidden");
         if (mobileFireBtn) mobileFireBtn.classList.add("hidden");
-        // Hide all pooled labels if we aren't targeting
         rulerLabelPool.forEach(el => el.style.display = 'none');
-        return; // <--- CRITICAL: Stops the function from drawing lines/circles
+        return; 
     }
 
-    // 3. NO TARGET GUARD: If no target, ensure panel is hidden
+    // 3. NO TARGET GUARD
     if (!activeTarget || !getActiveGunCoords()) {
         if (panel) panel.classList.add("hidden");
         if (mobileFireBtn) mobileFireBtn.classList.add("hidden");
-        // Hide all pooled labels if we aren't targeting
         rulerLabelPool.forEach(el => el.style.display = 'none');
         return;
     }
 
-    // 4. RESTORE UI: We have a target & Setup is OFF -> Show Panel
+    // 4. RESTORE UI
     if (panel) panel.classList.remove("hidden");
     
-    // FIX: Only show Fire Button if HUD is enabled AND we are on Mobile
+    // --- FIX: Strict Mobile + HUD Check ---
     if (mobileFireBtn) {
         const isMobile = window.innerWidth <= 768;
+        // Only show if: HUD is ON, AND we are on Mobile
         if (hudEnabled && isMobile) {
             mobileFireBtn.classList.remove("hidden");
         } else {
             mobileFireBtn.classList.add("hidden");
         }
     }
+    // --------------------------------------
 
     // UI Panel References
     const elDist = cached.panelDist;
