@@ -1849,7 +1849,10 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
    ========================================== */
 .zoom-slider-container {
   position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
-  height: 400px; 
+  
+  /* UPDATED: Increased height */
+  height: 500px; 
+  
   width: 40px; 
   display: flex; flex-direction: column;
   align-items: center; gap: 20px; z-index: 100; 
@@ -2932,8 +2935,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         right: 5px !important;
         left: auto !important;
         
-        /* CHANGE: Reduced from 480px to 420px */
-        height: 420px !important;
+        /* UPDATED: Increased height */
+        height: 450px !important;
         max-height: 85vh !important; 
         
         top: 50%;
@@ -3175,8 +3178,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 24px !important;
-        height: 24px !important;
+        width: 32px !important;
+        height: 32px !important;
         margin: 0 !important;
         display: block !important;
     }
@@ -3310,3 +3313,343 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   }
   
  /* END OF MOBILE MEDIA QUERY */
+
+/* ==========================================
+   MATCH SETUP & SECTOR HIGHLIGHTS (FINAL)
+   ========================================== */
+
+/* Button States */
+#spFilterBtn.active {
+    background-color: #28a745 !important; /* Green Button for Setup */
+    color: white !important;
+    border-color: #28a745 !important;
+}
+
+@media (hover: hover) {
+    #spFilterBtn:not(.active):hover {
+        background-color: rgba(60, 60, 60, 1) !important;
+        color: #28a745 !important;
+    }
+}
+
+/* --- SECTOR HIGHLIGHT LAYER (Smart Auto-Step) --- */
+.sector-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1; 
+}
+
+/* The Active "Target" Sector */
+.sector-highlight {
+    position: absolute;
+    /* Increased base opacity from 0.2 to 0.3 */
+    background-color: rgba(40, 167, 69, 0.3); 
+    border: 3px solid #28a745; /* Thicker border */
+    /* Stronger glow */
+    box-shadow: 0 0 25px rgba(40, 167, 69, 0.6);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    animation: sector-pulse 1.5s infinite ease-in-out; /* Faster pulse */
+}
+
+/* STRONGER PULSE ANIMATION */
+@keyframes sector-pulse {
+    0% { 
+        background-color: rgba(40, 167, 69, 0.25); 
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); 
+        border-color: rgba(40, 167, 69, 0.6);
+    }
+    50% { 
+        background-color: rgba(40, 167, 69, 0.45); /* Peaks at 45% opacity */
+        box-shadow: 0 0 40px rgba(40, 167, 69, 0.9); /* Bright glow */
+        border-color: #28a745;
+    }
+    100% { 
+        background-color: rgba(40, 167, 69, 0.25); 
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); 
+        border-color: rgba(40, 167, 69, 0.6);
+    }
+}
+
+/* ==========================================
+   STRONGPOINT STATES (CLEANED)
+   ========================================== */
+
+/* 1. SELECTED (Active - GREEN) */
+.marker.strongpoint.is-confirmed .marker-visual {
+    border: none !important;
+    /* Thick GREEN Ring + Glow */
+    box-shadow: 
+        inset 0 0 0 8px #00ff00, 
+        0 0 20px rgba(0, 255, 0, 0.6) !important;
+    background-color: rgba(0, 255, 0, 0.15) !important;
+    opacity: 1 !important;
+
+    /* Green Lines */
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        rgba(0, 255, 0, 0.05), 
+        rgba(0, 255, 0, 0.05) 16px, 
+        #00ff00 16px, 
+        #00ff00 18px
+    ) !important;
+}
+
+.marker.strongpoint.is-confirmed .marker-label {
+    color: #00ff00 !important;
+    font-weight: 900;
+    text-shadow: 0 0 8px rgba(0,0,0,1);
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
+
+/* 2. REJECTED / UNSELECTED (During Setup) */
+.marker.strongpoint.is-rejected {
+    opacity: 1.0 !important; 
+    filter: none !important; 
+    z-index: 5 !important;
+    transition: opacity 0.2s;
+}
+
+.marker.strongpoint.is-rejected .marker-visual {
+    /* Inset 4px RED ring (No white dots) */
+    box-shadow: inset 0 0 0 4px #ff4444 !important; 
+    border: none !important; 
+    
+    background-color: transparent !important;
+
+    /* RED Diagonal Lines */
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        rgba(255, 68, 68, 0.15), 
+        rgba(255, 68, 68, 0.15) 16px, 
+        #ff4444 16px, 
+        #ff4444 18px
+    ) !important;
+}
+
+/* RED Label Text */
+.marker.strongpoint.is-rejected .marker-label {
+    opacity: 1.0 !important;
+    color: #ff4444 !important;
+    text-decoration: none; 
+}
+
+/* 3. LOCKED (Future Steps) - NO DOTS, JUST BLACK */
+.marker.strongpoint.is-locked {
+    opacity: 0.5 !important;         /* Dimmed to show it's not ready */
+    pointer-events: none !important; /* Cannot click */
+    filter: none !important;         /* Standard colors */
+    z-index: 1 !important;          
+}
+
+.marker.strongpoint.is-locked .marker-visual {
+    /* DEFAULT BLACK RING */
+    box-shadow: inset 0 0 0 8px #000000 !important; 
+    border: none !important; /* Removes the white dots */
+    background-color: transparent !important;
+
+    /* DEFAULT BLACK LINES */
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        rgba(255, 255, 255, 0.05), 
+        rgba(255, 255, 255, 0.05) 16px, 
+        #000000 16px, 
+        #000000 18px
+    ) !important;
+}
+
+/* Dimmed White Text */
+.marker.strongpoint.is-locked .marker-label {
+    opacity: 0.5 !important;
+    color: #ffffff !important;
+}
+
+/* 4. OPEN / AVAILABLE (Active Sector) - FULL BLACK */
+.marker.strongpoint.is-open {
+    opacity: 1.0 !important;
+    filter: none !important;
+    z-index: 10 !important; 
+    cursor: pointer;
+}
+
+.marker.strongpoint.is-open .marker-visual {
+    /* DEFAULT BLACK RING */
+    box-shadow: inset 0 0 0 8px #000000, 0 0 4px rgba(0,0,0,0.5) !important;
+    border: none !important;
+    background-color: transparent !important;
+
+    /* DEFAULT BLACK LINES */
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        rgba(255, 255, 255, 0.1), 
+        rgba(255, 255, 255, 0.1) 16px, 
+        #000000 16px, 
+        #000000 18px
+    ) !important;
+}
+
+.marker.strongpoint.is-open .marker-label {
+    opacity: 1.0 !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+/* 5. INTERACTIVE HOVER (Green Preview) */
+.marker.strongpoint.setup-active {
+    pointer-events: auto !important;
+    cursor: pointer;
+}
+
+.marker.strongpoint.setup-active:hover {
+    filter: none !important;
+    opacity: 1 !important;   
+}
+
+.marker.strongpoint.setup-active:hover .marker-visual {
+    border: none !important;
+    /* PREVIEW: Thick GREEN Ring + Glow */
+    box-shadow: 
+        inset 0 0 0 8px #00ff00, 
+        0 0 20px rgba(0, 255, 0, 0.6) !important;
+    
+    /* PREVIEW: Green Lines */
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        rgba(0, 255, 0, 0.05), 
+        rgba(0, 255, 0, 0.05) 16px, 
+        #00ff00 16px, 
+        #00ff00 18px
+    ) !important;
+}
+
+.marker.strongpoint.setup-active:hover .marker-label {
+    color: #00ff00 !important;
+    opacity: 1 !important;
+    text-shadow: 0 0 8px rgba(0,0,0,1);
+}
+
+/* ==========================================
+   SETUP MODE GUIDE TEXT (TACTICAL THEME - SAFE)
+   ========================================== */
+
+.setup-guide {
+    pointer-events: none;
+    
+    /* THEME: Dark Background (Matches Drawer/Panels) */
+    background-color: rgba(20, 20, 20, 0.95) !important;
+    
+    /* THEME: Thin Grey Border */
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    
+    /* THEME: Tactical Yellow Top Accent */
+    border-top: 3px solid #ffc107 !important;
+    
+    /* Text Styles */
+    color: #ffffff !important; 
+    font-family: 'GothamSS', sans-serif;
+    font-weight: 900;
+    font-size: 14px; 
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: center;
+    
+    /* Layout */
+    padding: 12px 24px;
+    border-radius: 2px; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8); 
+    
+    /* Position: Top Center */
+    margin-bottom: 20px; 
+    z-index: 2500; 
+    
+    /* Desktop Positioning */
+    transform: none; 
+    
+    /* FIX: REMOVED 'will-change'. 
+       This prevents Chrome Mobile from creating aggressive GPU layers 
+       that cause checkerboarding/blur. */
+    transition: opacity 0.2s, transform 0.2s, border-color 0.3s;
+}
+
+.setup-guide.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* SUCCESS STATE: Green Accent */
+.setup-guide.success {
+    /* Change Top Border to Green */
+    border-top-color: #28a745 !important;
+    
+    /* Add subtle Green Glow */
+    box-shadow: 0 0 30px rgba(40, 167, 69, 0.25);
+    
+    /* Pop effect */
+    transform: scale(1.05); 
+}
+
+/* Finish Button (Matches Footer Buttons) */
+.setup-finish-btn {
+    background-color: rgba(40, 167, 69, 0.2); /* Semi-transparent Green */
+    border: 1px solid #28a745;
+    color: #ffffff;
+    
+    padding: 6px 16px;
+    margin-left: 15px;
+    border-radius: 2px;
+    
+    font-family: 'GothamSS', sans-serif;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 1px;
+    
+    cursor: pointer;
+    text-transform: uppercase;
+    pointer-events: auto; 
+    transition: all 0.2s;
+}
+
+.setup-finish-btn:hover {
+    background-color: #28a745; /* Solid Green on Hover */
+    color: #000000;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.setup-finish-btn:active {
+    transform: scale(0.95);
+}
+
+/* Flex layout for the content */
+.setup-guide.success {
+    pointer-events: auto !important; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mobile Adjustments (Keep Fixed Positioning) */
+@media (max-width: 768px) {
+    .setup-guide {
+        font-size: 13px;
+        padding: 12px 20px;
+        width: auto;
+        min-width: 220px;
+        white-space: nowrap;
+        
+        position: fixed;
+        top: 90px; 
+        left: 50%;
+        /* Force Centering on Mobile */
+        transform: translateX(-50%); 
+        margin: 0;
+    }
+    
+    /* Success Pop + Center */
+    .setup-guide.success {
+        transform: translateX(-50%) scale(1.05);
+    }
+}

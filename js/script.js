@@ -50,6 +50,10 @@ let _lastMobDist = null;
 let _lastMobMil = null;
 let _lastMobGrid = null;
 
+// Match Setup Variables
+let filterMode = false;       // Is the setup menu open?
+let confirmedPoints = new Set(); // Stores IDs of the "Chosen" points
+
 // Performance optimization: Cache frequently accessed DOM elements
 const cached = {
     get mapImage() { return document.getElementById("mapImage"); },
@@ -144,10 +148,11 @@ function getMilFromTable(distance, faction) {
 // 2. HELPER FUNCTIONS
 // ==========================================
 
-// ==========================================
-// BALLISTIC MATH HELPERS (MUZZLE CORRECTION)
-// ==========================================
-
+// --- NEW: Global Helper to stop map panning ---
+const stopMapInteraction = (e) => {
+    e.stopPropagation(); 
+    // NOTE: Do NOT call preventDefault() here, or sliders/inputs won't work!
+};
 
 function showLoading() {
     const loading = document.getElementById('loadingOverlay');
@@ -554,208 +559,235 @@ function imagePixelsToGame(imgX, imgY, imgW, imgH) {
 function renderMarkers() {
   const markersLayer = document.getElementById("markers");
   if (!markersLayer) return;
-  
-  // 1. Clear existing
   markersLayer.innerHTML = ""; 
   labelCache = [];
-  
-  // 2. Create Fragment
   const fragment = document.createDocumentFragment();
-  
   const mapImage = document.getElementById("mapImage");
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
-  
   if (!currentStrongpoints) return;
 
-  // Sorting Logic
   const mapConfig = MAP_DATABASE[activeMapKey];
   const sortMode = mapConfig ? mapConfig.gunSort : "y";
+  const isVerticalMap = (mapConfig && mapConfig.gunSort === "x"); 
+
   const teamArty = currentStrongpoints.filter(p => p.team === activeFaction && p.type === 'point');
   
-  if (sortMode === "x") {
-      teamArty.sort((a, b) => a.gameX - b.gameX);
-  } else {
-      teamArty.sort((a, b) => b.gameY - a.gameY);
-  }
+  if (sortMode === "x") teamArty.sort((a, b) => a.gameX - b.gameX);
+  else teamArty.sort((a, b) => b.gameY - a.gameY);
 
   let activeGunEl = null;
+
+  updateSectorVisuals(); 
+  updateSetupGuide(); 
+
+  // Calculate Target Sector
+  const filledSectors = new Set();
+  if (filterMode) {
+      confirmedPoints.forEach(id => {
+          const point = currentStrongpoints.find(p => p.id === id);
+          if (point) filledSectors.add(getPointSector(point, isVerticalMap));
+      });
+  }
+  
+  let targetSector = 0;
+  while (filledSectors.has(targetSector) && targetSector < 5) {
+      targetSector++;
+  }
 
   currentStrongpoints.forEach(point => {
     if (point.type === 'point' && point.team !== activeFaction) return; 
 
+    // --- SETUP LOGIC ---
+    if (point.type === 'strongpoint') {
+        const isConfirmed = confirmedPoints.has(point.id);
+        const mySector = getPointSector(point, isVerticalMap);
+        
+        const sectorHasConfirmation = currentStrongpoints.some(p => 
+            p.type === 'strongpoint' && confirmedPoints.has(p.id) &&
+            getPointSector(p, isVerticalMap) === mySector
+        );
+
+        if (!filterMode) {
+            if (sectorHasConfirmation && !isConfirmed) return;
+        }
+    }
+
     const el = document.createElement("div");
     el.className = `marker ${point.team} ${point.type}`;
     
+    // ... [GUN LOGIC] ...
     let isActiveGun = false;
-    
     if (point.type === 'point' && point.team === activeFaction) {
        const idx = teamArty.findIndex(gun => gun.id === point.id);
-       
-       // --- NEW: GUN SelectION CLICK LISTENER ---
-       el.style.cursor = "pointer"; // Indicate it's clickable
+       el.style.cursor = "pointer";
        el.onclick = (e) => {
-           // 1. Stop the click from hitting the map (Prevents shooting at your own gun)
-           e.stopPropagation(); 
-           e.preventDefault();
-
-           // Only act if clicking a different gun
+           e.stopPropagation(); e.preventDefault();
            if (activeGunIndex !== idx) {
-               
-               // A. Haptic Feedback (Mobile)
                if (navigator.vibrate) navigator.vibrate(20);
-
-               // B. Update Global State
                activeGunIndex = idx;
-
-               // C. Update UI Label (Sync the top-right dropdown text)
                const gunNames = mapConfig.guns || ["Gun 1", "Gun 2", "Gun 3"];
                const gunLabel = document.getElementById("gunLabel");
                if (gunLabel) {
                    gunLabel.innerText = gunNames[idx] || `Gun ${idx + 1}`;
-                   gunLabel.style.color = "#ffffff"; // Reset color to white
+                   gunLabel.style.color = "#ffffff";
                }
-
-               // D. Recalculate Target (If one exists)
                if (activeTarget) {
                    const gunPos = { x: point.gameX, y: point.gameY };
                    const factionLabel = document.getElementById("factionLabel").innerText;
-                   
                    const dx = activeTarget.gameX - gunPos.x;
                    const dy = activeTarget.gameY - gunPos.y;
                    const distanceUnits = Math.sqrt(dx*dx + dy*dy);
-                   const rawDistanceMeters = distanceUnits / GAME_UNITS_PER_METER;
-                   const correctedDistance = Math.round(rawDistanceMeters);
-                   
+                   const correctedDistance = Math.round(distanceUnits / GAME_UNITS_PER_METER);
                    const newMil = getMil(correctedDistance, factionLabel);
-
                    activeTarget.distance = correctedDistance;
                    activeTarget.mil = newMil;
-
-                   // Update Trajectory Slider if active
                    if (trajSliderEnabled) {
                         originalAngle = Math.atan2(dy, dx);
                         const trajInput = document.getElementById('trajectoryRange');
                         if (trajInput) trajInput.value = correctedDistance;
-                        
                         const milDisplay = document.getElementById('trajCurrentMil');
                         const meterDisplay = document.getElementById('trajCurrentMeter');
                         if (milDisplay) milDisplay.innerText = newMil !== null ? newMil : "OUT";
                         if (meterDisplay) meterDisplay.innerText = correctedDistance + "m";
                    }
                }
-
-               // E. Re-Render Everything
-               renderMarkers();
-               renderTargeting();
-               render();
-               saveState();
+               renderMarkers(); renderTargeting(); render(); saveState();
            }
        };
-       // -----------------------------------------
-
-       // --- VISIBILITY LOGIC START ---
        if (activeGunIndex === -1) {
-           // Case A: No Gun Selected. Show ALL guns fully opaque.
-           // Do NOT add 'active-gun' or 'dimmed-gun'.
-           // This makes them stand out equally.
-           el.style.opacity = "1";
-           el.style.filter = "none";
-           el.style.zIndex = "100";
+           el.style.opacity = "1"; el.style.filter = "none"; el.style.zIndex = "100";
        } else if (idx === activeGunIndex) {
-           // Case B: This is the Selected gun.
-           el.classList.add("active-gun");
-           isActiveGun = true;
+           el.classList.add("active-gun"); isActiveGun = true;
        } else {
-           // Case C: This is a parked gun.
            el.classList.add("dimmed-gun");
        }
-       // --- VISIBILITY LOGIC END ---
     }
 
     const pos = gameToImagePixels(point.gameX, point.gameY, w, h);
-    const finalX = Math.round(pos.x);
-    const finalY = Math.round(pos.y);
     
-    if (point.type === 'point') {
-        // CSS handles sizing dynamically via --dynamic-icon-size variable
-        el.style.left = `${finalX}px`; 
-        el.style.top = `${finalY}px`;
-
-        const img = document.createElement("img");
-        img.src = "images/ui/artillery_position.webp"; 
-        img.className = "arty-icon";
-        
-        // --- ROTATION LOGIC START ---
-        if (isActiveGun && activeTarget) {
-           // 1. DYNAMIC (Aiming)
-           const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
-           const dy = targetPos.y - pos.y; 
-           const dx = targetPos.x - pos.x;
-           
-           let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-           angle -= 90; // Adjust for icon orientation
-           
-           img.style.transform = `rotate(${angle}deg)`;
-           
-        } else {
-           // 2. STATIC (Parked)
-           let baseRotation = 0; 
-           const teamKey = point.team.toLowerCase(); 
-           
-           const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
-           const isSoviet = ["rus", "soviet"].some(x => teamKey.includes(x));
-           const isBritish = ["gb", "british", "commonwealth", "8th"].some(x => teamKey.includes(x));
-
-           if (mapConfig && mapConfig.gunRotations) {
-                if (mapConfig.gunRotations[teamKey] !== undefined) {
-                    baseRotation = mapConfig.gunRotations[teamKey];
-                }
-                else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) {
-                    baseRotation = mapConfig.gunRotations["ger"];
-                }
-                else if (isSoviet && mapConfig.gunRotations["rus"] !== undefined) {
-                    baseRotation = mapConfig.gunRotations["rus"];
-                }
-                else if (isBritish && mapConfig.gunRotations["gb"] !== undefined) {
-                    baseRotation = mapConfig.gunRotations["gb"];
-                }
-                else if (mapConfig.gunRotations["gb"] !== undefined && !isAxis && !isSoviet) {
-                     baseRotation = mapConfig.gunRotations["gb"];
-                }
-                else if (mapConfig.gunRotations["us"] !== undefined) {
-                    baseRotation = mapConfig.gunRotations["us"];
-                }
-           } else {
-               if (sortMode === "x") {
-                   baseRotation = isAxis ? -90 : 90;
-               } else {
-                   baseRotation = isAxis ? 180 : 0;
-               }
-           }
-           
-           img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
-        }
-        // --- ROTATION LOGIC END ---
-
-        el.appendChild(img);
-    } 
-    else if (point.type === 'strongpoint') {
+    // --- STRONGPOINT VISUALS & LOGIC ---
+    if (point.type === 'strongpoint') {
        const dims = getMapDimensions();
        const pxPerMeter = (w / dims.width) * GAME_UNITS_PER_METER;
        const radiusPx = (point.radius / GAME_UNITS_PER_METER) * pxPerMeter;
        const size = radiusPx * 2;
-       
-       el.style.width = `${size}px`;
-       el.style.height = `${size}px`;
-       el.style.left = `${finalX}px`; 
-       el.style.top = `${finalY}px`; 
-       el.style.marginLeft = `-${size/2}px`;
-       el.style.marginTop = `-${size/2}px`;
+       el.style.width = `${size}px`; el.style.height = `${size}px`;
+       el.style.left = `${Math.round(pos.x)}px`; el.style.top = `${Math.round(pos.y)}px`; 
+       el.style.marginLeft = `-${size/2}px`; el.style.marginTop = `-${size/2}px`;
 
        const visual = document.createElement("div");
        visual.className = "marker-visual";
        el.appendChild(visual);
+
+       if (filterMode) {
+           const mySector = getPointSector(point, isVerticalMap);
+           const isConfirmed = confirmedPoints.has(point.id);
+           
+           const sectorHasConfirmation = currentStrongpoints.some(p => 
+                p.type === 'strongpoint' && confirmedPoints.has(p.id) &&
+                getPointSector(p, isVerticalMap) === mySector
+           );
+
+           // 1. Determine Visual State
+           if (isConfirmed) {
+               el.classList.add("is-confirmed");
+               el.classList.add("setup-active");
+           } 
+           else if (sectorHasConfirmation) {
+               el.classList.add("is-rejected");
+               el.classList.add("setup-active"); 
+           }
+           else if (mySector === targetSector) {
+               // Active Sector -> Default Look + Clickable
+               el.classList.add("is-open"); // Or remove if you want pure black
+               el.classList.add("setup-active"); 
+           } 
+           else if (mySector > targetSector) {
+               el.classList.add("is-locked");
+           } 
+           else {
+               el.classList.add("is-rejected"); 
+           }
+
+           // 2. ROBUST INTERACTION HANDLER (Chrome Mobile Fix)
+           if (el.classList.contains("setup-active")) {
+               let touchHandled = false;
+
+               const handleSelect = (e) => {
+                   // Gatekeeper: If click fired after touch, ignore it
+                   if (e.type === 'click' && touchHandled) return;
+                   
+                   // If touch, set flag to ignore upcoming ghost click
+                   if (e.type === 'touchstart') {
+                       touchHandled = true;
+                       setTimeout(() => { touchHandled = false; }, 500);
+                   }
+
+                   e.preventDefault(); e.stopPropagation();
+                   
+                   // --- VIBRATION (20ms) ---
+                   if (navigator.vibrate) navigator.vibrate(20);
+
+                   // LOGIC
+                   if (confirmedPoints.has(point.id)) {
+                       confirmedPoints.delete(point.id); // Toggle Off
+                   } else {
+                       // Toggle On (and clear siblings)
+                       currentStrongpoints.forEach(p => {
+                           if (p.type === 'strongpoint' && 
+                               getPointSector(p, isVerticalMap) === mySector) {
+                               confirmedPoints.delete(p.id);
+                           }
+                       });
+                       confirmedPoints.add(point.id); 
+                   }
+
+                   // Auto-finish check
+                   if (confirmedPoints.size === 5) {
+                       updateSetupGuide(); 
+                       if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                   }
+
+                   renderMarkers();
+                   render();
+                   updateSetupGuide();
+               };
+
+               // Bind BOTH listeners
+               el.addEventListener('touchstart', handleSelect, { passive: false });
+               el.addEventListener('click', handleSelect);
+           }
+       }
+    }
+    
+    // ... [Point Rendering] ...
+    if (point.type === 'point') { 
+        el.style.left = `${Math.round(pos.x)}px`; el.style.top = `${Math.round(pos.y)}px`;
+        const img = document.createElement("img"); img.src = "images/ui/artillery_position.webp"; img.className = "arty-icon";
+        
+        if (isActiveGun && activeTarget) {
+           const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
+           const dy = targetPos.y - pos.y; 
+           const dx = targetPos.x - pos.x;
+           let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+           angle -= 90;
+           img.style.transform = `rotate(${angle}deg)`;
+        } else {
+           let baseRotation = 0; 
+           const teamKey = point.team.toLowerCase(); 
+           const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
+           if (mapConfig && mapConfig.gunRotations) {
+                if (mapConfig.gunRotations[teamKey] !== undefined) baseRotation = mapConfig.gunRotations[teamKey];
+                else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) baseRotation = mapConfig.gunRotations["ger"];
+                else if (mapConfig.gunRotations["us"] !== undefined) baseRotation = mapConfig.gunRotations["us"];
+           } else {
+                if (sortMode === "x") baseRotation = isAxis ? -90 : 90;
+                else baseRotation = isAxis ? 180 : 0;
+           }
+           img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
+        }
+        el.appendChild(img);
     }
 
     if (point.label) {
@@ -766,19 +798,73 @@ function renderMarkers() {
       labelCache.push(labelSpan);
     }
 
-    // Optimization
-    if (isActiveGun) {
-        activeGunEl = el; 
-    } else {
-        fragment.appendChild(el);
-    }
+    if (isActiveGun) activeGunEl = el;
+    else fragment.appendChild(el);
   });
 
-  if (activeGunEl) {
-      fragment.appendChild(activeGunEl);
-  }
-
+  if (activeGunEl) fragment.appendChild(activeGunEl);
   markersLayer.appendChild(fragment);
+}
+
+function updateSectorVisuals() {
+    let sectorLayer = document.getElementById("sectorLayer");
+    if (!sectorLayer) {
+        sectorLayer = document.createElement("div");
+        sectorLayer.id = "sectorLayer";
+        sectorLayer.className = "sector-layer";
+        const mapStage = document.getElementById("mapStage");
+        const gridLayer = document.getElementById("gridLayer");
+        mapStage.insertBefore(sectorLayer, gridLayer);
+    }
+    
+    sectorLayer.innerHTML = ""; 
+
+    if (!filterMode) return; 
+
+    const mapConfig = MAP_DATABASE[activeMapKey];
+    // Detect Vertical Map (Driel, PHL) based on sort mode
+    // Usually 'x' sort implies Vertical layout (North/South bases)
+    const isVerticalMap = (mapConfig && mapConfig.gunSort === "x"); 
+
+    // 1. Find filled sectors
+    const filledSectors = new Set();
+    confirmedPoints.forEach(id => {
+        const point = currentStrongpoints.find(p => p.id === id);
+        if (point) filledSectors.add(getPointSector(point, isVerticalMap));
+    });
+
+    // 2. Find target sector (Next Empty One)
+    let targetSector = 0;
+    while (filledSectors.has(targetSector) && targetSector < 5) {
+        targetSector++;
+    }
+
+    if (targetSector >= 5) return;
+
+    // 3. Draw Green Bar
+    const el = document.createElement("div");
+    el.className = "sector-highlight";
+    
+    const sizePct = 20; // 20% height or width
+    const posPct = targetSector * 20;
+
+    if (isVerticalMap) {
+        // Vertical Map: Rows
+        el.style.left = "0%";
+        el.style.width = "100%";
+        // Note: targetSector 0 is North (Top). CSS Top 0% is Top.
+        // So we just use posPct directly for Top.
+        el.style.top = `${posPct}%`; 
+        el.style.height = `${sizePct}%`;
+    } else {
+        // Horizontal Map: Columns
+        el.style.top = "0%";
+        el.style.height = "100%";
+        el.style.left = `${posPct}%`;
+        el.style.width = `${sizePct}%`;
+    }
+
+    sectorLayer.appendChild(el);
 }
 
 // --- CALCULATION LOGIC HELPERS ---
@@ -809,6 +895,97 @@ function getMil(distance, factionName) {
   return null;
 }
 
+// --- HELPER: Calculate which Sector (0-4) a point belongs to ---
+function getPointSector(point, isVerticalMap) {
+    const OFFSET = 100000;
+    const SECTOR_SIZE = 40000; 
+
+    let idx;
+    if (isVerticalMap) {
+        // Vertical (North-South) Maps (e.g., Driel)
+        // Y goes from +100k (North) to -100k (South).
+        // Standard calc makes South=0. We want North=0.
+        // So we INVERT it: 4 - index.
+        const rawIdx = Math.floor((point.gameY + OFFSET) / SECTOR_SIZE);
+        idx = 4 - rawIdx; 
+    } else {
+        // Horizontal (West-East) Maps (e.g., Carentan)
+        // X goes from -100k (West) to +100k (East).
+        // Standard calc makes West=0. This is correct.
+        idx = Math.floor((point.gameX + OFFSET) / SECTOR_SIZE);
+    }
+
+    // Safety Clamp (Just in case point is slightly off-map)
+    if (idx < 0) idx = 0;
+    if (idx > 4) idx = 4;
+
+    return idx;
+}
+
+function updateSetupGuide() {
+    const guideEl = document.getElementById("setupGuide");
+    if (!guideEl) return;
+
+    if (!filterMode) {
+        guideEl.classList.add("hidden");
+        guideEl.classList.remove("success");
+        return;
+    }
+
+    guideEl.classList.remove("hidden");
+
+    // 1. Calculate State
+    const mapConfig = MAP_DATABASE[activeMapKey];
+    const isVerticalMap = (mapConfig && mapConfig.gunSort === "x");
+    const filledSectors = new Set();
+    
+    confirmedPoints.forEach(id => {
+        const point = currentStrongpoints.find(p => p.id === id);
+        if (point) filledSectors.add(getPointSector(point, isVerticalMap));
+    });
+
+    // 2. Check for Completion (All 5 sectors filled)
+    if (filledSectors.size === 5) {
+        // Show FINISH button (Reset removed)
+        guideEl.innerHTML = `SETUP COMPLETE <button id="btnFinishSetup" class="setup-finish-btn">FINISH</button>`;
+        guideEl.classList.add("success");
+        
+        const finishBtn = document.getElementById("btnFinishSetup");
+        if (finishBtn) {
+            finishBtn.onclick = (e) => {
+                e.stopPropagation();
+                
+                filterMode = false;
+                const btn = document.getElementById('spFilterBtn');
+                if (btn) btn.classList.remove('active');
+                
+                updateSetupGuide();
+                renderMarkers();
+                renderTargeting();
+                render();
+                
+                if (navigator.vibrate) navigator.vibrate(50);
+            };
+        }
+        return;
+    }
+
+    // 3. Setup In Progress (Text Only)
+    guideEl.classList.remove("success");
+    
+    // Find gap
+    let stepIndex = 0;
+    while (filledSectors.has(stepIndex) && stepIndex < 5) stepIndex++;
+    const step = stepIndex + 1;
+    
+    let suffix = "TH";
+    if (step === 1) suffix = "ST";
+    else if (step === 2) suffix = "ND";
+    else if (step === 3) suffix = "RD";
+    
+    guideEl.innerText = `CHOOSE ${step}${suffix} STRONGPOINT`;
+}
+
 function getActiveGunCoords() {
   // If no gun Selected (-1), return null immediately
   if (activeGunIndex === -1 || !currentStrongpoints) return null;
@@ -833,26 +1010,49 @@ function getActiveGunCoords() {
 }
 
 function renderTargeting() {
-  const layer = cached.markersLayer;
-  
-  // 1. CLEANUP
-  // FIX: Only remove the SVG lines/circles. Do NOT remove .ruler-mil-label (we recycle them).
-  layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg').forEach(el => el.remove());
-  
-  // UI Panel References
-  const panel = cached.targetDataPanel;
-  const elDist = cached.panelDist;
-  const elMil = cached.panelMil;
-  const elTime = cached.panelTime;
+    const layer = cached.markersLayer;
+    const panel = cached.targetDataPanel;
+    const mobileFireBtn = document.querySelector(".mobile-fire-btn"); 
 
-  // 2. CHECK IF TARGET EXISTS
-  if (!activeTarget || !getActiveGunCoords()) {
-      if (panel) panel.classList.add("hidden");
-      // Hide all pooled labels if we aren't targeting
-      rulerLabelPool.forEach(el => el.style.display = 'none');
-      return;
-  }
-  if (panel) panel.classList.remove("hidden");
+    // 1. ALWAYS Clear Visuals first (Wipe the slate clean)
+    // FIX: Only remove the SVG lines/circles. Do NOT remove .ruler-mil-label (we recycle them).
+    layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg').forEach(el => el.remove());
+
+    // 2. SETUP MODE GUARD: If Setup is ON, Hide UI & Stop here.
+    if (filterMode) {
+        if (panel) panel.classList.add("hidden");
+        if (mobileFireBtn) mobileFireBtn.classList.add("hidden");
+        // Hide all pooled labels if we aren't targeting
+        rulerLabelPool.forEach(el => el.style.display = 'none');
+        return; // <--- CRITICAL: Stops the function from drawing lines/circles
+    }
+
+    // 3. NO TARGET GUARD: If no target, ensure panel is hidden
+    if (!activeTarget || !getActiveGunCoords()) {
+        if (panel) panel.classList.add("hidden");
+        if (mobileFireBtn) mobileFireBtn.classList.add("hidden");
+        // Hide all pooled labels if we aren't targeting
+        rulerLabelPool.forEach(el => el.style.display = 'none');
+        return;
+    }
+
+    // 4. RESTORE UI: We have a target & Setup is OFF -> Show Panel
+    if (panel) panel.classList.remove("hidden");
+    
+    // FIX: Only show Fire Button if HUD is enabled AND we are on Mobile
+    if (mobileFireBtn) {
+        const isMobile = window.innerWidth <= 768;
+        if (hudEnabled && isMobile) {
+            mobileFireBtn.classList.remove("hidden");
+        } else {
+            mobileFireBtn.classList.add("hidden");
+        }
+    }
+
+    // UI Panel References
+    const elDist = cached.panelDist;
+    const elMil = cached.panelMil;
+    const elTime = cached.panelTime;
 
   const gunPos = getActiveGunCoords();
   const mapImage = cached.mapImage;
@@ -1470,7 +1670,17 @@ function SelectMapFromGrid(key) {
     if (trajToggleBtn) trajToggleBtn.classList.remove('active');
     if (trajContainer) trajContainer.classList.add('hidden');
 
-    // 4. Update Page Config
+    // 4. Reset Filters
+    filterMode = false;
+    confirmedPoints.clear();
+    const btn = document.getElementById('spFilterBtn');
+    if(btn) btn.classList.remove('active');
+    
+    // Remove old overlay if it exists
+    const layer = document.getElementById("sectorLayer");
+    if(layer) layer.innerHTML = "";
+
+    // 5. Update Page Config
     const config = MAP_DATABASE[key];
     if (!config) return;
 
@@ -1491,7 +1701,7 @@ function SelectMapFromGrid(key) {
     // Highlight Selected card in the grid
     renderMapGrid("");
 
-    // 5. Trigger Map Transition
+    // 6. Trigger Map Transition
     switchMap(key);
 }
 
@@ -2160,14 +2370,7 @@ function initArtyControls() {
   const newRange = rangeInput.cloneNode(true); // Clear old listeners
   rangeInput.parentNode.replaceChild(newRange, rangeInput);
 
-  // --- CRITICAL FIX: ISOLATE SLIDER FROM MAP ---
-  // We must stop the touch events here so they don't bubble up to the map
-  // and trigger the panning logic, which causes the slider to "snap back".
-  const stopMapInteraction = (e) => {
-      e.stopPropagation(); 
-      // NOTE: Do NOT call preventDefault() here, or the slider won't move!
-  };
-
+  // --- USE THE GLOBAL FUNCTION ---
   // Block the map from seeing these events
   newRange.addEventListener('touchstart', stopMapInteraction, { passive: true });
   newRange.addEventListener('touchmove', stopMapInteraction, { passive: true });
@@ -2179,7 +2382,54 @@ function initArtyControls() {
       updateTrajectoryFromDistance(parseInt(e.target.value));
   });
 
-  // 5. Fix Keypad Events
+  // 5. Setup Match Setup Filter Button
+  const spFilterBtn = document.getElementById('spFilterBtn');
+  if (spFilterBtn) {
+      // Logic variables to prevent double-firing on mobile
+      let setupTouchHandled = false;
+      let setupTouchTimeout = null;
+
+      const handleFilterToggle = (e) => {
+          // --- MOZILLA MOBILE GATEKEEPER ---
+          // 1. If this is a click event but we just handled a touch, STOP.
+          if (e.type === 'click' && setupTouchHandled) {
+              e.preventDefault(); 
+              e.stopPropagation(); 
+              return;
+          }
+
+          // 2. If this is a touch event, set the flag so the following click is ignored.
+          if (e.type === 'touchstart') {
+              setupTouchHandled = true;
+              if (setupTouchTimeout) clearTimeout(setupTouchTimeout);
+              // 500ms timeout covers the slow 300ms click delay on some mobile browsers
+              setupTouchTimeout = setTimeout(() => { setupTouchHandled = false; }, 500);
+          }
+          // ----------------------------------
+
+          if (e.cancelable) e.preventDefault(); 
+          e.stopPropagation();
+          
+          // Actual Logic
+          filterMode = !filterMode;
+          spFilterBtn.classList.toggle('active', filterMode);
+          spFilterBtn.blur();
+          
+          renderMarkers();
+          
+          // FIX: Ensure trajectory comes back if we exit mode
+          renderTargeting(); 
+          
+          render(); 
+          
+          if (filterMode && navigator.vibrate) navigator.vibrate([10, 30, 10]);
+      };
+
+      spFilterBtn.addEventListener('click', handleFilterToggle);
+      spFilterBtn.addEventListener('touchstart', handleFilterToggle, { passive: false });
+  }
+
+  // 6. Fix Keypad Events
   fixKeypadEvents();
 }
 
@@ -2308,6 +2558,11 @@ const DRAG_THRESHOLD = 5; // Pixels to move before counting as a "Pan"
 mapContainer.addEventListener("click", (e) => {
   // 1. If we were dragging (panning), DO NOT SHOOT.
   if (isDragging) return; 
+
+  // --- NEW: SETUP MODE GUARD ---
+  // If Setup Mode is active, strictly ignore shooting clicks.
+  if (filterMode) return; 
+  // ----------------------------
 
   // ============================================================
   // FIX: CHECK IF CROSSHAIR IS VISIBLE
@@ -2681,29 +2936,36 @@ function initZoomControls() {
   window.addEventListener("touchend", endDrag);
 
 // --- 3. BUTTONS (INSTANT SNAP) ---
-    const handleBtn = (e, direction) => {
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
+  const handleBtn = (e, direction) => {
+      // 1. Stop browser defaults (Zooming/Scrolling)
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
 
-        const btn = e.currentTarget;
-        if (btn.classList.contains('pressed')) return;
+      const btn = e.currentTarget;
+      
+      // Debounce: If already pressed, ignore
+      if (btn.classList.contains('pressed')) return;
 
-        if (navigator.vibrate) navigator.vibrate(10);
-        btn.classList.add("pressed");
-        setTimeout(() => btn.classList.remove("pressed"), 150);
+      // 2. VIBRATION FIX (Chrome Mobile)
+      // Increased to 25ms so it is distinctly felt on Android
+      if (navigator.vibrate) navigator.vibrate(25);
 
-        // CHANGE: Mobile uses 2.0 step to cover the 20x range quickly
-        // Desktop uses 1.0 step for standard precision
-        const step = (window.innerWidth <= 768) ? 2.0 : 1.0; 
-        
-        let target = state.scale + (direction * step);
-        target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
+      // 3. Visual Feedback
+      btn.classList.add("pressed");
+      setTimeout(() => btn.classList.remove("pressed"), 150);
 
-        const rect = mapContainer.getBoundingClientRect();
+      // 4. Zoom Logic
+      // CHANGE: Mobile uses 2.0 step for speed, Desktop uses 1.0 for precision
+      const step = (window.innerWidth <= 768) ? 2.0 : 1.0; 
+      
+      let target = state.scale + (direction * step);
+      target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
 
-        // Instant set (Safe for Mobile)
-        setZoomLevel(target, rect.width / 2, rect.height / 2);
-    };
+      const rect = mapContainer.getBoundingClientRect();
+
+      // Instant set (Safe for Mobile)
+      setZoomLevel(target, rect.width / 2, rect.height / 2);
+  };
   btnIn.addEventListener("touchstart", (e) => handleBtn(e, 1), { passive: false });
   btnOut.addEventListener("touchstart", (e) => handleBtn(e, -1), { passive: false });
   btnIn.addEventListener("click", (e) => handleBtn(e, 1));
