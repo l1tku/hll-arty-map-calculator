@@ -167,6 +167,26 @@ const stopMapInteraction = (e) => {
     // NOTE: Do NOT call preventDefault() here, or sliders/inputs won't work!
 };
 
+// --- HELPER: Visual Shooting Pulse ---
+function triggerFirePulse(x, y) {
+    const stage = cached.mapStage; // Must be mapStage!
+    if (!stage) return;
+
+    const pulse = document.createElement("div");
+    pulse.className = "shot-pulse";
+    
+    // Position exactly at target pixels
+    pulse.style.left = `${Math.round(x)}px`;
+    pulse.style.top = `${Math.round(y)}px`;
+
+    stage.appendChild(pulse);
+
+    // Cleanup slightly after animation ends (400ms animation -> 450ms cleanup)
+    setTimeout(() => {
+        pulse.remove();
+    }, 450); 
+}
+
 function showLoading() {
     const loading = document.getElementById('loadingOverlay');
     if (loading) loading.style.display = 'flex';
@@ -224,7 +244,11 @@ function syncToggleUI() {
   const desktopRings = document.getElementById("desktopCursorRings");
 
   if (hudEnabled) {
-    if (hudEl) hudEl.classList.remove("hidden");
+    if (hudEl) {
+        hudEl.classList.remove("hidden");
+        // FIX: Hide initially on Desktop until mouse moves to prevent 0,0 jump
+        if (!isMobile) hudEl.style.opacity = "0"; 
+    }
     
     if (isMobile) {
       // Mobile Mode
@@ -233,7 +257,11 @@ function syncToggleUI() {
       if (desktopRings) desktopRings.classList.add("hidden"); 
     } else {
       // Desktop Mode
-      if (desktopRings) desktopRings.classList.remove("hidden"); 
+      if (desktopRings) {
+          desktopRings.classList.remove("hidden");
+          // FIX: Hide initially until mouse moves
+          desktopRings.style.opacity = "0";
+      }
       if (crosshair) crosshair.classList.add("hidden");
       if (fireBtn) fireBtn.classList.add("hidden");
     }
@@ -248,27 +276,23 @@ function syncToggleUI() {
 
 function updateDesktopRingScale() {
   const ringsEl = document.getElementById("desktopCursorRings");
-  // Optimization: Don't calculate if hidden or missing
   if (!ringsEl || !hudEnabled) return; 
 
-  const mapImage = document.getElementById("mapImage");
+  const mapImage = cached.mapImage; // Use cached
   if (!mapImage || mapImage.naturalWidth === 0) return;
 
   const dims = getMapDimensions();
-  // Effective scale = Current Zoom * Fit Scale
   const effectiveZoom = state.scale * state.fitScale; 
   
-  // Pixels currently on screen for the whole map width
   const currentMapPixelWidth = mapImage.naturalWidth * effectiveZoom;
-  
-  // Total meters in the map
   const totalMapMeters = dims.width / GAME_UNITS_PER_METER;
-  
-  // How many pixels equal 1 meter?
   const pixelsPerMeter = currentMapPixelWidth / totalMapMeters;
   
-  // Dispersion is 40m diameter (20m radius)
-  const diameterPx = 40 * pixelsPerMeter;
+  const rawDiameter = 40 * pixelsPerMeter;
+  
+  // FIX: Round to the nearest EVEN integer to prevent sub-pixel blurring
+  // (e.g., 41.3 -> 42, 40.1 -> 40)
+  const diameterPx = Math.round(rawDiameter / 2) * 2;
   
   ringsEl.style.width = `${diameterPx}px`;
   ringsEl.style.height = `${diameterPx}px`;
@@ -597,6 +621,9 @@ function renderMarkers() {
   labelCache = [];
   const fragment = document.createDocumentFragment();
   const mapImage = cached.mapImage;
+  
+  if (!mapImage) return;
+
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   if (!currentStrongpoints) return;
@@ -627,7 +654,10 @@ function renderMarkers() {
   let targetSector = 0;
   while (filledSectors.has(targetSector) && targetSector < 5) {
       targetSector++;
-  }
+  } 
+
+  const dims = getMapDimensions();
+  const pxPerMeter = (w / dims.width) * GAME_UNITS_PER_METER;
 
   currentStrongpoints.forEach(point => {
     if (point.type === 'point' && point.team !== activeFaction) return; 
@@ -645,18 +675,19 @@ function renderMarkers() {
         if (!filterMode) {
             if (sectorHasConfirmation && !isConfirmed) return;
         }
-    }
+    } 
 
     const el = document.createElement("div");
     el.className = `marker ${point.team} ${point.type}`;
     
-    // ... [GUN LOGIC] ...
     let isActiveGun = false;
     if (point.type === 'point' && point.team === activeFaction) {
        const idx = teamArty.findIndex(gun => gun.id === point.id);
        el.style.cursor = "pointer";
        el.onclick = (e) => {
+           if (isDragging) return; 
            e.stopPropagation(); e.preventDefault();
+           
            if (activeGunIndex !== idx) {
                if (navigator.vibrate) navigator.vibrate(20);
                activeGunIndex = idx;
@@ -673,7 +704,7 @@ function renderMarkers() {
                    const dy = activeTarget.gameY - gunPos.y;
                    const distanceUnits = Math.sqrt(dx*dx + dy*dy);
                    const correctedDistance = Math.round(distanceUnits / GAME_UNITS_PER_METER);
-                   const newMil = getMil(correctedDistance, factionLabel);
+                   const newMil = getMilFromTable(correctedDistance, factionLabel);
                    activeTarget.distance = correctedDistance;
                    activeTarget.mil = newMil;
                    if (trajSliderEnabled) {
@@ -700,10 +731,36 @@ function renderMarkers() {
 
     const pos = gameToImagePixels(point.gameX, point.gameY, w, h);
     
-    // --- STRONGPOINT VISUALS & LOGIC ---
+    if (isActiveGun) {
+        const radiusMeters = 1600;
+        const rPx = radiusMeters * pxPerMeter;
+        const dPx = rPx * 2;
+
+        // Create SVG Container
+        const rangeSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        rangeSvg.setAttribute("class", "max-range-svg");
+        
+        // Position and Size matches the circle area
+        rangeSvg.style.width = `${dPx}px`;
+        rangeSvg.style.height = `${dPx}px`;
+        rangeSvg.style.left = `${pos.x - rPx}px`;
+        rangeSvg.style.top = `${pos.y - rPx}px`;
+        
+        // ViewBox ensures the internal coordinates match the pixel size
+        rangeSvg.setAttribute("viewBox", `0 0 ${dPx} ${dPx}`);
+
+        // Create the Circle Path
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", dPx / 2);
+        circle.setAttribute("cy", dPx / 2);
+        circle.setAttribute("r", (dPx / 2) - 1); // Slight padding
+        circle.setAttribute("class", "max-range-path");
+        
+        rangeSvg.appendChild(circle);
+        fragment.appendChild(rangeSvg);
+    }
+    
     if (point.type === 'strongpoint') {
-       const dims = getMapDimensions();
-       const pxPerMeter = (w / dims.width) * GAME_UNITS_PER_METER;
        const radiusPx = (point.radius / GAME_UNITS_PER_METER) * pxPerMeter;
        const size = radiusPx * 2;
        el.style.width = `${size}px`; el.style.height = `${size}px`;
@@ -730,7 +787,7 @@ function renderMarkers() {
            } 
            else if (sectorHasConfirmation) {
                el.classList.add("is-rejected");
-               el.classList.add("setup-active"); // Allows swapping
+               el.classList.add("setup-active"); 
            }
            else if (mySector === targetSector) {
                el.classList.add("is-open"); 
@@ -743,20 +800,19 @@ function renderMarkers() {
                el.classList.add("is-rejected"); 
            }
 
-           // 2. PAN-SAFE INTERACTION HANDLER (Use 'click')
+           // 2. PAN-SAFE INTERACTION HANDLER
            if (el.classList.contains("setup-active")) {
                el.onclick = (e) => {
-                   // Prevent map from receiving this click
+                   if (isDragging) return; 
+
                    e.preventDefault(); 
                    e.stopPropagation();
 
-                   // Vibrate on success
                    if (navigator.vibrate) navigator.vibrate(20);
 
                    if (confirmedPoints.has(point.id)) {
-                       confirmedPoints.delete(point.id); // Toggle Off
+                       confirmedPoints.delete(point.id); 
                    } else {
-                       // Toggle On (Switching)
                        currentStrongpoints.forEach(p => {
                            if (p.type === 'strongpoint' && 
                                getPointSector(p, isVerticalMap) === mySector) {
@@ -766,7 +822,6 @@ function renderMarkers() {
                        confirmedPoints.add(point.id); 
                    }
 
-                   // Auto-finish check
                    if (confirmedPoints.size === 5) {
                        updateSetupGuide(); 
                        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
@@ -887,17 +942,19 @@ function updateSectorVisuals() {
 }
 
 // --- CALCULATION LOGIC HELPERS ---
-function getMil(distance, factionName) {
+function getMilFromTable(distance, factionName) {
+  if (!factionName) return 0;
   let key = "US"; 
   const f = factionName.toUpperCase();
 
+  // Updated to catch both Database labels and Manual Calc short-codes
   if (f.includes("GER") || f.includes("AXIS") || f.includes("AFRIKA")) key = "GER";
   else if (f.includes("SOVIET") || f.includes("RUS")) key = "RUS";
   else if (f.includes("BRITISH") || f.includes("ALLIES") || f.includes("GB")) key = "GB";
   else key = "US";
 
   const data = ARTY_DATA[key];
-  if (distance < data.minDist || distance > data.maxDist) return null;
+  if (!data || distance < data.minDist || distance > data.maxDist) return null;
 
   for (let i = 0; i < data.table.length - 1; i++) {
     const rowA = data.table[i];
@@ -1071,6 +1128,8 @@ function renderTargeting() {
     const elDist = cached.panelDist;
     const elMil = cached.panelMil;
     const elTime = cached.panelTime;
+    // NEW: Get Bearing Element
+    const elBearing = document.getElementById("panelBearing");
 
   const gunPos = getActiveGunCoords();
   const mapImage = cached.mapImage;
@@ -1131,6 +1190,15 @@ function renderTargeting() {
     const cosAngle = Math.cos(angleRad);
     const sinAngle = Math.sin(angleRad);
 
+    // PERFORMANCE: Resolve faction data once outside the loop
+    let factionKey = "US";
+    const f = factionLabel.toUpperCase();
+    if (f.includes("GER") || f.includes("AXIS") || f.includes("AFRIKA")) factionKey = "GER";
+    else if (f.includes("SOVIET") || f.includes("RUS")) factionKey = "RUS";
+    else if (f.includes("BRITISH") || f.includes("ALLIES") || f.includes("GB")) factionKey = "GB";
+    
+    const factionData = ARTY_DATA[factionKey];
+
     for (let i = 2; i <= numMarkers; i++) {
       const markerX = i * intervalPx;
       const distanceAtMarker = i * intervalMeters;
@@ -1142,7 +1210,21 @@ function renderTargeting() {
       // This prevents the text from overlapping the red dispersion visual.
       if ((totalDistanceMeters - distanceAtMarker) < 40) continue; 
       
-      const mils = getMilFromTable(distanceAtMarker, factionLabel);
+      // PERFORMANCE: Use resolved data directly instead of calling getMilFromTable
+      let mils = null;
+      if (factionData && distanceAtMarker >= factionData.minDist && distanceAtMarker <= factionData.maxDist) {
+        for (let j = 0; j < factionData.table.length - 1; j++) {
+          const rowA = factionData.table[j];
+          const rowB = factionData.table[j+1];
+          if (distanceAtMarker >= rowA.dist && distanceAtMarker <= rowB.dist) {
+            const rangeDist = rowB.dist - rowA.dist;
+            const rangeMil = rowB.mil - rowA.mil;
+            const ratio = (distanceAtMarker - rowA.dist) / rangeDist;
+            mils = rowA.mil + (rangeMil * ratio);
+            break;
+          }
+        }
+      }
 
       // 1. Draw the Red Ball (SVG is fast, keep creating these)
       const tick = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -1229,6 +1311,22 @@ function renderTargeting() {
   // 4. UPDATE DASHBOARD
   if (elDist) elDist.innerText = `${activeTarget.distance}m`;
 
+  // --- NEW: COMPASS BEARING CALCULATION ---
+  if (elBearing) {
+    const dx = activeTarget.gameX - gunPos.x;
+    const dy = activeTarget.gameY - gunPos.y;
+    
+    // Calculate degrees (0 = North, 90 = East)
+    let bearing = Math.atan2(dx, dy) * (180 / Math.PI);
+    
+    // Normalize negative angles (-90 -> 270)
+    if (bearing < 0) bearing += 360;
+    
+    // Round to 1 decimal place for precision (or 0 if you prefer integers)
+    elBearing.innerText = Math.round(bearing) + "°";
+  }
+  // ----------------------------------------
+
   if (activeTarget.mil) {
       if (elMil) {
           elMil.innerText = activeTarget.mil;
@@ -1247,6 +1345,7 @@ function renderTargeting() {
           elTime.innerText = "---";
           elTime.className = "data-value val-small";
       }
+      if (elBearing) elBearing.innerText = "---"; // Hide bearing if out of range? Optional.
   }
 }
 
@@ -1254,6 +1353,7 @@ function renderTargeting() {
 function render() {
   clampPosition();
   const drawScale = state.scale * state.fitScale;
+  const markersLayer = cached.markersLayer;
   
   // 1. CSS Variables
   const mapContainer = cached.mapContainer;
@@ -1302,7 +1402,6 @@ function render() {
   mapStage.style.transform = transformString;
   
   // B. Apply to Markers Layer (Sync movement so they stay attached)
-  const markersLayer = document.getElementById("markers");
   if (markersLayer) {
       markersLayer.style.transform = transformString;
   }
@@ -1315,13 +1414,13 @@ function render() {
   const zoomIndicator = cached.zoomIndicator;
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
-  // Label Scaling
+  // --- FIREFOX OPTIMIZATION START: BATCH LABEL UPDATE ---
   const isMobile = window.innerWidth <= 768;
   const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
 
   const TRANSITION_START_ZOOM = 1.0;
   const TRANSITION_END_ZOOM = 5.0;
-  
+
   let progress = (state.scale - TRANSITION_START_ZOOM) / (TRANSITION_END_ZOOM - TRANSITION_START_ZOOM);
   progress = Math.max(0, Math.min(1, progress)); 
 
@@ -1334,13 +1433,16 @@ function render() {
   const smoothInverse = 1.0 / Math.pow(state.scale, exponent);
   const finalScale = smoothInverse * mobileScaleMultiplier;
 
-  // Update Labels
-  for (let i = 0; i < labelCache.length; i++) {
-      const label = labelCache[i];
-      label.style.setProperty('--arrow-opacity', arrowOp);
-      label.style.top = `${topVal}%`; 
-      label.style.transform = `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`;
+  // PERFORMANCE FIX: Apply values to the CONTAINER (1 DOM write)
+  // instead of looping through 50+ labels (50 DOM writes).
+  if (markersLayer) {
+      markersLayer.style.setProperty('--label-arrow-op', arrowOp);
+      markersLayer.style.setProperty('--label-top', `${topVal}%`);
+      markersLayer.style.setProperty('--label-transform', `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`);
   }
+  
+  // REMOVED: The 'for (let i = 0; i < labelCache.length...)' loop is DELETED.
+  // --- FIREFOX OPTIMIZATION END ---
 
   // Update Grid Thickness
   const majorThickness = Math.max(1.0, 2.0 / drawScale); 
@@ -1450,28 +1552,30 @@ function centerMap() {
 
 function initMap() {
     // --- 1. DOM RESTRUCTURING (Fix Z-Index Stacking) ---
-    // We move the 'markers' layer OUT of 'mapStage' and into 'mapContainer'
-    // This allows markers to sit physically ABOVE the sticky labels.
-    const markersLayer = document.getElementById("markers");
-    const mapContainer = document.getElementById("mapContainer");
-    const labelLayer = document.getElementById("labelLayer");
-    
-    if (markersLayer && mapContainer) {
-        // If markers are not already a direct child of container, move them
+    const markersLayer = cached.markersLayer;
+    const mapContainer = cached.mapContainer;
+    const mapImage = cached.mapImage;
+
+    if (markersLayer && mapContainer && mapImage) {
+        // Move markers layer if needed
         if (markersLayer.parentElement !== mapContainer) {
             mapContainer.appendChild(markersLayer);
         }
         
-        // VISUAL ORDER: 
-        // 1. mapStage (Bottom)
-        // 2. labelLayer (Middle)
-        // 3. markersLayer (Top) - Ensure high Z-Index
+        // --- FIX: Sizing for Clipping ---
+        // Force the layer to match the image size exactly.
+        // This ensures 'overflow: hidden' cuts off the circle at the map edge.
+        if (mapImage.naturalWidth > 0 && mapImage.naturalHeight > 0) {
+            markersLayer.style.width = `${mapImage.naturalWidth}px`;
+            markersLayer.style.height = `${mapImage.naturalHeight}px`;
+        }
+        
+        // Visual Order & Transform Origin
         markersLayer.style.zIndex = "100"; 
-        markersLayer.style.transformOrigin = "0 0"; // Critical for alignment
+        markersLayer.style.transformOrigin = "0 0"; 
     }
     // ---------------------------------------------------
 
-    // --- NO OPACITY CODE HERE ---
     const controlsDrawer = document.getElementById("controlsDrawer");
     if (controlsDrawer) {
         if (window.savedPanelHidden) {
@@ -1480,24 +1584,22 @@ function initMap() {
             controlsDrawer.classList.remove("hidden-by-default");
         }
     }
-  
-  updateDimensions();
-  centerMap();
-  buildGrid();
-  renderMarkers();
-  renderTargeting();
-  currentZoomLevel = state.scale;
-  
-  // REMOVED: mapStage.classList.add("zoom-transition"); 
-  
-  mapContainer.style.cursor = ""; 
-  
-  render();
-  
-  mapContainer.addEventListener("contextmenu", (e) => {
-    e.preventDefault(); 
-    return false;
-  });
+
+    updateDimensions();
+    centerMap();
+    buildGrid();
+    renderMarkers();
+    renderTargeting();
+    currentZoomLevel = state.scale;
+
+    mapContainer.style.cursor = ""; 
+
+    render();
+
+    mapContainer.addEventListener("contextmenu", (e) => {
+        e.preventDefault(); 
+        return false;
+    });
 }
 
 // ==========================================
@@ -1908,7 +2010,7 @@ function updateGunUI(config) {
               const dy = activeTarget.gameY - gunPos.y;
               const distanceUnits = Math.sqrt(dx*dx + dy*dy);
               const correctedDistance = Math.round(distanceUnits / GAME_UNITS_PER_METER);
-              const newMil = getMil(correctedDistance, factionLabel);
+              const newMil = getMilFromTable(correctedDistance, factionLabel);
               
               activeTarget.distance = correctedDistance;
               activeTarget.mil = newMil;
@@ -2128,13 +2230,39 @@ function initArtyControls() {
   // 6. Setup Mobile Fire Button
   const mobileFireBtn = document.getElementById("mobileFireBtn");
   if (mobileFireBtn) {
+      // Timestamp to block rapid duplicate events (The "Ghost" Killer)
+      let lastFireTime = 0; 
+
       const handleFire = (e) => {
-          e.preventDefault(); e.stopPropagation(); 
+          // 1. AGGRESSIVE STOP
+          // Prevent browser zooming, scrolling, or bubbling to the map
+          if (e.cancelable) e.preventDefault();
+          e.stopPropagation();
+          // Stop any other listeners on this specific element
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation(); 
+
+          // 2. TIME GATE (Debounce)
+          // If we fired recently (< 300ms), ignore this event entirely.
+          // This automatically filters out the 'click' that follows a 'touchstart'.
+          const now = Date.now();
+          if (now - lastFireTime < 300) {
+              return;
+          }
+          lastFireTime = now;
+
+          // 3. FIRE ACTION
           if (navigator.vibrate) navigator.vibrate(30); 
+          
+          // Visual Feedback
           mobileFireBtn.classList.add("pressed");
           setTimeout(() => mobileFireBtn.classList.remove("pressed"), 150);
+          
+          // Execute Math
           fireAtCenter();
       };
+
+      // Attach listeners
+      // 'passive: false' is REQUIRED to allow e.preventDefault()
       mobileFireBtn.addEventListener("touchstart", handleFire, { passive: false });
       mobileFireBtn.addEventListener("click", handleFire);
   }
@@ -2298,7 +2426,7 @@ function initArtyControls() {
       // -----------------------------------
 
       const factionLabel = cached.factionLabel.innerText;
-      const mils = getMil(newDistMeters, factionLabel); 
+      const mils = getMilFromTable(newDistMeters, factionLabel); 
 
       activeTarget = {
           gameX: newX,
@@ -2525,42 +2653,6 @@ function clearSavedState() {
   }
 }
 
-// ==========================================
-// 6. EXECUTION START
-// ==========================================
-createStickyLabels();
-initMapSelector();
-
-// 1. Load data from local storage
-loadState();
-
-// 2. CRITICAL FIX: DATA RESTORATION
-// Ensure we actually have the map data loaded before we try to render
-if (!MAP_DATABASE[activeMapKey]) {
-  activeMapKey = "CAR"; // Fallback safety
-}
-
-// Set the strongpoints array so renderMarkers() has something to draw
-currentStrongpoints = MAP_DATABASE[activeMapKey].strongpoints || [];
-
-// Update the header text and dropdown menus to match the loaded map
-const currentMapLbl = document.getElementById("currentMapName");
-if (currentMapLbl) {
-  currentMapLbl.innerText = MAP_DATABASE[activeMapKey].name;
-}
-updateFactionUI(MAP_DATABASE[activeMapKey]);
-updateGunUI(MAP_DATABASE[activeMapKey]);
-
-// 3. Setup listeners (Now that UI elements are ready)
-initArtyControls();
-
-// 4. Force UI to match loaded variables (Ruler/HUD buttons)
-syncToggleUI(); 
-
-// 5. Handle first-time visit (No save found)
-if (localStorage.getItem('hllArtyCalculatorState') === null) {
-  openMapSelector();
-}
 
 // ==========================================
 // 5. EVENT LISTENERS
@@ -2604,6 +2696,13 @@ mapContainer.addEventListener("click", (e) => {
   const rawImgX = clickX / effectiveZoom;
   const rawImgY = clickY / effectiveZoom;
 
+  // Only show pulse on map click if we are NOT on mobile using the HUD
+  // (Because the HUD button handles the pulse for mobile users)
+  const isMobile = window.innerWidth <= 768;
+  if (!isMobile || !hudEnabled) { 
+      triggerFirePulse(rawImgX, rawImgY); 
+  }
+
   const mapImage = document.getElementById("mapImage");
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
@@ -2631,7 +2730,7 @@ mapContainer.addEventListener("click", (e) => {
   const correctedDistance = Math.round(rawDistanceMeters);
   
   const factionLabel = document.getElementById("factionLabel").innerText;
-  const mil = getMil(correctedDistance, factionLabel);
+  const mil = getMilFromTable(correctedDistance, factionLabel);
 
   activeTarget = {
     gameX: targetPos.x,
@@ -3268,12 +3367,11 @@ function fixKeypadEvents() {
 
       // 5. CLICK LISTENER (Fallback for Desktop)
       key.addEventListener('click', (e) => {
-          // GATEKEEPER CHECK:
-          // If a touch happened recently (< 500ms), this 'click' is a ghost. BLOCK IT.
           const now = Date.now();
-          if (now - lastTouchTime < 500) {
+          // Increase gap to 600ms and stop propagation
+          if (now - lastTouchTime < 600) {
               e.preventDefault();
-              e.stopPropagation();
+              e.stopImmediatePropagation(); 
               return; 
           }
           executeLogic();
@@ -3290,52 +3388,60 @@ function updateCalcScreen() {
 function calculateManual() {
   const dist = parseInt(calcInputVal);
   const milEl = document.getElementById("calcMil");
-  
-  // REMOVED: const timeEl = ... 
-  
   if (!milEl) return;
 
-  // Validate Range
-  if (!dist || dist < 100 || dist > 1600) {
+  // 1. Get result directly (returns null if out of range)
+  const mils = getMilFromTable(dist, manualCalcFaction);
+
+  // 2. check result
+  if (mils === null || isNaN(dist)) {
     milEl.innerText = "---";
     milEl.className = "res-value text-red"; 
-    return;
+  } else {
+    milEl.className = "res-value text-yellow";
+    milEl.innerText = mils;
   }
-  
-  // Pass the strict code to getMilFromTable
-  const mils = getMilFromTable(dist, manualCalcFaction);
-  
-  milEl.className = "res-value text-yellow";
-  milEl.innerText = mils;
-  
-  // REMOVED: timeEl updates
 }
 
 // --- LIVE HUD MOUSE TRACKING & RINGS (OPTIMIZED) ---
 let isHudUpdating = false; // Semaphore flag
 
 document.addEventListener("mousemove", (e) => {
+    // 1. Global Checks
     if (!hudEnabled) return;
     if (window.innerWidth <= 768) return; 
 
-    // Visuals: Move these instantly (CSS transforms are cheap)
+    // 2. Visuals: Move these instantly (Force Override CSS)
     const hudEl = document.getElementById("liveCursorHud");
     const ringsEl = document.getElementById("desktopCursorRings");
     
     if (hudEl) {
-        hudEl.style.left = (e.clientX + 20) + "px";
-        hudEl.style.top = (e.clientY + 20) + "px";
+        // FIX: Use 'important' to beat any CSS centering rules
+        hudEl.style.setProperty('left', (e.clientX + 20) + 'px', 'important');
+        hudEl.style.setProperty('top', (e.clientY + 20) + 'px', 'important');
+        // FIX: Reveal the element now that we have valid coordinates
+        hudEl.style.opacity = "1";
     }
     if (ringsEl) {
-        ringsEl.style.left = e.clientX + "px";
-        ringsEl.style.top = e.clientY + "px";
+        // FIX: Use 'important' to beat any CSS positioning
+        ringsEl.style.setProperty('left', e.clientX + 'px', 'important');
+        ringsEl.style.setProperty('top', e.clientY + 'px', 'important');
+        // FIX: Reveal the element now that we have valid coordinates
+        ringsEl.style.opacity = "1";
     }
 
-    // Heavy Math: Throttle this!
+    // 3. Heavy Math: Throttle this!
     if (!isHudUpdating) {
         isHudUpdating = true;
         
         requestAnimationFrame(() => {
+            // Safety Check: Ensure mapContainer exists before calculating
+            const mapContainer = document.getElementById("mapContainer");
+            if (!mapContainer) {
+                isHudUpdating = false;
+                return;
+            }
+
             const rect = mapContainer.getBoundingClientRect();
             
             // Bounds Check
@@ -3353,7 +3459,7 @@ document.addEventListener("mousemove", (e) => {
             const rawImgY = clickY / effectiveZoom;
 
             const mapImage = document.getElementById("mapImage");
-            if (mapImage) { // Safety check
+            if (mapImage) { 
                 const w = mapImage.naturalWidth;
                 const h = mapImage.naturalHeight;
                 
@@ -3367,17 +3473,22 @@ document.addEventListener("mousemove", (e) => {
                     const dist = Math.round(Math.sqrt(dx*dx + dy*dy) / GAME_UNITS_PER_METER);
                     
                     const factionLabel = document.getElementById("factionLabel").innerText;
-                    const mil = getMil(dist, factionLabel);
+                    const mil = getMilFromTable(dist, factionLabel);
                     
-                    document.getElementById("hudDist").innerText = dist + "m";
-                    document.getElementById("hudMil").innerText = mil !== null ? mil : "---";
+                    const hudDist = document.getElementById("hudDist");
+                    const hudMil = document.getElementById("hudMil");
+                    
+                    if(hudDist) hudDist.innerText = dist + "m";
+                    if(hudMil) hudMil.innerText = mil !== null ? mil : "---";
                 } else {
-                    // --- FIX: CLEAR DESKTOP HUD IF NO GUN ---
-                    document.getElementById("hudDist").innerText = "---";
-                    document.getElementById("hudMil").innerText = "---";
+                    const hudDist = document.getElementById("hudDist");
+                    const hudMil = document.getElementById("hudMil");
+                    if(hudDist) hudDist.innerText = "---";
+                    if(hudMil) hudMil.innerText = "---";
                 }
                 
-                document.getElementById("hudGrid").innerText = getGridRef(targetPos.x, targetPos.y);
+                const hudGrid = document.getElementById("hudGrid");
+                if(hudGrid) hudGrid.innerText = getGridRef(targetPos.x, targetPos.y);
             }
             
             isHudUpdating = false; // Release the lock
@@ -3414,7 +3525,11 @@ function updateMobileHud() {
   
   // Scale container to 40m Diameter
   const dispersionDiameterMeters = 40; 
-  const containerSize = pixelsPerMeter * dispersionDiameterMeters;  
+  const rawSize = pixelsPerMeter * dispersionDiameterMeters;  
+
+  // FIX: Force Even Integer for perfect centering
+  const containerSize = Math.round(rawSize / 2) * 2;
+
   const containerEl = document.getElementById("mobileRingContainer");
   if (containerEl) {
       containerEl.style.width = `${containerSize}px`;
@@ -3434,7 +3549,7 @@ function updateMobileHud() {
       
       // OPTIMIZATION: Only calculate Mil if distance changed OR if we have no cached mil value
       if (dist !== _lastMobDist || _lastMobMil === null) {
-          const mil = getMil(dist, factionLabel);
+          const mil = getMilFromTable(dist, factionLabel);
           _lastMobMil = mil; // Update cache
           
           const hudMil = document.getElementById("hudMil");
@@ -3473,16 +3588,17 @@ function updateMobileHud() {
 
 // --- NEW: Mobile Fire Logic (Optimized - No Transition Code) ---
 function fireAtCenter() {
-  const mapImage = document.getElementById("mapImage");
+  const mapImage = cached.mapImage;
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   
-  // 1. Calculate Target from Center
-  const rect = mapContainer.getBoundingClientRect();
-  const visualCenterX = rect.width / 2;
-  const visualCenterY = rect.height / 2;
+  // Use clientWidth/Height for more stable mobile centering
+  const visualCenterX = mapContainer.clientWidth / 2;
+  const visualCenterY = mapContainer.clientHeight / 2;
 
   const effectiveZoom = state.scale * state.fitScale;
+  
+  // rawImgX/Y are the exact pixel coordinates on the original map image
   const rawImgX = (visualCenterX - state.pointX) / effectiveZoom;
   const rawImgY = (visualCenterY - state.pointY) / effectiveZoom;
 
@@ -3500,7 +3616,7 @@ function fireAtCenter() {
   const correctedDistance = Math.round(rawDistanceMeters);
   
   const factionLabel = document.getElementById("factionLabel").innerText;
-  const mil = getMil(correctedDistance, factionLabel);
+  const mil = getMilFromTable(correctedDistance, factionLabel);
 
   activeTarget = {
     gameX: targetPos.x,
@@ -3511,63 +3627,75 @@ function fireAtCenter() {
 
   // 3. Update Trajectory Slider Data (Silent update)
   if (trajSliderEnabled) {
-      originalAngle = Math.atan2(dy, dx); // Lock Angle
-
+      originalAngle = Math.atan2(dy, dx); 
       const trajInput = document.getElementById('trajectoryRange');
       if (trajInput) trajInput.value = activeTarget.distance;
-
       const milDisplay = document.getElementById('trajCurrentMil');
       const meterDisplay = document.getElementById('trajCurrentMeter');
-      
       if (milDisplay) milDisplay.innerText = (activeTarget.mil !== null) ? activeTarget.mil : "OUT";
       if (meterDisplay) meterDisplay.innerText = activeTarget.distance + "m";
   }
 
+  // --- FIX: VISUAL PULSE ---
+  // Pass the calculated raw pixels directly. No extra math needed.
+  triggerFirePulse(rawImgX, rawImgY); 
+  // -------------------------
+
   // 4. Render Instantly
-  // No toggleTransitions() needed because CSS already disables animations on mobile
   renderMarkers();    
   renderTargeting();  
-  render();            
+  render();           
 }
 
 // ==========================================
-// 6. EXECUTION START
+// FINAL INITIALIZATION
 // ==========================================
 
 // Build initial UI
-renderMapGrid(""); 
+createStickyLabels();
+initMapSelector();
+renderMapGrid("");
 
-// Load saved data
+// Load saved data (single call)
 loadState();
 
-// 6. Load Map Image and Start Rendering
+// Fallback / UI setup that was in the first block
+if (!MAP_DATABASE[activeMapKey]) {
+    activeMapKey = "CAR";
+}
+currentStrongpoints = MAP_DATABASE[activeMapKey].strongpoints || [];
+document.getElementById("currentMapName").innerText = MAP_DATABASE[activeMapKey].name;
+updatePageTitle(MAP_DATABASE[activeMapKey].name);
+updateFactionUI(MAP_DATABASE[activeMapKey]);
+updateGunUI(MAP_DATABASE[activeMapKey]);
+initArtyControls();
+syncToggleUI();
+
+// Handle first-time visit (No save found)
+if (localStorage.getItem('hllArtyCalculatorState') === null) {
+    openMapSelector();
+}
+
+// Load the map image last
 const imgEl = document.getElementById("mapImage");
-
-const onInitLoadWithRetry = function() {
-  // FIX: Loop until image has physical dimensions (Fixes "Stuck Zoom" on Reload)
-  if (imgEl.naturalWidth === 0) {
-      setTimeout(onInitLoadWithRetry, 50);
-      return;
-  }
-
-  // --- ADD THIS LINE HERE ---
-  if (MAP_DATABASE[activeMapKey]) {
-      updatePageTitle(MAP_DATABASE[activeMapKey].name);
-  }
-
-  initMap(); 
-  render();
-  syncToggleUI(); 
-  hideLoading();
-};
-
-// Set image source and trigger load
 imgEl.src = MAP_DATABASE[activeMapKey].image;
 
+const onInitLoadWithRetry = function() {
+    // FIX: Loop until image has physical dimensions (Fixes "Stuck Zoom" on Reload)
+    if (imgEl.naturalWidth === 0) {
+        setTimeout(onInitLoadWithRetry, 50);
+        return;
+    }
+
+    initMap(); 
+    render();
+    hideLoading();
+};
+
 if (imgEl.complete) {
-  onInitLoadWithRetry();
+    onInitLoadWithRetry();
 } else {
-  imgEl.onload = onInitLoadWithRetry;
+    imgEl.onload = onInitLoadWithRetry;
 }
 
 // Ensure ResizeObserver doesn't trigger bad math if image isn't ready

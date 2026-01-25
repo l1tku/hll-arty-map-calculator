@@ -65,7 +65,7 @@ const MAP_DATABASE = {
     widthMeters: 1984, 
     heightMeters: 1984, 
 
-    gunRotations: { "gb": -180, "ger": 0 },
+    gunRotations: { "us": -180, "ger": 0 },
     gunSort: "x",
 
     guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
@@ -118,7 +118,7 @@ const MAP_DATABASE = {
     widthMeters: 1984, 
     heightMeters: 1984, 
 
-    gunRotations: { "gb": 90, "ger": -90 },
+    gunRotations: { "us": 90, "ger": -90 },
 
     guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
     strongpoints: [

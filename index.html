@@ -158,28 +158,35 @@
     </div>
   </div>
 
-  <div id="targetDataPanel" class="target-data-panel">
+  <div id="targetDataPanel" class="target-data-panel hidden">
     <div class="panel-watermark">
-       HLL ARTY MAP CALC <span id="appVersionPanel">v1.1.0</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
+        HLL ARTY MAP CALC <span id="appVersionPanel">v1.1.0</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
     </div>
 
-    <div class="data-col small-col">
-      <span class="data-label">DIST</span>
-      <span class="data-value val-small" id="panelDist">---</span>
+    <div class="panel-row main-row">
+        <div class="solution-container">
+            <span class="lbl-main">ELEVATION MIL</span>
+            <span id="panelMil" class="val-huge">---</span>
+        </div>
     </div>
 
-    <div class="data-divider"></div>
+    <div class="panel-horiz-divider"></div>
 
-    <div class="data-col main-col">
-      <span class="data-label">SET ELEVATION MIL</span>
-      <span class="data-value val-huge" id="panelMil">---</span>
-    </div>
+    <div class="panel-row context-row">
+        <div class="data-group">
+            <span class="lbl-tiny">DIST</span>
+            <span id="panelDist" class="val-mid">---</span>
+        </div>
+        
+        <div class="data-group">
+            <span class="lbl-tiny">BEARING</span>
+            <span id="panelBearing" class="val-mid text-yellow">---</span>
+        </div>
 
-    <div class="data-divider"></div>
-
-    <div class="data-col small-col">
-      <span class="data-label">IMPACT</span>
-      <span class="data-value val-small" id="panelTime">---</span>
+        <div class="data-group">
+            <span class="lbl-tiny">IMPACT</span>
+            <span id="panelTime" class="val-mid text-green">---</span>
+        </div>
     </div>
   </div>
 
