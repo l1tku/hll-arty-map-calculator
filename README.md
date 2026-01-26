@@ -14,9 +14,9 @@ Access the calculator instantly in your browser:
   - Trajectory Adjustment Slider to walk shots along the fixed bearing.
   - Dispersion (40m), Killzone (20m), and Blast Radius (10m) rings (adaptive scaling at any zoom).
   - Permanent dashed 1600m max-range circle around active gun.
-  - Compass bearing readout (floored to match in-game).
+  - Compass bearing readout.
   - Shooting pulse ripple at impact.
-- **Strongpoint Management**: "Match Setup" mode – select the 5 active strongpoints to mach the current in-game Warfare or Offensive layout.
+- **Strongpoint Management**: "Match Setup" mode – select the 5 active strongpoints to match the current in-game Warfare or Offensive layout.
 - **Gun Selection & Visualization**:
   - Select via dropdown or direct click/tap on artillery icons.
   - Icons dynamically scale with zoom, rotate toward target, and stay fully visible.
