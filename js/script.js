@@ -658,7 +658,7 @@ function renderMarkers() {
                    const dx = activeTarget.gameX - gunPos.x;
                    const dy = activeTarget.gameY - gunPos.y;
                    const distanceUnits = Math.sqrt(dx*dx + dy*dy);
-                   const correctedDistance = Math.round(distanceUnits / GAME_UNITS_PER_METER);
+                   const correctedDistance = Math.floor(distanceUnits / GAME_UNITS_PER_METER);
                    const newMil = getMilFromTable(correctedDistance, factionLabel);
                    activeTarget.distance = correctedDistance;
                    activeTarget.mil = newMil;
@@ -1129,8 +1129,9 @@ function renderTargeting() {
   linePath.setAttribute("x2", lineLength);
   linePath.setAttribute("y2", "0");
 
-  const dashPart = tenMeterPx / 2; 
-  linePath.style.strokeDasharray = `${dashPart}px ${dashPart}px`;
+  // NEW (Fixed Pixels):
+// This makes the dashes look correct relative to the dynamic thickness
+linePath.style.strokeDasharray = "8, 6";
   
   lineSvg.appendChild(linePath);
   
@@ -1239,6 +1240,11 @@ function renderTargeting() {
   circleSvg.style.left = `${Math.round(end.x)}px`;
   circleSvg.style.top = `${Math.round(end.y)}px`;
   
+  // Ensure the SVG itself has no width/height that pushes the contents
+  circleSvg.style.width = "1px";
+  circleSvg.style.height = "1px";
+  circleSvg.style.overflow = "visible";
+  
   function createSvgCircle(radiusMeters, className) {
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     const rPx = radiusMeters * pixelsPerMeter;
@@ -1258,6 +1264,7 @@ function renderTargeting() {
   // --- C. CENTER CROSS (THE X) ---
   const marker = document.createElement("div");
   marker.className = "impact-marker";
+  // FIX: Use Math.round here as well
   marker.style.left = `${Math.round(end.x)}px`;
   marker.style.top = `${Math.round(end.y)}px`;
   
@@ -1278,7 +1285,7 @@ function renderTargeting() {
     if (bearing < 0) bearing += 360;
     
     // Round to 1 decimal place for precision (or 0 if you prefer integers)
-    elBearing.innerText = Math.round(bearing) + "°";
+    elBearing.innerText = Math.floor(bearing) + "°";
   }
   // ----------------------------------------
 
@@ -1289,7 +1296,8 @@ function renderTargeting() {
       }
       if (elTime) {
           elTime.innerText = "24s";
-          elTime.className = "data-value val-small text-green";
+          // FIX: Change 'val-small' to 'val-mid' to match Distance/Bearing
+          elTime.className = "data-value val-mid text-green";
       }
   } else {
       if (elMil) {
@@ -1298,7 +1306,8 @@ function renderTargeting() {
       }
       if (elTime) {
           elTime.innerText = "---";
-          elTime.className = "data-value val-small";
+          // FIX: Change 'val-small' to 'val-mid' here too
+          elTime.className = "data-value val-mid";
       }
       if (elBearing) elBearing.innerText = "---"; // Hide bearing if out of range? Optional.
   }
@@ -1338,7 +1347,28 @@ function render() {
   const dynSize = Math.max(minSize, rawSize);
 
   mapContainer.style.setProperty('--dynamic-icon-size', `${dynSize}px`);
-  // ---------------------------------
+  
+  // --- NEW: DYNAMIC STROKE SCALING ---
+  const isMob = window.innerWidth <= 768;
+
+  // If zoomed out (1x), we want a thick 8px line.
+  // If zoomed in (10x), we want a sharp 2px line.
+  const strokeBase = isMob ? 10 : 8; 
+  const strokeExp = isMob ? 0.5 : 0.6;
+
+  // Calculate Line Stroke
+  const dynStroke = strokeBase / Math.pow(state.scale, strokeExp);
+  // Ensure it never gets thinner than 1.5px or thicker than 10px
+  const finalStroke = Math.max(1.5, Math.min(10, dynStroke));
+
+  mapContainer.style.setProperty('--dynamic-stroke', `${finalStroke}px`);
+
+  // Calculate Circle Stroke (Rings)
+  const dynCircleStroke = (strokeBase * 0.75) / Math.pow(state.scale, strokeExp);
+  const finalCircleStroke = Math.max(1.0, Math.min(8, dynCircleStroke));
+
+  mapContainer.style.setProperty('--dynamic-circle-stroke', `${finalCircleStroke}px`);
+  // ------------------------------------
   
   // 2. Move Map (Conditional Precision)
   
@@ -1965,7 +1995,7 @@ function updateGunUI(config) {
               const dx = activeTarget.gameX - gunPos.x;
               const dy = activeTarget.gameY - gunPos.y;
               const distanceUnits = Math.sqrt(dx*dx + dy*dy);
-              const correctedDistance = Math.round(distanceUnits / GAME_UNITS_PER_METER);
+              const correctedDistance = Math.floor(distanceUnits / GAME_UNITS_PER_METER);
               const newMil = getMilFromTable(correctedDistance, factionLabel);
               
               activeTarget.distance = correctedDistance;
@@ -2683,7 +2713,7 @@ mapContainer.addEventListener("click", (e) => {
   
   const distanceUnits = Math.sqrt(dx*dx + dy*dy);
   const rawDistanceMeters = distanceUnits / GAME_UNITS_PER_METER;
-  const correctedDistance = Math.round(rawDistanceMeters);
+  const correctedDistance = Math.floor(rawDistanceMeters);
   
   const factionLabel = document.getElementById("factionLabel").innerText;
   const mil = getMilFromTable(correctedDistance, factionLabel);
@@ -3434,7 +3464,7 @@ document.addEventListener("mousemove", (e) => {
                 if (gunPos) {
                     const dx = targetPos.x - gunPos.x;
                     const dy = targetPos.y - gunPos.y;
-                    const dist = Math.round(Math.sqrt(dx*dx + dy*dy) / GAME_UNITS_PER_METER);
+                    const dist = Math.floor(Math.sqrt(dx*dx + dy*dy) / GAME_UNITS_PER_METER);
                     
                     const factionLabel = document.getElementById("factionLabel").innerText;
                     const mil = getMilFromTable(dist, factionLabel);
@@ -3507,7 +3537,7 @@ function updateMobileHud() {
   if (gunPos) {
       const dx = targetPos.x - gunPos.x;
       const dy = targetPos.y - gunPos.y;
-      const dist = Math.round(Math.sqrt(dx*dx + dy*dy) / GAME_UNITS_PER_METER);
+      const dist = Math.floor(Math.sqrt(dx*dx + dy*dy) / GAME_UNITS_PER_METER);
       
       const factionLabel = document.getElementById("factionLabel").innerText;
       
@@ -3577,7 +3607,7 @@ function fireAtCenter() {
   
   const distanceUnits = Math.sqrt(dx*dx + dy*dy);
   const rawDistanceMeters = distanceUnits / GAME_UNITS_PER_METER;
-  const correctedDistance = Math.round(rawDistanceMeters);
+  const correctedDistance = Math.floor(rawDistanceMeters);
   
   const factionLabel = document.getElementById("factionLabel").innerText;
   const mil = getMilFromTable(correctedDistance, factionLabel);

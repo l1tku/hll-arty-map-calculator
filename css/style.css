@@ -1670,24 +1670,29 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 }
 
 .trajectory-visual line {
-  stroke-width: 3px;
-  stroke: #ff0000; 
-  stroke-linecap: butt; 
-  shape-rendering: geometricPrecision;
-  vector-effect: non-scaling-stroke !important; 
+    /* The variable MUST come first */
+    stroke-width: var(--dynamic-stroke, 3px) !important; 
+    stroke: #ff0000; 
+    stroke-linecap: butt; 
+    shape-rendering: geometricPrecision;
+    vector-effect: non-scaling-stroke !important; 
 }
 
-/* 1. Impact Circles Container Fix */
+/* THE SVG CIRCLES */
 .impact-circles-svg {
   position: absolute;
-  z-index: 100 !important; 
-  width: 1px !important;
-  height: 1px !important;
-  overflow: visible;
+  z-index: 100 !important;
   pointer-events: none;
-  top: 0;
-  left: 0;
-  /* Hardware acceleration removed for mobile safety */
+  
+  /* FIX: Ensure the SVG coordinate 0,0 is treated as the center */
+  overflow: visible;
+  transform: translate(0, 0); /* Reset any accidental shifts */
+}
+
+/* Ensure the circles inside the SVG are centered on 0,0 */
+.impact-circles-svg circle {
+  cx: 0;
+  cy: 0;
 }
 
 /* ==========================================
@@ -1695,13 +1700,16 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
    ========================================== */
 .impact-marker {
     position: absolute; 
-    /* Increased size for longer arms */
     width: 12px;  
     height: 12px;
-    transform: translate(-50%, -50%); 
+    
+    /* CRITICAL FIX: This shifts the element back by half its width/height 
+       to put the intersection of the X exactly on the coordinate */
+    transform: translate(-50%, -50%) !important; 
+    
     pointer-events: none;
     z-index: 120 !important;
-    opacity: 0.9; /* Reduced opacity */
+    opacity: 0.9;
 }
 
 .impact-marker::before,
@@ -1813,33 +1821,34 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 .deadzone-circle, 
 .dispersion-circle, 
 .blast-circle {
-  vector-effect: non-scaling-stroke !important; /* CRITICAL: Forces redraw at screen resolution */
-  shape-rendering: geometricPrecision;
-  z-index: 30; 
+    stroke-width: var(--dynamic-circle-stroke, 2px) !important;
+    vector-effect: non-scaling-stroke !important;
+    shape-rendering: geometricPrecision;
+    z-index: 30; 
 }
 
 /* 3. Specifics */
 .deadzone-circle {
-  stroke-width: 1px; 
-  stroke: rgba(255, 0, 0, 0.3); 
-  fill: rgba(255, 0, 0, 0.3); 
+    /* RESTORE FILL */
+    fill: rgba(255, 0, 0, 0.3) !important;
+    vector-effect: non-scaling-stroke !important;
 }
 
 .dispersion-circle {
-  stroke-width: 2px; 
-  stroke: rgba(0, 0, 0, 0.6); 
-  stroke-dasharray: 4px 4px; /* Dash stays crisp during zoom */
-  fill: rgba(255, 0, 0, 0.2); 
+    stroke-width: var(--dynamic-circle-stroke, 2px) !important;
+    stroke: rgba(0, 0, 0, 0.6);
+    stroke-dasharray: calc(var(--dynamic-circle-stroke, 2px) * 2);
+    /* RESTORE FILL */
+    fill: rgba(255, 0, 0, 0.15) !important; 
+    vector-effect: non-scaling-stroke !important;
 }
 
 /* --- THE FIX FOR BLURRY RED CIRCLE --- */
 .blast-circle {
-  stroke: none; 
-  fill: rgba(255, 0, 0, 0.5); 
-  
-  /* FIX: REMOVED 'transform: translateZ(0)' 
-     This forces Chrome to re-draw the vector at high quality 
-     on every zoom level instead of stretching a bitmap. */
+    stroke: none; 
+    /* RESTORE SOLID FILL */
+    fill: rgba(255, 0, 0, 0.5) !important;
+    vector-effect: non-scaling-stroke !important;
 }
 
 /* --- TACTICAL PANEL (INVERTED) --- */
@@ -1997,11 +2006,20 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     margin-bottom: 3px;
 }
 
+/* Ensure val-mid is the master controller for size/weight */
 .val-mid {
     font-family: 'GothamSS', sans-serif;
-    font-size: 16px;
-    font-weight: 900;
+    font-size: 16px !important; /* Desktop Size */
+    font-weight: 900 !important;
     color: white;
+}
+
+/* Ensure colors inherit the size/weight from val-mid */
+.val-mid.text-green, 
+.val-mid.text-yellow {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
 }
 
 /* --- FONT ENFORCER --- */
@@ -3841,5 +3859,51 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     /* Success Pop + Center */
     .setup-guide.success {
         transform: translateX(-50%) scale(1.05);
+    }
+
+    /* 1. Row Container: Center vertically, reset horizontal spacing */
+    .panel-row.context-row {
+        display: flex !important;
+        justify-content: center !important; /* Don't push to edges */
+        align-items: center !important;     /* Vertically align centers */
+        gap: 0 !important;
+        padding: 8px 0 !important;          /* Balanced padding */
+    }
+
+    /* 2. The 3 Data Groups: Force 3 Equal Columns */
+    .data-group {
+        flex: 1 1 33% !important;        /* Each takes exactly 1/3 width */
+        width: 33% !important;           /* Fallback */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;  /* Horizontally center text */
+        justify-content: center !important;
+    }
+
+    /* 3. Ensure Text is Centered */
+    .lbl-tiny, .val-mid {
+        text-align: center !important;
+        width: 100% !important;
+    }
+
+    /* 4. Match Label Styles to Desktop */
+    .lbl-tiny {
+        font-size: 8px !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 2px !important;
+        opacity: 0.6 !important;
+    }
+
+    /* 5. Ensure Values Match Desktop Size */
+    .val-mid {
+        font-size: 13px !important;
+        line-height: 1.2 !important;
+    }
+
+    .val-huge {
+        font-size: 35px !important; /* Reduced size */
+        line-height: 1 !important;
+        margin-top: 0 !important;   /* Remove extra top gap */
+        margin-bottom: 2px !important; /* Slight spacing before the line */
     }
 }
