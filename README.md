@@ -7,16 +7,16 @@ Access the calculator instantly in your browser:
 **[https://l1tku.github.io/hll-arty-map-calculator/](https://l1tku.github.io/hll-arty-map-calculator/)**
 
 ## Features
-- **Interactive Tactical Maps**: High-resolution maps with smooth pan/zoom, dynamic grid rendering, sticky grid labels, and accurate 200m-based scale bar.
+- **Interactive Tactical Maps**: High-resolution maps with smooth pan/zoom, dynamic grid rendering, sticky grid labels, and accurate meter scale.
 - **Multi-Faction Support**: Full ballistics for **US**, **Germany**, **Soviet Union**, and **Great Britain** with per-map dynamic scaling (e.g., 2016m Carentan vs 1984m Driel) for 1:1 in-game accuracy.
 - **Visual Targeting Suite**:
   - Trajectory line from gun to target with 50m distance/MIL ruler.
   - Trajectory Adjustment Slider to walk shots along the fixed bearing.
   - Dispersion (40m), Killzone (20m), and Blast Radius (10m) rings (adaptive scaling at any zoom).
   - Permanent dashed 1600m max-range circle around active gun.
-  - Shooting pulse ripple at impact.
   - Compass bearing readout (floored to match in-game).
-- **Strongpoint Management**: "Strongpoint Filter" mode – click strongpoints to toggle visibility for current sector layout.
+  - Shooting pulse ripple at impact.
+- **Strongpoint Management**: "Match Setup" mode – select the 5 active strongpoints to mach the current in-game Warfare or Offensive layout.
 - **Gun Selection & Visualization**:
   - Select via dropdown or direct click/tap on artillery icons.
   - Icons dynamically scale with zoom, rotate toward target, and stay fully visible.
@@ -25,7 +25,7 @@ Access the calculator instantly in your browser:
   - **Mobile**: Docked crosshair HUD with "Fire" button to lock target at screen center.
 - **Manual Calculator**: Integrated keypad for quick distance-to-MIL calculations.
 - **Mobile Optimized**:
-  - Large touch targets, haptic feedback (keypad, Fire button, zoom buttons), and visual safety cues (e.g., button shake).
+  - Large touch targets, haptic feedback (keypad, Fire button, zoom buttons), and visual safety cues.
   - Snappy step-zoom, ergonomic Fire button placement, no pull-to-refresh bounce.
   - Crosshair targeting mode for precise in-game overlay use.
 - **Map Selector**: Visual thumbnail grid with search bar (supports accented characters).
