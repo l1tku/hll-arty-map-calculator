@@ -112,51 +112,6 @@ document.getElementById('projectsModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'projectsModal') closeProjectsModal();
 });
 
-// Helper function to get mil value from artillery data table with interpolation
-function getMilFromTable(distance, faction) {
-  if (!faction) return 0;
-  
-  // 1. FACTION DETECTION (The Fix)
-  let key = "US"; 
-  const f = faction.toUpperCase();
-
-  if (f.includes("GER") || f.includes("AXIS") || f.includes("AFRIKA")) key = "GER";
-  else if (f.includes("SOVIET") || f.includes("RUS")) key = "RUS";
-  else if (f.includes("BRITISH") || f.includes("ALLIES") || f.includes("GB")) key = "GB";
-  else key = "US";
-
-  const data = ARTY_DATA[key];
-  if (!data) return 0;
-  
-  // 2. Exact match check
-  const exactEntry = data.table.find(entry => entry.dist === distance);
-  if (exactEntry) return exactEntry.mil;
-  
-  // 3. Interpolation logic
-  let lowerEntry = null;
-  let upperEntry = null;
-  
-  for (let i = 0; i < data.table.length - 1; i++) {
-    if (data.table[i].dist < distance && data.table[i + 1].dist > distance) {
-      lowerEntry = data.table[i];
-      upperEntry = data.table[i + 1];
-      break;
-    }
-  }
-  
-  if (!lowerEntry || !upperEntry) {
-    const nearestEntry = data.table.reduce((nearest, entry) => {
-      return Math.abs(entry.dist - distance) < Math.abs(nearest.dist - distance) ? entry : nearest;
-    });
-    return nearestEntry.mil;
-  }
-  
-  const ratio = (distance - lowerEntry.dist) / (upperEntry.dist - lowerEntry.dist);
-  const interpolatedMil = lowerEntry.mil + (upperEntry.mil - lowerEntry.mil) * ratio;
-  
-  return Math.round(interpolatedMil);
-}
-
 // ==========================================
 // 2. HELPER FUNCTIONS
 // ==========================================

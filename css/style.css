@@ -327,6 +327,10 @@ body {
   background: #000;
   border: 1px solid var(--panel-border);
   border-radius: 4px; overflow: hidden; 
+  
+  /* FIX 1: Performance Isolation */
+  /* Tells browser this container is isolated, preventing layout thrashing */
+  contain: layout paint style; 
 
   /* --- CUSTOM CURSOR --- */
   /* 16 16 sets the "hotspot" (click point) to the center of a 32x32 image. */
@@ -350,11 +354,13 @@ body {
   left: 0;
   transition: opacity 0.4s ease-in-out;
   
-  /* Add this to prevent 'jitter' during pinch-zoom on iOS Safari */
-  will-change: transform; 
-  /* But keep your fix: */
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  /* --- FIX: REMOVE THESE LINES --- */
+  /* will-change: transform; */
+  /* -webkit-backface-visibility: hidden; */
+  /* backface-visibility: hidden; */
+  
+  /* Modern browsers handle 2D transforms efficiently on the CPU/Compositor 
+     without forcing a dedicated high-memory layer. */
 }
 
 /* ==========================================
@@ -404,7 +410,11 @@ body {
   pointer-events: none; 
   max-width: none; 
   max-height: none;
-  image-rendering: high-quality;
+  /* FIX 2: Reduce Scaling Cost */
+  /* CHANGE: high-quality causes checkerboarding on mobile zoom. Use auto. */
+  image-rendering: auto;
+  /* Ensure no hardware acceleration hints are accidentally applied */
+  transform: none;
   transition: opacity 0.3s ease-in-out;
   background-color: black; /* Prevents white flashes */
 }
@@ -685,8 +695,8 @@ body {
   -webkit-backface-visibility: visible !important;
   backface-visibility: visible !important;
   
-  /* 3. Hint to browser we are resizing this */
-  will-change: transform;
+  /* FIX: REMOVE THIS LINE to prevent memory exhaustion */
+  /* will-change: transform; */
   
   /* --- CHROME BLUR FIX END --- */
 }
@@ -1283,9 +1293,21 @@ select.btn-map-select option {
   background-color: rgba(0, 0, 0, 0.85);
   display: flex; justify-content: center; align-items: center;
   z-index: 3000; transition: opacity 0.2s ease-in-out; opacity: 0; pointer-events: none;
-  backdrop-filter: blur(5px);
+  /* FIX 4: Disable Backdrop Filter on Mobile (GPU Hog) */
+  /* Default: No Blur (Mobile Safe) */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+/* FIX 4: Desktop Only: Re-enable Blur */
+@media (min-width: 769px) {
+    /* Desktop Only: Re-enable Blur */
+    .modal-overlay {
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+}
 
 .modal-content {
   background-color: #15171e; border: 1px solid rgba(255,255,255,0.15);
@@ -1593,15 +1615,25 @@ select.btn-map-select option {
   background-color: rgba(29, 31, 39, 0.95) !important;
   border: 1px solid rgba(255, 255, 255, 0.15);
   
-  /* Use backdrop blur to match the premium look of the other panels */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* FIX 4: Disable Backdrop Filter on Mobile (GPU Hog) */
+  /* Default: No Blur (Mobile Safe) */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   
   border-radius: 4px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.8);
   z-index: 9999 !important;
   opacity: 1; transform: translateY(0); transition: opacity 0.15s, transform 0.15s;
   pointer-events: auto;
+}
+
+/* FIX 4: Desktop Only: Re-enable Blur */
+@media (min-width: 769px) {
+    /* Desktop Only: Re-enable Blur */
+    .dropdown-menu {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 }
 
 .dropdown-menu.hidden {
@@ -1813,7 +1845,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* --- TACTICAL PANEL (INVERTED) --- */
 .target-data-panel {
     position: absolute;
-    top: 80px;
+    top: 70px;
     left: 50%;
     transform: translateX(-50%);
     
@@ -1822,7 +1854,10 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     align-items: stretch; /* Stretch rows to full width */
     
     background-color: rgba(15, 15, 15, 0.95);
-    backdrop-filter: blur(5px);
+    /* FIX 4: Disable Backdrop Filter on Mobile (GPU Hog) */
+    /* Default: No Blur (Mobile Safe) */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-top: 3px solid #ffc107; /* Yellow Top Bar */
     border-radius: 4px;
@@ -1836,6 +1871,15 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     overflow: visible !important; 
     /* Push panel down so watermark doesn't hit screen edge */
     margin-top: 25px;
+}
+
+/* FIX 4: Desktop Only: Re-enable Blur */
+@media (min-width: 769px) {
+    /* Desktop Only: Re-enable Blur */
+    .target-data-panel {
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
 }
 
 /* Force standard hidden behavior without transitions */
@@ -2984,7 +3028,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 
     /* --- 3. TARGET DATA PANEL --- */
     .target-data-panel {
-        top: 30px; /* Lower on mobile so it doesn't hit header */
+        top: 20px; /* Lower on mobile so it doesn't hit header */
         min-width: 260px;
     }
     
@@ -3508,29 +3552,16 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     /* Increased base opacity from 0.2 to 0.3 */
     background-color: rgba(40, 167, 69, 0.3); 
     border: 3px solid #28a745; /* Thicker border */
-    /* Stronger glow */
-    box-shadow: 0 0 25px rgba(40, 167, 69, 0.6);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    animation: sector-pulse 1.5s infinite ease-in-out; /* Faster pulse */
+    /* REMOVED dynamic box-shadow animation. Static shadow only. */
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); 
+    /* Animate opacity instead (GPU cheap) */
+    animation: sector-pulse 2s infinite ease-in-out;
 }
 
-/* STRONGER PULSE ANIMATION */
+/* FIX 3: Safe Pulse Animation (No Box-Shadow Thrashing) */
 @keyframes sector-pulse {
-    0% { 
-        background-color: rgba(40, 167, 69, 0.25); 
-        box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); 
-        border-color: rgba(40, 167, 69, 0.6);
-    }
-    50% { 
-        background-color: rgba(40, 167, 69, 0.45); /* Peaks at 45% opacity */
-        box-shadow: 0 0 40px rgba(40, 167, 69, 0.9); /* Bright glow */
-        border-color: #28a745;
-    }
-    100% { 
-        background-color: rgba(40, 167, 69, 0.25); 
-        box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); 
-        border-color: rgba(40, 167, 69, 0.6);
-    }
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 0.7; }
 }
 
 /* ==========================================
