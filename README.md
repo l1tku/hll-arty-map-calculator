@@ -10,30 +10,25 @@ Access the calculator instantly in your browser:
 - **Interactive Tactical Maps**: High-resolution maps with smooth pan/zoom, dynamic grid rendering, sticky grid labels, and accurate 200m-based scale bar.
 - **Multi-Faction Support**: Full ballistics for **US**, **Germany**, **Soviet Union**, and **Great Britain** with per-map dynamic scaling (e.g., 2016m Carentan vs 1984m Driel) for 1:1 in-game accuracy.
 - **Visual Targeting Suite**:
-  - **Trajectory Line**: Shows shell flight path from gun to target.
-  - **Dynamic Ruler**: MILs and distance markers every 50m along the trajectory.
-  - **Trajectory Adjustment Slider**: Fine-tune distance along the fixed bearing to walk shots without re-aiming.
-  - **Impact Analysis**: Visual rings for Dispersion (40m), Killzone (20m), and Blast Radius (10m).
-  - **Max Range Indicator**: Permanent dashed 1600m circle around the active gun.
-  - **Shooting Pulse**: Ripple effect at impact point when firing for instant feedback.
-  - **Compass Bearing**: Precise bearing readout in the Target Data Panel.
-- **Strongpoint Management**: "Strongpoint Filter" mode – click strongpoints to toggle visibility, perfect for matching current sector layout in Warfare/Offensive.
+  - Trajectory line from gun to target with 50m distance/MIL ruler.
+  - Trajectory Adjustment Slider to walk shots along the fixed bearing.
+  - Dispersion (40m), Killzone (20m), and Blast Radius (10m) rings (adaptive scaling at any zoom).
+  - Permanent dashed 1600m max-range circle around active gun.
+  - Shooting pulse ripple at impact.
+  - Compass bearing readout (floored to match in-game).
+- **Strongpoint Management**: "Strongpoint Filter" mode – click strongpoints to toggle visibility for current sector layout.
 - **Gun Selection & Visualization**:
-  - Select via dropdown or **direct click** on artillery icons.
+  - Select via dropdown or direct click/tap on artillery icons.
   - Icons dynamically scale with zoom, rotate toward target, and stay fully visible.
 - **Live Tracking HUD**:
   - **Desktop**: Real-time distance, MILs, grid, and bearing under cursor.
   - **Mobile**: Docked crosshair HUD with "Fire" button to lock target at screen center.
 - **Manual Calculator**: Integrated keypad for quick distance-to-MIL calculations.
 - **Mobile Optimized**:
-  - Large touch targets, haptic feedback (keypad, fire button, zoom buttons).
-  - Snappy step-zoom, ergonomic fire button placement, no pull-to-refresh bounce.
+  - Large touch targets, haptic feedback (keypad, Fire button, zoom buttons), and visual safety cues (e.g., button shake).
+  - Snappy step-zoom, ergonomic Fire button placement, no pull-to-refresh bounce.
   - Crosshair targeting mode for precise in-game overlay use.
 - **Map Selector**: Visual thumbnail grid with search bar (supports accented characters).
-- **Other Enhancements**:
-  - Direct gun selection by tapping icons.
-  - Adaptive visual scaling for lines/rings to stay clear at any zoom.
-  - Haptic and visual safety cues (e.g., button shake if trying to open slider without target).
 
 ## Technical Details
 - **Dynamic Caching**: "Stale-While-Revalidate" – only downloads and caches maps you open, keeping storage low while ensuring instant reloads.
