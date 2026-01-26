@@ -1824,7 +1824,8 @@ function switchMap(mapKey) {
             mapStage.style.opacity = "1";
             // Restore smooth transitions
             setTimeout(() => {
-                mapStage.style.transition = "opacity 0.3s ease-in-out, transform 0.05s ease-out";
+                // Only animate opacity. Keep transform INSTANT to prevent memory spikes.
+                mapStage.style.transition = "opacity 0.3s ease-in-out"; 
             }, 50);
         }
 
@@ -2981,7 +2982,11 @@ function initZoomControls() {
   // --- EVENTS ---
   const startDrag = (e) => {
     isDraggingSlider = true;
+    
+    // FORCE KILL ALL TRANSITIONS
+    mapStage.style.transition = "none"; 
     mapStage.classList.remove("zoom-transition");
+    
     updateZoomFromEvent(e);
     // Vibrate on interaction start
     if (navigator.vibrate) navigator.vibrate(10);
@@ -3029,7 +3034,11 @@ function initZoomControls() {
       btn.classList.add("pressed");
       setTimeout(() => btn.classList.remove("pressed"), 150);
 
-      // 4. Zoom Logic
+      // 4. FORCE KILL TRANSITIONS HERE TOO
+      mapStage.style.transition = "none";
+      mapStage.classList.remove("zoom-transition");
+
+      // 5. Zoom Logic
       // CHANGE: Mobile uses 2.0 step for speed, Desktop uses 1.0 for precision
       const step = (window.innerWidth <= 768) ? 2.0 : 1.0; 
       
