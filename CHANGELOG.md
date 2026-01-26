@@ -6,6 +6,24 @@ All notable changes to this project will be documented in this file.
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.6] - 2026-01-26
+
+### Added
+- **Match Setup Mode**: Implemented a "Strongpoint Filter" button that allows users to click strongpoints on the map to hide or show them, useful for matching the current in-game sector layout.
+- **Max Range Indicator**: Added a permanent dashed outline circle at **1600m** around the active gun to visually represent maximum firing range.
+- **Shooting Pulse**: Integrated a visual "pulse" ripple effect at the impact location when firing, providing immediate tactical feedback.
+- **Target Compass Bearing**: Added a compass bearing readout to the Target Data Panel.
+
+### Fixed
+- **Bearing Accuracy**: Recalibrated bearing calculations to achieve 1:1 in-game accuracy. Implemented `Math.floor` logic to match the game's compass truncation (e.g., 65.9° now correctly displays as 65°).
+- **Z-Index Layering Overhaul**: Re-aligned stacking contexts to ensure the **Target Data Panel** remains at the absolute top, with side controls (zoom slider, ruler, calculator) correctly layered underneath.
+- **Zoom Performance**: Resolved a significant lag spike occurring when transitioning between **1x and 2x zoom** levels.
+- **Haptic Improvements**: Added tactile vibration feedback to the mobile Zoom (+) and (-) buttons specifically for Chrome on Android.
+- **Mobile Projects Alignment**: Corrected the layout of the "Other Projects" hub on mobile, ensuring project titles are perfectly centered within their buttons.
+
+### Performance
+- **Adaptive Visual Scaling**: Extended dynamic scaling logic to the **trajectory line**, **dispersion circles**, and **deadzone/blast rings**. These elements now maintain visual clarity by adjusting stroke weight based on zoom level, preventing them from becoming too thick when zoomed in or invisible when zoomed out.
+
 ## [1.1.5] - 2026-01-23
 ### Changed
 - **Responsiveness Overhaul**: Completely removed zoom and panning interpolation animations on Desktop. The map now responds instantly to input for a snappier, tactical feel.
