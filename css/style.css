@@ -2919,7 +2919,13 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         padding: 10px 10px 12px 10px !important; 
         
         gap: 8px;
-        background-color: #181818 !important;
+        /* FIX: Change from #181818 to solid black with 1.0 opacity */
+        background-color: rgba(24, 24, 24, 1.0) !important;
+        
+        /* Ensure no blur effects are making it look "glassy" */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        
         border-top: 1px solid rgba(255, 255, 255, 0.3);
         border-left: none !important;
         border-right: none !important;
@@ -2953,7 +2959,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         transform: none !important; 
         
         height: 4px;
-        background-color: #181818;
+        /* FIX: Match solid background with 1.0 opacity */
+        background-color: rgba(24, 24, 24, 1.0) !important;
         z-index: 1301;
     }
 
@@ -2974,7 +2981,8 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         
         height: 32px !important;
         z-index: 1000 !important;
-        background-color: #181818 !important;
+        /* FIX: Match solid background with 1.0 opacity */
+        background-color: rgba(24, 24, 24, 1.0) !important;
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-bottom: none !important;
         border-radius: 10px 10px 0 0 !important;
@@ -2991,7 +2999,15 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         flex-direction: column;
     }
     
-    .dropdown-menu { z-index: 1500 !important; }
+    .dropdown-menu { 
+        z-index: 1500 !important;
+        /* FIX: Change from 0.95 to 1.0 for solid opacity */
+        background-color: rgba(29, 31, 39, 1.0) !important;
+        
+        /* Force remove blur which can cause a translucent look on some mobile browsers */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
 
     /* Map Button (Full Width) */
     .custom-dropdown:nth-child(1),
