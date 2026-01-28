@@ -2,7 +2,10 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.6"; // <--- CHANGE THIS TO UPDATE EVERYWHERE
+const APP_VERSION = "v1.1.6"; // UPDATES EVERYWHERE
+
+// Detect Firefox to enable specific optimizations (sub-pixel rendering)
+const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 // Map Dimensions
 const MAP_WIDTH_METERS = 2000.0; 
@@ -30,12 +33,12 @@ let activeGunIndex = -1;
 let activeTarget = null;
 let activeMapKey = "CAR"; 
 let rulerEnabled = false; // Ruler toggle state 
-let hudEnabled = false; // NEW: HUD toggle state
-let manualCalcFaction = "us"; // <--- MOVED HERE (Fixes the crash)
+let hudEnabled = false;
+let manualCalcFaction = "us";
 let currentStrongpoints = []; 
 let labelCache = [];
 let isRendering = false; 
-let calcInputVal = ""; // Stores the string like "1250" 
+let calcInputVal = ""; // Stores the string
 
 // Trajectory Slider Variables
 let trajSliderEnabled = false;
@@ -49,7 +52,7 @@ let rulerLabelPool = [];
 let stickyLabelsCache = { cols: [], rows: [] }; // Stores grid label elements
 let cachedSubGrid = null; // Stores the keypad grid element
 
-// --- MOVE THESE HERE (Top of script) ---
+// (Top of script) ---
 let _lastMobDist = null;
 let _lastMobMil = null;
 let _lastMobGrid = null;
@@ -148,7 +151,7 @@ function showLoading() {
 }
 
 function updatePageTitle(mapName) {
-    // Dynamically updates the browser tab title using the original case
+    // Dynamically updates the browser tab title using the original case 
     document.title = `HLL Arty Calculator - ${mapName}`;
 }
 
@@ -185,7 +188,6 @@ function syncToggleUI() {
   const hudBtn = document.getElementById('hudToggleBtn');
   if (hudBtn) hudBtn.classList.toggle('active', hudEnabled);
 
-  // --- ADD THIS LINE HERE ---
   // This lets the CSS know the HUD is on to show the arrows
   document.body.classList.toggle('hud-active', hudEnabled);
   // --------------------------
@@ -413,7 +415,6 @@ function createStickyLabels() {
 
 // === FIX #2: Sticky Labels using 2D Transform ===
 function updateStickyLabels(currentDrawScale) {
-  // Use cached map image if available
   const mapImage = cached.mapImage; 
   if (!mapImage) return;
 
@@ -431,34 +432,38 @@ function updateStickyLabels(currentDrawScale) {
   let fontScale = 0.7 + ((state.scale - 1) * 0.15);
   if (fontScale > 1.0) fontScale = 1.0;
 
-  // 1. Update Columns (A-J) using Cache
+  // FIX: Detect if we should use floats (Firefox/HighDPI) to prevent label vibration
+  const isHighDPI = window.devicePixelRatio > 1;
+  const useFloats = isHighDPI || isFirefox;
+
   for (let i = 0; i < stickyLabelsCache.cols.length; i++) {
     const el = stickyLabelsCache.cols[i];
-    
     const colScreenX = state.pointX + (i * stepX);
     const finalX = colScreenX + padding;
     
     let finalY;
     if (i === 0) finalY = state.pointY + padding; 
-    else finalY = stickyTopY + padding;     
+    else finalY = stickyTopY + padding;      
     
-    el.style.transform = `translate(${Math.round(finalX)}px, ${Math.round(finalY)}px) scale(${fontScale})`;
+    // Apply rounding only if NOT Firefox/HighDPI
+    const xVal = useFloats ? finalX : Math.round(finalX);
+    const yVal = useFloats ? finalY : Math.round(finalY);
+
+    el.style.transform = `translate(${xVal}px, ${yVal}px) scale(${fontScale})`;
   }
 
-  // 2. Update Rows (2-10) using Cache
   for (let i = 0; i < stickyLabelsCache.rows.length; i++) {
     const el = stickyLabelsCache.rows[i];
-    // Note: Rows array starts at 2 (index 0 is row 2), so logic matches index + 1
-    // But physically in loop i=0 corresponds to row 2.
-    // The previous loop started at i=1 for creating elements.
-    // Let's align math: i here is 0..8. The actual grid index is i+1.
-    
     const gridIndex = i + 1; 
     const finalX = stickyLeftX + padding;
     const rowScreenY = state.pointY + (gridIndex * stepY);
     const finalY = rowScreenY + padding;
     
-    el.style.transform = `translate(${Math.round(finalX)}px, ${Math.round(finalY)}px) scale(${fontScale})`;
+    // Apply rounding only if NOT Firefox/HighDPI
+    const xVal = useFloats ? finalX : Math.round(finalX);
+    const yVal = useFloats ? finalY : Math.round(finalY);
+    
+    el.style.transform = `translate(${xVal}px, ${yVal}px) scale(${fontScale})`;
   }
 }
 
@@ -469,11 +474,6 @@ function buildGrid() {
     gridLayer = document.createElement("div");
     gridLayer.id = "gridLayer";
     gridLayer.className = "grid-layer";
-    
-    // FIX: 'markers' is no longer a child of mapStage (it's in mapContainer now).
-    // So we cannot use insertBefore(gridLayer, markers).
-    // Instead, we just append the grid to the mapStage.
-    // The Z-Index in CSS (z-index: 2) ensures it sits above the map image.
     document.getElementById("mapStage").appendChild(gridLayer);
   }
   
@@ -494,23 +494,31 @@ function buildGrid() {
   keypadLayer.style.backgroundSize = `${stepX/3}px ${stepY/3}px`;
   gridLayer.appendChild(keypadLayer);
 
+  // --- VERTICAL LINES ---
   for (let i = 0; i <= 10; i++) { 
     const vLine = document.createElement("div");
     vLine.className = "hll-grid-line vertical";
-    vLine.style.left = `${i * stepX}px`;
+    vLine.style.left = `${Math.round(i * stepX)}px`;
+    
+    // FIX: Remove -50% centering for inner lines to prevent Firefox sub-pixel blur
     if (i === 0) vLine.style.transform = "translateX(0)"; 
     else if (i === 10) vLine.style.transform = "translateX(-100%)"; 
-    else vLine.style.transform = "translateX(-50%)";
+    else vLine.style.transform = "translateX(0)"; // Changed from -50% to 0
+    
     gridLayer.appendChild(vLine);
   }
 
+  // --- HORIZONTAL LINES ---
   for (let i = 0; i <= 10; i++) { 
     const hLine = document.createElement("div");
     hLine.className = "hll-grid-line horizontal";
-    hLine.style.top = `${i * stepY}px`;
+    hLine.style.top = `${Math.round(i * stepY)}px`;
+    
+    // FIX: Remove -50% centering for inner lines
     if (i === 0) hLine.style.transform = "translateY(0)"; 
     else if (i === 10) hLine.style.transform = "translateY(-100%)"; 
-    else hLine.style.transform = "translateY(-50%)";
+    else hLine.style.transform = "translateY(0)"; // Changed from -50% to 0
+    
     gridLayer.appendChild(hLine);
   }
 }
@@ -1176,7 +1184,8 @@ linePath.style.strokeDasharray = "8, 6";
             const rangeDist = rowB.dist - rowA.dist;
             const rangeMil = rowB.mil - rowA.mil;
             const ratio = (distanceAtMarker - rowA.dist) / rangeDist;
-            mils = rowA.mil + (rangeMil * ratio);
+            // --- FIX: Round the result to remove half-integers ---
+            mils = Math.round(rowA.mil + (rangeMil * ratio));
             break;
           }
         }
@@ -1325,76 +1334,70 @@ function render() {
   const mapStage = cached.mapStage;
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
-  // --- FIXED: RESPONSIVE DYNAMIC ICON SCALING ---
-  const isMobileDevice = window.innerWidth <= 768;
+  // --- FIREFOX SPECIFIC LAYER PROMOTION ---
+  if (isFirefox) {
+      // FIX: Only apply will-change if we are actually zoomed in or panning.
+      // At 1.0 scale, we remove it to ensure crisp grid rendering.
+      if (state.scale > 1.01) {
+          if (mapStage.style.willChange !== 'transform') mapStage.style.willChange = 'transform';
+          if (markersLayer && markersLayer.style.willChange !== 'transform') markersLayer.style.willChange = 'transform';
+      } else {
+          // Force removal at 1x to stop texture blurring
+          mapStage.style.willChange = 'auto';
+          if (markersLayer) markersLayer.style.willChange = 'auto';
+      }
+  }
 
+  // --- RESPONSIVE DYNAMIC ICON SCALING ---
+  const isMobileDevice = window.innerWidth <= 768;
   let baseSize, minSize, iconExponent;
 
   if (isMobileDevice) {
-      // MOBILE: Starts bigger (140px), shrinks slower (0.5), stays tappable (42px min)
       baseSize = 200; 
       minSize = 32; 
       iconExponent = 0.7; 
   } else {
-      // DESKTOP: Starts at 120px, shrinks fast (0.7) for precision aiming
       baseSize = 120;
       minSize = 32; 
       iconExponent = 0.8; 
   }
 
-  // Calculate using exponential decay
   const rawSize = baseSize / Math.pow(state.scale, iconExponent);
   const dynSize = Math.max(minSize, rawSize);
-
   mapContainer.style.setProperty('--dynamic-icon-size', `${dynSize}px`);
   
-  // --- NEW: DYNAMIC STROKE SCALING ---
+  // --- DYNAMIC STROKE SCALING ---
   const isMob = window.innerWidth <= 768;
-
-  // If zoomed out (1x), we want a thick 8px line.
-  // If zoomed in (10x), we want a sharp 2px line.
   const strokeBase = isMob ? 10 : 8; 
   const strokeExp = isMob ? 0.5 : 0.6;
-
-  // Calculate Line Stroke
   const dynStroke = strokeBase / Math.pow(state.scale, strokeExp);
-  // Ensure it never gets thinner than 1.5px or thicker than 10px
   const finalStroke = Math.max(1.5, Math.min(10, dynStroke));
-
   mapContainer.style.setProperty('--dynamic-stroke', `${finalStroke}px`);
 
-  // Calculate Circle Stroke (Rings)
   const dynCircleStroke = (strokeBase * 0.75) / Math.pow(state.scale, strokeExp);
   const finalCircleStroke = Math.max(1.0, Math.min(8, dynCircleStroke));
-
   mapContainer.style.setProperty('--dynamic-circle-stroke', `${finalCircleStroke}px`);
-  // ------------------------------------
   
   // 2. Move Map (Conditional Precision)
-  
-  // DETECT HIGH-DPI (Mobile/Retina):
-  // If ratio > 1, we are on a high-density screen (Mobile). Use precise floating-point math.
-  // If ratio === 1, we are on a standard Desktop monitor. Round to integer to prevent blur.
   const isHighDPI = window.devicePixelRatio > 1;
   
-  const finalX = isHighDPI ? state.pointX : Math.round(state.pointX);
-  const finalY = isHighDPI ? state.pointY : Math.round(state.pointY);
+  // Use floats only if zoomed in or on HighDPI, otherwise snap to integers for 1x sharpness
+  const useFloats = isHighDPI || (isFirefox && state.scale > 1.05);
+
+  const finalX = useFloats ? state.pointX : Math.round(state.pointX);
+  const finalY = useFloats ? state.pointY : Math.round(state.pointY);
   
-  // Create the transform string once
   const transformString = `translate(${finalX}px, ${finalY}px) scale(${drawScale})`;
   
   // A. Apply to Map Image
   mapStage.style.transform = transformString;
   
-  // B. Apply to Markers Layer (Sync movement so they stay attached)
+  // B. Apply to Markers Layer
   if (markersLayer) {
       markersLayer.style.transform = transformString;
   }
   
-  // 3. Update Text & Grid (Synchronous)
-  // We do this immediately in the same frame so Chrome paints everything at once.
-  // Since we aren't animating 60fps, this calculation is fast enough for a single click.
-  
+  // 3. Update Text & Grid
   updateRealScale(drawScale);
   const zoomIndicator = cached.zoomIndicator;
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
@@ -1418,15 +1421,11 @@ function render() {
   const smoothInverse = 1.0 / Math.pow(state.scale, exponent);
   const finalScale = smoothInverse * mobileScaleMultiplier;
 
-  // PERFORMANCE FIX: Apply values to the CONTAINER (1 DOM write)
-  // instead of looping through 50+ labels (50 DOM writes).
   if (markersLayer) {
       markersLayer.style.setProperty('--label-arrow-op', arrowOp);
       markersLayer.style.setProperty('--label-top', `${topVal}%`);
       markersLayer.style.setProperty('--label-transform', `translate(-50%, calc(${transY}% + ${gap}px)) scale(${finalScale})`);
   }
-  
-  // REMOVED: The 'for (let i = 0; i < labelCache.length...)' loop is DELETED.
   // --- FIREFOX OPTIMIZATION END ---
 
   // Update Grid Thickness
