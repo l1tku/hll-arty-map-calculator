@@ -2674,8 +2674,19 @@ mapContainer.addEventListener("click", (e) => {
   // ============================================================
 
   const rect = mapContainer.getBoundingClientRect();
-  const clickX = e.clientX - rect.left - state.pointX;
-  const clickY = e.clientY - rect.top - state.pointY;
+
+  // --- PRECISION FIX: SYNC CLICK WITH RENDER SNAP ---
+  // We must subtract the map's position exactly as it was rendered.
+  // If render() rounded the values to integers, we must subtract the rounded integer here,
+  // otherwise, the shot will drift by up to 0.5px (multiplied by zoom, this causes errors).
+  const isHighDPI = window.devicePixelRatio > 1;
+  const useFloats = isHighDPI || (isFirefox && state.scale > 1.05);
+
+  const currentVisualX = useFloats ? state.pointX : Math.round(state.pointX);
+  const currentVisualY = useFloats ? state.pointY : Math.round(state.pointY);
+
+  const clickX = e.clientX - rect.left - currentVisualX;
+  const clickY = e.clientY - rect.top - currentVisualY;
   
   const effectiveZoom = state.scale * state.fitScale;
   const rawImgX = clickX / effectiveZoom;

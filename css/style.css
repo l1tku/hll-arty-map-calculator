@@ -3231,15 +3231,17 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         paint-order: stroke fill;
         color: #fff;
     }
-    /* --- 7. LIVE HUD (BOTTOM-RIGHT OF CROSSHAIR) --- */
+    /* --- 7. LIVE HUD (TOP-RIGHT OF CROSSHAIR) --- */
     .live-hud {
         position: fixed !important;
         /* Anchor to center */
         top: 50% !important;
         left: 50% !important;
         
-        /* Push into Bottom-Right Quadrant */
-        transform: translate(25px, 25px) !important;
+        /* UPDATED: Push into Top-Right Quadrant */
+        /* X: 25px (Right) */
+        /* Y: -105% (Up - Moves it up by its own height + 5% padding) */
+        transform: translate(25px, -140%) !important;
         
         /* Reset old conflicting anchors */
         bottom: auto !important;
@@ -3266,6 +3268,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
     }
     .live-hud .hud-label { font-size: 9px; font-weight: 700; color: #aaa; }
     .live-hud .hud-value { font-size: 12px; font-weight: 900; color: white; }
+    .live-hud .hud-value.text-yellow { color: #ffc107; }
     .live-hud.hidden { display: none !important; }
 
     /* --- 8. TRAJECTORY SLIDER & SQUARE BUTTONS --- */
