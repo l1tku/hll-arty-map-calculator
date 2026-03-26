@@ -16,7 +16,7 @@ const MAP_DATABASE = {
 
     gunRotations: { "us": -90, "ger": 90 },
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- ALLIES GUNS ---
       { label: "", id: "US_A1", gameX: -97254.0, gameY: 4366.0, radius: 500, team: "us", type: "point" }, 
@@ -68,7 +68,7 @@ const MAP_DATABASE = {
     gunRotations: { "us": -180, "ger": 0 },
     gunSort: "x",
 
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // Y coordinates inverted (multiplied by -1) to match map image orientation
 
@@ -120,7 +120,7 @@ const MAP_DATABASE = {
 
     gunRotations: { "us": 90, "ger": -90 },
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- ALLIES GUNS ---
       { label: "", id: "GB_A1", gameX: 91592.76, gameY: 6998.52, radius: 500, team: "us", type: "point" }, 
@@ -175,7 +175,7 @@ const MAP_DATABASE = {
 
     gunRotations: { "us": 0, "ger": 180 },
 
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // --- METHOD: Y-INVERSION (Driel Method) ---
       // The visual map is South->North.
@@ -232,7 +232,7 @@ const MAP_DATABASE = {
     // US (South) points North (180), GER (North) points South (0)
     gunRotations: { "us": 180, "ger": 0  },
 
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // --- ALLIES GUNS ---
       { label: "", id: "US_A1", gameX: 14095.0, gameY: -95545.0, radius: 500, team: "us", type: "point" }, 
@@ -279,7 +279,7 @@ H4: {
     gunSort: "y",
     gunRotations: { "us": -90, "ger": 90 },
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- ALLIES GUNS ---
       { label: "", id: "US_A1", gameX: -92742.050, gameY: -12583.729, radius: 500, team: "us", type: "point" }, 
@@ -327,7 +327,7 @@ H4: {
     gunSort: "y",
     gunRotations: { us: -90, ger: 90 },
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- AXIS GUNS (Germany) ---
       // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
@@ -375,7 +375,7 @@ KHA: {
     gunSort: "x",
     gunRotations: { "us": 0, "ger": 180 },
 
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // --- AXIS GUNS ---
       { label: "", id: "GER_A1", gameX: -3351.93, gameY: -90730.05, radius: 500, team: "ger", type: "point" },
@@ -425,7 +425,7 @@ KUR: {
     gunRotations: { "us": 0, "ger": 180 },
     gunSort: "x", 
 
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // NOTE: Y-Coordinates Inverted (Raw Y * -1).
       // Radii = 1000 * RelativeScale3D.X
@@ -493,7 +493,7 @@ KUR: {
     // US guns on west point east (-90°), GER guns on east point west (90°)
     gunRotations: { "us": -90, "ger": 90 },
     
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- STRONGPOINTS (OBJECTIVES) ---
       // Names: MOR_WarfareMeta (GameModeMetaDataAsset) -> SectorDefinitions[].Name.SourceString
@@ -571,7 +571,7 @@ KUR: {
     // US guns on east side point west (90°), GER guns on west side point east (-90°)
     gunRotations: { us: 90, ger: -90 },
     
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- STRONGPOINTS (OBJECTIVES) ---
       // Extracted from FModel JSON: SphereSectorCaptureBooster components
@@ -646,7 +646,7 @@ PHL: {
     // US guns (north) point south (0°), German guns (south) point north (180°)
     gunRotations: { "us": 0, "ger": 180 },
     
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // NOTE: Map is visually south-north, Allies north, Axis south
       // Y coordinates inverted (multiplied by -1) to match map image orientation
@@ -703,7 +703,7 @@ REM: {
     // US (South/West) faces North (180), GER (North/East) faces South (0)
     gunRotations: { "us": 180, "ger": 0 },
 
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // NOTE: Map is visually North-South.
       // Top of Map = Positive Y = German Lines
@@ -718,7 +718,7 @@ REM: {
       { label: "KASBACH OUTLOOK", id: "B14", gameX: 38436.418, gameY: 41098.23, radius: 4000.0, team: "ger", type: "strongpoint" }, 
 
       // --- NEUTRAL SECTORS (Middle/River) ---
-      { label: "ERPEL", id: "B9", gameX: -39275.0, gameY: 40853.0, radius: 4000.0, team: "neu", type: "strongpoint" }, 
+      { label: "ST. SEVERIN CHAPEL", id: "B9", gameX: -39275.0, gameY: 12967.0, radius: 4000.0, team: "neu", type: "strongpoint" }, 
       { label: "LUDENDORFF BRIDGE", id: "B1", gameX: 3032.2412, gameY: -7.0210953, radius: 8000.0, team: "neu", type: "strongpoint" }, 
       { label: "BAUERNHOF AM RHEIN", id: "B6", gameX: 38817.02, gameY: -15613.944, radius: 4000.0, team: "neu", type: "strongpoint" }, 
 
@@ -756,7 +756,7 @@ SMM: {
     gunRotations: { "us": 0, "ger": 180 },
     gunSort: "x", 
 
-    guns: ["Gun 1 (West)", "Gun 2 (Middle)", "Gun 3 (East)"],
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // NOTE: Y-Coordinates Inverted (Raw Y * -1).
       // Radii calculated: Base Radius * RelativeScale3D.X
@@ -815,7 +815,7 @@ SMM: {
     gunRotations: { "us": 90, "ger": -90 },
     gunSort: "y", 
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // NOTE: Y-Coordinates Inverted.
       // Map is West (Left/Ger) to East (Right/US).
@@ -873,7 +873,7 @@ SMM: {
     gunRotations: { "us": 90, "ger": -90 },
     gunSort: "y", 
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // NOTE: Y-Coordinates Inverted.
       // Map is West (Left/Ger) to East (Right/Sov).
@@ -933,7 +933,7 @@ STA: {
     gunRotations: { "us": 90, "ger": -90 },
     gunSort: "y", 
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // NOTE: IDs updated to match SphereSectorCaptureBooster numbers.
       // Coordinates: Exact Booster location (Y inverted).
@@ -990,7 +990,7 @@ STA: {
     gunSort: "y",
     gunRotations: { "us": 90, "ger": -90 },
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- AXIS GUNS (Germany) ---
       // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
@@ -1040,7 +1040,7 @@ UTA: {
     gunRotations: { "us": 90, "ger": -90 },
     gunSort: "y", 
 
-    guns: ["Gun 1 (North)", "Gun 2 (Middle)", "Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // NOTE: Y-Coordinates Inverted.
       // Sorted North (Negative Y) to South (Positive Y).
