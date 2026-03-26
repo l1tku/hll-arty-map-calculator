@@ -718,8 +718,8 @@ REM: {
       { label: "KASBACH OUTLOOK", id: "B14", gameX: 38436.418, gameY: 41098.23, radius: 4000.0, team: "ger", type: "strongpoint" }, 
 
       // --- NEUTRAL SECTORS (Middle/River) ---
-      { label: "ST. SEVERIN CHAPEL", id: "B9", gameX: -39275.0, gameY: 12967.0, radius: 4000.0, team: "neu", type: "strongpoint" }, 
-      { label: "LUDENDORFF BRIDGE", id: "B1", gameX: 3032.2412, gameY: -7.021, radius: 8000.0, team: "neu", type: "strongpoint" }, 
+      { label: "ERPEL", id: "B9", gameX: -39275.0, gameY: 40853.0, radius: 4000.0, team: "neu", type: "strongpoint" }, 
+      { label: "LUDENDORFF BRIDGE", id: "B1", gameX: 3032.2412, gameY: -7.0210953, radius: 8000.0, team: "neu", type: "strongpoint" }, 
       { label: "BAUERNHOF AM RHEIN", id: "B6", gameX: 38817.02, gameY: -15613.944, radius: 4000.0, team: "neu", type: "strongpoint" }, 
 
       // --- ALLIES SECTORS (South/Bottom) ---
