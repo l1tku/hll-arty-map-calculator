@@ -3,7 +3,7 @@
 // ==========================================
 
 const APP_VERSION = "v1.1.7";
-const GAME_VERSION = "UPDATE 19.1";
+const GAME_VERSION = "PREP UPDATE 19.1";
 
 // Create a simple map of IDs and what text should go in them
 const versionMap = {
