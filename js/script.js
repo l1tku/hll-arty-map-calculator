@@ -2,8 +2,8 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.7";
-const GAME_VERSION = "PREP UPDATE 19.1";
+const APP_VERSION = "v1.1.8";
+const GAME_VERSION = "UPDATE 19.1";
 
 // Create a simple map of IDs and what text should go in them
 const versionMap = {
@@ -28,6 +28,9 @@ const MAP_WIDTH_METERS = 2000.0;
 const GAME_UNITS_PER_METER = 100.0;
 const MAP_SDK_WIDTH = MAP_WIDTH_METERS * GAME_UNITS_PER_METER; // 200,000
 const MAP_SDK_HEIGHT = MAP_SDK_WIDTH; // Square map
+
+// Artillery Range Constants
+const MIN_RANGE_METERS = 100;   // ← Change this number if you want a different deadzone (e.g. 120 or 150)
 
 // SDK Boundaries
 const GAME_LEFT = -MAP_SDK_WIDTH / 2; // -100,000
@@ -55,6 +58,14 @@ let currentStrongpoints = [];
 let labelCache = [];
 let isRendering = false; 
 let calcInputVal = ""; // Stores the string
+
+// Custom Artillery Variables
+let customArtillery = []; // Store user-placed artillery
+let placementMode = false; // Track if we're in placement mode
+let nextCustomGunId = 1; // ID counter for custom guns
+let moveMode = false; // Track if we're moving a custom gun
+let movingGunId = null; // ID of gun being moved
+let activeCustomGunId = null;   // ← ADD THIS LINE
 
 // Trajectory Slider Variables
 let trajSliderEnabled = false;
@@ -96,10 +107,22 @@ const cached = {
     get panelMil() { return this.getElem("panelMil"); },
     get panelTime() { return this.getElem("panelTime"); },
     get zoomIndicator() { return this.getElem("zoomIndicator"); },
-    // Add scale elements to cache too
+
+    // Add scale elements to cache
     get scaleWrapper() { return this.getElem("scaleWrapper"); },
     get scaleTextMid() { return this.getElem("scaleTextMid"); },
     get scaleTextEnd() { return this.getElem("scaleTextEnd"); }
+};
+
+// ==========================================
+// MOBILE PERFORMANCE MODE
+// ==========================================
+const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+const MOBILE_QUALITY = {
+    showRangeCircle: !IS_MOBILE,           // disable big 1600m circle on phones
+    rulerIntervalMeters: IS_MOBILE ? 100 : 50,   // fewer ruler ticks
+    maxRulerMarkers: IS_MOBILE ? 8 : 20
 };
 
 // DOM Elements
@@ -621,6 +644,12 @@ function renderMarkers() {
   updateSectorVisuals(); 
   updateSetupGuide(); 
 
+  // FIX: Keep green sector highlight visible during placement mode
+  // (prevents it from disappearing when target panel is closed)
+  if (placementMode && activeFaction) {
+    updatePlacementSectorVisuals();
+  } 
+
   // Calculate Target Sector
   const filledSectors = new Set();
   if (filterMode) {
@@ -669,7 +698,12 @@ function renderMarkers() {
            
            if (activeGunIndex !== idx) {
                if (navigator.vibrate) navigator.vibrate(20);
+
+               // === CRITICAL FIX ===
                activeGunIndex = idx;
+               activeCustomGunId = null;          // ← This was missing!
+               // =====================
+
                const gunNames = mapConfig.guns || ["Gun 1", "Gun 2", "Gun 3"];
                const gunLabel = document.getElementById("gunLabel");
                if (gunLabel) {
@@ -709,35 +743,6 @@ function renderMarkers() {
     }
 
     const pos = gameToImagePixels(point.gameX, point.gameY, w, h);
-    
-    if (isActiveGun) {
-        const radiusMeters = 1600;
-        const rPx = radiusMeters * pxPerMeter;
-        const dPx = rPx * 2;
-
-        // Create SVG Container
-        const rangeSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        rangeSvg.setAttribute("class", "max-range-svg");
-        
-        // Position and Size matches the circle area
-        rangeSvg.style.width = `${dPx}px`;
-        rangeSvg.style.height = `${dPx}px`;
-        rangeSvg.style.left = `${pos.x - rPx}px`;
-        rangeSvg.style.top = `${pos.y - rPx}px`;
-        
-        // ViewBox ensures the internal coordinates match the pixel size
-        rangeSvg.setAttribute("viewBox", `0 0 ${dPx} ${dPx}`);
-
-        // Create the Circle Path
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", dPx / 2);
-        circle.setAttribute("cy", dPx / 2);
-        circle.setAttribute("r", (dPx / 2) - 1); // Slight padding
-        circle.setAttribute("class", "max-range-path");
-        
-        rangeSvg.appendChild(circle);
-        fragment.appendChild(rangeSvg);
-    }
     
     if (point.type === 'strongpoint') {
        const radiusPx = (point.radius / GAME_UNITS_PER_METER) * pxPerMeter;
@@ -817,7 +822,15 @@ function renderMarkers() {
     // ... [Point Rendering] ...
     if (point.type === 'point') { 
         el.style.left = `${Math.round(pos.x)}px`; el.style.top = `${Math.round(pos.y)}px`;
-        const img = document.createElement("img"); img.src = "images/ui/artillery_position.webp"; img.className = "arty-icon";
+        const img = document.createElement("img");
+        img.className = "arty-icon";
+
+        // Use white version ONLY when the gun is selected
+        if (isActiveGun) {
+            img.src = "images/ui/artillery_position_white.webp";
+        } else {
+            img.src = "images/ui/artillery_position.webp";
+        }
         
         if (isActiveGun && activeTarget) {
            const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
@@ -855,8 +868,142 @@ function renderMarkers() {
     else fragment.appendChild(el);
   });
 
+  // --- CUSTOM ARTILLERY (no label + clickable + rotates like HQ guns) ---
+customArtillery.forEach(gun => {
+  if (gun.team !== activeFaction) return;   // ← safe guard
+
+  const el = document.createElement("div");
+  el.className = `marker ${gun.team} point custom-artillery`;   // ← "point" added
+  el.style.cursor = "pointer";
+
+  // Is this the currently selected custom gun?
+  const isActiveGun = (activeCustomGunId === gun.id) ||
+                      (activeCustomGunId === null && activeGunIndex === -1 &&
+                       customArtillery.filter(g => g.team === activeFaction).slice(-1)[0]?.id === gun.id);
+
+  // Click icon → switch to this custom gun
+  el.onclick = (e) => {
+    if (isDragging) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    activeGunIndex = -1;
+    activeCustomGunId = gun.id;
+
+    placementMode = false;
+    moveMode = false;
+    movingGunId = null;
+
+    const gunLabel = document.getElementById("gunLabel");
+    if (gunLabel) {
+      gunLabel.innerText = gun.label;
+      gunLabel.style.color = "#ffffff";
+    }
+
+    updateMapCursor();
+
+    if (activeTarget) {
+      const gunPos = { x: gun.gameX, y: gun.gameY };
+      const factionLabel = document.getElementById("factionLabel").innerText;
+      const dx = activeTarget.gameX - gunPos.x;
+      const dy = activeTarget.gameY - gunPos.y;
+      const distanceUnits = Math.sqrt(dx*dx + dy*dy);
+      const correctedDistance = Math.floor(distanceUnits / GAME_UNITS_PER_METER);
+      const newMil = getMilFromTable(correctedDistance, factionLabel);
+      activeTarget.distance = correctedDistance;
+      activeTarget.mil = newMil;
+
+      if (trajSliderEnabled) {
+        originalAngle = Math.atan2(dy, dx);
+        const trajInput = document.getElementById('trajectoryRange');
+        if (trajInput) trajInput.value = correctedDistance;
+        const milDisplay = document.getElementById('trajCurrentMil');
+        const meterDisplay = document.getElementById('trajCurrentMeter');
+        if (milDisplay) milDisplay.innerText = newMil !== null ? newMil : "OUT";
+        if (meterDisplay) meterDisplay.innerText = correctedDistance + "m";
+      }
+    }
+
+    renderMarkers();
+    renderTargeting();
+    render();
+    saveState();
+  };
+
+  // Right-click still opens context menu
+  el.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showArtilleryContextMenu(gun.id, e.clientX, e.clientY);
+  });
+
+  // Visual state
+  if (isActiveGun) {
+    el.classList.add("active-gun");
+  } else {
+    el.classList.add("dimmed-gun");
+  }
+
+  const pos = gameToImagePixels(gun.gameX, gun.gameY, w, h);
+
+  // === ROTATION LOGIC (exactly like HQ guns) ===
+  const img = document.createElement("img");
+  img.className = "arty-icon";
+
+  // Use white version ONLY when the gun is selected
+  if (isActiveGun) {
+    img.src = "images/ui/artillery_position_white.webp";
+  } else {
+    img.src = "images/ui/artillery_position.webp";
+  }
+  img.style.width = "100%";
+  img.style.height = "100%";
+
+  if (isActiveGun && activeTarget) {
+    // Point at target
+    const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
+    const dy = targetPos.y - pos.y;
+    const dx = targetPos.x - pos.x;
+    let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    angle -= 90;
+    img.style.transform = `rotate(${angle}deg)`;
+  } else {
+    // Default base rotation (same as HQ guns)
+    let baseRotation = 0;
+    const teamKey = gun.team.toLowerCase();   // ← now safe because of guard above
+    const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
+    const mapConfig = MAP_DATABASE[activeMapKey];
+    if (mapConfig && mapConfig.gunRotations) {
+      if (mapConfig.gunRotations[teamKey] !== undefined) baseRotation = mapConfig.gunRotations[teamKey];
+      else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) baseRotation = mapConfig.gunRotations["ger"];
+      else if (mapConfig.gunRotations["us"] !== undefined) baseRotation = mapConfig.gunRotations["us"];
+    } else {
+      const sortMode = mapConfig ? mapConfig.gunSort : "y";
+      if (sortMode === "x") baseRotation = isAxis ? -90 : 90;
+      else baseRotation = isAxis ? 180 : 0;
+    }
+    img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
+  }
+  el.appendChild(img);
+
+  // Position only — size is handled by .point class + CSS variable (same as HQ guns)
+  el.style.left = `${Math.round(pos.x)}px`;
+  el.style.top = `${Math.round(pos.y)}px`;
+
+  if (isActiveGun) {
+    activeGunEl = el;
+  } else {
+    fragment.appendChild(el);
+  }
+});
+  // ------------------------------------
+
   if (activeGunEl) fragment.appendChild(activeGunEl);
   markersLayer.appendChild(fragment);
+
+  // ← ADD THIS LINE
+  updateBeyondRangeOverlay();
+  updateMinRangeOverlay();   // ← add this
 }
 
 function updateSectorVisuals() {
@@ -917,6 +1064,53 @@ function updateSectorVisuals() {
         el.style.width = `${sizePct}%`;
     }
 
+    sectorLayer.appendChild(el);
+}
+
+// ====================== GREEN HIGHLIGHT (Placement Mode) ======================
+function updatePlacementSectorVisuals() {
+    let sectorLayer = document.getElementById("sectorLayer");
+    if (!sectorLayer) {
+        sectorLayer = document.createElement("div");
+        sectorLayer.id = "sectorLayer";
+        sectorLayer.className = "sector-layer";
+        const mapStage = document.getElementById("mapStage");
+        const gridLayer = document.getElementById("gridLayer");
+        mapStage.insertBefore(sectorLayer, gridLayer);
+    }
+
+    sectorLayer.innerHTML = "";
+    if (!placementMode || !activeFaction) return;
+
+    // === DYNAMIC: Find correct home sector from the faction's own guns ===
+    const mapConfig = MAP_DATABASE[activeMapKey];
+    const isVerticalMap = (mapConfig && mapConfig.gunSort === "x");
+
+    const friendlyGuns = currentStrongpoints.filter(p => 
+        p.team === activeFaction && p.type === 'point'
+    );
+
+    if (friendlyGuns.length === 0) return;
+
+    const allowedSector = getPointSector(friendlyGuns[0], isVerticalMap);
+
+    // Draw GREEN highlight
+    const el = document.createElement("div");
+    el.className = "sector-highlight";
+    const sizePct = 20;
+    const posPct = allowedSector * 20;
+
+    if (isVerticalMap) {
+        el.style.left = "0%";
+        el.style.width = "100%";
+        el.style.top = `${posPct}%`;
+        el.style.height = `${sizePct}%`;
+    } else {
+        el.style.top = "0%";
+        el.style.height = "100%";
+        el.style.left = `${posPct}%`;
+        el.style.width = `${sizePct}%`;
+    }
     sectorLayer.appendChild(el);
 }
 
@@ -1042,32 +1236,86 @@ function updateSetupGuide() {
 }
 
 function getActiveGunCoords() {
-  // If no gun Selected (-1), return null immediately
+  // 1. Active CUSTOM gun (new priority)
+  if (activeCustomGunId !== null) {
+    const gun = customArtillery.find(g => g.id === activeCustomGunId && g.team === activeFaction);
+    if (gun) return { x: gun.gameX, y: gun.gameY };
+  }
+
+  // 2. Fallback: any custom gun (when just placed)
+  if (activeGunIndex === -1 && customArtillery.length > 0) {
+    const factionCustomGuns = customArtillery.filter(g => g.team === activeFaction);
+    if (factionCustomGuns.length > 0) {
+      return { x: factionCustomGuns[factionCustomGuns.length - 1].gameX, 
+               y: factionCustomGuns[factionCustomGuns.length - 1].gameY };
+    }
+  }
+
+  // 3. HQ guns (original logic)
   if (activeGunIndex === -1 || !currentStrongpoints) return null;
 
   const teamArty = currentStrongpoints.filter(p => p.team === activeFaction && p.type === 'point');
-  
   if (!teamArty || teamArty.length === 0) return null;
-  
-  const mapConfig = MAP_DATABASE[activeMapKey];
-  const sortMode = mapConfig ? mapConfig.gunSort : "y"; 
 
-  if (sortMode === "x") {
-      teamArty.sort((a, b) => a.gameX - b.gameX);
-  } else {
-      teamArty.sort((a, b) => b.gameY - a.gameY);
-  }
+  const mapConfig = MAP_DATABASE[activeMapKey];
+  const sortMode = mapConfig ? mapConfig.gunSort : "y";
+  if (sortMode === "x") teamArty.sort((a, b) => a.gameX - b.gameX);
+  else teamArty.sort((a, b) => b.gameY - a.gameY);
 
   const index = activeGunIndex % teamArty.length;
   const gun = teamArty[index];
-  
   return { x: gun.gameX, y: gun.gameY };
+}
+
+// ====================== BEYOND RANGE OVERLAY (always visible when gun selected) ======================
+function updateBeyondRangeOverlay() {
+  const beyondOverlay = document.getElementById('beyondRangeOverlay');
+  if (!beyondOverlay) return;
+
+  const gunPos = getActiveGunCoords();
+  const mapImage = cached.mapImage;
+  if (!gunPos || !mapImage || mapImage.naturalWidth === 0) {
+    beyondOverlay.style.display = 'none';
+    return;
+  }
+
+  const w = mapImage.naturalWidth;
+  const h = mapImage.naturalHeight;
+  const gunPixel = gameToImagePixels(gunPos.x, gunPos.y, w, h);
+  const radiusPx = 1600 * (w / getMapDimensions().width * GAME_UNITS_PER_METER); // accurate scale
+
+  beyondOverlay.style.setProperty('--gun-x', `${gunPixel.x}px`);
+  beyondOverlay.style.setProperty('--gun-y', `${gunPixel.y}px`);
+  beyondOverlay.style.setProperty('--max-range-r', `${radiusPx}px`);
+  beyondOverlay.style.display = 'block';
+}
+
+function updateMinRangeOverlay() {
+  const minOverlay = document.getElementById('minRangeOverlay');
+  if (!minOverlay) return;
+
+  const gunPos = getActiveGunCoords();
+  const mapImage = cached.mapImage;
+  if (!gunPos || !mapImage || mapImage.naturalWidth === 0) {
+    minOverlay.style.display = 'none';
+    return;
+  }
+
+  const w = mapImage.naturalWidth;
+  const h = mapImage.naturalHeight;
+  const gunPixel = gameToImagePixels(gunPos.x, gunPos.y, w, h);
+  const radiusPx = MIN_RANGE_METERS * (w / getMapDimensions().width * GAME_UNITS_PER_METER);
+
+  minOverlay.style.setProperty('--gun-x', `${gunPixel.x}px`);
+  minOverlay.style.setProperty('--gun-y', `${gunPixel.y}px`);
+  minOverlay.style.setProperty('--min-range-r', `${radiusPx}px`);
+  minOverlay.style.display = 'block';
 }
 
 function renderTargeting() {
     const layer = cached.markersLayer;
     const panel = cached.targetDataPanel;
-    const mobileFireBtn = document.getElementById("mobileFireBtn"); 
+    const mobileFireBtn = document.getElementById("mobileFireBtn");
 
     // 1. ALWAYS Clear Visuals first
     layer.querySelectorAll('.trajectory-visual, .impact-marker, .impact-circles-svg').forEach(el => el.remove());
@@ -1077,7 +1325,7 @@ function renderTargeting() {
         if (panel) panel.classList.add("hidden");
         if (mobileFireBtn) mobileFireBtn.classList.add("hidden");
         rulerLabelPool.forEach(el => el.style.display = 'none');
-        return; 
+        return;
     }
 
     // 3. NO TARGET GUARD
@@ -1088,254 +1336,277 @@ function renderTargeting() {
         return;
     }
 
-    // 4. RESTORE UI
-    if (panel) panel.classList.remove("hidden");
-    
-    // --- FIX: Strict Mobile + HUD Check ---
+    // 4. SHOW PANEL + ADD X BUTTON (safe absolute positioning)
+    if (panel) {
+        panel.classList.remove("hidden");
+
+        // Create X only once
+        let closeBtn = panel.querySelector('.panel-close-btn');
+        if (!closeBtn) {
+            closeBtn = document.createElement("div");
+            closeBtn.className = "panel-close-btn";
+            closeBtn.innerHTML = "✕";
+            closeBtn.title = "Clear target (ESC also works)";
+            panel.appendChild(closeBtn);
+
+            closeBtn.addEventListener("click", (e) => {
+                e.stopImmediatePropagation();
+                activeTarget = null;
+                renderMarkers();
+                renderTargeting();
+                render();
+                saveState();
+                if (navigator.vibrate) navigator.vibrate(20);
+            });
+        }
+    }
+
+    // Mobile HUD Fire Button
     if (mobileFireBtn) {
         const isMobile = window.innerWidth <= 768;
-        // Only show if: HUD is ON, AND we are on Mobile
         if (hudEnabled && isMobile) {
             mobileFireBtn.classList.remove("hidden");
         } else {
             mobileFireBtn.classList.add("hidden");
         }
     }
-    // --------------------------------------
 
-    // UI Panel References
+    // === REST OF YOUR ORIGINAL CODE (unchanged) ===
     const elDist = cached.panelDist;
     const elMil = cached.panelMil;
     const elTime = cached.panelTime;
-    // NEW: Get Bearing Element
     const elBearing = document.getElementById("panelBearing");
 
-  const gunPos = getActiveGunCoords();
-  const mapImage = cached.mapImage;
-  const w = mapImage.naturalWidth;
-  const h = mapImage.naturalHeight;
-  
-  const end = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
-  const start = gameToImagePixels(gunPos.x, gunPos.y, w, h);
-  
-  // 3. DRAW VISUALS
-  const dims = getMapDimensions();
-  const pixelsPerMeter = (w / dims.width) * GAME_UNITS_PER_METER; 
-  
-  // --- A. TRAJECTORY LINE WITH RULER MARKERS (SVG) ---
-  const totalDistPx = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-  const dangerZoneRadiusPx = 20.0 * pixelsPerMeter;
-  const lineLength = Math.max(0, totalDistPx - dangerZoneRadiusPx);
-  const angleRad = Math.atan2(end.y - start.y, end.x - start.x);
-  
-  const totalDistanceMeters = totalDistPx / pixelsPerMeter;
-  
-  // FORCE 50m intervals always (Matches Desktop behavior)
-  const intervalMeters = 50; 
-  const intervalPx = intervalMeters * pixelsPerMeter;
-  const tenMeterPx = 10 * pixelsPerMeter;
+    const gunPos = getActiveGunCoords();
+    const mapImage = cached.mapImage;
+    const w = mapImage.naturalWidth;
+    const h = mapImage.naturalHeight;
 
-  const lineSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  lineSvg.setAttribute("class", `trajectory-visual ${!rulerEnabled ? 'ruler-hidden' : ''}`);
-  lineSvg.style.position = "absolute";
-  lineSvg.style.left = `${start.x}px`;
-  lineSvg.style.top = `${start.y}px`;
-  lineSvg.style.overflow = "visible";
-  lineSvg.style.pointerEvents = "none";
-  lineSvg.style.zIndex = "100";
-  
-  lineSvg.style.transformOrigin = "0 0";
-  lineSvg.style.transform = `rotate(${angleRad * (180 / Math.PI)}deg)`;
+    const end = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
+    const start = gameToImagePixels(gunPos.x, gunPos.y, w, h);
 
-  const linePath = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  linePath.setAttribute("x1", "0");
-  linePath.setAttribute("y1", "0");
-  linePath.setAttribute("x2", lineLength);
-  linePath.setAttribute("y2", "0");
+    const dims = getMapDimensions();
+    const pixelsPerMeter = (w / dims.width) * GAME_UNITS_PER_METER;
 
-  // NEW (Fixed Pixels):
-// This makes the dashes look correct relative to the dynamic thickness
-linePath.style.strokeDasharray = "8, 6";
-  
-  lineSvg.appendChild(linePath);
-  
-  // Track how many labels we use this frame
-  let poolIdx = 0;
-
-  if (rulerEnabled) {
-    const numMarkers = Math.floor(lineLength / intervalPx);
-    const MAX_RULER_DIST = 1600;
-
-    const factionLabel = cached.factionLabel.innerText;
-    const cosAngle = Math.cos(angleRad);
-    const sinAngle = Math.sin(angleRad);
-
-    // PERFORMANCE: Resolve faction data once outside the loop
-    let factionKey = "US";
-    const f = factionLabel.toUpperCase();
-    if (f.includes("GER") || f.includes("AXIS") || f.includes("AFRIKA")) factionKey = "GER";
-    else if (f.includes("SOVIET") || f.includes("RUS")) factionKey = "RUS";
-    else if (f.includes("BRITISH") || f.includes("ALLIES") || f.includes("GB")) factionKey = "GB";
+    // --- A. TRAJECTORY LINE WITH RULER MARKERS (SVG) ---
+    const totalDistPx = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+    const dangerZoneRadiusPx = 20.0 * pixelsPerMeter;
+    const lineLength = Math.max(0, totalDistPx - dangerZoneRadiusPx);
+    const angleRad = Math.atan2(end.y - start.y, end.x - start.x);
     
-    const factionData = ARTY_DATA[factionKey];
+    const totalDistanceMeters = totalDistPx / pixelsPerMeter;
+    
+    // Use mobile quality setting for intervals
+    const intervalMeters = MOBILE_QUALITY.rulerIntervalMeters; 
+    const intervalPx = intervalMeters * pixelsPerMeter;
+    const tenMeterPx = 10 * pixelsPerMeter;
 
-    for (let i = 2; i <= numMarkers; i++) {
-      const markerX = i * intervalPx;
-      const distanceAtMarker = i * intervalMeters;
+    const lineSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    lineSvg.setAttribute("class", `trajectory-visual ${!rulerEnabled ? 'ruler-hidden' : ''}`);
+    lineSvg.style.position = "absolute";
+    lineSvg.style.left = `${start.x}px`;
+    lineSvg.style.top = `${start.y}px`;
+    lineSvg.style.overflow = "visible";
+    lineSvg.style.pointerEvents = "none";
+    lineSvg.style.zIndex = "100";
+    
+    lineSvg.style.transformOrigin = "0 0";
+    lineSvg.style.transform = `rotate(${angleRad * (180 / Math.PI)}deg)`;
 
-      if (distanceAtMarker > MAX_RULER_DIST) break;
-      if (markerX > lineLength) break;
+    const linePath = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    linePath.setAttribute("x1", "0");
+    linePath.setAttribute("y1", "0");
+    linePath.setAttribute("x2", lineLength);
+    linePath.setAttribute("y2", "0");
 
-      // NEW: Hide label if it's too close to the Impact Circle (60m Buffer)
-      // This prevents the text from overlapping the red dispersion visual.
-      if ((totalDistanceMeters - distanceAtMarker) < 40) continue; 
-      
-      // PERFORMANCE: Use resolved data directly instead of calling getMilFromTable
-      let mils = null;
-      if (factionData && distanceAtMarker >= factionData.minDist && distanceAtMarker <= factionData.maxDist) {
-        for (let j = 0; j < factionData.table.length - 1; j++) {
-          const rowA = factionData.table[j];
-          const rowB = factionData.table[j+1];
-          if (distanceAtMarker >= rowA.dist && distanceAtMarker <= rowB.dist) {
-            const rangeDist = rowB.dist - rowA.dist;
-            const rangeMil = rowB.mil - rowA.mil;
-            const ratio = (distanceAtMarker - rowA.dist) / rangeDist;
-            // --- FIX: Round the result to remove half-integers ---
-            mils = Math.round(rowA.mil + (rangeMil * ratio));
-            break;
-          }
+    // NEW (Fixed Pixels):
+    // This makes the dashes look correct relative to the dynamic thickness
+    linePath.style.strokeDasharray = "8, 6";
+    
+    lineSvg.appendChild(linePath);
+    
+    // Track how many labels we use this frame
+    let poolIdx = 0;
+
+    if (rulerEnabled) {
+        const numMarkers = Math.floor(lineLength / intervalPx);
+        const MAX_RULER_DIST = 1600;
+
+        const factionLabel = cached.factionLabel.innerText;
+        const cosAngle = Math.cos(angleRad);
+        const sinAngle = Math.sin(angleRad);
+
+        // PERFORMANCE: Resolve faction data once outside the loop
+        let factionKey = "US";
+        const f = factionLabel.toUpperCase();
+        if (f.includes("GER") || f.includes("AXIS") || f.includes("AFRIKA")) factionKey = "GER";
+        else if (f.includes("SOVIET") || f.includes("RUS")) factionKey = "RUS";
+        else if (f.includes("BRITISH") || f.includes("ALLIES") || f.includes("GB")) factionKey = "GB";
+        
+        const factionData = ARTY_DATA[factionKey];
+
+        for (let i = 2; i <= numMarkers && i <= MOBILE_QUALITY.maxRulerMarkers; i++) {
+            const markerX = i * intervalPx;
+            const distanceAtMarker = i * intervalMeters;
+
+            if (distanceAtMarker > MAX_RULER_DIST) break;
+            if (markerX > lineLength) break;
+
+            // NEW: Hide label if it's too close to the Impact Circle (60m Buffer)
+            // This prevents the text from overlapping the red dispersion visual.
+            if ((totalDistanceMeters - distanceAtMarker) < 40) continue; 
+            
+            // PERFORMANCE: Use resolved data directly instead of calling getMilFromTable
+            let mils = null;
+            if (factionData && distanceAtMarker >= factionData.minDist && distanceAtMarker <= factionData.maxDist) {
+                for (let j = 0; j < factionData.table.length - 1; j++) {
+                    const rowA = factionData.table[j];
+                    const rowB = factionData.table[j+1];
+                    if (distanceAtMarker >= rowA.dist && distanceAtMarker <= rowB.dist) {
+                        const rangeDist = rowB.dist - rowA.dist;
+                        const rangeMil = rowB.mil - rowA.mil;
+                        const ratio = (distanceAtMarker - rowA.dist) / rangeDist;
+                        // --- FIX: Round the result to remove half-integers ---
+                        mils = Math.round(rowA.mil + (rangeMil * ratio));
+                        break;
+                    }
+                }
+            }
+
+            // 1. Draw the Red Ball (SVG is fast, keep creating these)
+            const tick = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            tick.setAttribute("cx", markerX);
+            tick.setAttribute("cy", "0");
+            tick.setAttribute("r", "3");
+            tick.setAttribute("class", "ruler-tick");
+            lineSvg.appendChild(tick);
+
+            // 2. OPTIMIZED LABEL POOLING
+            const labelX = start.x + cosAngle * markerX;
+            const labelY = start.y + sinAngle * markerX;
+
+            // Recycle existing div or create new one
+            let milLabel = rulerLabelPool[poolIdx];
+
+            if (!milLabel) {
+                milLabel = document.createElement("div");
+                milLabel.className = "ruler-mil-label";
+                // FIX: Use 0,0 and move with transform for performance
+                milLabel.style.left = "0px";
+                milLabel.style.top = "0px";
+                rulerLabelPool.push(milLabel);
+            }
+
+            // If renderMarkers() wiped the layer, we must re-attach the pooled element
+            if (milLabel.parentNode !== layer) {
+                layer.appendChild(milLabel);
+            }
+            
+            milLabel.style.display = "block";
+            
+            // FIX: Use 2D translate. Safer for memory, prevents checkerboarding, still fast.
+            milLabel.style.transform = `translate(${labelX}px, ${labelY}px) translate(-50%, -100%)`;
+            
+            milLabel.innerHTML = `
+                <div class="mil-value">${mils}</div>
+                <div class="meter-subtext">${distanceAtMarker}m</div>
+            `;
+            
+            poolIdx++;
         }
-      }
-
-      // 1. Draw the Red Ball (SVG is fast, keep creating these)
-      const tick = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      tick.setAttribute("cx", markerX);
-      tick.setAttribute("cy", "0");
-      tick.setAttribute("r", "3");
-      tick.setAttribute("class", "ruler-tick");
-      lineSvg.appendChild(tick);
-
-      // 2. OPTIMIZED LABEL POOLING
-      const labelX = start.x + cosAngle * markerX;
-      const labelY = start.y + sinAngle * markerX;
-
-      // Recycle existing div or create new one
-      let milLabel = rulerLabelPool[poolIdx];
-
-      if (!milLabel) {
-          milLabel = document.createElement("div");
-          milLabel.className = "ruler-mil-label";
-          // FIX: Use 0,0 and move with transform for performance
-          milLabel.style.left = "0px";
-          milLabel.style.top = "0px";
-          rulerLabelPool.push(milLabel);
-      }
-
-      // If renderMarkers() wiped the layer, we must re-attach the pooled element
-      if (milLabel.parentNode !== layer) {
-          layer.appendChild(milLabel);
-      }
-      
-      milLabel.style.display = "block";
-      
-      // FIX: Use 2D translate. Safer for memory, prevents checkerboarding, still fast.
-      milLabel.style.transform = `translate(${labelX}px, ${labelY}px) translate(-50%, -100%)`;
-      
-      milLabel.innerHTML = `
-        <div class="mil-value">${mils}</div>
-        <div class="meter-subtext">${distanceAtMarker}m</div>
-      `;
-      
-      poolIdx++;
     }
-  }
-  
-  // HIDE UNUSED LABELS (Don't delete them)
-  for (let k = poolIdx; k < rulerLabelPool.length; k++) {
-      rulerLabelPool[k].style.display = "none";
-  }
-  
-  layer.prepend(lineSvg);
-
-  // --- B. IMPACT CIRCLES (SVG) ---
-  const circleSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  circleSvg.setAttribute("class", "impact-circles-svg");
-  
-  circleSvg.style.position = "absolute";
-  circleSvg.style.left = `${Math.round(end.x)}px`;
-  circleSvg.style.top = `${Math.round(end.y)}px`;
-  
-  // Ensure the SVG itself has no width/height that pushes the contents
-  circleSvg.style.width = "1px";
-  circleSvg.style.height = "1px";
-  circleSvg.style.overflow = "visible";
-  
-  function createSvgCircle(radiusMeters, className) {
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    const rPx = radiusMeters * pixelsPerMeter;
-    circle.setAttribute("cx", "0");
-    circle.setAttribute("cy", "0");
-    circle.setAttribute("r", rPx);
-    circle.setAttribute("class", className); 
-    return circle;
-  }
-
-  circleSvg.appendChild(createSvgCircle(20.0, 'dispersion-circle'));
-  circleSvg.appendChild(createSvgCircle(10.0, 'deadzone-circle'));
-  circleSvg.appendChild(createSvgCircle(5.0, 'blast-circle'));
-  
-  layer.appendChild(circleSvg);
-
-  // --- C. CENTER CROSS (THE X) ---
-  const marker = document.createElement("div");
-  marker.className = "impact-marker";
-  // FIX: Use Math.round here as well
-  marker.style.left = `${Math.round(end.x)}px`;
-  marker.style.top = `${Math.round(end.y)}px`;
-  
-  layer.appendChild(marker);
-
-  // 4. UPDATE DASHBOARD
-  if (elDist) elDist.innerText = `${activeTarget.distance}m`;
-
-  // --- NEW: COMPASS BEARING CALCULATION ---
-  if (elBearing) {
-    const dx = activeTarget.gameX - gunPos.x;
-    const dy = activeTarget.gameY - gunPos.y;
     
-    // Calculate degrees (0 = North, 90 = East)
-    let bearing = Math.atan2(dx, dy) * (180 / Math.PI);
+    // HIDE UNUSED LABELS (Don't delete them)
+    for (let k = poolIdx; k < rulerLabelPool.length; k++) {
+        rulerLabelPool[k].style.display = "none";
+    }
     
-    // Normalize negative angles (-90 -> 270)
-    if (bearing < 0) bearing += 360;
-    
-    // Round to 1 decimal place for precision (or 0 if you prefer integers)
-    elBearing.innerText = Math.floor(bearing) + "°";
-  }
-  // ----------------------------------------
+    layer.prepend(lineSvg);
 
-  if (activeTarget.mil) {
-      if (elMil) {
-          elMil.innerText = activeTarget.mil;
-          elMil.className = "data-value val-huge"; 
-      }
-      if (elTime) {
-          elTime.innerText = "24s";
-          // FIX: Change 'val-small' to 'val-mid' to match Distance/Bearing
-          elTime.className = "data-value val-mid text-green";
-      }
-  } else {
-      if (elMil) {
-          elMil.innerText = "OUT";
-          elMil.className = "data-value text-red"; 
-      }
-      if (elTime) {
-          elTime.innerText = "---";
-          // FIX: Change 'val-small' to 'val-mid' here too
-          elTime.className = "data-value val-mid";
-      }
-      if (elBearing) elBearing.innerText = "---"; // Hide bearing if out of range? Optional.
-  }
+    // --- B. IMPACT CIRCLES (SVG) ---
+    const circleSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    circleSvg.setAttribute("class", "impact-circles-svg");
+    
+    circleSvg.style.position = "absolute";
+    circleSvg.style.left = `${Math.round(end.x)}px`;
+    circleSvg.style.top = `${Math.round(end.y)}px`;
+    
+    // Ensure the SVG itself has no width/height that pushes the contents
+    circleSvg.style.width = "1px";
+    circleSvg.style.height = "1px";
+    circleSvg.style.overflow = "visible";
+    
+    function createSvgCircle(radiusMeters, className) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        const rPx = radiusMeters * pixelsPerMeter;
+        circle.setAttribute("cx", "0");
+        circle.setAttribute("cy", "0");
+        circle.setAttribute("r", rPx);
+        circle.setAttribute("class", className); 
+        return circle;
+    }
+
+    circleSvg.appendChild(createSvgCircle(20.0, 'dispersion-circle'));
+    circleSvg.appendChild(createSvgCircle(10.0, 'deadzone-circle'));
+    circleSvg.appendChild(createSvgCircle(5.0, 'blast-circle'));
+    
+    layer.appendChild(circleSvg);
+
+    // --- C. CENTER CROSS (THE X) ---
+    const marker = document.createElement("div");
+    marker.className = "impact-marker";
+    // FIX: Use Math.round here as well
+    marker.style.left = `${Math.round(end.x)}px`;
+    marker.style.top = `${Math.round(end.y)}px`;
+    
+    layer.appendChild(marker);
+
+    // ====================== BEYOND MAX RANGE DARKEN OVERLAY ======================
+  updateBeyondRangeOverlay();
+  updateMinRangeOverlay();   // ← add this
+  // ============================================================================
+
+    // 4. UPDATE DASHBOARD
+    if (elDist) elDist.innerText = `${activeTarget.distance}m`;
+
+    // --- NEW: COMPASS BEARING CALCULATION ---
+    if (elBearing) {
+        const dx = activeTarget.gameX - gunPos.x;
+        const dy = activeTarget.gameY - gunPos.y;
+        
+        // Calculate degrees (0 = North, 90 = East)
+        let bearing = Math.atan2(dx, dy) * (180 / Math.PI);
+        
+        // Normalize negative angles (-90 -> 270)
+        if (bearing < 0) bearing += 360;
+        
+        // Round to 1 decimal place for precision (or 0 if you prefer integers)
+        elBearing.innerText = Math.floor(bearing) + "°";
+    }
+    // ----------------------------------------
+
+    if (activeTarget.mil) {
+        if (elMil) {
+            elMil.innerText = activeTarget.mil;
+            elMil.className = "data-value val-huge"; 
+        }
+        if (elTime) {
+            elTime.innerText = "24s";
+            // FIX: Change 'val-small' to 'val-mid' to match Distance/Bearing
+            elTime.className = "data-value val-mid text-green";
+        }
+    } else {
+        if (elMil) {
+            elMil.innerText = "OUT";
+            elMil.className = "data-value text-red"; 
+        }
+        if (elTime) {
+            elTime.innerText = "---";
+            // FIX: Change 'val-small' to 'val-mid' here too
+            elTime.className = "data-value val-mid";
+        }
+        if (elBearing) elBearing.innerText = "---"; // Hide bearing if out of range? Optional.
+    }
 }
 
 // === FIX: SYNCHRONOUS RENDER (Prevents Chrome Checkerboards) ===
@@ -1364,22 +1635,13 @@ function render() {
       }
   }
 
-  // --- RESPONSIVE DYNAMIC ICON SCALING ---
-  const isMobileDevice = window.innerWidth <= 768;
-  let baseSize, minSize, iconExponent;
+  // --- MOBILE-AWARE ARTILLERY ICON SCALING ---
+  const isMobileScreen = IS_MOBILE || window.innerWidth <= 768;
+  const baseIconSize = isMobileScreen ? 300 : 128;   // ← bigger base on mobile (20× zoom)
 
-  if (isMobileDevice) {
-      baseSize = 200; 
-      minSize = 32; 
-      iconExponent = 0.7; 
-  } else {
-      baseSize = 120;
-      minSize = 32; 
-      iconExponent = 0.8; 
-  }
-
-  const rawSize = baseSize / Math.pow(state.scale, iconExponent);
-  const dynSize = Math.max(minSize, rawSize);
+  const normalizedZoom = Math.max(0, Math.min(1, (state.scale - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)));
+  const viewScale = 1.0 / ((MAX_ZOOM - 1.0) * normalizedZoom + 1.0);
+  const dynSize = baseIconSize * viewScale;
   mapContainer.style.setProperty('--dynamic-icon-size', `${dynSize}px`);
   
   // --- DYNAMIC STROKE SCALING ---
@@ -1462,6 +1724,7 @@ function render() {
   if (window.updateZoomSliderUI) window.updateZoomSliderUI();
   updateMobileHud();
   updateDesktopRingScale(); 
+  updateMapCursor();   // ← add this line
 }
 
 // ... (rest of the code remains the same)
@@ -1588,6 +1851,25 @@ function initMap() {
     updateDimensions();
     centerMap();
     buildGrid();
+    
+    // ====================== BEYOND MAX RANGE OVERLAY (created once) ======================
+    let beyondOverlay = document.getElementById('beyondRangeOverlay');
+    if (!beyondOverlay) {
+        beyondOverlay = document.createElement('div');
+        beyondOverlay.id = 'beyondRangeOverlay';
+        cached.mapStage.appendChild(beyondOverlay);
+    }
+    // ====================================================================================
+    
+    // ====================== MIN RANGE OVERLAY (created once) ======================
+    let minOverlay = document.getElementById('minRangeOverlay');
+    if (!minOverlay) {
+        minOverlay = document.createElement('div');
+        minOverlay.id = 'minRangeOverlay';
+        cached.mapStage.appendChild(minOverlay);
+    }
+    // ====================================================================================
+    
     renderMarkers();
     renderTargeting();
     currentZoomLevel = state.scale;
@@ -1851,13 +2133,38 @@ function switchMap(mapKey) {
 
     // 2. Load new image
     imgElement.onload = function() {
-        // Ensure correct state (in case of race conditions)
+        // Ensure correct state
         activeMapKey = mapKey;
         currentStrongpoints = config.strongpoints || [];
 
+        // === CRITICAL RESET FOR CUSTOM GUNS ===
+        customArtillery = [];
+        nextCustomGunId = 1;
+        
+        // Clean up memory leak
+        rulerLabelPool.forEach(label => label.remove());
+        rulerLabelPool = [];
+        activeGunIndex = -1;
+        activeCustomGunId = null;           // ← THIS WAS MISSING
+        placementMode = false;
+        moveMode = false;
+        movingGunId = null;
+        // =====================================
+
         // Re-build grid and markers for new map dimensions
         buildGrid();
-        initMap(); // Re-centers, re-builds sticky labels, etc.
+        initMap();
+
+        // Force gun label back to default (prevents stale "CUSTOM GUN 1")
+        const label = document.getElementById("gunLabel");
+        if (label) {
+            label.innerText = "Select GUN";
+            label.style.color = "#ffc107";
+        }
+
+        // Update UI to refresh dropdown (clear custom guns)
+        updateGunUI(config);
+        updateGunDropdownUI();
 
         // Final render
         renderMarkers();
@@ -1867,21 +2174,16 @@ function switchMap(mapKey) {
         // Fade in new map
         if (mapStage) {
             mapStage.style.opacity = "1";
-            // Restore smooth transitions
             setTimeout(() => {
-                // Only animate opacity. Keep transform INSTANT to prevent memory spikes.
-                mapStage.style.transition = "opacity 0.3s ease-in-out"; 
+                mapStage.style.transition = "opacity 0.3s ease-in-out";
             }, 50);
         }
 
-        // Hide loading
         hideLoading();
-
-        // Clean up handler
         imgElement.onload = null;
     };
 
-    // Trigger load (even if cached, onload fires synchronously)
+    // Trigger load
     imgElement.src = config.image;
 }
 
@@ -1968,74 +2270,653 @@ function updateFactionUI(config) {
 }
 
 // ==========================================
-// GUN UI UPDATES (FIXED: No Animation on Switch)
+// UPDATED GUN UI - Multi custom-gun selection + max 3 limit
 // ==========================================
 function updateGunUI(config) {
-  const gunNames = config.guns || ["Gun 1 (Left)", "Gun 2 (Mid)", "Gun 3 (Right)"];
+  const gunNames = config.guns || ["Gun 1 (Left)", "Gun 2 (Mid)", "Gun 3 (East)"];
   const gunDropdown = document.getElementById("gunDropdown");
-  const menu = gunDropdown.querySelector('.dropdown-menu');
+  const menu = gunDropdown ? gunDropdown.querySelector('.dropdown-menu') : null;
   const label = document.getElementById("gunLabel");
-  
-  // Safety check
-  if (activeGunIndex >= gunNames.length) {
-    activeGunIndex = -1; // Reset to "Select" if map changes configuration
-  }
-  
+
+  if (!menu || !label) return;
+
   menu.innerHTML = "";
-  
+
+  // 1. + ADD GUN (top)
+  const addBtn = document.createElement("div");
+  addBtn.id = "btnAddGunAction";
+  addBtn.className = "dropdown-item";
+  addBtn.style.color = "#ffc107";
+  addBtn.style.fontWeight = "900";
+  addBtn.textContent = "+ ADD GUN";
+
+  addBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    // === existing faction warning code (keep it exactly as-is) ===
+    if (!activeFaction) {
+        const label = document.getElementById("gunLabel");
+        if (label) {
+            label.innerText = "SELECT TEAM FIRST";
+            label.style.color = "#ff4444"; // Red for attention
+        }
+
+        // Optional haptic feedback
+        if (navigator.vibrate) navigator.vibrate([30, 20]);
+
+        // Also show message in the guide area
+        const guideEl = document.getElementById("setupGuide");
+        if (guideEl) {
+            guideEl.classList.remove("hidden", "success");
+            guideEl.innerHTML = `<span style="color:#ff4444;font-weight:900;">CHOOSE FACTION FIRST</span>`;
+            // Auto-hide after 2.2 seconds
+            setTimeout(() => {
+                if (!placementMode && guideEl) guideEl.classList.add("hidden");
+            }, 2200);
+        }
+
+        // Close dropdown
+        menu.classList.add('hidden');
+        document.getElementById("gunBtn").classList.remove('active');
+        return; // ← STOP HERE - do not enable placement
+    }
+
+    const teamCustomCount = customArtillery.filter(g => g.team === activeFaction).length;
+    if (teamCustomCount >= 3) {
+        alert("Maximum 3 custom guns allowed per team.");
+        return;
+    }
+
+    menu.classList.add('hidden');
+    document.getElementById("gunBtn").classList.remove('active');
+
+    placementMode = true;
+    moveMode = false;
+    movingGunId = null;
+    activeCustomGunId = null;
+
+    // === NEW: AUTO-DISABLE LIVE HUD (desktop + mobile) ===
+    hudEnabled = false;
+    syncToggleUI();
+    updateMapCursor();
+    // =====================================================
+
+    const label = document.getElementById("gunLabel");
+    if (label) {
+        label.innerText = "Click map to place";
+        label.style.color = "#ffc107";
+    }
+    updateMapCursor();
+    showPlacementFeedback();
+  });
+
+  menu.appendChild(addBtn);
+
+  // 2. Custom Guns (selectable + shows which one is active)
+  const factionCustomGuns = customArtillery.filter(g => g.team === activeFaction);
+  factionCustomGuns.forEach(gun => {
+    const item = document.createElement("div");
+    item.className = "dropdown-item";
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+    item.style.justifyContent = "space-between";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.style.flexGrow = "1";
+    nameSpan.style.color = "#ffc107";
+    nameSpan.textContent = gun.label;
+
+    // Highlight the currently selected custom gun (bold only)
+    if (activeCustomGunId === gun.id) {
+      nameSpan.style.fontWeight = "700";
+    }
+
+    item.appendChild(nameSpan);
+
+    // Delete ×
+    const deleteBtn = document.createElement("span");
+    deleteBtn.textContent = "×";
+    deleteBtn.style.color = "#ff4444";
+    deleteBtn.style.fontSize = "22px";
+    deleteBtn.style.marginLeft = "12px";
+    deleteBtn.style.cursor = "pointer";
+
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete ${gun.label}?`)) {
+        customArtillery = customArtillery.filter(g => g.id !== gun.id);
+        if (activeCustomGunId === gun.id) activeCustomGunId = null;
+        if (activeGunIndex === -1) activeGunIndex = 0;
+
+        menu.classList.add('hidden');
+        document.getElementById("gunBtn").classList.remove('active');
+
+        renderMarkers();
+        renderTargeting();
+        render();
+        saveState();
+        updateGunUI(config);
+      }
+    });
+
+    item.appendChild(deleteBtn);
+
+    // Click gun name → select it + update trajectory
+    item.addEventListener('click', (e) => {
+      if (e.target !== deleteBtn) {
+        e.stopPropagation();
+        menu.classList.add('hidden');
+        document.getElementById("gunBtn").classList.remove('active');
+
+        activeGunIndex = -1;
+        activeCustomGunId = gun.id;           // ← this makes switching work
+        placementMode = false;
+        moveMode = false;
+        movingGunId = null;
+
+        label.innerText = gun.label;
+        label.style.color = "#ffffff";
+
+        renderMarkers();
+        renderTargeting();   // ← trajectory now updates
+        render();
+        saveState();
+      }
+    });
+
+    menu.appendChild(item);
+  });
+
+  // 3. Separator
+  const separator = document.createElement("div");
+  separator.className = "dropdown-separator";
+  menu.appendChild(separator);
+
+  // 4. HQ Guns
   gunNames.forEach((name, index) => {
     const item = document.createElement("div");
     item.className = "dropdown-item";
     item.setAttribute("data-value", index);
-    item.innerText = name;
-    
+    item.textContent = name;
+
     item.addEventListener('click', (e) => {
       e.stopPropagation();
-      label.innerText = name;
-      label.style.color = "#ffffff"; // Reset color to white on Selection
-      
       menu.classList.add('hidden');
       document.getElementById("gunBtn").classList.remove('active');
-      
-      toggleTransitions(false);
 
-      // Set the active gun
       activeGunIndex = index;
-      
-      // Recalculate target logic...
-      if (activeTarget) {
-          const gunPos = getActiveGunCoords();
-          if (gunPos) {
-              const factionLabel = document.getElementById("factionLabel").innerText;
-              const dx = activeTarget.gameX - gunPos.x;
-              const dy = activeTarget.gameY - gunPos.y;
-              const distanceUnits = Math.sqrt(dx*dx + dy*dy);
-              const correctedDistance = Math.floor(distanceUnits / GAME_UNITS_PER_METER);
-              const newMil = getMilFromTable(correctedDistance, factionLabel);
-              
-              activeTarget.distance = correctedDistance;
-              activeTarget.mil = newMil;
-          }
-      }
+      activeCustomGunId = null;
+      placementMode = false;
+      moveMode = false;
+      movingGunId = null;
 
-      // Render & Save
-      renderMarkers();   
-      renderTargeting(); 
-      render();          
-      saveState();        
+      label.innerText = name;
+      label.style.color = "#ffffff";
+
+      renderMarkers();
+      renderTargeting();
+      render();
+      saveState();
     });
-    
+
     menu.appendChild(item);
   });
 
-  // --- NEW: Handle "Select Gun" State ---
-  if (activeGunIndex === -1) {
-      label.innerText = "Select GUN";
-      label.style.color = "#ffc107"; // Tactical Yellow to grab attention
-  } else {
-      label.innerText = gunNames[activeGunIndex];
+  // 5. Update main label (now correctly shows the selected custom gun)
+  if (placementMode) {
+    label.innerText = "Click map to place";
+    label.style.color = "#ffc107";
+  } else if (moveMode) {
+    label.innerText = "Click new position";
+    label.style.color = "#ffc107";
+  } else if (activeGunIndex >= 0 && activeGunIndex < gunNames.length) {
+    label.innerText = gunNames[activeGunIndex];
+    label.style.color = "#ffffff";
+  } else if (activeCustomGunId !== null) {
+    const activeGun = customArtillery.find(g => g.id === activeCustomGunId);
+    if (activeGun) {
+      label.innerText = activeGun.label;
       label.style.color = "#ffffff";
+    }
+  } else {
+    label.innerText = "Select GUN";
+    label.style.color = "#ffc107";
   }
+}
+
+// ==========================================
+// CUSTOM ARTILLERY FUNCTIONS
+// ==========================================
+
+function updateMapCursor() {
+  const mapContainer = document.getElementById("mapContainer");
+  const isMobile = window.innerWidth <= 768;
+  const crosshair = document.getElementById("mobileCrosshair");
+  const placeBtn = document.getElementById("mobilePlaceBtn");
+  const fireBtn = document.getElementById("mobileFireBtn");
+
+  if (placementMode || moveMode) {
+    mapContainer.style.cursor = "crosshair";
+
+    if (isMobile && crosshair) {
+      crosshair.classList.remove("hidden");
+      crosshair.classList.add("placement-mode");   // ← ONLY this line affects placement
+      crosshair.style.display = "block";
+      crosshair.style.opacity = "1";
+    }
+
+    if (placeBtn) {
+      if (isMobile) placeBtn.classList.remove("hidden");
+      else placeBtn.classList.add("hidden");
+    }
+    if (fireBtn) fireBtn.classList.add("hidden");
+  }
+  // Live HUD part stays completely untouched
+  else if (isMobile && hudEnabled) {
+    mapContainer.style.cursor = "crosshair";
+    if (crosshair) {
+      crosshair.classList.remove("hidden", "placement-mode");
+      crosshair.style.display = "block";
+      crosshair.style.opacity = "1";
+      const ringContainer = document.getElementById("mobileRingContainer");
+      if (ringContainer) ringContainer.style.display = "block";
+    }
+    if (placeBtn) placeBtn.classList.add("hidden");
+    if (fireBtn) fireBtn.classList.remove("hidden");
+  }
+  else {
+    mapContainer.style.cursor = "default";
+    if (isMobile && crosshair) {
+      crosshair.classList.add("hidden");
+      crosshair.classList.remove("placement-mode");
+      crosshair.style.display = "none";
+    }
+    if (placeBtn) placeBtn.classList.add("hidden");
+    if (fireBtn) fireBtn.classList.add("hidden");
+  }
+}
+
+function showPlacementFeedback() {
+  const guideEl = document.getElementById("setupGuide");
+  if (!guideEl) return;
+
+  guideEl.classList.remove("hidden", "success");
+
+  if (!activeFaction) {
+    guideEl.innerHTML = `<span style="color:#ff4444;font-weight:900;">CHOOSE FACTION FIRST</span>`;
+    const label = document.getElementById("gunLabel");
+    if (label) {
+      label.innerText = "SELECT TEAM FIRST";
+      label.style.color = "#ff4444";
+    }
+    return;
+  }
+
+  const isMobile = window.innerWidth <= 768;
+
+  if (placementMode) {
+    // ← THIS IS THE FIXED PART
+    guideEl.innerText = isMobile 
+      ? "AIM WITH CROSSHAIR THEN TAP PLACE" 
+      : "CLICK MAP TO PLACE ARTILLERY";
+  } 
+  else if (moveMode) {
+    guideEl.innerText = "CLICK NEW POSITION FOR ARTILLERY";
+  }
+
+  if (activeFaction) updatePlacementSectorVisuals();
+
+  // Toggle body class for placement arrows
+  document.body.classList.toggle('placement-active', placementMode);
+
+  // Auto-hide after 4 seconds only if still in placement/move mode
+  setTimeout(() => {
+    if ((!placementMode && !moveMode) && guideEl) {
+      guideEl.classList.add("hidden");
+    }
+  }, 4000);
+}
+
+function updateGunDropdownUI() {
+    const container = document.getElementById("customGunContainer");
+    if (!container) return;
+
+    // This ONLY clears the list of placed guns, NOT the "+ Add Gun" button
+    container.innerHTML = "";
+
+    customArtillery.forEach((gun) => {
+        const item = document.createElement("div");
+        item.className = "dropdown-item";
+        item.style.color = "#ffc107";
+        item.style.paddingLeft = "25px"; // Slight indent so it looks "nested" under the action
+        item.innerText = gun.label;
+        
+        item.onclick = (e) => {
+            e.stopPropagation();
+            selectCustomGun(gun.id);
+            // Close the menu
+            document.querySelector("#gunDropdown .dropdown-menu").classList.add("hidden");
+        };
+
+        container.appendChild(item);
+    });
+}
+
+function selectCustomGun(id) {
+    const gun = customArtillery.find(g => g.id === id);
+    if (!gun) return;
+
+    activeGunIndex = -1; // Set to -1 to indicate we aren't using an HQ gun
+    window.selectedCustomGunId = id; // Track which custom gun is active
+    
+    // Update the main button text
+    document.getElementById("gunLabel").innerText = gun.label;
+    
+    renderMarkers();
+    render(); // Recalculate ballistics for the new position
+}
+
+// ====================== PLACEMENT RESTRICTION ======================
+function placeCustomArtillery(gameX, gameY) {
+  if (!activeFaction) {
+    alert("Please select a TEAM first before placing custom artillery.");
+    placementMode = false;
+    updateMapCursor();
+    return;
+  }
+
+  const mapImage = document.getElementById("mapImage");
+  const w = mapImage.naturalWidth;
+  const h = mapImage.naturalHeight;
+
+  const clickPixels = gameToImagePixels(gameX, gameY, w, h);
+
+  const mapConfig = MAP_DATABASE[activeMapKey];
+  const isVerticalMap = (mapConfig && mapConfig.gunSort === "x");
+
+  // === DYNAMIC: Find correct home sector from the faction's own guns ===
+  const friendlyGuns = currentStrongpoints.filter(p => 
+      p.team === activeFaction && p.type === 'point'
+  );
+
+  if (friendlyGuns.length === 0) return;
+
+  const allowedSector = getPointSector(friendlyGuns[0], isVerticalMap);
+
+  const PIXEL_TOLERANCE = 0;   // pixel-perfect
+
+  let isAllowed = false;
+
+  if (isVerticalMap) {
+    const sectorHeight = h / 5;
+    const allowedTop    = allowedSector * sectorHeight;
+    const allowedBottom = allowedTop + sectorHeight;
+
+    if (clickPixels.y >= allowedTop && clickPixels.y <= allowedBottom) {
+      isAllowed = true;
+    }
+  } else {
+    const sectorWidth = w / 5;
+    const allowedLeft  = allowedSector * sectorWidth;
+    const allowedRight = allowedLeft + sectorWidth;
+
+    if (clickPixels.x >= allowedLeft && clickPixels.x <= allowedRight) {
+      isAllowed = true;
+    }
+  }
+
+  if (!isAllowed) {
+    const guideEl = document.getElementById("setupGuide");
+    if (guideEl) {
+      guideEl.classList.remove("hidden", "success");
+      guideEl.innerHTML = `<span style="color:#ff4444;font-weight:900;">❌ ONLY IN GREEN SECTOR</span>`;
+    }
+    if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
+
+    // After error message disappears, RESTORE the correct placement text
+    setTimeout(() => {
+      if (placementMode) {
+        showPlacementFeedback();   // ← This now correctly restores mobile/desktop text
+      } else if (guideEl) {
+        guideEl.classList.add("hidden");
+      }
+    }, 2200);
+
+    return;
+  }
+
+  // ====================== VALID PLACEMENT ======================
+  const customGun = {
+    id: `custom_${nextCustomGunId++}`,
+    gameX: gameX,
+    gameY: gameY,
+    team: activeFaction,
+    type: "custom",
+    label: `Custom Gun ${customArtillery.length + 1}`,
+    radius: 500
+  };
+
+  customArtillery.push(customGun);
+  activeGunIndex = -1;
+  activeCustomGunId = customGun.id;
+  placementMode = false;
+  moveMode = false;
+  movingGunId = null;
+
+  updateMapCursor();
+  updateGunUI(MAP_DATABASE[activeMapKey]);
+  updateGunDropdownUI();
+
+  const label = document.getElementById("gunLabel");
+  label.innerText = customGun.label;
+  label.style.color = "#ffffff";
+
+  renderMarkers();
+  renderTargeting();
+  render();
+  saveState();
+
+  console.log(`Custom artillery placed at (${gameX}, ${gameY})`);
+}
+
+function deleteCustomGun(gunId) {
+  const index = customArtillery.findIndex(gun => gun.id === gunId);
+  if (index !== -1) {
+    customArtillery.splice(index, 1);
+    
+    // Reset active gun if it was the deleted one
+    if (activeGunIndex === -1) {
+      activeGunIndex = -1;
+      const label = document.getElementById("gunLabel");
+      label.innerText = "Select GUN";
+      label.style.color = "#ffc107";
+    }
+    
+    // Update UI to refresh dropdown
+    updateGunUI(MAP_DATABASE[activeMapKey]); // Refresh dropdown to remove deleted custom gun
+    updateGunDropdownUI(); // Refresh custom gun container to remove deleted gun
+    
+    // Re-render and save
+    renderMarkers();
+    renderTargeting();
+    render();
+    saveState();
+    
+    console.log(`Custom artillery ${gunId} deleted`);
+  }
+}
+
+function startMoveGun(gunId) {
+  moveMode = true;
+  movingGunId = gunId;
+  placementMode = false;
+  
+  const label = document.getElementById("gunLabel");
+  label.innerText = "Click new position";
+  label.style.color = "#ffc107";
+  
+  updateMapCursor();
+  showPlacementFeedback();
+}
+
+function moveCustomGun(gunId, newGameX, newGameY) {
+  const gun = customArtillery.find(g => g.id === gunId);
+  if (!gun) return;
+
+  // Update position
+  gun.gameX = newGameX;
+  gun.gameY = newGameY;
+
+  // Reset modes
+  moveMode = false;
+  movingGunId = null;
+
+  // Keep this gun as the ACTIVE one (critical for rotation + trajectory)
+  activeGunIndex = -1;
+  activeCustomGunId = gunId;
+
+  // Update main label
+  const label = document.getElementById("gunLabel");
+  if (label) {
+    label.innerText = gun.label;
+    label.style.color = "#ffffff";
+  }
+
+  updateMapCursor();
+
+  // If there's an active target → recalculate distance/mil from the NEW gun position
+  if (activeTarget) {
+    const gunPos = { x: gun.gameX, y: gun.gameY };
+    const factionLabel = document.getElementById("factionLabel").innerText;
+    const dx = activeTarget.gameX - gunPos.x;
+    const dy = activeTarget.gameY - gunPos.y;
+    const distanceUnits = Math.sqrt(dx*dx + dy*dy);
+    const correctedDistance = Math.floor(distanceUnits / GAME_UNITS_PER_METER);
+    const newMil = getMilFromTable(correctedDistance, factionLabel);
+
+    activeTarget.distance = correctedDistance;
+    activeTarget.mil = newMil;
+
+    // Update trajectory slider if it's open
+    if (trajSliderEnabled) {
+      originalAngle = Math.atan2(dy, dx);
+      const trajInput = document.getElementById('trajectoryRange');
+      if (trajInput) trajInput.value = correctedDistance;
+    }
+  }
+
+  // Full refresh — this updates rotation + trajectory line + numbers
+  renderMarkers();
+  renderTargeting();
+  render();
+  saveState();
+
+  console.log(`Custom artillery ${gunId} moved to (${newGameX}, ${newGameY})`);
+}
+
+function showArtilleryContextMenu(gunId, x, y) {
+  // Remove existing context menu
+  const existingMenu = document.getElementById("artilleryContextMenu");
+  if (existingMenu) existingMenu.remove();
+
+  // Create context menu
+  const menu = document.createElement("div");
+  menu.id = "artilleryContextMenu";
+  menu.style.position = "absolute";
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+  menu.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
+  menu.style.border = "1px solid rgba(255, 255, 255, 0.3)";
+  menu.style.borderRadius = "4px";
+  menu.style.padding = "4px 0";
+  menu.style.zIndex = "5000";
+  menu.style.minWidth = "120px";
+
+  // Move option (unchanged)
+  const moveItem = document.createElement("div");
+  moveItem.className = "context-menu-item";
+  moveItem.innerText = "MOVE";
+  moveItem.style.padding = "8px 16px";
+  moveItem.style.color = "#ffffff";
+  moveItem.style.cursor = "pointer";
+  moveItem.addEventListener('click', () => {
+    startMoveGun(gunId);
+    menu.remove();
+  });
+
+  // Delete option → now uses the nice styled popup
+  const deleteItem = document.createElement("div");
+  deleteItem.className = "context-menu-item";
+  deleteItem.innerText = "DELETE";
+  deleteItem.style.padding = "8px 16px";
+  deleteItem.style.color = "#ff4444";
+  deleteItem.style.cursor = "pointer";
+  deleteItem.addEventListener('click', () => {
+    menu.remove();
+    showConfirmModal("Delete this custom gun?", () => {
+      deleteCustomGun(gunId);
+    });
+  });
+
+  // Hover effects
+  moveItem.addEventListener('mouseenter', () => moveItem.style.backgroundColor = "rgba(255, 255, 255, 0.1)");
+  moveItem.addEventListener('mouseleave', () => moveItem.style.backgroundColor = "transparent");
+  deleteItem.addEventListener('mouseenter', () => deleteItem.style.backgroundColor = "rgba(255, 68, 68, 0.2)");
+  deleteItem.addEventListener('mouseleave', () => deleteItem.style.backgroundColor = "transparent");
+
+  menu.appendChild(moveItem);
+  menu.appendChild(deleteItem);
+
+  document.body.appendChild(menu);
+
+  // Close when clicking elsewhere
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 100);
+}
+
+// Styled confirmation modal (replaces native confirm)
+function showConfirmModal(message, onConfirm) {
+    // Remove any old modal
+    const old = document.getElementById('customConfirmModal');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'customConfirmModal';
+    overlay.className = 'confirm-modal-overlay';
+    overlay.style.display = 'flex';
+
+    overlay.innerHTML = `
+        <div class="confirm-modal">
+            <div class="confirm-title">DELETE CUSTOM GUN</div>
+            <div class="confirm-message">${message}</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn cancel">CANCEL</button>
+                <button class="confirm-btn delete">DELETE</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const cancelBtn = overlay.querySelector('.cancel');
+    const deleteBtn = overlay.querySelector('.delete');
+
+    cancelBtn.onclick = () => overlay.remove();
+    deleteBtn.onclick = () => {
+        overlay.remove();
+        if (onConfirm) onConfirm();
+    };
+
+    // Click outside = cancel
+    overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.remove();
+    };
 }
 
 function setupDropdown(containerId, buttonId, labelId, onSelect) {
@@ -2087,6 +2968,13 @@ function initArtyControls() {
       toggleTransitions(false);
 
       activeFaction = value;
+      
+      // Reset placement and move modes when switching factions
+      placementMode = false;
+      moveMode = false;
+      movingGunId = null;
+      updateMapCursor();
+      
       // Note: We do NOT reset activeGunIndex here if it was already set, 
       // but usually if you switch teams you might want to reset guns. 
       // For now, let's keep gun Selection if valid, or let it stick.
@@ -2131,6 +3019,7 @@ function initArtyControls() {
           }
       });
   }
+
 
   // 3. Setup Ruler Toggle
   const rulerToggleBtn = document.getElementById('rulerToggleBtn');
@@ -2591,7 +3480,7 @@ function saveState() {
   const controlsDrawer = document.getElementById("controlsDrawer");
   
   // CLEAN SAVE: Only saves Map, Faction, Gun, and Toggle Buttons.
-  // NO Pan/Zoom, NO Manual Calculator settings.
+  // NO Pan/Zoom, NO Manual Calculator settings, NO Custom Artillery.
   const stateToSave = {
     activeMapKey: activeMapKey,
     activeFaction: activeFaction,
@@ -2600,6 +3489,8 @@ function saveState() {
     panelHidden: controlsDrawer ? controlsDrawer.classList.contains("closed") : false,
     rulerEnabled: rulerEnabled,
     hudEnabled: hudEnabled,
+    // customArtillery is EXCLUDED here so it never saves
+    // nextCustomGunId is EXCLUDED here so it never saves
     timestamp: Date.now()
   };
   
@@ -2618,6 +3509,12 @@ function loadState() {
     if (!savedState) {
         activeGunIndex = -1; 
         activeFaction = null; // Default to no faction
+        // RESET CUSTOM ARTY (Always reset on load)
+        customArtillery = []; // Reset custom artillery
+        nextCustomGunId = 1; // Reset ID counter
+        placementMode = false;
+        moveMode = false;
+        movingGunId = null;
         return null;
     }
     
@@ -2636,12 +3533,25 @@ function loadState() {
     rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : false;
     hudEnabled = loaded.hudEnabled !== undefined ? loaded.hudEnabled : false;
     
+    // RESET CUSTOM ARTY (Always reset on load, never restore from save)
+    customArtillery = []; 
+    nextCustomGunId = 1;
+    placementMode = false;
+    moveMode = false;
+    movingGunId = null;
+    
     window.savedPanelHidden = loaded.panelHidden || false;
     
     return true; 
   } catch (error) {
     activeGunIndex = -1;
     activeFaction = null;
+    // RESET CUSTOM ARTY (Always reset on error)
+    customArtillery = []; 
+    nextCustomGunId = 1;
+    placementMode = false;
+    moveMode = false;
+    movingGunId = null;
     return null;
   }
 }
@@ -2676,6 +3586,77 @@ mapContainer.addEventListener("click", (e) => {
   // --- NEW: SETUP MODE GUARD ---
   // If Setup Mode is active, strictly ignore shooting clicks.
   if (filterMode) return; 
+  // ----------------------------
+
+  // --- NEW: PLACEMENT MODE HANDLING ---
+  if (placementMode) {
+    const isMobileDevice = window.innerWidth <= 768;
+    
+    if (isMobileDevice) {
+      // On mobile: Do NOTHING when tapping map.
+      // Only the PLACE button is allowed to place custom artillery.
+      return;
+    }
+    
+    // Desktop: Allow direct click to place (unchanged behavior)
+    const rect = mapContainer.getBoundingClientRect();
+   
+    const currentVisualX = Math.round(state.pointX);
+    const currentVisualY = Math.round(state.pointY);
+   
+    const clickX = e.clientX - rect.left - currentVisualX;
+    const clickY = e.clientY - rect.top - currentVisualY;
+   
+    const effectiveZoom = state.scale * state.fitScale;
+    const rawImgX = clickX / effectiveZoom;
+    const rawImgY = clickY / effectiveZoom;
+    const mapImage = document.getElementById("mapImage");
+    const w = mapImage.naturalWidth;
+    const h = mapImage.naturalHeight;
+   
+    const targetPos = imagePixelsToGame(rawImgX, rawImgY, w, h);
+    
+    if (targetPos.x < GAME_LEFT || targetPos.x > GAME_RIGHT ||
+        targetPos.y < GAME_BOTTOM || targetPos.y > GAME_TOP) {
+      return;
+    }
+   
+    placeCustomArtillery(targetPos.x, targetPos.y);
+    return;
+  }
+
+  // --- NEW: MOVE MODE HANDLING ---
+  if (moveMode && movingGunId) {
+    const rect = mapContainer.getBoundingClientRect();
+    
+    // Calculate click position
+    const currentVisualX = Math.round(state.pointX);
+    const currentVisualY = Math.round(state.pointY);
+    
+    const clickX = e.clientX - rect.left - currentVisualX;
+    const clickY = e.clientY - rect.top - currentVisualY;
+    
+    const effectiveZoom = state.scale * state.fitScale;
+    const rawImgX = clickX / effectiveZoom;
+    const rawImgY = clickY / effectiveZoom;
+
+    const mapImage = document.getElementById("mapImage");
+    const w = mapImage.naturalWidth;
+    const h = mapImage.naturalHeight;
+    
+    // Convert to game coordinates
+    const targetPos = imagePixelsToGame(rawImgX, rawImgY, w, h);
+
+    // Check boundaries
+    if (targetPos.x < GAME_LEFT || targetPos.x > GAME_RIGHT || 
+        targetPos.y < GAME_BOTTOM || targetPos.y > GAME_TOP) {
+        return; 
+    }
+    
+    // Move custom artillery
+    moveCustomGun(movingGunId, targetPos.x, targetPos.y);
+    return;
+  }
   // ----------------------------
 
   // ============================================================
@@ -3524,6 +4505,16 @@ function updateMobileHud() {
   // Only run if HUD is enabled and we are on mobile
   if (!hudEnabled || window.innerWidth > 768) return;
 
+  // SAFETY FORCE: Keep rings visible when Live HUD is active (even after faction change)
+  const crosshair = document.getElementById("mobileCrosshair");
+  const ringContainer = document.getElementById("mobileRingContainer");
+  if (crosshair && !crosshair.classList.contains("placement-mode")) {
+    crosshair.classList.remove("hidden");
+    crosshair.style.display = "block";
+    crosshair.style.opacity = "1";
+    if (ringContainer) ringContainer.style.display = "block";
+  }
+
   const mapImage = document.getElementById("mapImage");
   const rect = mapContainer.getBoundingClientRect();
   
@@ -3667,6 +4658,25 @@ function fireAtCenter() {
   render();           
 }
 
+function placeAtCenter() {
+  const mapImage = cached.mapImage;
+  const w = mapImage.naturalWidth;
+  const h = mapImage.naturalHeight;
+
+  const visualCenterX = mapContainer.clientWidth / 2;
+  const visualCenterY = mapContainer.clientHeight / 2;
+  const effectiveZoom = state.scale * state.fitScale;
+
+  const rawImgX = (visualCenterX - state.pointX) / effectiveZoom;
+  const rawImgY = (visualCenterY - state.pointY) / effectiveZoom;
+
+  const targetPos = imagePixelsToGame(rawImgX, rawImgY, w, h);
+
+  placeCustomArtillery(targetPos.x, targetPos.y);
+
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
 // ==========================================
 // FINAL INITIALIZATION
 // ==========================================
@@ -3790,3 +4800,25 @@ window.addEventListener('pageshow', (event) => {
         document.querySelectorAll('.footer-btn').forEach(btn => btn.blur());
     }
 });
+
+// Mobile PLACE button listener
+const mobilePlaceBtn = document.getElementById("mobilePlaceBtn");
+if (mobilePlaceBtn) {
+  let lastPlaceTime = 0;
+  const handlePlace = (e) => {
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+
+    const now = Date.now();
+    if (now - lastPlaceTime < 300) return;
+    lastPlaceTime = now;
+
+    mobilePlaceBtn.classList.add("pressed");
+    setTimeout(() => mobilePlaceBtn.classList.remove("pressed"), 150);
+
+    placeAtCenter();
+  };
+
+  mobilePlaceBtn.addEventListener("touchstart", handlePlace, { passive: false });
+  mobilePlaceBtn.addEventListener("click", handlePlace);
+}

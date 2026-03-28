@@ -619,6 +619,31 @@ body {
     z-index: 110 !important;
 }
 
+
+/* Context Menu Styling */
+#artilleryContextMenu {
+    font-family: 'GothamSS', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#artilleryContextMenu .context-menu-item {
+    transition: background-color 0.1s ease;
+}
+
+#artilleryContextMenu .context-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Dropdown separator styling */
+.dropdown-separator {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    height: 1px !important;
+    margin: 4px 8px !important;
+}
+
 /* Keep the trajectory line and circles at 100 */
 .trajectory-visual, 
 .impact-circles-svg {
@@ -639,9 +664,6 @@ body {
     transition: none !important;
 }
 
-.marker.active-gun .arty-icon {
-  filter: invert(1);
-}
 
 .marker.strongpoint { 
     background: none; border: none; border-radius: 0;
@@ -962,29 +984,6 @@ body {
 }
 
 /* ==========================================
-   MAX RANGE INDICATOR (SVG)
-   ========================================== */
-.max-range-svg {
-    position: absolute;
-    pointer-events: none;
-    z-index: 1; /* Below icons */
-    overflow: visible;
-}
-
-.max-range-path {
-    fill: none;
-    stroke: rgba(255, 0, 0, 0.8); /* Tactical Yellow */
-    
-    /* CONSTANT THICKNESS: Prevents line from getting fat/blurry on zoom */
-    stroke-width: 4px;
-    vector-effect: non-scaling-stroke !important; 
-    
-    /* Dash Pattern */
-    stroke-dasharray: 8, 8; 
-    
-}
-
-/* ==========================================
    LOADING OVERLAY
    ========================================== */
 .loading-overlay {
@@ -1047,6 +1046,89 @@ svg.icon {
 
 
 /* --- DESKTOP WHITE BLOCK FIX --- */
+
+/* Mobile PLACE button — slightly smaller, same position */
+#mobilePlaceBtn {
+  position: absolute;
+  bottom: 230px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #28a745;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  font-family: 'GothamSS', sans-serif;
+  font-weight: 900;
+  font-size: 14px;         /* smaller */
+  padding: 11px 30px;      /* smaller */
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  z-index: 510;
+  pointer-events: auto;
+  white-space: nowrap;
+}
+#mobilePlaceBtn:active,
+#mobilePlaceBtn.pressed {
+  transform: translateX(-50%) translateY(4px) scale(0.95) !important;
+  background-color: #ffc107 !important;
+  color: black !important;
+}
+
+/* ==============================================================
+   MOBILE PLACEMENT CROSSHAIR ONLY (Custom Artillery)
+   Live HUD is completely untouched
+   ============================================================== */
+
+#mobileCrosshair.placement-mode {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;   /* single clean translate */
+  width: 68px !important;
+  height: 68px !important;
+  z-index: 200 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  filter: drop-shadow(0 0 12px #ffc107);
+}
+
+#mobileCrosshair.placement-mode .garrisonCrosshairImg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Hide rings ONLY during placement (does not affect live HUD) */
+#mobileCrosshair.placement-mode #mobileRingContainer,
+#mobileCrosshair.placement-mode .m-ring {
+  display: none !important;
+}
+
+/* CLEAN CUSTOM ARTILLERY - No square border */
+.marker.custom-artillery {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* ACTIVE GUN - Clean without yellow glow */
+.marker.custom-artillery.active-gun .arty-icon {
+    filter: invert(1);
+    transform: scale(1.08);               /* slight pop */
+    transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+/* Dimmed guns stay clean */
+.marker.custom-artillery.dimmed-gun .arty-icon {
+    filter: none;
+    transform: scale(1);
+}
 @media (min-width: 769px) {
   /* 1. Force the icon to be an outline, not a solid block */
   .modal-footer .footer-btn .icon {
@@ -2691,48 +2773,49 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 }
 
 /* --- HUD CROSSHAIR (Center +) --- */
-.hud-crosshair {
+/* === MOBILE PLACEMENT CENTER VISUAL (garrison_lining_dot_2.png) === */
+#mobileCrosshair.placement-mode {
+  background: url('images/ui/garrison_lining_dot_2.png') center / contain no-repeat;
+}
+
+#mobileCrosshair {
   position: absolute;
   top: 50%;
   left: 50%;
-  /* Center exactly on the point */
   transform: translate(-50%, -50%);
-  width: 14px;
-  height: 14px;
+  width: 56px;
+  height: 56px;
   pointer-events: none;
-  /* Ensure it sits on top of the Blast/Red circle (z-index 30) */
-  z-index: 40; 
+  z-index: 45;
+  filter: drop-shadow(0 0 10px #ffc107);
+  display: none;
 }
 
-#mapStage {
-    transition: opacity 0.2s ease-in-out;
+/* Hide garrison dot image during Live HUD (show only rings) */
+#mobileCrosshair:not(.placement-mode) img {
+  display: none !important;
 }
 
-/* The vertical and horizontal lines */
-.hud-crosshair::before,
-.hud-crosshair::after {
-  content: '';
-  position: absolute;
-  background-color: #ffc107; /* Tactical Yellow */
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8); /* Shadow for contrast */
+/* === PLACEMENT MODE ARROWS (exactly like live HUD) === */
+.fire-guide-arrow.placement-arrow {
+  color: #ffc107;
+  text-shadow: 
+    0 0 10px #000000,
+    0 0 6px #ffc107;
+  animation: arrow-point-down 1.4s infinite ease-in-out;
+  font-size: 36px;
+  z-index: 2000;
+  pointer-events: none;
 }
 
-/* Vertical Line */
-.hud-crosshair::before {
-  top: 0;
-  left: 50%;
-  width: 2px;
-  height: 100%;
-  transform: translateX(-50%);
+/* Show arrows when panel is open AND we are in placement mode */
+body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-arrow {
+  display: block;
 }
 
-/* Horizontal Line */
-.hud-crosshair::after {
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  transform: translateY(-50%);
+@keyframes arrow-point-down {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(8px); opacity: 1; }
 }
 
 /* Ensure the Manual Calculator Modal doesn't have dead space */
@@ -3586,14 +3669,12 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* The Active "Target" Sector */
 .sector-highlight {
     position: absolute;
-    /* Increased base opacity from 0.2 to 0.3 */
     background-color: rgba(40, 167, 69, 0.3); 
-    border: 3px solid #28a745; /* Thicker border */
-    /* REMOVED dynamic box-shadow animation. Static shadow only. */
-    box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); 
-    /* Animate opacity instead (GPU cheap) */
-    animation: sector-pulse 2s infinite ease-in-out;
+    border: none;
+    pointer-events: none;
+    z-index: 50;
 }
+
 
 /* FIX 3: Safe Pulse Animation (No Box-Shadow Thrashing) */
 @keyframes sector-pulse {
@@ -3925,4 +4006,212 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
         margin-top: 0 !important;   /* Remove extra top gap */
         margin-bottom: 2px !important; /* Slight spacing before the line */
     }
+}
+
+/* CLEAN CUSTOM ARTILLERY ICONS - No square border */
+.marker.custom-artillery {
+    border: none !important;           /* ← REMOVED the square */
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* === CLEAN CUSTOM ARTILLERY ICONS (no square ever) === */
+.marker.custom-artillery {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Active custom gun: clean without yellow glow */
+.marker.custom-artillery.active-gun .arty-icon {
+    filter: invert(1);
+    transform: scale(1.1);
+    transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+/* Dimmed custom guns stay perfectly clean */
+.marker.custom-artillery.dimmed-gun .arty-icon {
+    filter: none;
+    transform: scale(1);
+}
+
+/* ==========================================
+   CUSTOM CONFIRM MODAL (matches dropdown style)
+   ========================================== */
+.confirm-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-modal {
+    background: #1d1f27;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    border-radius: 6px;
+    max-width: 340px;
+    width: 90%;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0,0,0,0.9);
+}
+
+.confirm-title {
+    font-family: 'GothamSS', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    color: #ffc107;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+}
+
+.confirm-message {
+    font-family: 'GothamSS', sans-serif;
+    font-size: 15px;
+    color: #ddd;
+    line-height: 1.4;
+    margin-bottom: 28px;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.confirm-btn {
+    padding: 12px 28px;
+    border-radius: 4px;
+    font-family: 'GothamSS', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    min-width: 110px;
+}
+
+.confirm-btn.cancel {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #ddd;
+}
+
+.confirm-btn.delete {
+    background: #ff4444;
+    border: 1px solid #ff4444;
+    color: white;
+}
+
+.confirm-btn.delete:hover { background: #ff6666; }
+.confirm-btn.cancel:hover { background: rgba(255,255,255,0.2); }
+
+/* TARGET PANEL CLOSE BUTTON — safe absolute positioning */
+.panel-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 28px;          /* slightly bigger for easy taps */
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'GothamSS', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.15s ease;
+    user-select: none;
+    
+    /* THIS IS THE FIX */
+    pointer-events: auto !important;
+}
+
+.panel-close-btn:hover {
+    color: #ffc107;
+    transform: scale(1.15);
+}
+
+.panel-close-btn:active {
+    color: #ff4444;
+    transform: scale(0.9);
+}
+
+/* FORCE PLACE BUTTON MOBILE-ONLY (defensive) */
+@media (min-width: 769px) {
+  #mobilePlaceBtn {
+    display: none !important;
+  }
+}
+
+/* ACTIVE GUN — use pre-inverted white icon (no CSS filter needed) */
+.marker.active-gun .arty-icon {
+    filter: none !important; /* important so Firefox doesn't fight us */
+}
+
+/* FIREFOX: Maximum crispness for scaled + rotated icons */
+@supports (-moz-appearance: none) {
+    .marker.active-gun,
+    .marker.point.active-gun,
+    .marker.active-gun .arty-icon,
+    .marker.point.active-gun .arty-icon {
+        image-rendering: crisp-edges !important;
+        image-rendering: -moz-crisp-edges !important;
+        backface-visibility: hidden !important;
+    }
+}
+
+/* BEYOND MAX RANGE DARK OVERLAY — always on when gun selected */
+#beyondRangeOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);     /* ← change to 0.95 for darker */
+  pointer-events: none;
+  z-index: 96;
+  display: none;
+  
+  /* Clean transparent circle (hole) centered on gun */
+  mask-image: radial-gradient(
+    circle at var(--gun-x) var(--gun-y),
+    transparent var(--max-range-r),
+    black calc(var(--max-range-r) + 1px)
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--gun-x) var(--gun-y),
+    transparent var(--max-range-r),
+    black calc(var(--max-range-r) + 1px)
+  );
+}
+
+/* MIN RANGE DARK OVERLAY — darkens inside the dead zone (no outline) */
+#minRangeOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);     /* same softness as your max range */
+  pointer-events: none;
+  z-index: 95;                        /* slightly below max overlay */
+  display: none;
+  
+  mask-image: radial-gradient(
+    circle at var(--gun-x) var(--gun-y),
+    black var(--min-range-r),
+    transparent calc(var(--min-range-r) + 1px)
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--gun-x) var(--gun-y),
+    black var(--min-range-r),
+    transparent calc(var(--min-range-r) + 1px)
+  );
 }

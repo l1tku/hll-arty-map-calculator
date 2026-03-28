@@ -15,7 +15,7 @@
   <link rel="icon" type="image/webp" href="images/favicon.webp">
   <link rel="icon" type="image/png" href="images/favicon.png">
   <link rel="apple-touch-icon" href="images/icon-180.png">
-  <link rel="stylesheet" href="css/style.css?v=3.36">
+  <link rel="stylesheet" href="css/style.css?v=3.38">
   
   <script>
     if ('serviceWorker' in navigator) {
@@ -111,10 +111,19 @@
               <span id="gunLabel">Gun 1 (Left)</span>
               <span class="icon">▾</span>
             </button>
+            
             <div class="dropdown-menu hidden">
               <div class="dropdown-item" data-value="0">Gun 1 (Left)</div>
               <div class="dropdown-item" data-value="1">Gun 2 (Mid)</div>
               <div class="dropdown-item" data-value="2">Gun 3 (Right)</div>
+              
+              <div class="dropdown-separator"></div>
+
+              <div class="dropdown-item" id="btnAddGunAction" style="color: #ffc107; font-weight: 900;">
+                + ADD CUSTOM GUN
+              </div>
+
+              <div id="customGunContainer"></div>
             </div>
           </div>
         </div>
@@ -123,6 +132,7 @@
   </div>
 
   <div id="mobileCrosshair" class="mobile-crosshair hidden">
+    <img src="images/ui/garrison_lining_dot_2.png" alt="Placement Crosshair">
     <div id="mobileRingContainer" class="ring-container">
       <div class="m-ring dispersion"></div>
       <div class="m-ring deadzone"></div>
@@ -139,6 +149,14 @@
   <button id="mobileFireBtn" class="mobile-fire-btn hidden" aria-label="Fire Artillery">
     <span>FIRE</span>
   </button>
+
+  <button id="mobilePlaceBtn" class="mobile-place-btn hidden" aria-label="Place Custom Artillery">
+    <span>PLACE</span>
+  </button>
+
+  <!-- Placement guide arrows (same as live HUD arrows) -->
+  <div class="fire-guide-arrow placement-arrow left">↓</div>
+  <div class="fire-guide-arrow placement-arrow right">↓</div>
 
   <div id="trajSliderContainer" class="traj-slider-container hidden">
     <div class="traj-controls-wrapper">
@@ -160,7 +178,7 @@
 
   <div id="targetDataPanel" class="target-data-panel hidden">
     <div class="panel-watermark">
-        HLL ARTY MAP CALC <span id="appVersionPanel">v1.1.0</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
+        HLL ARTY MAP CALC <span id="appVersionPanel">v1.1.8</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
     </div>
 
     <div class="panel-row main-row">
@@ -395,6 +413,6 @@
 
 <script src="js/maps.js"></script> 
 <script src="js/ballistics.js"></script> 
-<script src="js/script.js?v=3.36"></script>
+<script src="js/script.js?v=3.38"></script>
 </body>
 </html>
