@@ -864,7 +864,7 @@ function renderMarkers() {
 
       if (isEnemyGun) {
         // ENEMY GUN — use enemy-specific image
-        img.src = "images/ui/artillery_position_enemy_v2.webp";
+        img.src = "images/ui/artillery_position_enemy.webp";
         
         // ← NEW: Apply correct rotation using the ENEMY faction
         const baseRotation = getGunBaseRotation(point.team, mapConfig);
