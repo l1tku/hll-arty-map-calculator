@@ -4217,6 +4217,15 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
 }
 
 .marker.enemy-gun {
-  opacity: 0.8 !important;
+  opacity: 0.9 !important;
   filter: none !important;
+}
+
+/* Enemy artillery icons - scale but always half size of friendly */
+.marker.enemy-gun,
+.marker.enemy-gun .arty-icon {
+    width: var(--enemy-icon-size) !important;
+    height: var(--enemy-icon-size) !important;
+    margin-left: calc(var(--enemy-icon-size) / -2) !important;
+    margin-top: calc(var(--enemy-icon-size) / -2) !important;
 }

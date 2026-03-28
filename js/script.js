@@ -1655,6 +1655,11 @@ function render() {
   const viewScale = 1.0 / ((MAX_ZOOM - 1.0) * normalizedZoom + 1.0);
   const dynSize = baseIconSize * viewScale;
   mapContainer.style.setProperty('--dynamic-icon-size', `${dynSize}px`);
+
+  // Enemy arty icons scale but are HALF the size of friendly when zoomed out
+  const enemyFactor = 0.5 + (0.5 * normalizedZoom);   // 1.0 at max zoom → 0.5 at min zoom
+  const enemySize = dynSize * enemyFactor;
+  mapContainer.style.setProperty('--enemy-icon-size', `${enemySize}px`);
   
   // --- DYNAMIC STROKE SCALING ---
   const isMob = window.innerWidth <= 768;
