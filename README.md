@@ -1,4 +1,4 @@
-# HLL Artillery Map Calculator
+# HLL Artillery Map Calculator ()
 **Updated for Hell Let Loose Update 19.1**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
@@ -17,7 +17,6 @@ Access the calculator instantly in your browser:
   - **Permanent soft dark overlays** showing 1600m maximum range (outside the circle) and 100m minimum range / dead zone (inside the circle).
   - Compass bearing readout.
   - Shooting pulse ripple at impact.
-  - Target Panel close button (✕) for instant clearing.
 - **Strongpoint Management**: "Match Setup" mode – select the 5 active strongpoints to match the current in-game Warfare or Offensive layout.
 - **Custom Artillery System**: Place up to 3 custom guns per team directly on the map. They rotate toward the target, appear in the gun dropdown, and support Move/Delete via context menu.
 - **Gun Selection & Visualization**:

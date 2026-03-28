@@ -556,7 +556,7 @@ body {
   /* width: 100%; height: 100%;  <-- These will be overridden by JS */
   
   pointer-events: none;
-  z-index: 50; 
+  z-index: 110; 
   text-rendering: geometricPrecision;
   shape-rendering: geometricPrecision;
   
@@ -4214,4 +4214,9 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     black var(--min-range-r),
     transparent calc(var(--min-range-r) + 1px)
   );
+}
+
+.marker.enemy-gun {
+  opacity: 0.8 !important;
+  filter: none !important;
 }

@@ -619,56 +619,55 @@ function imagePixelsToGame(imgX, imgY, imgW, imgH) {
 function renderMarkers() {
   const markersLayer = cached.markersLayer;
   if (!markersLayer) return;
-  markersLayer.innerHTML = ""; 
+  markersLayer.innerHTML = "";
   labelCache = [];
   const fragment = document.createDocumentFragment();
   const mapImage = cached.mapImage;
-  
-  if (!mapImage) return;
 
+  if (!mapImage) return;
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   if (!currentStrongpoints) return;
 
   const mapConfig = MAP_DATABASE[activeMapKey];
   const sortMode = mapConfig ? mapConfig.gunSort : "y";
-  const isVerticalMap = (mapConfig && mapConfig.gunSort === "x"); 
+  const isVerticalMap = (mapConfig && mapConfig.gunSort === "x");
 
   const teamArty = currentStrongpoints.filter(p => p.team === activeFaction && p.type === 'point');
-  
+
   if (sortMode === "x") teamArty.sort((a, b) => a.gameX - b.gameX);
   else teamArty.sort((a, b) => b.gameY - a.gameY);
 
   let activeGunEl = null;
 
-  updateSectorVisuals(); 
-  updateSetupGuide(); 
+  updateSectorVisuals();
+  updateSetupGuide();
 
-  // FIX: Keep green sector highlight visible during placement mode
-  // (prevents it from disappearing when target panel is closed)
   if (placementMode && activeFaction) {
     updatePlacementSectorVisuals();
-  } 
+  }
 
-  // Calculate Target Sector
   const filledSectors = new Set();
   if (filterMode) {
-      confirmedPoints.forEach(id => {
-          const point = currentStrongpoints.find(p => p.id === id);
-          if (point) filledSectors.add(getPointSector(point, isVerticalMap));
-      });
+    confirmedPoints.forEach(id => {
+      const point = currentStrongpoints.find(p => p.id === id);
+      if (point) filledSectors.add(getPointSector(point, isVerticalMap));
+    });
   }
-  
+
   let targetSector = 0;
   while (filledSectors.has(targetSector) && targetSector < 5) {
-      targetSector++;
-  } 
+    targetSector++;
+  }
 
   const dims = getMapDimensions();
   const pxPerMeter = (w / dims.width) * GAME_UNITS_PER_METER;
 
   currentStrongpoints.forEach(point => {
-    if (point.type === 'point' && point.team !== activeFaction) return; 
+    // NEW: We now render enemy artillery too
+    if (point.type === 'point') {
+      // Skip nothing — both friendly and enemy artillery are shown
+    }
 
     // --- SETUP VISIBILITY LOGIC ---
     if (point.type === 'strongpoint') {
@@ -687,59 +686,67 @@ function renderMarkers() {
 
     const el = document.createElement("div");
     el.className = `marker ${point.team} ${point.type}`;
-    
+
     let isActiveGun = false;
-    if (point.type === 'point' && point.team === activeFaction) {
-       const idx = teamArty.findIndex(gun => gun.id === point.id);
-       el.style.cursor = "pointer";
-       el.onclick = (e) => {
-           if (isDragging) return; 
-           e.stopPropagation(); e.preventDefault();
-           
-           if (activeGunIndex !== idx) {
-               if (navigator.vibrate) navigator.vibrate(20);
+    let isEnemyGun = false;
 
-               // === CRITICAL FIX ===
-               activeGunIndex = idx;
-               activeCustomGunId = null;          // ← This was missing!
-               // =====================
+    if (point.type === 'point') {
+      if (point.team === activeFaction) {
+        // Friendly gun (existing logic)
+        const idx = teamArty.findIndex(gun => gun.id === point.id);
+        el.style.cursor = "pointer";
+        el.onclick = (e) => {
+          if (isDragging) return;
+          e.stopPropagation(); e.preventDefault();
 
-               const gunNames = mapConfig.guns || ["Gun 1", "Gun 2", "Gun 3"];
-               const gunLabel = document.getElementById("gunLabel");
-               if (gunLabel) {
-                   gunLabel.innerText = gunNames[idx] || `Gun ${idx + 1}`;
-                   gunLabel.style.color = "#ffffff";
-               }
-               if (activeTarget) {
-                   const gunPos = { x: point.gameX, y: point.gameY };
-                   const factionLabel = document.getElementById("factionLabel").innerText;
-                   const dx = activeTarget.gameX - gunPos.x;
-                   const dy = activeTarget.gameY - gunPos.y;
-                   const distanceUnits = Math.sqrt(dx*dx + dy*dy);
-                   const correctedDistance = Math.floor(distanceUnits / GAME_UNITS_PER_METER);
-                   const newMil = getMilFromTable(correctedDistance, factionLabel);
-                   activeTarget.distance = correctedDistance;
-                   activeTarget.mil = newMil;
-                   if (trajSliderEnabled) {
-                        originalAngle = Math.atan2(dy, dx);
-                        const trajInput = document.getElementById('trajectoryRange');
-                        if (trajInput) trajInput.value = correctedDistance;
-                        const milDisplay = document.getElementById('trajCurrentMil');
-                        const meterDisplay = document.getElementById('trajCurrentMeter');
-                        if (milDisplay) milDisplay.innerText = newMil !== null ? newMil : "OUT";
-                        if (meterDisplay) meterDisplay.innerText = correctedDistance + "m";
-                   }
-               }
-               renderMarkers(); renderTargeting(); render(); saveState();
-           }
-       };
-       if (activeGunIndex === -1) {
-           el.style.opacity = "1"; el.style.filter = "none"; el.style.zIndex = "100";
-       } else if (idx === activeGunIndex) {
-           el.classList.add("active-gun"); isActiveGun = true;
-       } else {
-           el.classList.add("dimmed-gun");
-       }
+          if (activeGunIndex !== idx) {
+            if (navigator.vibrate) navigator.vibrate(20);
+            activeGunIndex = idx;
+            activeCustomGunId = null;
+
+            const gunNames = mapConfig.guns || ["Gun 1", "Gun 2", "Gun 3"];
+            const gunLabel = document.getElementById("gunLabel");
+            if (gunLabel) {
+              gunLabel.innerText = gunNames[idx] || `Gun ${idx + 1}`;
+              gunLabel.style.color = "#ffffff";
+            }
+            if (activeTarget) {
+              const gunPos = { x: point.gameX, y: point.gameY };
+              const factionLabel = document.getElementById("factionLabel").innerText;
+              const dx = activeTarget.gameX - gunPos.x;
+              const dy = activeTarget.gameY - gunPos.y;
+              const distanceUnits = Math.sqrt(dx*dx + dy*dy);
+              const correctedDistance = Math.floor(distanceUnits / GAME_UNITS_PER_METER);
+              const newMil = getMilFromTable(correctedDistance, factionLabel);
+              activeTarget.distance = correctedDistance;
+              activeTarget.mil = newMil;
+              if (trajSliderEnabled) {
+                originalAngle = Math.atan2(dy, dx);
+                const trajInput = document.getElementById('trajectoryRange');
+                if (trajInput) trajInput.value = correctedDistance;
+                const milDisplay = document.getElementById('trajCurrentMil');
+                const meterDisplay = document.getElementById('trajCurrentMeter');
+                if (milDisplay) milDisplay.innerText = newMil !== null ? newMil : "OUT";
+                if (meterDisplay) meterDisplay.innerText = correctedDistance + "m";
+              }
+            }
+            renderMarkers(); renderTargeting(); render(); saveState();
+          }
+        };
+
+        if (activeGunIndex === -1) {
+          el.style.opacity = "1"; el.style.filter = "none"; el.style.zIndex = "100";
+        } else if (idx === activeGunIndex) {
+          el.classList.add("active-gun"); isActiveGun = true;
+        } else {
+          el.classList.add("dimmed-gun");
+        }
+      } else {
+        // ENEMY GUN
+        isEnemyGun = true;
+        el.classList.add("enemy-gun");
+        el.style.cursor = "default";
+      }
     }
 
     const pos = gameToImagePixels(point.gameX, point.gameY, w, h);
@@ -818,42 +825,49 @@ function renderMarkers() {
            }
        }
     }
-    
-    // ... [Point Rendering] ...
-    if (point.type === 'point') { 
-        el.style.left = `${Math.round(pos.x)}px`; el.style.top = `${Math.round(pos.y)}px`;
-        const img = document.createElement("img");
-        img.className = "arty-icon";
 
-        // Use white version ONLY when the gun is selected
-        if (isActiveGun) {
-            img.src = "images/ui/artillery_position_white.webp";
+    // === ARTILLERY ICON RENDERING ===
+    if (point.type === 'point') {
+      el.style.left = `${Math.round(pos.x)}px`;
+      el.style.top = `${Math.round(pos.y)}px`;
+
+      const img = document.createElement("img");
+      img.className = "arty-icon";
+
+      if (isEnemyGun) {
+        // ENEMY ICON — this is the new line you asked for
+        img.src = "images/ui/artillery_position_enemy.webp";
+      } else if (isActiveGun) {
+        img.src = "images/ui/artillery_position_white.webp";
+      } else {
+        img.src = "images/ui/artillery_position.webp";
+      }
+
+      // Rotation only for friendly active guns
+      if (!isEnemyGun && isActiveGun && activeTarget) {
+        const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
+        const dy = targetPos.y - pos.y;
+        const dx = targetPos.x - pos.x;
+        let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+        angle -= 90;
+        img.style.transform = `rotate(${angle}deg)`;
+      } else if (!isEnemyGun) {
+        // Default friendly rotation (unchanged)
+        let baseRotation = 0;
+        const teamKey = point.team.toLowerCase();
+        const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
+        if (mapConfig && mapConfig.gunRotations) {
+          if (mapConfig.gunRotations[teamKey] !== undefined) baseRotation = mapConfig.gunRotations[teamKey];
+          else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) baseRotation = mapConfig.gunRotations["ger"];
+          else if (mapConfig.gunRotations["us"] !== undefined) baseRotation = mapConfig.gunRotations["us"];
         } else {
-            img.src = "images/ui/artillery_position.webp";
+          if (sortMode === "x") baseRotation = isAxis ? -90 : 90;
+          else baseRotation = isAxis ? 180 : 0;
         }
-        
-        if (isActiveGun && activeTarget) {
-           const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
-           const dy = targetPos.y - pos.y; 
-           const dx = targetPos.x - pos.x;
-           let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-           angle -= 90;
-           img.style.transform = `rotate(${angle}deg)`;
-        } else {
-           let baseRotation = 0; 
-           const teamKey = point.team.toLowerCase(); 
-           const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
-           if (mapConfig && mapConfig.gunRotations) {
-                if (mapConfig.gunRotations[teamKey] !== undefined) baseRotation = mapConfig.gunRotations[teamKey];
-                else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) baseRotation = mapConfig.gunRotations["ger"];
-                else if (mapConfig.gunRotations["us"] !== undefined) baseRotation = mapConfig.gunRotations["us"];
-           } else {
-                if (sortMode === "x") baseRotation = isAxis ? -90 : 90;
-                else baseRotation = isAxis ? 180 : 0;
-           }
-           img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
-        }
-        el.appendChild(img);
+        img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
+      }
+
+      el.appendChild(img);
     }
 
     if (point.label) {
@@ -996,14 +1010,12 @@ customArtillery.forEach(gun => {
     fragment.appendChild(el);
   }
 });
-  // ------------------------------------
 
   if (activeGunEl) fragment.appendChild(activeGunEl);
   markersLayer.appendChild(fragment);
 
-  // ← ADD THIS LINE
   updateBeyondRangeOverlay();
-  updateMinRangeOverlay();   // ← add this
+  updateMinRangeOverlay();
 }
 
 function updateSectorVisuals() {
@@ -1834,7 +1846,7 @@ function initMap() {
         }
         
         // Visual Order & Transform Origin
-        markersLayer.style.zIndex = "100"; 
+        markersLayer.style.zIndex = "110"; 
         markersLayer.style.transformOrigin = "0 0"; 
     }
     // ---------------------------------------------------
