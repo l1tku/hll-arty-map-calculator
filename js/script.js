@@ -1212,63 +1212,60 @@ function updateSetupGuide() {
     const guideEl = document.getElementById("setupGuide");
     if (!guideEl) return;
 
+    // ─────────────────────────────────────────────────────────────
+    // NEW GUARD: Never hide or change the guide while placing/moving
+    // This protects the mobile placement text when closing the target panel
+    // ─────────────────────────────────────────────────────────────
+    if (placementMode || moveMode) return;
+
     if (!filterMode) {
         guideEl.classList.add("hidden");
         guideEl.classList.remove("success");
         return;
     }
 
+    // … (rest of your original filter-mode logic stays exactly the same)
     guideEl.classList.remove("hidden");
 
-    // 1. Calculate State
     const mapConfig = MAP_DATABASE[activeMapKey];
     const isVerticalMap = (mapConfig && mapConfig.gunSort === "x");
     const filledSectors = new Set();
-    
+
     confirmedPoints.forEach(id => {
         const point = currentStrongpoints.find(p => p.id === id);
         if (point) filledSectors.add(getPointSector(point, isVerticalMap));
     });
 
-    // 2. Check for Completion (All 5 sectors filled)
     if (filledSectors.size === 5) {
-        // Show FINISH button (Reset removed)
         guideEl.innerHTML = `SETUP COMPLETE <button id="btnFinishSetup" class="setup-finish-btn">FINISH</button>`;
         guideEl.classList.add("success");
-        
         const finishBtn = document.getElementById("btnFinishSetup");
         if (finishBtn) {
             finishBtn.onclick = (e) => {
                 e.stopPropagation();
-                
                 filterMode = false;
                 const btn = document.getElementById('spFilterBtn');
                 if (btn) btn.classList.remove('active');
-                
                 updateSetupGuide();
                 renderMarkers();
                 renderTargeting();
                 render();
-                
                 if (navigator.vibrate) navigator.vibrate(50);
             };
         }
         return;
     }
 
-    // 3. Setup In Progress (Text Only)
     guideEl.classList.remove("success");
-    
-    // Find gap
     let stepIndex = 0;
     while (filledSectors.has(stepIndex) && stepIndex < 5) stepIndex++;
     const step = stepIndex + 1;
-    
+
     let suffix = "TH";
     if (step === 1) suffix = "ST";
     else if (step === 2) suffix = "ND";
     else if (step === 3) suffix = "RD";
-    
+
     guideEl.innerText = `CHOOSE ${step}${suffix} STRONGPOINT`;
 }
 
@@ -2510,14 +2507,25 @@ function updateGunUI(config) {
     label.innerText = gunNames[activeGunIndex];
     label.style.color = "#ffffff";
   } else if (activeCustomGunId !== null) {
-    const activeGun = customArtillery.find(g => g.id === activeCustomGunId);
+    const activeGun = customArtillery.find(g => g.id === activeCustomGunId && g.team === activeFaction);
     if (activeGun) {
       label.innerText = activeGun.label;
       label.style.color = "#ffffff";
+    } else {
+      label.innerText = "Select GUN";
+      label.style.color = "#ffc107";
     }
   } else {
-    label.innerText = "Select GUN";
-    label.style.color = "#ffc107";
+    // Auto-select latest custom gun if none is active but some exist
+    const factionCustomGuns = customArtillery.filter(g => g.team === activeFaction);
+    if (factionCustomGuns.length > 0) {
+      activeCustomGunId = factionCustomGuns[factionCustomGuns.length - 1].id;
+      label.innerText = factionCustomGuns[factionCustomGuns.length - 1].label;
+      label.style.color = "#ffffff";
+    } else {
+      label.innerText = "Select GUN";
+      label.style.color = "#ffc107";
+    }
   }
 }
 
@@ -2723,13 +2731,16 @@ function placeCustomArtillery(gameX, gameY) {
   }
 
   // ====================== VALID PLACEMENT ======================
+  // Per-faction numbering (resets to 1 when you change faction)
+  const factionCustomCount = customArtillery.filter(g => g.team === activeFaction).length + 1;
+
   const customGun = {
     id: `custom_${nextCustomGunId++}`,
     gameX: gameX,
     gameY: gameY,
     team: activeFaction,
     type: "custom",
-    label: `Custom Gun ${customArtillery.length + 1}`,
+    label: `Custom Gun ${factionCustomCount}`,   // ← now resets per faction
     radius: 500
   };
 
@@ -2997,42 +3008,43 @@ function setupDropdown(containerId, buttonId, labelId, onSelect) {
 }
 
 function initArtyControls() {
-  // 1. Setup Faction Dropdown (FIXED: No Animation)
+  // 1. Setup Faction Dropdown
   setupDropdown('factionDropdown', 'factionBtn', 'factionLabel', (value) => {
-    // Even if value is same, we might need to "wake up" from null state
     if (activeFaction !== value) {
-      
       toggleTransitions(false);
-
       activeFaction = value;
-      
-      // Reset placement and move modes when switching factions
+
+      // Reset placement and move modes
       placementMode = false;
       moveMode = false;
       movingGunId = null;
-      updateMapCursor();
+
+      // === NEW: Auto-select the LAST custom gun of the NEW faction ===
+      const factionCustomGuns = customArtillery.filter(g => g.team === activeFaction);
       
-      // Note: We do NOT reset activeGunIndex here if it was already set, 
-      // but usually if you switch teams you might want to reset guns. 
-      // For now, let's keep gun Selection if valid, or let it stick.
-      // Ideally, switching teams SHOULD reset the gun index to -1 as well 
-      // because Gun 1 (US) is not Gun 1 (GER).
-      activeGunIndex = -1; // FORCE GUN RESET ON TEAM SWAP
+      if (factionCustomGuns.length > 0) {
+        activeCustomGunId = factionCustomGuns[factionCustomGuns.length - 1].id;
+        activeGunIndex = -1;
+      } else {
+        activeCustomGunId = null;
+        activeGunIndex = -1;
+      }
+
       activeTarget = null;
-      
+
       // Disable trajectory slider
       trajSliderEnabled = false;
       const trajToggleBtn = document.getElementById('trajToggleBtn');
       const trajContainer = document.getElementById('trajSliderContainer');
       if (trajToggleBtn) trajToggleBtn.classList.remove('active');
       if (trajContainer) trajContainer.classList.add('hidden');
-      
-      // Refresh UI (This will revert color to white via updateFactionUI)
-      updateFactionUI(MAP_DATABASE[activeMapKey]); 
-      updateGunUI(MAP_DATABASE[activeMapKey]); // Update gun label to "Select GUN"
-      
-      renderMarkers(); 
-      renderTargeting(); 
+
+      // Refresh UI
+      updateFactionUI(MAP_DATABASE[activeMapKey]);
+      updateGunUI(MAP_DATABASE[activeMapKey]);
+
+      renderMarkers();
+      renderTargeting();
       render();
       saveState();
     }
