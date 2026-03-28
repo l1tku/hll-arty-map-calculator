@@ -2763,8 +2763,6 @@ function placeCustomArtillery(gameX, gameY) {
   renderTargeting();
   render();
   saveState();
-
-  console.log(`Custom artillery placed at (${gameX}, ${gameY})`);
 }
 
 function deleteCustomGun(gunId) {
