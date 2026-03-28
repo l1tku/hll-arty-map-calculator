@@ -4216,14 +4216,26 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
   );
 }
 
+/* ENEMY ARTILLERY — same perfect centering as friendly guns */
 .marker.enemy-gun {
-  opacity: 0.9 !important;
-  filter: none !important;
+    /* Fixed size - same as friendly guns when fully zoomed in (10x) */
+    width: 13px !important;
+    height: 13px !important;
+   
+    /* Perfect negative margin centering for fixed size */
+    margin-left: -6.5px !important;
+    margin-top: -6.5px !important;
+   
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   
+    pointer-events: none; /* prevents accidental clicks on enemy icons */
+    z-index: 90; /* sits below friendly guns */
 }
 
-/* Enemy artillery icons - scale but always half size of friendly */
-.marker.enemy-gun,
 .marker.enemy-gun .arty-icon {
-    width: var(--enemy-icon-size) !important;
-    height: var(--enemy-icon-size) !important;
+    width: 100% !important;
+    height: 100% !important;
 }

@@ -616,6 +616,34 @@ function imagePixelsToGame(imgX, imgY, imgW, imgH) {
   return { x: x, y: y };
 }
 
+// ==========================================
+// GUN ROTATION HELPER (used by BOTH friendly + enemy)
+// ==========================================
+function getGunBaseRotation(team, mapConfig) {
+  const teamKey = team.toLowerCase();
+  const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
+  const sortMode = mapConfig ? mapConfig.gunSort : "y";
+
+  if (mapConfig && mapConfig.gunRotations) {
+    if (mapConfig.gunRotations[teamKey] !== undefined) {
+      return mapConfig.gunRotations[teamKey];
+    }
+    if (isAxis && mapConfig.gunRotations["ger"] !== undefined) {
+      return mapConfig.gunRotations["ger"];
+    }
+    if (mapConfig.gunRotations["us"] !== undefined) {
+      return mapConfig.gunRotations["us"];
+    }
+  }
+
+  // Fallback based on map orientation
+  if (sortMode === "x") {
+    return isAxis ? -90 : 90;   // vertical maps (north-south)
+  } else {
+    return isAxis ? 180 : 0;    // horizontal maps (west-east) like Carentan
+  }
+}
+
 function renderMarkers() {
   const markersLayer = cached.markersLayer;
   if (!markersLayer) return;
@@ -835,15 +863,21 @@ function renderMarkers() {
       img.className = "arty-icon";
 
       if (isEnemyGun) {
-        // ENEMY ICON — this is the new line you asked for
-        img.src = "images/ui/artillery_position_enemy.webp";
-      } else if (isActiveGun) {
+        // ENEMY GUN — use enemy-specific image
+        img.src = "images/ui/artillery_position_enemy_v2.webp";
+        
+        // ← NEW: Apply correct rotation using the ENEMY faction
+        const baseRotation = getGunBaseRotation(point.team, mapConfig);
+        img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
+      } 
+      else if (isActiveGun) {
         img.src = "images/ui/artillery_position_white.webp";
-      } else {
+      } 
+      else {
         img.src = "images/ui/artillery_position.webp";
       }
 
-      // Rotation only for friendly active guns
+      // Friendly active gun still points at target (unchanged)
       if (!isEnemyGun && isActiveGun && activeTarget) {
         const targetPos = gameToImagePixels(activeTarget.gameX, activeTarget.gameY, w, h);
         const dy = targetPos.y - pos.y;
@@ -851,19 +885,10 @@ function renderMarkers() {
         let angle = Math.atan2(dy, dx) * (180 / Math.PI);
         angle -= 90;
         img.style.transform = `rotate(${angle}deg)`;
-      } else if (!isEnemyGun) {
-        // Default friendly rotation (unchanged)
-        let baseRotation = 0;
-        const teamKey = point.team.toLowerCase();
-        const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
-        if (mapConfig && mapConfig.gunRotations) {
-          if (mapConfig.gunRotations[teamKey] !== undefined) baseRotation = mapConfig.gunRotations[teamKey];
-          else if (isAxis && mapConfig.gunRotations["ger"] !== undefined) baseRotation = mapConfig.gunRotations["ger"];
-          else if (mapConfig.gunRotations["us"] !== undefined) baseRotation = mapConfig.gunRotations["us"];
-        } else {
-          if (sortMode === "x") baseRotation = isAxis ? -90 : 90;
-          else baseRotation = isAxis ? 180 : 0;
-        }
+      } 
+      else if (!isEnemyGun) {
+        // Friendly default rotation (unchanged)
+        const baseRotation = getGunBaseRotation(point.team, mapConfig);
         img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
       }
 
@@ -1655,11 +1680,6 @@ function render() {
   const viewScale = 1.0 / ((MAX_ZOOM - 1.0) * normalizedZoom + 1.0);
   const dynSize = baseIconSize * viewScale;
   mapContainer.style.setProperty('--dynamic-icon-size', `${dynSize}px`);
-
-  // Enemy arty icons scale but are HALF the size of friendly when zoomed out
-  const enemyFactor = 0.5 + (0.5 * normalizedZoom);   // 1.0 at max zoom → 0.5 at min zoom
-  const enemySize = dynSize * enemyFactor;
-  mapContainer.style.setProperty('--enemy-icon-size', `${enemySize}px`);
   
   // --- DYNAMIC STROKE SCALING ---
   const isMob = window.innerWidth <= 768;
