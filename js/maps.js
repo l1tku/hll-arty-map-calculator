@@ -73,14 +73,14 @@ const MAP_DATABASE = {
       // Y coordinates inverted (multiplied by -1) to match map image orientation
 
       // --- ALLIES GUNS ---
-      { label: "", id: "GB_A1", gameX: -8563.06, gameY: -87734.95, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "GB_A2", gameX: -6264.19, gameY: -87408.29, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "GB_A3", gameX: -4660.69, gameY: -86962.99, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "GB_A1", gameX: -8563.06, gameY: -87734.95, radius: 500, team: "us", type: "point", rotation: 177.3 }, 
+      { label: "", id: "GB_A2", gameX: -6264.19, gameY: -87408.29, radius: 500, team: "us", type: "point", rotation: -180 }, 
+      { label: "", id: "GB_A3", gameX: -4660.69, gameY: -86962.99, radius: 500, team: "us", type: "point", rotation: -180 }, 
 
       // --- AXIS GUNS ---
-      { label: "", id: "GERMANY_A1", gameX: -16081.69, gameY: 84361.05, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GERMANY_A2", gameX: -14599.28, gameY: 84316.64, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GERMANY_A3", gameX: -12759.99, gameY: 84396.84, radius: 500, team: "ger", type: "point" },
+      { label: "", id: "GERMANY_A1", gameX: -16081.69, gameY: 84361.05, radius: 500, team: "ger", type: "point", rotation: -1.3 }, 
+      { label: "", id: "GERMANY_A2", gameX: -14599.28, gameY: 84316.64, radius: 500, team: "ger", type: "point", rotation: -1.3 }, 
+      { label: "", id: "GERMANY_A3", gameX: -12759.99, gameY: 84396.84, radius: 500, team: "ger", type: "point", rotation: -7.6 },
 
       // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
 
@@ -123,14 +123,14 @@ const MAP_DATABASE = {
     guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- ALLIES GUNS ---
-      { label: "", id: "GB_A1", gameX: 91592.76, gameY: 6998.52, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "GB_A2", gameX: 90711.81, gameY: 9742.40, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "GB_A3", gameX: 89586.62, gameY: 13349.61, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "GB_A1", gameX: 91592.76, gameY: 6998.52, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
+      { label: "", id: "GB_A2", gameX: 90711.81, gameY: 9742.40, radius: 500, team: "us", type: "point", rotation: 92.4 }, 
+      { label: "", id: "GB_A3", gameX: 89586.62, gameY: 13349.61, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
 
       // --- AXIS GUNS ---
-      { label: "", id: "GER_A1", gameX: -91964.09, gameY: 3237.91, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -90921.03, gameY: 6183.05, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -94109.44, gameY: 9760.08, radius: 500, team: "ger", type: "point" },
+      { label: "", id: "GER_A1", gameX: -91964.09, gameY: 3237.91, radius: 500, team: "ger", type: "point", rotation: -91.3 }, 
+      { label: "", id: "GER_A2", gameX: -90921.03, gameY: 6183.05, radius: 500, team: "ger", type: "point", rotation: -91.3 }, 
+      { label: "", id: "GER_A3", gameX: -94109.44, gameY: 9760.08, radius: 500, team: "ger", type: "point", rotation: -91.3 },
 
       // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
 
@@ -183,14 +183,14 @@ const MAP_DATABASE = {
       // Adjustment: Multiply ALL Y-coordinates  by -1 to flip them.
 
       // --- ALLIES GUNS ---
-      { label: "", id: "US_A1", gameX: 1972.95, gameY: 91307.24, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: 2864.32, gameY: 91026.45, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: 3538.50, gameY: 91394.53, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A1", gameX: 1972.95, gameY: 91307.24, radius: 500, team: "us", type: "point", rotation: -2.4 }, 
+      { label: "", id: "US_A2", gameX: 2864.32, gameY: 91026.45, radius: 500, team: "us", type: "point", rotation: -18.2 }, 
+      { label: "", id: "US_A3", gameX: 3538.50, gameY: 91394.53, radius: 500, team: "us", type: "point", rotation: -24.3 }, 
 
       // --- AXIS GUNS ---
-      { label: "", id: "GER_A1", gameX: -7994.93, gameY: -94008.09, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -6399.25, gameY: -93262.29, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -4866.51, gameY: -94131.34, radius: 500, team: "ger", type: "point" },
+      { label: "", id: "GER_A1", gameX: -7994.93, gameY: -94008.09, radius: 500, team: "ger", type: "point", rotation: -196.9 }, 
+      { label: "", id: "GER_A2", gameX: -6399.25, gameY: -93262.29, radius: 500, team: "ger", type: "point", rotation: -177.2 }, 
+      { label: "", id: "GER_A3", gameX: -4866.51, gameY: -94131.34, radius: 500, team: "ger", type: "point", rotation: 179.7 },
 
       // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
 
@@ -235,14 +235,14 @@ const MAP_DATABASE = {
     guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // --- ALLIES GUNS ---
-      { label: "", id: "US_A1", gameX: 14095.0, gameY: -95545.0, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: 15033.0, gameY: -96042.0, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: 15846.0, gameY: -96295.0, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A1", gameX: 14095.0, gameY: -95545.0, radius: 500, team: "us", type: "point", rotation: -160.3 }, 
+      { label: "", id: "US_A2", gameX: 15033.0, gameY: -96042.0, radius: 500, team: "us", type: "point", rotation: -160.3 }, 
+      { label: "", id: "US_A3", gameX: 15846.0, gameY: -96295.0, radius: 500, team: "us", type: "point", rotation: -177.2 }, 
 
       // --- AXIS GUNS ---
-      { label: "", id: "GER_A1", gameX: 6178.13, gameY: 93955.51, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: 7401.13, gameY: 93871.51, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: 8783.13, gameY: 93871.70, radius: 500, team: "ger", type: "point" },
+      { label: "", id: "GER_A1", gameX: 6178.13, gameY: 93955.51, radius: 500, team: "ger", type: "point", rotation: 14.0 }, 
+      { label: "", id: "GER_A2", gameX: 7401.13, gameY: 93871.51, radius: 500, team: "ger", type: "point", rotation: 0.0 }, 
+      { label: "", id: "GER_A3", gameX: 8783.13, gameY: 93871.70, radius: 500, team: "ger", type: "point", rotation: 0.0 },
 
       // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
 
@@ -282,14 +282,14 @@ H4: {
     guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
     strongpoints: [
       // --- ALLIES GUNS ---
-      { label: "", id: "US_A1", gameX: -92742.050, gameY: -12583.729, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: -92871.086, gameY: -11403.749, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: -93164.120, gameY: -9681.098, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A1", gameX: -92742.050, gameY: -12583.729, radius: 500, team: "us", type: "point", rotation: -98.4 }, 
+      { label: "", id: "US_A2", gameX: -92871.086, gameY: -11403.749, radius: 500, team: "us", type: "point", rotation: -95.6 }, 
+      { label: "", id: "US_A3", gameX: -93164.120, gameY: -9681.098, radius: 500, team: "us", type: "point", rotation: -111.1 }, 
 
       // --- AXIS GUNS ---
-      { label: "", id: "GER_A1", gameX: 88119.170, gameY: -7863.742, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: 88402.150, gameY: -6428.254, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: 88974.860, gameY: -5394.126, radius: 500, team: "ger", type: "point" },
+      { label: "", id: "GER_A1", gameX: 88119.170, gameY: -7863.742, radius: 500, team: "ger", type: "point", rotation: 81.7 }, 
+      { label: "", id: "GER_A2", gameX: 88402.150, gameY: -6428.254, radius: 500, team: "ger", type: "point", rotation: 93.1 }, 
+      { label: "", id: "GER_A3", gameX: 88974.860, gameY: -5394.126, radius: 500, team: "ger", type: "point", rotation: 113.3 },
 
       // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
 
@@ -331,15 +331,15 @@ H4: {
     strongpoints: [
       // --- AXIS GUNS (Germany) ---
       // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
-      { label: "", id: "GER_A3", gameX: 91198.0, gameY: -10428.0, radius: 500, team: "ger", type: "point" }, // North
-      { label: "", id: "GER_A2", gameX: 91198.0, gameY: -11227.0, radius: 500, team: "ger", type: "point" }, // Mid
-      { label: "", id: "GER_A1", gameX: 91198.0, gameY: -11963.0, radius: 500, team: "ger", type: "point" }, // South
+      { label: "", id: "GER_A3", gameX: 91198.0, gameY: -10428.0, radius: 500, team: "ger", type: "point", rotation: 90.0 }, // North
+      { label: "", id: "GER_A2", gameX: 91198.0, gameY: -11227.0, radius: 500, team: "ger", type: "point", rotation: 90.0 }, // Mid
+      { label: "", id: "GER_A1", gameX: 91198.0, gameY: -11963.0, radius: 500, team: "ger", type: "point", rotation: 90.0 }, // South
 
       // --- ALLIES GUNS (United States) ---
       // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
-      { label: "", id: "US_A3", gameX: -92088.86, gameY: 4955.032, radius: 500, team: "us", type: "point" },  // North
-      { label: "", id: "US_A2", gameX: -93577.97, gameY: 3982.9868, radius: 500, team: "us", type: "point" },  // Mid
-      { label: "", id: "US_A1", gameX: -92188.766, gameY: 2897.9956, radius: 500, team: "us", type: "point" },  // South
+      { label: "", id: "US_A3", gameX: -92088.86, gameY: 4955.032, radius: 500, team: "us", type: "point", rotation: -95.6 },  // North
+      { label: "", id: "US_A2", gameX: -93577.97, gameY: 3982.9868, radius: 500, team: "us", type: "point", rotation: -99.7 },  // Mid
+      { label: "", id: "US_A1", gameX: -92188.766, gameY: 2897.9956, radius: 500, team: "us", type: "point", rotation: -98.4 },  // South
 
       // --- ALLIES SECTORS (Col 1 & 2) ---
       { label: "LUMBER YARD", id: "B1", gameX: -77356.0, gameY: -36029.0, radius: 4000.0, team: "us", type: "strongpoint" }, // Booster 9 (Scale 4.0 * 1000)
@@ -378,14 +378,14 @@ KHA: {
     guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
     strongpoints: [
       // --- AXIS GUNS ---
-      { label: "", id: "GER_A1", gameX: -3351.93, gameY: -90730.05, radius: 500, team: "ger", type: "point" },
-      { label: "", id: "GER_A2", gameX: -1593.68, gameY: -90886.69, radius: 500, team: "ger", type: "point" },
-      { label: "", id: "GER_A3", gameX: 206.03, gameY: -91623.68, radius: 500, team: "ger", type: "point" },
+      { label: "", id: "GER_A1", gameX: -3351.93, gameY: -90730.05, radius: 500, team: "ger", type: "point", rotation: -175.0 }, 
+      { label: "", id: "GER_A2", gameX: -1593.68, gameY: -90886.69, radius: 500, team: "ger", type: "point", rotation: -172.8 }, 
+      { label: "", id: "GER_A3", gameX: 206.03, gameY: -91623.68, radius: 500, team: "ger", type: "point", rotation: -159.1 }, 
 
       // --- ALLIES GUNS ---
-      { label: "", id: "SOV_A1", gameX: 5643.66, gameY: 94554.93, radius: 500, team: "us", type: "point" },
-      { label: "", id: "SOV_A2", gameX: 6506.63, gameY: 94131.92, radius: 500, team: "us", type: "point" },
-      { label: "", id: "SOV_A3", gameX: 7607.47, gameY: 93717.47, radius: 500, team: "us", type: "point" },
+      { label: "", id: "SOV_A1", gameX: 5643.66, gameY: 94554.93, radius: 500, team: "us", type: "point", rotation: 14.1 }, 
+      { label: "", id: "SOV_A2", gameX: 6506.63, gameY: 94131.92, radius: 500, team: "us", type: "point", rotation: 0.0 }, 
+      { label: "", id: "SOV_A3", gameX: 7607.47, gameY: 93717.47, radius: 500, team: "us", type: "point", rotation: 0.0 },
 
       // NOTE: Sectors grouped by MapMeta InitialOwner, NOT by geographic position.
       
@@ -458,14 +458,14 @@ KUR: {
 
       // --- GUN POSITIONS ---
       // GERMANS (South - Bottom of Map)
-      { label: "", id: "GER_A1", gameX: -1583.09, gameY: -91085.52, radius: 500, team: "ger", type: "point" }, // West
-      { label: "", id: "GER_A2", gameX: -584.95,  gameY: -91323.79, radius: 500, team: "ger", type: "point" }, // Middle
-      { label: "", id: "GER_A3", gameX: 249.13,   gameY: -91934.51, radius: 500, team: "ger", type: "point" }, // East
+      { label: "", id: "GER_A1", gameX: -1583.09, gameY: -91085.52, radius: 500, team: "ger", type: "point", rotation: 164.8 }, // West
+      { label: "", id: "GER_A2", gameX: -584.95,  gameY: -91323.79, radius: 500, team: "ger", type: "point", rotation: 181.9 }, // Middle
+      { label: "", id: "GER_A3", gameX: 249.13,   gameY: -91934.51, radius: 500, team: "ger", type: "point", rotation: 175.6 }, // East
 
       // SOVIETS (North - Top of Map)
-      { label: "", id: "SOV_A1", gameX: 3988.0, gameY: 91604.0, radius: 500, team: "us", type: "point" }, // West
-      { label: "", id: "SOV_A2", gameX: 4834.0, gameY: 91543.0, radius: 500, team: "us", type: "point" }, // Middle
-      { label: "", id: "SOV_A3", gameX: 5641.0, gameY: 91341.0, radius: 500, team: "us", type: "point" }  // East
+      { label: "", id: "SOV_A1", gameX: 3988.0, gameY: 91604.0, radius: 500, team: "us", type: "point", rotation: 0.0 }, // West
+      { label: "", id: "SOV_A2", gameX: 4834.0, gameY: 91543.0, radius: 500, team: "us", type: "point", rotation: 0.0 }, // Middle
+      { label: "", id: "SOV_A3", gameX: 5641.0, gameY: 91341.0, radius: 500, team: "us", type: "point", rotation: 0.0 }  // East
     ] 
   },
   MOR: { 
@@ -536,17 +536,17 @@ KUR: {
       // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
       // Sorted by Y descending (North to South) after inversion
       // Spawner6 (most north), Spawner5, Spawner4 (most south)
-      { label: "", id: "US_A1", gameX: -88315.72, gameY: 6495.1196, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: -88402.46, gameY: 7784.2734, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: -88551.5, gameY: 8780.766, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A1", gameX: -88315.72, gameY: 6495.1196, radius: 500, team: "us", type: "point", rotation: -95.6 }, 
+      { label: "", id: "US_A2", gameX: -88402.46, gameY: 7784.2734, radius: 500, team: "us", type: "point", rotation: -95.6 }, 
+      { label: "", id: "US_A3", gameX: -88551.5, gameY: 8780.766, radius: 500, team: "us", type: "point", rotation: -99.1 }, 
 
       // --- GERMAN GUNS (EAST) ---
       // Y coordinates inverted from FModel (multiply by -1) to match map image orientation
       // Sorted by Y descending (North to South) after inversion
       // Spawner4 (most north), Spawner5, Spawner6 (most south)
-      { label: "", id: "GER_A1", gameX: 90334.24, gameY: 2615.621, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: 90170.0, gameY: 4075.0, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: 90346.56, gameY: 5372.948, radius: 500, team: "ger", type: "point" }
+      { label: "", id: "GER_A1", gameX: 90334.24, gameY: 2615.621, radius: 500, team: "ger", type: "point", rotation: 80.0 }, 
+      { label: "", id: "GER_A2", gameX: 90170.0, gameY: 4075.0, radius: 500, team: "ger", type: "point", rotation: 90.0 }, 
+      { label: "", id: "GER_A3", gameX: 90346.56, gameY: 5372.948, radius: 500, team: "ger", type: "point", rotation: 100.0 }
     ]
   },
   OMA: { 
@@ -619,15 +619,15 @@ KUR: {
       
       // --- GERMAN GUNS (WEST) ---
       // Sorted west to east (lowest X to highest X)
-      { label: "", id: "GER_A1", gameX: -93808.164, gameY: -1728.4452, radius: 500, team: "ger", type: "point" }, // BP_GERArtillery_Spawner5 (most west)
-      { label: "", id: "GER_A2", gameX: -93742.41, gameY: 662.3068, radius: 500, team: "ger", type: "point" }, // BP_GERArtillery_Spawner4
-      { label: "", id: "GER_A3", gameX: -93369.984, gameY: -4131.0264, radius: 500, team: "ger", type: "point" }, // BP_GERArtillery_Spawner6 (least west)
+      { label: "", id: "GER_A1", gameX: -93808.164, gameY: -1728.4452, radius: 500, team: "ger", type: "point", rotation: -89.5 }, // BP_GERArtillery_Spawner5 (most west)
+      { label: "", id: "GER_A2", gameX: -93742.41, gameY: 662.3068, radius: 500, team: "ger", type: "point", rotation: -89.5 }, // BP_GERArtillery_Spawner4
+      { label: "", id: "GER_A3", gameX: -93369.984, gameY: -4131.0264, radius: 500, team: "ger", type: "point", rotation: -89.5 }, // BP_GERArtillery_Spawner6 (least west)
       
       // --- US GUNS (EAST) ---
       // Sorted west to east (lowest X to highest X)
-      { label: "", id: "US_A1", gameX: 77848.13, gameY: -6830.192, radius: 500, team: "us", type: "point" }, // BP_USArtillery_Spawner3 (most west of US guns)
-      { label: "", id: "US_A2", gameX: 78467.6, gameY: -9514.723, radius: 500, team: "us", type: "point" }, // BP_USArtillery_Spawner4
-      { label: "", id: "US_A3", gameX: 79327.93, gameY: -3703.3025, radius: 500, team: "us", type: "point" } // BP_USArtillery_Spawner_2 (most east)
+      { label: "", id: "US_A1", gameX: 77848.13, gameY: -6830.192, radius: 500, team: "us", type: "point", rotation: 87.2 }, // BP_USArtillery_Spawner3 (most west of US guns)
+      { label: "", id: "US_A2", gameX: 78467.6, gameY: -9514.723, radius: 500, team: "us", type: "point", rotation: 87.2 }, // BP_USArtillery_Spawner4
+      { label: "", id: "US_A3", gameX: 79327.93, gameY: -3703.3025, radius: 500, team: "us", type: "point", rotation: 92.8 } // BP_USArtillery_Spawner_2 (most east)
     ] 
   },
 PHL: { 
@@ -680,12 +680,12 @@ PHL: {
       { label: "CABBAGE PATCH", id: "B4", gameX: 46253.22, gameY: -62363.098, radius: 2500.0, team: "ger", type: "strongpoint" }, // Scale 2.5
       
       // --- ARTILLERY POSITIONS (Pure Data - Y Inverted) ---
-      { label: "", id: "US_A1", gameX: -1290.70, gameY: 91683.69, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: 1351.00,  gameY: 92849.00, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: 1471.00,  gameY: 90291.00, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "GER_A1", gameX: 712.84,  gameY: -90298.55, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: 1502.01, gameY: -92441.29, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: 1718.97, gameY: -90134.83, radius: 500, team: "ger", type: "point" }
+      { label: "", id: "US_A1", gameX: -1290.70, gameY: 91683.69, radius: 500, team: "us", type: "point", rotation: -357.2 }, 
+      { label: "", id: "US_A3", gameX: 1351.00,  gameY: 92849.00, radius: 500, team: "us", type: "point", rotation: 8.4 }, 
+      { label: "", id: "US_A2", gameX: 1471.00,  gameY: 90291.00, radius: 500, team: "us", type: "point", rotation: -354.4 }, 
+      { label: "", id: "GER_A1", gameX: 712.84,  gameY: -90298.55, radius: 500, team: "ger", type: "point", rotation: -185.6 }, 
+      { label: "", id: "GER_A2", gameX: 1502.01, gameY: -92441.29, radius: 500, team: "ger", type: "point", rotation: -185.6 }, 
+      { label: "", id: "GER_A3", gameX: 1718.97, gameY: -90134.83, radius: 500, team: "ger", type: "point", rotation: -171.6 }
     ] 
   },
 REM: { 
@@ -732,14 +732,14 @@ REM: {
 
       // --- GUN POSITIONS ---
       // ALLIES (US) - South/Bottom (Negative Y)
-      { label: "", id: "US_A1", gameX: -4446.61, gameY: -88972.766, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: -3567.6099, gameY: -89011.83, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: -2679.6123, gameY: -88972.766, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A1", gameX: -4446.61, gameY: -88972.766, radius: 500, team: "us", type: "point", rotation: -180.0 }, 
+      { label: "", id: "US_A2", gameX: -3567.6099, gameY: -89011.83, radius: 500, team: "us", type: "point", rotation: -180.0 }, 
+      { label: "", id: "US_A3", gameX: -2679.6123, gameY: -88972.766, radius: 500, team: "us", type: "point", rotation: -180.0 }, 
 
       // AXIS (GER) - North/Top (Positive Y)
-      { label: "", id: "GER_A1", gameX: 14294.659, gameY: 94233.6, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: 16394.264, gameY: 94198.32, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: 17936.605, gameY: 93962.43, radius: 500, team: "ger", type: "point" }
+      { label: "", id: "GER_A1", gameX: 14294.659, gameY: 94233.6, radius: 500, team: "ger", type: "point", rotation: -1.3 }, 
+      { label: "", id: "GER_A2", gameX: 16394.264, gameY: 94198.32, radius: 500, team: "ger", type: "point", rotation: -1.3 }, 
+      { label: "", id: "GER_A3", gameX: 17936.605, gameY: 93962.43, radius: 500, team: "ger", type: "point", rotation: -1.3 }
     ]
   },
 SMM: { 
@@ -791,14 +791,14 @@ SMM: {
 
       // --- GUN POSITIONS ---
       // ALLIES (US) - North (Positive Y)
-      { label: "", id: "US_A1", gameX: 1037.18, gameY: 95426.19, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: 1860.62, gameY: 95570.82, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: 3849.56, gameY: 95341.53, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A1", gameX: 1037.18, gameY: 95426.19, radius: 500, team: "us", type: "point", rotation: -8.3 }, 
+      { label: "", id: "US_A2", gameX: 1860.62, gameY: 95570.82, radius: 500, team: "us", type: "point", rotation: -1.1 }, 
+      { label: "", id: "US_A3", gameX: 3849.56, gameY: 95341.53, radius: 500, team: "us", type: "point", rotation: -8.1 }, 
 
       // AXIS (GER) - South (Negative Y)
-      { label: "", id: "GER_A1", gameX: -7146.81, gameY: -95880.13, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -4235.60, gameY: -95027.63, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -1324.40, gameY: -95453.88, radius: 500, team: "ger", type: "point" } // Estimated 3rd gun based on pattern if missing
+      { label: "", id: "GER_A1", gameX: -7146.81, gameY: -95880.13, radius: 500, team: "ger", type: "point", rotation: -189.4 }, 
+      { label: "", id: "GER_A2", gameX: -4235.60, gameY: -95027.63, radius: 500, team: "ger", type: "point", rotation: -180.0 }, 
+      { label: "", id: "GER_A3", gameX: -1324.40, gameY: -95453.88, radius: 500, team: "ger", type: "point", rotation: -180.0 } // Estimated 3rd gun based on pattern if missing
     ] 
   },
   SME: { 
@@ -849,14 +849,14 @@ SMM: {
 
       // --- GUN POSITIONS ---
       // ALLIES (US) - East (Positive X)
-      { label: "", id: "US_A1", gameX: 91952.0, gameY: -559.0, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A2", gameX: 91952.0, gameY: 1057.0, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "US_A3", gameX: 91952.0, gameY: 2432.0, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "US_A1", gameX: 91952.0, gameY: -559.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
+      { label: "", id: "US_A2", gameX: 91952.0, gameY: 1057.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
+      { label: "", id: "US_A3", gameX: 91952.0, gameY: 2432.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
 
       // AXIS (GER) - West (Negative X)
-      { label: "", id: "GER_A1", gameX: -95041.6, gameY: -1857.68, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -95111.11, gameY: -1027.0771, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -95177.37, gameY: -235.55342, radius: 500, team: "ger", type: "point" }
+      { label: "", id: "GER_A1", gameX: -95041.6, gameY: -1857.68, radius: 500, team: "ger", type: "point", rotation: -94.8 }, 
+      { label: "", id: "GER_A2", gameX: -95111.11, gameY: -1027.0771, radius: 500, team: "ger", type: "point", rotation: -94.8 }, 
+      { label: "", id: "GER_A3", gameX: -95177.37, gameY: -235.55342, radius: 500, team: "ger", type: "point", rotation: -94.8 }
     ] 
   },
   SMO: { 
@@ -909,14 +909,14 @@ SMM: {
 
       // --- GUN POSITIONS ---
       // SOVIETS (East - Positive X)
-      { label: "", id: "SOV_A1", gameX: 98300.0, gameY: 670.0, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "SOV_A2", gameX: 98300.0, gameY: 2000.0, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "SOV_A3", gameX: 98300.0, gameY: 3525.0, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "SOV_A1", gameX: 98300.0, gameY: 670.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
+      { label: "", id: "SOV_A2", gameX: 98300.0, gameY: 2000.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
+      { label: "", id: "SOV_A3", gameX: 98300.0, gameY: 3525.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
 
       // GERMANS (West - Negative X)
-      { label: "", id: "GER_A1", gameX: -98800.0, gameY: -1505.0, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -98800.0, gameY: 570.0, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -98800.0, gameY: 2695.0, radius: 500, team: "ger", type: "point" }
+      { label: "", id: "GER_A1", gameX: -98800.0, gameY: -1505.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
+      { label: "", id: "GER_A2", gameX: -98800.0, gameY: 570.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
+      { label: "", id: "GER_A3", gameX: -98800.0, gameY: 2695.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }
     ] 
   },
 STA: { 
@@ -968,14 +968,14 @@ STA: {
 
       // --- GUN POSITIONS ---
       // SOVIETS (East - Positive X)
-      { label: "", id: "SOV_A1", gameX: 78109.51, gameY: -5554.999, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "SOV_A2", gameX: 78366.555, gameY: -4298.889, radius: 500, team: "us", type: "point" }, 
-      { label: "", id: "SOV_A3", gameX: 78117.766, gameY: -3058.8193, radius: 500, team: "us", type: "point" }, 
+      { label: "", id: "SOV_A1", gameX: 78109.51, gameY: -5554.999, radius: 500, team: "us", type: "point", rotation: 87.2 }, 
+      { label: "", id: "SOV_A2", gameX: 78366.555, gameY: -4298.889, radius: 500, team: "us", type: "point", rotation: 92.8 }, 
+      { label: "", id: "SOV_A3", gameX: 78117.766, gameY: -3058.8193, radius: 500, team: "us", type: "point", rotation: 92.8 }, 
 
       // GERMANS (West - Negative X)
-      { label: "", id: "GER_A1", gameX: -93251.61, gameY: -5937.273, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A2", gameX: -93397.79, gameY: -3805.0764, radius: 500, team: "ger", type: "point" }, 
-      { label: "", id: "GER_A3", gameX: -93916.195, gameY: -2579.355, radius: 500, team: "ger", type: "point" } 
+      { label: "", id: "GER_A1", gameX: -93251.61, gameY: -5937.273, radius: 500, team: "ger", type: "point", rotation: -89.5 }, 
+      { label: "", id: "GER_A2", gameX: -93397.79, gameY: -3805.0764, radius: 500, team: "ger", type: "point", rotation: -89.5 }, 
+      { label: "", id: "GER_A3", gameX: -93916.195, gameY: -2579.355, radius: 500, team: "ger", type: "point", rotation: -97.5 } 
     ] 
   },
   TOB: {
@@ -994,15 +994,15 @@ STA: {
     strongpoints: [
       // --- AXIS GUNS (Germany) ---
       // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
-      { label: "", id: "GER_A3", gameX: -92423.66, gameY: -5152.503, radius: 500, team: "ger", type: "point" },  // North
-      { label: "", id: "GER_A2", gameX: -93282.37, gameY: -5983.347, radius: 500, team: "ger", type: "point" },  // Mid
-      { label: "", id: "GER_A1", gameX: -92338.164, gameY: -7535.631, radius: 500, team: "ger", type: "point" }, // South
+      { label: "", id: "GER_A3", gameX: -92423.66, gameY: -5152.503, radius: 500, team: "ger", type: "point", rotation: -109.7 },  // North
+      { label: "", id: "GER_A2", gameX: -93282.37, gameY: -5983.347, radius: 500, team: "ger", type: "point", rotation: -90.0 },  // Mid
+      { label: "", id: "GER_A1", gameX: -92338.164, gameY: -7535.631, radius: 500, team: "ger", type: "point", rotation: -78.7 }, // South
 
       // --- ALLIES GUNS (British) ---
       // Inverted Ys. Sorted North (Highest Y) -> South (Lowest Y)
-      { label: "", id: "GB_A3", gameX: 93126.9, gameY: 7690.272, radius: 500, team: "us", type: "point" },    // North
-      { label: "", id: "GB_A2", gameX: 92639.85, gameY: 5926.3613, radius: 500, team: "us", type: "point" },   // Mid
-      { label: "", id: "GB_A1", gameX: 93045.516, gameY: 1597.4238, radius: 500, team: "us", type: "point" },  // South
+      { label: "", id: "GB_A3", gameX: 93126.9, gameY: 7690.272, radius: 500, team: "us", type: "point", rotation: 114.4 },    // North
+      { label: "", id: "GB_A2", gameX: 92639.85, gameY: 5926.3613, radius: 500, team: "us", type: "point", rotation: 87.8 },   // Mid
+      { label: "", id: "GB_A1", gameX: 93045.516, gameY: 1597.4238, radius: 500, team: "us", type: "point", rotation: 61.6 },  // South
 
       // --- AXIS SECTORS (Col 1 & 2) ---
       { label: "GUARD ROOM", id: "B1", gameX: -68855.0, gameY: 27530.0, radius: 7000.0, team: "ger", type: "strongpoint" },
@@ -1072,14 +1072,14 @@ UTA: {
 
       // --- GUN POSITIONS ---
       // SOVIETS (East - Positive X)
-      { label: "", id: "US_A1", gameX: 77788.36, gameY: -6617.35, radius: 500, team: "us", type: "point" }, // North
-      { label: "", id: "US_A2", gameX: 78334.16, gameY: -4627.70, radius: 500, team: "us", type: "point" }, // Mid
-      { label: "", id: "US_A3", gameX: 77932.25, gameY: -2639.21, radius: 500, team: "us", type: "point" }, // South
+      { label: "", id: "US_A1", gameX: 77788.36, gameY: -6617.35, radius: 500, team: "us", type: "point", rotation: 87.2 }, // North
+      { label: "", id: "US_A2", gameX: 78334.16, gameY: -4627.70, radius: 500, team: "us", type: "point", rotation: 92.8 }, // Mid
+      { label: "", id: "US_A3", gameX: 77932.25, gameY: -2639.21, radius: 500, team: "us", type: "point", rotation: 92.8 }, // South
 
       // GERMANS (West - Negative X)
-      { label: "", id: "GER_A1", gameX: -91738.08, gameY: -221.04, radius: 500, team: "ger", type: "point" }, // North
-      { label: "", id: "GER_A2", gameX: -91714.0, gameY: 752.0, radius: 500, team: "ger", type: "point" }, // Mid
-      { label: "", id: "GER_A3", gameX: -91649.22, gameY: 1828.61, radius: 500, team: "ger", type: "point" } // South
+      { label: "", id: "GER_A1", gameX: -91738.08, gameY: -221.04, radius: 500, team: "ger", type: "point", rotation: -89.5 }, // North
+      { label: "", id: "GER_A2", gameX: -91714.0, gameY: 752.0, radius: 500, team: "ger", type: "point", rotation: -89.5 }, // Mid
+      { label: "", id: "GER_A3", gameX: -91649.22, gameY: 1828.61, radius: 500, team: "ger", type: "point", rotation: -89.5 } // South
     ] 
   },
 };

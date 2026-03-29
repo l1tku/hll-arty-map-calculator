@@ -623,7 +623,12 @@ function imagePixelsToGame(imgX, imgY, imgW, imgH) {
 // ==========================================
 // GUN ROTATION HELPER (used by BOTH friendly + enemy)
 // ==========================================
-function getGunBaseRotation(team, mapConfig) {
+function getGunBaseRotation(team, mapConfig, individualRotation) {
+  // If individual rotation is defined, use it (from game files)
+  if (individualRotation !== undefined && individualRotation !== null) {
+    return individualRotation;
+  }
+  
   const teamKey = team.toLowerCase();
   const isAxis = ["ger", "axis", "afrika"].some(x => teamKey.includes(x));
   const sortMode = mapConfig ? mapConfig.gunSort : "y";
@@ -870,15 +875,15 @@ function renderMarkers() {
         // ENEMY GUN — use enemy-specific image
         img.src = "images/ui/artillery_position_enemy.webp";
         
-        // ← NEW: Apply correct rotation using the ENEMY faction
-        const baseRotation = getGunBaseRotation(point.team, mapConfig);
+        // ← NEW: Apply correct rotation using the ENEMY faction + individual rotation if available
+        const baseRotation = getGunBaseRotation(point.team, mapConfig, point.rotation);
         img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
       } 
       else if (isActiveGun) {
-        img.src = "images/ui/artillery_position_white.webp";
+        img.src = "images/ui/artillery_position_v2_white.webp";
       } 
       else {
-        img.src = "images/ui/artillery_position.webp";
+        img.src = "images/ui/artillery_position_v2.webp";
       }
 
       // Friendly active gun still points at target (unchanged)
@@ -891,8 +896,8 @@ function renderMarkers() {
         img.style.transform = `rotate(${angle}deg)`;
       } 
       else if (!isEnemyGun) {
-        // Friendly default rotation (unchanged)
-        const baseRotation = getGunBaseRotation(point.team, mapConfig);
+        // Friendly default rotation (use individual if available)
+        const baseRotation = getGunBaseRotation(point.team, mapConfig, point.rotation);
         img.style.transform = `rotate(${baseRotation}deg) scaleX(-1)`;
       }
 

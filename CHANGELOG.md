@@ -1,6 +1,25 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-03-29
+### Fixed
+- Manual calculator "FIRING AS" label now consistently shows "UNITED STATES" for US faction
+- Desktop haptic feedback: Added vibration when shooting via desktop map click (was only on mobile fire button previously)
+- Individual gun rotations: Added authentic Yaw rotation values from game files to all 114 artillery guns across 19 maps
+- Updated all artillery icon images
+- Removed leftover unused crosshair.png file
+
+## [1.2.0] - 2026-03-29
+### Added
+- **Dynamic Version System**: APP_VERSION now extracts automatically from script URL query parameter, ensuring displayed version always matches cache-buster.
+- **Haptic Feedback for Custom Artillery**: Added vibration feedback when selecting custom artillery guns (was missing previously).
+
+### Changed
+- Updated script.js cache-buster to semantic versioning (`?v=1.2.0`).
+
+### Fixed
+- **Desktop Haptic Feedback**: Added missing vibration feedback when shooting via desktop map click (was only on mobile fire button previously).
+
 ## [1.1.8] - 2026-03-28
 ### Added
 - **Custom Artillery System (Major Feature)**: Players can now place up to 3 custom guns per team directly on the map. Custom guns are fully functional and appear in the gun dropdown or when clicked on, and support a context menu (Move / Delete).
