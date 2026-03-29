@@ -3750,6 +3750,8 @@ mapContainer.addEventListener("click", (e) => {
   const isMobile = window.innerWidth <= 768;
   if (!isMobile || !hudEnabled) { 
       triggerFirePulse(rawImgX, rawImgY); 
+      // Haptic feedback for desktop shooting (Chrome/Android)
+      if (navigator.vibrate) navigator.vibrate(30);
   }
 
   const mapImage = document.getElementById("mapImage");
