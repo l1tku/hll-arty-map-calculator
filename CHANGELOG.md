@@ -1,13 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2026-03-29
+### Fixed
+- **Mil Display on Gun Switch**: Fixed bug where "OUT" was incorrectly displayed for elevation mil when switching between HQ and custom artillery, even when the target was within range. The mil value is now correctly recalculated from the current gun position in `renderTargeting()`.
+
 ## [1.2.1] - 2026-03-29
 ### Fixed
 - Manual calculator "FIRING AS" label now consistently shows "UNITED STATES" for US faction
 - Desktop haptic feedback: Added vibration when shooting via desktop map click (was only on mobile fire button previously)
 - Individual gun rotations: Added authentic Yaw rotation values from game files to all 114 artillery guns across 19 maps
 - Updated all artillery icon images
-- Removed leftovers and unused files
+- Removed leftover unused crosshair.png file
 
 ## [1.2.0] - 2026-03-29
 ### Added

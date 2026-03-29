@@ -1612,7 +1612,16 @@ function renderTargeting() {
   // ============================================================================
 
     // 4. UPDATE DASHBOARD
-    if (elDist) elDist.innerText = `${activeTarget.distance}m`;
+    if (elDist) elDist.innerText = `${Math.round(totalDistanceMeters)}m`;
+
+    // --- RECALCULATE MIL FROM CURRENT GUN POSITION ---
+    // This ensures the mil is always correct for the currently selected gun
+    const factionLabel = cached.factionLabel.innerText;
+    const currentMil = getMilFromTable(Math.round(totalDistanceMeters), factionLabel);
+    // Update activeTarget to keep them in sync
+    activeTarget.distance = Math.round(totalDistanceMeters);
+    activeTarget.mil = currentMil;
+    // ------------------------------------------------
 
     // --- NEW: COMPASS BEARING CALCULATION ---
     if (elBearing) {
@@ -1630,9 +1639,9 @@ function renderTargeting() {
     }
     // ----------------------------------------
 
-    if (activeTarget.mil) {
+    if (currentMil) {
         if (elMil) {
-            elMil.innerText = activeTarget.mil;
+            elMil.innerText = currentMil;
             elMil.className = "data-value val-huge"; 
         }
         if (elTime) {
