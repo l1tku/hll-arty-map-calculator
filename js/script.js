@@ -3526,18 +3526,19 @@ function initArtyControls() {
 function saveState() {
   const controlsDrawer = document.getElementById("controlsDrawer");
   
-  // CLEAN SAVE: Only saves Map, Faction, Gun, and Toggle Buttons.
-  // NO Pan/Zoom, NO Manual Calculator settings, NO Custom Artillery.
+  // SAVE: Map, Faction, Gun, Toggle Buttons, and Custom Artillery.
   const stateToSave = {
     activeMapKey: activeMapKey,
     activeFaction: activeFaction,
     activeGunIndex: activeGunIndex,
+    activeCustomGunId: activeCustomGunId,
     manualCalcFaction: manualCalcFaction,
     panelHidden: controlsDrawer ? controlsDrawer.classList.contains("closed") : false,
     rulerEnabled: rulerEnabled,
     hudEnabled: hudEnabled,
-    // customArtillery is EXCLUDED here so it never saves
-    // nextCustomGunId is EXCLUDED here so it never saves
+    // NEW: Save custom artillery state
+    customArtillery: customArtillery,
+    nextCustomGunId: nextCustomGunId,
     timestamp: Date.now()
   };
   
@@ -3556,9 +3557,9 @@ function loadState() {
     if (!savedState) {
         activeGunIndex = -1; 
         activeFaction = null; // Default to no faction
-        // RESET CUSTOM ARTY (Always reset on load)
-        customArtillery = []; // Reset custom artillery
-        nextCustomGunId = 1; // Reset ID counter
+        activeCustomGunId = null;
+        customArtillery = [];
+        nextCustomGunId = 1;
         placementMode = false;
         moveMode = false;
         movingGunId = null;
@@ -3576,13 +3577,15 @@ function loadState() {
     
     activeGunIndex = (loaded.activeGunIndex !== undefined) ? loaded.activeGunIndex : -1;
     
+    // NEW: Restore custom artillery state
+    activeCustomGunId = loaded.activeCustomGunId || null;
+    customArtillery = loaded.customArtillery || [];
+    nextCustomGunId = loaded.nextCustomGunId || 1;
+    
     manualCalcFaction = loaded.manualCalcFaction || 'us';
     rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : false;
     hudEnabled = loaded.hudEnabled !== undefined ? loaded.hudEnabled : false;
     
-    // RESET CUSTOM ARTY (Always reset on load, never restore from save)
-    customArtillery = []; 
-    nextCustomGunId = 1;
     placementMode = false;
     moveMode = false;
     movingGunId = null;
@@ -3593,7 +3596,7 @@ function loadState() {
   } catch (error) {
     activeGunIndex = -1;
     activeFaction = null;
-    // RESET CUSTOM ARTY (Always reset on error)
+    activeCustomGunId = null;
     customArtillery = []; 
     nextCustomGunId = 1;
     placementMode = false;
