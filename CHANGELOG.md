@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 - Desktop haptic feedback: Added vibration when shooting via desktop map click (was only on mobile fire button previously)
 - Individual gun rotations: Added authentic Yaw rotation values from game files to all 114 artillery guns across 19 maps
 - Updated all artillery icon images
-- Removed leftover unused crosshair.png file
+- Removed leftovers and unused files
 
 ## [1.2.0] - 2026-03-29
 ### Added
