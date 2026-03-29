@@ -2,7 +2,11 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.1.8";
+const APP_VERSION = (() => {
+  const script = document.querySelector('script[src*="script.js"]');
+  const match = script?.src.match(/\?v=([\d.]+)/);
+  return match ? `v${match[1]}` : "dev";
+})();
 const GAME_VERSION = "UPDATE 19.1";
 
 // Create a simple map of IDs and what text should go in them
@@ -925,6 +929,8 @@ customArtillery.forEach(gun => {
     if (isDragging) return;
     e.stopPropagation();
     e.preventDefault();
+
+    if (navigator.vibrate) navigator.vibrate(20);
 
     activeGunIndex = -1;
     activeCustomGunId = gun.id;
