@@ -15,8 +15,9 @@ const ASSETS_TO_CACHE = [
   './images/flags/gb.webp'
 ];
 
-// Install: Cache core assets
+// Install: Cache core assets + skip waiting for immediate activation
 self.addEventListener('install', (e) => {
+  self.skipWaiting(); // Activate new worker immediately
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -24,8 +25,9 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// Activate: Clean up old caches
+// Activate: Clean up old caches + claim clients immediately
 self.addEventListener('activate', (e) => {
+  self.clients.claim(); // Take control of all pages immediately
   e.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(keyList.map((key) => {
@@ -37,30 +39,23 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch: Cache First -> Network Fallback -> Cache New Files (Stale-While-Revalidate)
+// Fetch: Network First -> Cache Fallback (for offline support)
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      // 1. Serve cached file if found
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      // 2. If not in cache, fetch from network
-      return fetch(e.request).then((networkResponse) => {
-        // Check if we received a valid response
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+    fetch(e.request)
+      .then((networkResponse) => {
+        // Valid network response: cache it and return
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
         }
-
-        // 3. Clone the response and save it to cache for next time
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(e.request, responseToCache);
-        });
-
         return networkResponse;
-      });
-    })
+      })
+      .catch(() => {
+        // Network failed: try cache
+        return caches.match(e.request);
+      })
   );
 });
