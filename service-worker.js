@@ -1,9 +1,11 @@
-const CACHE_NAME = 'hll-arty-cache-v1';
+const CACHE_NAME = 'hll-arty-cache-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './css/style.css',
   './js/script.js',
+  './js/maps.js',
+  './js/ballistics.js',
   './fonts/Gotham.otf',
   './images/ui/artillery_position.webp',
   './images/ui/garrison_lining_dot_2.png',
@@ -35,11 +37,30 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch: Serve from cache, fallback to network
+// Fetch: Cache First -> Network Fallback -> Cache New Files (Stale-While-Revalidate)
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
+    caches.match(e.request).then((cachedResponse) => {
+      // 1. Serve cached file if found
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      // 2. If not in cache, fetch from network
+      return fetch(e.request).then((networkResponse) => {
+        // Check if we received a valid response
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+          return networkResponse;
+        }
+
+        // 3. Clone the response and save it to cache for next time
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, responseToCache);
+        });
+
+        return networkResponse;
+      });
     })
   );
 });
