@@ -655,10 +655,10 @@ body {
     /* Sit below the active gun (105) and trajectory (100) */
     z-index: 90 !important; 
     
-    opacity: 0.8 !important; 
+    opacity: 1.0 !important; 
     
-    /* VISUAL FIX: Slight grayscale makes the active gun color pop more */
-    filter: grayscale(0.8) !important; 
+    /* No grayscale - full color */
+    filter: none !important; 
     
     /* REMOVED TRANSITION: Instant state change */
     transition: none !important;
