@@ -1002,9 +1002,9 @@ customArtillery.forEach(gun => {
 
   // Use white version ONLY when the gun is selected
   if (isActiveGun) {
-    img.src = "images/ui/artillery_position_white.webp";
+    img.src = "images/ui/artillery_position_v2_white.webp";
   } else {
-    img.src = "images/ui/artillery_position.webp";
+    img.src = "images/ui/artillery_position_v2.webp";
   }
   img.style.width = "100%";
   img.style.height = "100%";
