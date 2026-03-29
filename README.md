@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.2.1 — Updated for Hell Let Loose Update 19.1**
+**v1.2.0 — Updated for Hell Let Loose Update 19.1**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
@@ -41,9 +41,14 @@ Access the calculator instantly in your browser:
 ## Usage
 ### Method 1: Map Targeting
 1. **Select Map**: Open the map selector and choose your map.
-2. **Configure Faction**: Select your Faction and active Gun (1, 2, or 3) from the control panel.
-3. **Aim**: Click anywhere on the map to place a target or use Live Tracking for real-time results directly under your cursor.
-4. **Result**: Read the result from the Target Data Panel topside.
+2. **Configure Faction**: Select your Faction from the control panel.
+3. **Select or Place Artillery**:
+   - **HQ Guns**: Select Gun 1, 2, or 3 from the dropdown (these are the fixed HQ artillery positions).
+   - **Custom Guns**: Click/tap the **"+"** button to enter placement mode, then click on the map (desktop) or aim with the crosshair and tap **PLACE** (mobile) to position up to 3 custom guns per team. Custom guns must be placed within the green highlighted sector.
+4. **Aim**: Click anywhere on the map to place a target or use Live Tracking for real-time results directly under your cursor.
+5. **Result**: Read the result from the Target Data Panel topside.
+
+**Custom Gun Management**: Click a custom gun icon to select it, or right-click to open the context menu (Move / Delete). On mobile, you can also remove custom guns from the faction dropdown menu.
 
 ### Method 2: Manual Calculator
 1. Click the Calculator Icon in the sidebar or within the Map Selection footer.
