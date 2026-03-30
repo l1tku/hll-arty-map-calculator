@@ -14,24 +14,21 @@ Access the calculator instantly in your browser:
   - Trajectory line from gun to target with 50m distance/MIL ruler.
   - Trajectory Adjustment Slider to walk shots along the fixed bearing.
   - Dispersion (40m), Killzone (20m), and Blast Radius (10m) rings (adaptive scaling at any zoom).
-  - **Permanent soft dark overlays** showing 1600m maximum range (outside the circle) and 100m minimum range / dead zone (inside the circle).
   - Compass bearing readout.
   - Shooting pulse ripple at impact.
 - **Strongpoint Management**: "Match Setup" mode – select the 5 active strongpoints to match the current in-game Warfare or Offensive layout.
 - **Custom Artillery System**: Place up to 3 custom guns per team directly on the map. They rotate toward the target, appear in the gun dropdown, and support Move/Delete via context menu.
 - **Gun Selection & Visualization**:
   - Select via dropdown or direct click/tap on artillery icons.
-  - Icons dynamically scale with zoom, rotate toward target, and stay fully visible.
-- **Green Sector Highlight**: Persistent green sector highlight stays visible while placing custom artillery so you always know the allowed area.
+  - Icons dynamically scale with zoom and rotate toward target.
 - **Live Tracking HUD**:
   - **Desktop**: Real-time distance, MILs, grid, and bearing under cursor.
   - **Mobile**: Docked crosshair HUD with "Fire" button to lock target at screen center.
 - **Manual Calculator**: Integrated keypad for quick distance-to-MIL calculations.
 - **Mobile Optimized**:
-  - Large touch targets, haptic feedback (keypad, Fire button, zoom buttons), and visual safety cues.
-  - Snappy step-zoom, ergonomic Fire button placement, no pull-to-refresh bounce.
-  - Crosshair targeting mode for precise in-game overlay use. On mobile you must aim with the crosshair and tap the **PLACE** button to position custom artillery.
-- **Map Selector**: Visual thumbnail grid with search bar (supports accented characters).
+  - Large touch targets, haptic feedback, and visual safety cues.
+  - Snappy step-zoom, no pull-to-refresh bounce.
+- **Map Selector**: Visual thumbnail grid with search bar.
 
 ## Technical Details
 - **Dynamic Caching**: "Stale-While-Revalidate" – only downloads and caches maps you open, keeping storage low while ensuring instant reloads.
