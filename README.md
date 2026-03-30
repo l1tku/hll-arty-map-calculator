@@ -14,7 +14,6 @@ Access the calculator instantly in your browser:
   - Trajectory line from gun to target with 50m distance/MIL ruler.
   - Trajectory Adjustment Slider to walk shots along the fixed bearing.
   - Dispersion (40m), Killzone (20m), and Blast Radius (10m) rings (adaptive scaling at any zoom).
-  - **Permanent soft dark overlays** showing 1600m maximum range (outside the circle) and 100m minimum range / dead zone (inside the circle).
   - Compass bearing readout.
   - Shooting pulse ripple at impact.
 - **Strongpoint Management**: "Match Setup" mode – select the 5 active strongpoints to match the current in-game Warfare or Offensive layout.
