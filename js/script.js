@@ -2790,17 +2790,41 @@ function deleteCustomGun(gunId) {
   if (index !== -1) {
     customArtillery.splice(index, 1);
     
+    // Check if we were in move mode for this gun
+    if (moveMode && movingGunId === gunId) {
+      moveMode = false;
+      movingGunId = null;
+      
+      const label = document.getElementById("gunLabel");
+      if (label) {
+        label.innerText = "Select GUN";
+        label.style.color = "#ffc107";
+      }
+      
+      // Hide the guide text
+      const guideEl = document.getElementById("setupGuide");
+      if (guideEl) {
+        guideEl.classList.add("hidden");
+      }
+      
+      updateMapCursor();
+      renderMarkers(); // Re-render to remove sector highlight
+    }
+    
     // Reset active gun if it was the deleted one
-    if (activeGunIndex === -1) {
+    if (activeCustomGunId === gunId) {
+      activeCustomGunId = null;
       activeGunIndex = -1;
       const label = document.getElementById("gunLabel");
-      label.innerText = "Select GUN";
-      label.style.color = "#ffc107";
+      if (label) {
+        label.innerText = "Select GUN";
+        label.style.color = "#ffc107";
+      }
     }
     
     // Update UI to refresh dropdown
-    updateGunUI(MAP_DATABASE[activeMapKey]); // Refresh dropdown to remove deleted custom gun
-    updateGunDropdownUI(); // Refresh custom gun container to remove deleted gun
+    updateGunUI(MAP_DATABASE[activeMapKey]);
+    updateGunDropdownUI();
     
     // Re-render and save
     renderMarkers();
