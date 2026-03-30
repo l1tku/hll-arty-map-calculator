@@ -4174,7 +4174,7 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.3);     /* ← change to 0.95 for darker */
+  background: rgba(0, 0, 0, 0.3);
   pointer-events: none;
   z-index: 96;
   display: none;

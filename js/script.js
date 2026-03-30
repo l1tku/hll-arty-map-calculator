@@ -1128,7 +1128,7 @@ function updatePlacementSectorVisuals() {
     }
 
     sectorLayer.innerHTML = "";
-    if (!placementMode || !activeFaction) return;
+    if ((!placementMode && !moveMode) || !activeFaction) return;
 
     // === DYNAMIC: Find correct home sector from the faction's own guns ===
     const mapConfig = MAP_DATABASE[activeMapKey];
@@ -3722,6 +3722,63 @@ mapContainer.addEventListener("click", (e) => {
         targetPos.y < GAME_BOTTOM || targetPos.y > GAME_TOP) {
         return; 
     }
+
+    // === SECTOR RESTRICTION CHECK (same as placement) ===
+    const mapConfig = MAP_DATABASE[activeMapKey];
+    const isVerticalMap = (mapConfig && mapConfig.gunSort === "x");
+
+    // Find correct home sector from the faction's own guns
+    const friendlyGuns = currentStrongpoints.filter(p => 
+        p.team === activeFaction && p.type === 'point'
+    );
+
+    if (friendlyGuns.length === 0) return;
+
+    const allowedSector = getPointSector(friendlyGuns[0], isVerticalMap);
+
+    // Convert target game position to image pixels for sector check
+    const clickPixels = gameToImagePixels(targetPos.x, targetPos.y, w, h);
+
+    let isAllowed = false;
+
+    if (isVerticalMap) {
+      const sectorHeight = h / 5;
+      const allowedTop    = allowedSector * sectorHeight;
+      const allowedBottom = allowedTop + sectorHeight;
+
+      if (clickPixels.y >= allowedTop && clickPixels.y <= allowedBottom) {
+        isAllowed = true;
+      }
+    } else {
+      const sectorWidth = w / 5;
+      const allowedLeft  = allowedSector * sectorWidth;
+      const allowedRight = allowedLeft + sectorWidth;
+
+      if (clickPixels.x >= allowedLeft && clickPixels.x <= allowedRight) {
+        isAllowed = true;
+      }
+    }
+
+    if (!isAllowed) {
+      const guideEl = document.getElementById("setupGuide");
+      if (guideEl) {
+        guideEl.classList.remove("hidden", "success");
+        guideEl.innerHTML = `<span style="color:#ff4444;font-weight:900;">❌ ONLY IN GREEN SECTOR</span>`;
+      }
+      if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
+
+      // Restore the move mode text after error
+      setTimeout(() => {
+        if (moveMode && guideEl) {
+          guideEl.innerText = "CLICK NEW POSITION FOR ARTILLERY";
+        } else if (guideEl) {
+          guideEl.classList.add("hidden");
+        }
+      }, 2200);
+
+      return;
+    }
+    // ==================================================
     
     // Move custom artillery
     moveCustomGun(movingGunId, targetPos.x, targetPos.y);

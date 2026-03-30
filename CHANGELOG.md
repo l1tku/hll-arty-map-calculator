@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.3] - 2026-03-30
+### Fixed
+- **Custom Artillery Move Sector Restriction**: Fixed bug where custom artillery could be moved past the 2-sector boundary. Moving custom guns now enforces the same green sector restriction as placement.
+- **Green Sector Highlight in Move Mode**: The green sector highlight is now displayed during move mode, not just placement mode.
+
 ## [1.2.2] - 2026-03-29
 ### Fixed
 - **Mil Display on Gun Switch**: Fixed bug where "OUT" was incorrectly displayed for elevation mil when switching between HQ and custom artillery, even when the target was within range. The mil value is now correctly recalculated from the current gun position in `renderTargeting()`.
