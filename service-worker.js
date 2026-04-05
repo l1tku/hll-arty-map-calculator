@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hll-arty-cache-v3';
+const CACHE_NAME = 'hll-arty-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const ASSETS_TO_CACHE = [
   './js/maps.js',
   './js/ballistics.js',
   './fonts/Gotham.otf',
-  './images/ui/artillery_position.webp',
+  './images/ui/artillery_position_v2.webp',
   './images/ui/garrison_lining_dot_2.png',
   './images/flags/us.webp',
   './images/flags/ger.webp',
