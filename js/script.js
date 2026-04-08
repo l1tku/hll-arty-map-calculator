@@ -2203,6 +2203,7 @@ function switchMap(mapKey) {
         placementMode = false;
         moveMode = false;
         movingGunId = null;
+        updateMapCursor();
         // =====================================
 
         // Re-build grid and markers for new map dimensions

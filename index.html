@@ -23,7 +23,7 @@
       if (window.location.protocol.indexOf('http') === 0) {
         window.addEventListener('load', () => {
           // Cache-busting query parameter forces browser to check for new service worker code
-          navigator.serviceWorker.register('./service-worker.js?v=4')
+          navigator.serviceWorker.register('./service-worker.js?v=5')
             .then((reg) => console.log('Service Worker registered.', reg))
             .catch((err) => console.log('Service Worker registration failed.', err));
         });
