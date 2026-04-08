@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.2.4] - 2026-04-05
 ### Fixed
-- **404 Artillery Position Image**: Fixed missing image error by updating service worker cache to v4 and renaming artillery_position.webp to artillery_position_v2.webp
+- **404 Artillery Position Image**: Fixed missing image error by updating service worker cache
 - **Mobile UI Refresh on Map Change**: Fixed mobile crosshair and place button remaining visible after switching maps by calling updateMapCursor() when resetting placement mode
 
 ## [1.2.3] - 2026-03-30
