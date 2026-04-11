@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.5] - 2026-04-11
+### Fixed
+- **Stalingrad Strongpoint Positions**: Updated all 15 strongpoint coordinates to use accurate TextRenderComponent label positions from game files for precise map alignment.
+
 ## [1.2.4] - 2026-04-05
 ### Fixed
 - **404 Artillery Position Image**: Fixed missing image error by updating service worker cache
