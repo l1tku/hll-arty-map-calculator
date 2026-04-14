@@ -941,30 +941,30 @@ STA: {
 
       // --- AXIS SECTORS (West - Negative X) ---
       // GER Base (Far West)
-      { label: "CITY OVERLOOK", id: "B11", gameX: -72630.0, gameY: -49110.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Label position (North)
-      { label: "NAIL FACTORY", id: "B10", gameX: -70500.0, gameY: -9050.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Label position (Mid)
-      { label: "MAMAYEV APPROACH", id: "B9", gameX: -73120.0, gameY: 47180.0, radius: 7000.0, team: "ger", type: "strongpoint" }, // Label position (South)
+      { label: "CITY OVERLOOK", id: "B11", gameX: -69346.0, gameY: -48417.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 11 (North)
+      { label: "NAIL FACTORY", id: "B10", gameX: -71016.0, gameY: -11068.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 10 (Mid)
+      { label: "MAMAYEV APPROACH", id: "B9", gameX: -69500.0, gameY: 47966.0, radius: 7000.0, team: "ger", type: "strongpoint" }, // Booster 9 (South)
 
       // GER Mid (Mid-West)
-      { label: "KOMSOMOL HQ", id: "B14", gameX: -42420.0, gameY: -40370.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Label position (North)
-      { label: "YELLOW HOUSE", id: "B12", gameX: -42860.0, gameY: -430.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Label position (Mid)
-      { label: "DOLGIY RAVINE", id: "B8", gameX: -43000.0, gameY: 48130.0, radius: 7500.0, team: "ger", type: "strongpoint" }, // Label position (South)
+      { label: "KOMSOMOL HQ", id: "B14", gameX: -39683.0, gameY: -39676.0, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 14 (North)
+      { label: "YELLOW HOUSE", id: "B12", gameX: -39693.0, gameY: 1.5, radius: 8000.0, team: "ger", type: "strongpoint" }, // Booster 12 (Mid)
+      { label: "DOLGIY RAVINE", id: "B8", gameX: -39681.0, gameY: 48845.0, radius: 7500.0, team: "ger", type: "strongpoint" }, // Booster 8 (South)
 
       // --- NEUTRAL SECTORS (Center - Near X=0) ---
-      { label: "TRAIN STATION", id: "B15", gameX: -2760.0, gameY: -40220.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Label position (North)
-      { label: "CARRIAGE DEPOT", id: "B13", gameX: 3240.0, gameY: 70.0, radius: 8500.0, team: "neu", type: "strongpoint" }, // Label position (Mid)
-      { label: "RAILWAY CROSSING", id: "B7", gameX: -3980.0, gameY: 39600.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Label position (South)
+      { label: "TRAIN STATION", id: "B15", gameX: 6.0, gameY: -39678.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Booster 15 (North)
+      { label: "CARRIAGE DEPOT", id: "B13", gameX: -15.0, gameY: -13.0, radius: 8500.0, team: "neu", type: "strongpoint" }, // Booster 13 (Mid)
+      { label: "RAILWAY CROSSING", id: "B7", gameX: 7.0, gameY: 39673.0, radius: 8000.0, team: "neu", type: "strongpoint" }, // Booster 7 (South)
 
       // --- SOVIET SECTORS (East - Positive X) ---
       // SOV Mid (Mid-East)
-      { label: "THE BREWERY", id: "B3", gameX: 36920.0, gameY: -43290.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Label position (North)
-      { label: "PAVLOV'S HOUSE", id: "B1", gameX: 44860.0, gameY: -1560.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Label position (Mid)
-      { label: "HOUSE OF THE WORKERS", id: "B5", gameX: 32530.0, gameY: 39480.0, radius: 9500.0, team: "us", type: "strongpoint" }, // Label position (South - Largest!)
+      { label: "THE BREWERY", id: "B3", gameX: 39674.0, gameY: -41970.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 3 (North)
+      { label: "PAVLOV'S HOUSE", id: "B1", gameX: 48586.0, gameY: -1452.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Booster 1 (Mid)
+      { label: "HOUSE OF THE WORKERS", id: "B5", gameX: 36591.0, gameY: 40602.0, radius: 9500.0, team: "us", type: "strongpoint" }, // Booster 5 (South - Largest!)
 
       // SOV Base (Far East)
-      { label: "VOLGA BANKS", id: "B4", gameX: 66950.0, gameY: -43150.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Label position (North)
-      { label: "GRUDININ'S MILL", id: "B2", gameX: 65220.0, gameY: 1480.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Label position (Mid)
-      { label: "L-SHAPED HOUSE", id: "B6", gameX: 65370.0, gameY: 34460.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Label position (South)
+      { label: "VOLGA BANKS", id: "B4", gameX: 70121.0, gameY: -43351.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 4 (North)
+      { label: "GRUDININ'S MILL", id: "B2", gameX: 70063.0, gameY: 32.0, radius: 7000.0, team: "us", type: "strongpoint" }, // Booster 2 (Mid)
+      { label: "L-SHAPED HOUSE", id: "B6", gameX: 68875.0, gameY: 35043.0, radius: 7500.0, team: "us", type: "strongpoint" }, // Booster 6 (South)
 
       // --- GUN POSITIONS ---
       // SOVIETS (East - Positive X)

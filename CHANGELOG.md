@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.6] - 2026-04-11
+### Fixed
+- **Stalingrad Strongpoint Positions**: Reverted Changes.
+
+
 ## [1.2.5] - 2026-04-11
 ### Fixed
 - **Stalingrad Strongpoint Positions**: Updated all 15 strongpoint coordinates to use accurate TextRenderComponent label positions from game files for precise map alignment.
