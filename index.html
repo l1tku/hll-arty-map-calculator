@@ -23,7 +23,7 @@
       if (window.location.protocol.indexOf('http') === 0) {
         window.addEventListener('load', () => {
           // Cache-busting query parameter forces browser to check for new service worker code
-          navigator.serviceWorker.register('./service-worker.js?v=7')
+          navigator.serviceWorker.register('./service-worker.js?v=8')
             .then((reg) => console.log('Service Worker registered.', reg))
             .catch((err) => console.log('Service Worker registration failed.', err));
         });
@@ -420,8 +420,8 @@
     </div>
   </div>
 
-<script src="js/maps.js"></script> 
-<script src="js/ballistics.js"></script> 
+<script src="js/maps.js?v=1.2.6"></script>
+<script src="js/ballistics.js?v=1.2.6"></script>
 <script src="js/script.js?v=1.2.6"></script>
 </body>
 </html>
