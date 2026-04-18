@@ -70,8 +70,7 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 
 ### Option 2: Local Development
 1. **Clone** or download this repository.
-2. Ensure map images are placed in `images/maps/` and thumbnails are in `images/maps/thumbnail/`.
-3. Open `index.html` in any modern web browser.
+2. Open `index.html` in any modern web browser.
 
 ## Supported Maps
 * Carentan (CAR)
