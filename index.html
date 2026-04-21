@@ -15,7 +15,7 @@
   <link rel="icon" type="image/webp" href="images/favicon.webp?v=3.42">
   <link rel="icon" type="image/png" href="images/favicon.png?v=3.42">
   <link rel="apple-touch-icon" href="images/icon-180.png?v=3.42">
-  <link rel="stylesheet" href="css/style.css?v=3.45">
+  <link rel="stylesheet" href="css/style.css?v=3.46">
   
   <script>
     if ('serviceWorker' in navigator) {
@@ -23,7 +23,7 @@
       if (window.location.protocol.indexOf('http') === 0) {
         window.addEventListener('load', () => {
           // Cache-busting query parameter forces browser to check for new service worker code
-          navigator.serviceWorker.register('./service-worker.js?v=8')
+          navigator.serviceWorker.register('./service-worker.js?v=9')
             .then((reg) => console.log('Service Worker registered.', reg))
             .catch((err) => console.log('Service Worker registration failed.', err));
         });
@@ -187,7 +187,7 @@
 
   <div id="targetDataPanel" class="target-data-panel hidden">
     <div class="panel-watermark">
-        HLL ARTY MAP CALC <span id="appVersionPanel">v1.2.5</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
+        HLL ARTY MAP CALC <span id="appVersionPanel">v1.2.7</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
     </div>
 
     <div class="panel-row main-row">
@@ -222,7 +222,7 @@
     <div class="modal-brand-header">
       <div class="main-title">HLL ARTY MAP CALCULATOR</div>
       <div class="main-subtitle-credits">
-        <span id="appVersion">v1.2.5</span> 
+        <span id="appVersion">v1.2.7</span> 
         <span class="spacer">•</span> 
         <span id="gameVersion">UPDATE 19.1</span> 
         <span class="spacer">•</span> 
@@ -349,7 +349,7 @@
       <div class="calc-screen">
         <div class="screen-row">
           <span class="screen-label">TARGET DISTANCE</span>
-          <div class="screen-input" id="calcInput">0</div>
+          <input type="text" class="screen-input" id="calcInput" value="0" inputmode="numeric" autocomplete="off" aria-label="Target Distance">
         </div>
         
         <div class="screen-divider"></div>
@@ -420,8 +420,8 @@
     </div>
   </div>
 
-<script src="js/maps.js?v=1.2.6"></script>
-<script src="js/ballistics.js?v=1.2.6"></script>
-<script src="js/script.js?v=1.2.6"></script>
+<script src="js/maps.js?v=1.2.7"></script>
+<script src="js/ballistics.js?v=1.2.7"></script>
+<script src="js/script.js?v=1.2.7"></script>
 </body>
 </html>

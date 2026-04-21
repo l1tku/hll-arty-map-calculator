@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.7] - 2026-04-21
+### Fixed
+- Manual calculator now supports keyboard input for typing distances
+- Enter key clears calculator input to empty
+- Backspace allows removing all characters including the last 0
+
 ## [1.2.6] - 2026-04-11
 ### Fixed
 - **Stalingrad Strongpoint Positions**: Reverted Changes.

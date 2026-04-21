@@ -2299,11 +2299,20 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 .screen-label { font-family: 'GothamSS', sans-serif; font-size: 10px; color: #888; margin-bottom: 4px; }
 /* Screen Input (Target Distance) - Reduced Size */
 .screen-input {
-  font-family: 'GothamSS', sans-serif; 
+  font-family: 'GothamSS', sans-serif;
   font-weight: 900;
   font-size: 36px; /* Reduced from 48px to 36px */
-  color: white; 
+  color: white;
   line-height: 1;
+  background: transparent;
+  border: none;
+  text-align: center;
+  width: 120px;
+  outline: none;
+}
+
+.screen-input:focus {
+  color: #ffc107;
 }
 
 .screen-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0; }

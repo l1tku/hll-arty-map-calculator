@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.2.6 — Updated for Hell Let Loose Update 19.1**
+**v1.2.7 — Updated for Hell Let Loose Update 19.1**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
@@ -29,6 +29,17 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 3. Enter the distance using the keypad.
 4. Get instant Elevation MILs.
 
+## Map Controls
+### Desktop
+- **Left Click**: Place Target / Select Artillery.
+- **Click & Drag**: Pan the map.
+- **Mouse Wheel**: Zoom in/out.
+- **Hover**: View live distance and grid reference in the HUD.
+
+### Mobile
+- **One Finger Drag**: Pan the map.
+- **Tap "Fire" Button**: Places target at the center of the screen (Live Tracking).
+
 ## Features
 - **Interactive Maps**: High-resolution maps with pan/zoom, grid labels, and accurate meter scale
 - **Multi-Faction**: US, Germany, Soviet Union, and Great Britain with accurate ballistics
@@ -45,17 +56,6 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 - **Dynamic Caching**: "Stale-While-Revalidate" – only downloads and caches maps you open, keeping storage low while ensuring instant reloads.
 - **PWA Ready**: Installable to home screen on mobile for native-like experience (offline-capable once cached).
 - **Performance**: GPU-accelerated on desktop, memory-safe transforms on mobile, throttled HUD updates, batch rendering.
-
-## Map Controls
-### Desktop
-- **Left Click**: Place Target / Select Artillery.
-- **Click & Drag**: Pan the map.
-- **Mouse Wheel**: Zoom in/out.
-- **Hover**: View live distance and grid reference in the HUD.
-
-### Mobile
-- **One Finger Drag**: Pan the map.
-- **Tap "Fire" Button**: Places target at the center of the screen (Live Tracking).
 
 ## Supported Maps
 * Carentan (CAR)

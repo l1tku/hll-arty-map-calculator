@@ -4536,8 +4536,40 @@ function fixKeypadEvents() {
 
 function updateCalcScreen() {
   const display = document.getElementById("calcInput");
-  if (display) display.innerText = calcInputVal + "m";
+  if (display) display.value = calcInputVal;
   calculateManual();
+}
+
+// Add keyboard input support for calculator
+const calcInputEl = document.getElementById("calcInput");
+if (calcInputEl) {
+  // Handle input when user types
+  calcInputEl.addEventListener("input", (e) => {
+    let val = e.target.value.replace(/[^0-9]/g, ""); // Only allow numbers
+    if (val.length > 4) val = val.slice(0, 4); // Max 4 digits
+    calcInputVal = val === "" ? "0" : val;
+    e.target.value = val;
+    calculateManual();
+  });
+
+  // Handle special keys
+  calcInputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace") {
+      if (calcInputVal.length > 1) {
+        calcInputVal = calcInputVal.slice(0, -1);
+      } else {
+        calcInputVal = "";
+      }
+      calcInputEl.value = calcInputVal;
+      calculateManual();
+    } else if (e.key === "Enter") {
+      calcInputVal = "";
+      calcInputEl.value = "";
+      calculateManual();
+    } else if (e.key === "Escape") {
+      closeManualCalculator();
+    }
+  });
 }
 
 function calculateManual() {
