@@ -39,12 +39,36 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch: Network First -> Cache Fallback (for offline support)
+// Fetch: Only cache specific assets, pass everything else through
 self.addEventListener('fetch', (e) => {
+  // Only handle GET requests
+  if (e.request.method !== 'GET') {
+    return;
+  }
+
+  // Check if this is a URL we want to cache
+  const url = new URL(e.request.url);
+  const shouldCache = ASSETS_TO_CACHE.some(asset => {
+    try {
+      const assetUrl = new URL(asset, self.location.href);
+      return url.pathname === assetUrl.pathname;
+    } catch {
+      return false;
+    }
+  });
+
+  if (!shouldCache) {
+    // Pass through to network for non-cached assets
+    return;
+  }
+
+  // For cached assets: Cache First -> Network Fallback
   e.respondWith(
-    fetch(e.request)
-      .then((networkResponse) => {
-        // Valid network response: cache it and return
+    caches.match(e.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(e.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -52,12 +76,7 @@ self.addEventListener('fetch', (e) => {
           });
         }
         return networkResponse;
-      })
-      .catch(() => {
-        // Network failed: try cache
-        return caches.match(e.request).then((cachedResponse) => {
-          return cachedResponse || new Response('Not found', { status: 404 });
-        });
-      })
+      });
+    })
   );
 });
