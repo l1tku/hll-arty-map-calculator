@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hll-arty-cache-v9';
+const CACHE_NAME = 'hll-arty-cache-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -55,7 +55,9 @@ self.addEventListener('fetch', (e) => {
       })
       .catch(() => {
         // Network failed: try cache
-        return caches.match(e.request);
+        return caches.match(e.request).then((cachedResponse) => {
+          return cachedResponse || new Response('Not found', { status: 404 });
+        });
       })
   );
 });

@@ -4250,6 +4250,7 @@ function initZoomControls() {
 // Initialize
 initZoomControls();
 
+
 // Apply panel hidden state immediately when DOM is ready (early as possible)
 document.addEventListener('DOMContentLoaded', function() {
   const controlsDrawer = document.getElementById("controlsDrawer");
