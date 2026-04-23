@@ -14,7 +14,7 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 ## Usage
 ### Method 1: Map Targeting
 1. **Select Map**: Choose your map from the selector
-2. **Configure Faction**: Select your Faction from the control panel
+2. **Configure Faction**: Select your Faction from the control panel (bottom)
 3. **Select or Place Artillery**:
    - **HQ Guns**: Select Gun 1, 2, or 3 from the dropdown
    - **Custom Guns**: Click "+" to enter placement mode, then click on map (desktop) or tap PLACE (mobile)
