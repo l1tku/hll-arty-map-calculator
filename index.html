@@ -1,419 +1,864 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
   <title>HLL Artillery Calculator</title>
+
   
+
   <link rel="manifest" href="manifest.json">
+
   
+
   <meta name="mobile-web-app-capable" content="yes">
+
   <meta name="apple-mobile-web-app-capable" content="yes">
+
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <meta name="apple-mobile-web-app-title" content="HLL Arty">
 
+
+
   <link rel="icon" type="image/webp" href="images/favicon.webp?v=3.42">
+
   <link rel="icon" type="image/png" href="images/favicon.png?v=3.42">
+
   <link rel="apple-touch-icon" href="images/icon-180.png?v=3.42">
+
   <link rel="stylesheet" href="css/style.css?v=3.46">
+
   
+
   <script>
+
     if ('serviceWorker' in navigator) {
+
       // Only register if we are online (HTTP/HTTPS) to avoid errors when testing locally
+
       if (window.location.protocol.indexOf('http') === 0) {
+
         window.addEventListener('load', () => {
+
           // Cache-busting query parameter forces browser to check for new service worker code
+
           navigator.serviceWorker.register('./service-worker.js?v=10')
+
             .then((reg) => console.log('Service Worker registered.', reg))
+
             .catch((err) => console.log('Service Worker registration failed.', err));
+
         });
+
       }
+
     }
+
   </script>
+
 </head>
+
 <body>
+
   <div class="shell">
+
     <div class="panel map-wrap" id="mapContainer">
+
       <div class="loading-overlay" id="loadingOverlay">
+
         <div class="loading-spinner"></div>
+
         <div class="loading-text">Loading map...</div>
+
       </div>
+
       
+
       <div class="map-stage" id="mapStage">
+
         <img 
+
           id="mapImage" 
+
           class="map-image"
+
           src="images/maps/map_Carentan.webp" 
+
           alt="Carentan Map"
+
         >
+
         <div id="markers" class="markers-layer"></div>
+
       </div>
+
     </div>
+
+
 
     <div class="main-ui-overlay">
+
       
+
       <div id="setupGuide" class="setup-guide hidden">
+
         SELECT 1ST STRONGPOINT
+
       </div>
+
+
 
       <div class="scale-container">
+
         <div class="scale-wrapper" id="scaleWrapper">
+
           <div class="scale-bar-graphic">
+
             <div class="scale-tick t-start"></div>
+
             <div class="scale-tick t-mid"></div>
+
             <div class="scale-tick t-end"></div>
+
           </div>
+
           <div class="scale-labels">
+
             <span class="scale-lbl l-start">0</span>
+
             <span id="scaleTextMid" class="scale-lbl l-mid">125m</span>
+
             <span id="scaleTextEnd" class="scale-lbl l-end">250m</span>
+
           </div>
+
         </div>
+
+
 
         <div class="zoom-indicator-inline">
+
           <span id="zoomIndicator">1.0x</span>
+
         </div>
+
       </div>
+
       
+
       <div class="controls-drawer" id="controlsDrawer">
+
         <button id="drawerToggleBtn" class="drawer-tab" aria-label="Toggle controls drawer" aria-expanded="true">
+
           <span class="tab-arrow">▼</span>
+
         </button>
 
+
+
         <div class="fire-guide-arrow left">▼</div>
+
         <div class="fire-guide-arrow right">▼</div>
 
+
+
         <div class="controls-content">
+
           <button id="openMapBtn" class="btn-map-select" aria-haspopup="true" aria-expanded="false" aria-label="Select Map">
+
             <span id="currentMapName">Carentan</span> 
+
             <span class="map-arrow">⇄</span>
+
           </button>
 
+
+
           <div class="custom-dropdown" id="factionDropdown">
+
             <button class="btn-map-select compact" id="factionBtn" aria-haspopup="true" aria-expanded="false" aria-label="Select Faction">
+
               <img id="currentFactionFlag" src="images/flags/us.webp" class="faction-flag" alt="">
+
               <span id="factionLabel">US</span>
+
               <span class="icon">▾</span>
+
             </button>
+
             <div class="dropdown-menu hidden">
+
               <div class="dropdown-item" data-value="us">
+
                 <img class="faction-flag item-flag" src="images/flags/us.webp" alt="">
+
                 <span class="item-text">US</span>
+
               </div>
+
               <div class="dropdown-item" data-value="ger">
+
                 <img class="faction-flag item-flag" src="images/flags/ger.webp" alt="">
+
                 <span class="item-text">AXIS</span>
+
               </div>
+
             </div>
+
           </div>
+
+
 
           <div class="custom-dropdown" id="gunDropdown">
+
             <button class="btn-map-select compact" id="gunBtn" aria-haspopup="true" aria-expanded="false" aria-label="Select Gun">
+
               <span id="gunLabel">Gun 1 (Left)</span>
+
               <span class="icon">▾</span>
+
             </button>
+
             
+
             <div class="dropdown-menu hidden">
+
               <div class="dropdown-item" data-value="0">Gun 1 (Left)</div>
+
               <div class="dropdown-item" data-value="1">Gun 2 (Mid)</div>
+
               <div class="dropdown-item" data-value="2">Gun 3 (Right)</div>
+
               
+
               <div class="dropdown-separator"></div>
 
+
+
               <div class="dropdown-item" id="btnAddGunAction" style="color: #ffc107; font-weight: 900;">
+
                 + ADD CUSTOM GUN
+
               </div>
 
+
+
               <div id="customGunContainer"></div>
+
             </div>
+
           </div>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
+
+
 
   <div id="mobileCrosshair" class="mobile-crosshair hidden">
+
     <img src="images/ui/garrison_lining_dot_2.png" alt="Placement Crosshair">
+
     <div id="mobileRingContainer" class="ring-container">
+
       <div class="m-ring dispersion"></div>
+
       <div class="m-ring deadzone"></div>
+
       <div class="m-ring blast"></div>
+
     </div>
+
   </div>
+
+
 
   <div id="desktopCursorRings" class="ring-container hidden">
+
     <div class="m-ring dispersion"></div>
+
     <div class="m-ring deadzone"></div>
+
     <div class="m-ring blast"></div>
+
   </div>
+
+
 
   <button id="mobileFireBtn" class="mobile-fire-btn hidden" aria-label="Fire Artillery">
+
     <span>FIRE</span>
+
   </button>
+
+
 
   <button id="mobilePlaceBtn" class="mobile-place-btn hidden" aria-label="Place Custom Artillery">
+
     <span>PLACE</span>
+
   </button>
 
+
+
   <!-- Placement guide arrows (same as live HUD arrows) -->
+
   <div class="fire-guide-arrow placement-arrow left">↓</div>
+
   <div class="fire-guide-arrow placement-arrow right">↓</div>
 
+
+
   <div id="trajSliderContainer" class="traj-slider-container hidden">
+
     <div class="traj-controls-wrapper">
+
       <div class="traj-step-group">
+
         <button class="traj-step-btn" data-step="-25">-25</button>
+
         <button class="traj-step-btn" data-step="-10">-10</button>
+
       </div>
+
+
 
       <div class="traj-slider-inner">
+
         <input type="range" id="trajectoryRange" min="100" max="1600" step="1" value="800">
+
       </div>
+
+
 
       <div class="traj-step-group">
+
         <button class="traj-step-btn" data-step="10">+10</button>
+
         <button class="traj-step-btn" data-step="25">+25</button>
+
       </div>
+
     </div>
+
   </div>
 
+
+
   <div id="targetDataPanel" class="target-data-panel hidden">
+
     <div class="panel-watermark">
-        HLL ARTY MAP CALC <span id="appVersionPanel">v1.2.7</span> <span class="watermark-bullet">•</span> 2026 <span class="watermark-bullet">•</span> BY LITKU
+
+        <button class="changelog-btn" id="changelogBtnPanel" aria-label="View Changelog">📋</button> <a href="https://github.com/l1tku/hll-arty-map-calculator" target="_blank" rel="noopener noreferrer" id="appVersionPanel"></a> <span class="watermark-bullet">•</span> <a href="https://www.hellletloose.com/blog/patch-19-1-changelog" target="_blank" rel="noopener noreferrer" id="gameVersionPanel"></a> <span class="watermark-bullet">•</span> BY LITKU
+
     </div>
 
+
+
     <div class="panel-row main-row">
+
         <div class="solution-container">
+
             <span class="lbl-main">ELEVATION MIL</span>
+
             <span id="panelMil" class="val-huge">---</span>
+
         </div>
+
     </div>
+
+
 
     <div class="panel-horiz-divider"></div>
 
+
+
     <div class="panel-row context-row">
-        <div class="data-group">
-            <span class="lbl-tiny">DIST</span>
-            <span id="panelDist" class="val-mid">---</span>
-        </div>
-        
-        <div class="data-group">
-            <span class="lbl-tiny">BEARING</span>
-            <span id="panelBearing" class="val-mid text-yellow">---</span>
-        </div>
 
         <div class="data-group">
-            <span class="lbl-tiny">IMPACT</span>
-            <span id="panelTime" class="val-mid text-green">---</span>
+
+            <span class="lbl-tiny">DISTANCE</span>
+
+            <span id="panelDist" class="val-mid">---</span>
+
         </div>
+
+        
+
+        <div class="data-group">
+
+            <span class="lbl-tiny">BEARING</span>
+
+            <span id="panelBearing" class="val-mid text-yellow">---</span>
+
+        </div>
+
+
+
+        <div class="data-group">
+
+            <span class="lbl-tiny">IMPACT</span>
+
+            <span id="panelTime" class="val-mid text-green">---</span>
+
+        </div>
+
     </div>
+
   </div>
+
+
 
   <div id="mapModal" class="modal-overlay">
+
   <div class="modal-content">
+
     <div class="modal-brand-header">
+
       <div class="main-title">HLL ARTY MAP CALCULATOR</div>
+
       <div class="main-subtitle-credits">
-        <span id="appVersion">v1.2.7</span> 
+
+        <button class="changelog-btn" id="changelogBtn" aria-label="View Changelog">📋</button> <a href="https://github.com/l1tku/hll-arty-map-calculator" target="_blank" rel="noopener noreferrer" id="appVersion"></a> 
+
         <span class="spacer">•</span> 
-        <span id="gameVersion">UPDATE 19.1</span> 
+
+        <a href="https://www.hellletloose.com/blog/patch-19-1-changelog" target="_blank" rel="noopener noreferrer" id="gameVersion"></a> 
+
         <span class="spacer">•</span> 
+
         <span>BY LITKU</span>
+
       </div>
+
       <button class="close-btn" id="closeModalBtn" aria-label="Close Map Selection">×</button>
+
     </div>
+
+
 
       <div class="modal-sub-header">
+
         <div class="modal-subtitle-container">
+
           <div class="modal-search-wrapper">
+
             <input type="text" id="mapSearchInput" placeholder="SEARCH MAPS..." autocomplete="off" aria-label="Search Maps">
+
             <button id="clearSearchBtn" class="search-clear-btn" aria-label="Clear Search">×</button>
+
           </div>
+
         </div>
+
       </div>
+
+
 
       <div class="map-grid" id="mapGrid">
+
       </div>
+
+
 
       <div class="modal-footer">
+
         <div class="footer-btn" id="btnOpenManualCalc">
+
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
             <rect x="5" y="3" width="14" height="18" rx="2" />
+
             <line x1="8" y1="7" x2="16" y2="7" />
+
             <circle cx="8.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
+
             <circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none" />
+
             <circle cx="15.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
+
             <circle cx="8.5" cy="16" r="0.8" fill="currentColor" stroke="none" />
+
             <circle cx="12" cy="16" r="0.8" fill="currentColor" stroke="none" />
+
             <circle cx="15.5" cy="16" r="0.8" fill="currentColor" stroke="none" />
+
           </svg>
+
           <span>MANUAL CALCULATOR</span>
+
         </div>
+
         <button class="footer-btn secondary" id="btnOtherProjects" onclick="openProjectsModal()">
+
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+
             <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+
             <polyline points="2 17 12 22 22 17"></polyline>
+
             <polyline points="2 12 12 17 22 12"></polyline>
+
           </svg>
+
           MORE PROJECTS
+
         </button>
+
       </div>
+
     </div>
+
   </div>
+
+
 
   <div class="zoom-slider-container">
+
     <div class="zoom-slider-track" id="zoomSliderTrack">
+
       <div class="zoom-slider-fill" id="zoomSliderFill"></div>
+
       <div class="zoom-slider-handle" id="zoomSliderHandle"></div>
+
     </div>
+
+
 
     <div class="zoom-icons">
+
       <span id="btnZoomIn" data-tooltip="Zoom In" role="button" tabindex="0" aria-label="Zoom In">+</span>
+
       <span id="btnZoomOut" data-tooltip="Zoom Out" role="button" tabindex="0" aria-label="Zoom Out">−</span>
+
       
+
       <span id="spFilterBtn" data-tooltip="MATCH SETUP" role="button" tabindex="0" aria-label="Setup Active Strongpoints">
+
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+
           <path d="M9 11l3 3L22 4"></path>
+
           <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+
         </svg>
+
       </span>
+
+
 
       <span id="rulerToggleBtn" class="active" data-tooltip="BALLISTIC RULER" role="button" tabindex="0" aria-label="Toggle Ballistic Ruler">
+
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
           <path d="M22 10V14C22 15.1046 21.1046 16 20 16H4C2.89543 16 2 15.1046 2 14V10C2 8.89543 2.89543 8 4 8H20C21.1046 8 22 8.89543 22 10Z"/>
+
           <path d="M6 8V11M10 8V13M14 8V11M18 8V13"/>
+
         </svg>
+
       </span>
+
+
 
       <span id="hudToggleBtn" data-tooltip="LIVE TRACKING" role="button" tabindex="0" aria-label="Toggle Live HUD">
+
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+
           <circle cx="12" cy="10" r="3"/>
+
         </svg>
+
       </span>
+
+
 
       <span id="sidebarCalcBtn" data-tooltip="CALCULATOR" role="button" tabindex="0" aria-label="Open Calculator">
+
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
           <rect x="4" y="2" width="16" height="20" rx="2" />
+
           <line x1="8" y1="6" x2="16" y2="6" />
+
           <path d="M16 14h.01M12 14h.01M8 14h.01M16 18h.01M12 18h.01M8 18h.01" />
+
         </svg>
+
       </span>
+
+
 
       <span id="trajToggleBtn" data-tooltip="TRAJECTORY SLIDER" role="button" tabindex="0">
+
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+
           <path d="M2 12h20M7 8l-5 4 5 4M17 8l5 4-5 4M12 9v6" />
+
           <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+
         </svg>
+
       </span>
+
     </div>
+
   </div>
+
   
+
   <div id="liveCursorHud" class="live-hud hidden">
+
       <div class="hud-row">
+
           <span class="hud-label">DIST</span>
+
           <span class="hud-value" id="hudDist">---</span>
+
       </div>
+
       <div class="hud-row">
+
           <span class="hud-label text-yellow">ELEV</span>
+
           <span class="hud-value text-yellow" id="hudMil">---</span>
+
       </div>
+
       <div class="hud-row">
+
           <span class="hud-label">GRID</span>
+
           <span class="hud-value" id="hudGrid">---</span>
+
       </div>
+
   </div>
+
+
 
   <div id="calcModal" class="modal-overlay">
+
     <div class="modal-content calc-content">
+
       <div class="modal-brand-header">
+
         ARTY CALCULATOR
+
         <button class="close-btn" id="closeCalcBtn" aria-label="Close Calculator">×</button>
+
       </div>
+
+
 
       <div class="calc-faction-bar" id="calcFactionToggle">
+
         <span class="calc-faction-label">FIRING AS:</span>
+
         <img id="calcFlag" src="images/flags/us.webp" class="faction-flag" alt="">
+
         <span id="calcFactionName" class="calc-faction-text">UNITED STATES</span>
+
         <button class="btn-swap">⇄</button>
+
       </div>
+
+
 
       <div class="calc-screen">
+
         <div class="screen-row">
+
           <span class="screen-label">TARGET DISTANCE</span>
+
           <input type="text" class="screen-input" id="calcInput" value="0" inputmode="numeric" autocomplete="off" aria-label="Target Distance">
+
         </div>
+
         
+
         <div class="screen-divider"></div>
 
+
+
         <div class="screen-results">
+
           <div class="res-box">
+
             <span class="res-label">ELEVATION MIL</span>
+
             <span class="res-value text-yellow" id="calcMil">---</span>
+
           </div>
+
         </div>
+
       </div>
+
+
 
       <div class="calc-keypad">
+
         <button class="key" onclick="inputDigit(7)">7</button>
+
         <button class="key" onclick="inputDigit(8)">8</button>
+
         <button class="key" onclick="inputDigit(9)">9</button>
+
         <button class="key" onclick="inputDigit(4)">4</button>
+
         <button class="key" onclick="inputDigit(5)">5</button>
+
         <button class="key" onclick="inputDigit(6)">6</button>
+
         <button class="key" onclick="inputDigit(1)">1</button>
+
         <button class="key" onclick="inputDigit(2)">2</button>
+
         <button class="key" onclick="inputDigit(3)">3</button>
+
         <button class="key action red" onclick="clearInput()">C</button>
+
         <button class="key" onclick="inputDigit(0)">0</button>
+
         <button class="key action" onclick="backspaceInput()">⌫</button>
+
       </div>
+
     </div>
+
   </div>
+
+
 
   <div id="projectsModal" class="modal-overlay">
+
     <div class="modal-content projects-hub-content">
+
       <div class="modal-brand-header">
+
         <div class="main-title">OTHER PROJECTS</div>
+
         <button class="close-btn" id="closeProjectsBtn" aria-label="Close Projects">×</button>
+
       </div>
+
+
 
       <div class="projects-list">
+
         <button class="footer-btn" onclick="window.open('https://l1tku.github.io/hll-default-garrisons/', '_blank')">
+
           <img src="images/favicon_garrison.png" class="footer-project-icon" alt=""> 
+
           <span>DEFAULT GARRISONS MAP</span>
+
           <svg class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+
             <polyline points="15 3 21 3 21 9"></polyline>
+
             <line x1="10" y1="14" x2="21" y2="3"></line>
+
           </svg>
+
         </button>
+
+
 
         <button class="footer-btn" onclick="window.open('https://l1tku.github.io/hll-spa-calculator/', '_blank')">
+
           <img src="images/favicon_spa.png" class="footer-project-icon" alt=""> 
+
           <span>SPA ARTILLERY CALCULATOR</span>
+
           <svg class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+
             <polyline points="15 3 21 3 21 9"></polyline>
+
             <line x1="10" y1="14" x2="21" y2="3"></line>
+
           </svg>
+
         </button>
+
+
 
         <button class="footer-btn github-btn" onclick="window.open('https://github.com/l1tku', '_blank')">
+
           <img src="images/github.png" class="footer-project-icon" alt=""> 
+
           <span>MY GITHUB</span>
+
           <svg class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+
             <polyline points="15 3 21 3 21 9"></polyline>
+
             <line x1="10" y1="14" x2="21" y2="3"></line>
+
           </svg>
+
         </button>
+
       </div>
+
     </div>
+
   </div>
 
-<script src="js/maps.js?v=1.2.7"></script>
-<script src="js/ballistics.js?v=1.2.7"></script>
-<script src="js/script.js?v=1.2.7"></script>
+
+
+  <!-- Changelog Modal -->
+
+  <div id="changelogModal" class="modal-overlay">
+
+    <div class="modal-content changelog-modal">
+
+      <div class="modal-brand-header">
+
+        <div class="main-title">CHANGELOG</div>
+
+        <button class="close-btn" id="closeChangelogBtn" aria-label="Close Changelog">×</button>
+
+      </div>
+
+      <div class="changelog-content" id="changelogContent">
+
+        Loading changelog...
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+<script src="js/maps.js?v=1.2.8"></script>
+
+<script src="js/ballistics.js?v=1.2.8"></script>
+
+<script src="js/script.js?v=1.2.8"></script>
+
 </body>
+
 </html>
+

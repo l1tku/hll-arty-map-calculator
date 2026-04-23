@@ -1,6 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.8] - 2026-04-22
+### Added
+- **Changelog Modal**: Added 📋 button that opens an in-app changelog modal showing latest changes
+- **Clickable Version Links**: App version links to GitHub, game version links to HLL patch notes
+- **New Artillery for Smolensk**: Added new artillery positions to Smolensk map
+
+### Changed
+- **Version Format**: Updated game version display
+- **Target Data Panel**: Changed "DIST" to "DISTANCE" for clarity
+
+### Fixed
+- **Mobile Alignment**: Fixed vertical alignment of distance/bearing/impact values on mobile
+- **Mobile Cursor**: Fixed cursor image path for custom artillery placement
+- **Service Worker Error**: Fixed service worker errors by disabling interception to prevent GitHub Pages conflicts
+- **Useless Thumbnail Removal**: Removed unused thumbnail image
+- **Custom Artillery UX**: Target data panel now closes when placing or moving custom artillery
+- **Debug Cleanup**: Removed leftover console.log statements
+
 ## [1.2.7] - 2026-04-21
 ### Fixed
 - Manual calculator now supports keyboard input for typing distances
@@ -10,7 +28,6 @@ All notable changes to this project will be documented in this file.
 ## [1.2.6] - 2026-04-11
 ### Fixed
 - **Stalingrad Strongpoint Positions**: Reverted Changes.
-
 
 ## [1.2.5] - 2026-04-11
 ### Fixed

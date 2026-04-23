@@ -7,13 +7,14 @@ const APP_VERSION = (() => {
   const match = script?.src.match(/\?v=([\d.]+)/);
   return match ? `v${match[1]}` : "dev";
 })();
-const GAME_VERSION = "UPDATE 19.1";
+const GAME_VERSION = "Update 19.1";
 
 // Create a simple map of IDs and what text should go in them
 const versionMap = {
   'appVersion': APP_VERSION,
   'appVersionPanel': APP_VERSION,
-  'gameVersion': GAME_VERSION
+  'gameVersion': GAME_VERSION,
+  'gameVersionPanel': GAME_VERSION
 };
 
 // Loop through and update only the ones that exist on the current page
@@ -2390,6 +2391,11 @@ function updateGunUI(config) {
     movingGunId = null;
     activeCustomGunId = null;
 
+    // Close target data panel when entering placement mode
+    if (cached.targetDataPanel) {
+      cached.targetDataPanel.classList.add('hidden');
+    }
+
     // === NEW: AUTO-DISABLE LIVE HUD (desktop + mobile) ===
     hudEnabled = false;
     syncToggleUI();
@@ -2832,8 +2838,6 @@ function deleteCustomGun(gunId) {
     renderTargeting();
     render();
     saveState();
-    
-    console.log(`Custom artillery ${gunId} deleted`);
   }
 }
 
@@ -2841,7 +2845,12 @@ function startMoveGun(gunId) {
   moveMode = true;
   movingGunId = gunId;
   placementMode = false;
-  
+
+  // Close target data panel when entering move mode
+  if (cached.targetDataPanel) {
+    cached.targetDataPanel.classList.add('hidden');
+  }
+
   const label = document.getElementById("gunLabel");
   label.innerText = "Click new position";
   label.style.color = "#ffc107";
@@ -2901,8 +2910,6 @@ function moveCustomGun(gunId, newGameX, newGameY) {
   renderTargeting();
   render();
   saveState();
-
-  console.log(`Custom artillery ${gunId} moved to (${newGameX}, ${newGameY})`);
 }
 
 function showArtilleryContextMenu(gunId, x, y) {
@@ -4309,12 +4316,77 @@ if (toggleBtn && drawer) {
   if (versionEl) {
     versionEl.textContent = APP_VERSION;
   }
-  
+
   const versionPanelEl = document.getElementById('appVersionPanel');
   if (versionPanelEl) {
     versionPanelEl.textContent = APP_VERSION;
   }
-  
+
+  // --- CHANGELOG MODAL LOGIC ---
+
+  const changelogBtn = document.getElementById('changelogBtn');
+  const changelogBtnPanel = document.getElementById('changelogBtnPanel');
+  const changelogModal = document.getElementById('changelogModal');
+  const closeChangelogBtn = document.getElementById('closeChangelogBtn');
+  const changelogContent = document.getElementById('changelogContent');
+
+  function openChangelog() {
+    changelogModal.classList.add('active');
+    loadChangelog();
+  }
+
+  function closeChangelog() {
+    changelogModal.classList.remove('active');
+  }
+
+  async function loadChangelog() {
+    try {
+      const response = await fetch('CHANGELOG.md');
+      const text = await response.text();
+      changelogContent.innerHTML = parseMarkdown(text);
+    } catch (error) {
+      console.error('Failed to load changelog:', error);
+      changelogContent.textContent = 'Failed to load changelog. Make sure you are running this on a web server (not file://).';
+    }
+  }
+
+  function parseMarkdown(text) {
+    // Simple markdown parser for changelog
+    let html = text;
+    // Convert headers
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    // Convert lists
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+    // Wrap lists
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+    // Convert bold
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Convert line breaks
+    html = html.replace(/\n\n/g, '<br><br>');
+    return html;
+  }
+
+  if (changelogBtn) {
+    changelogBtn.addEventListener('click', openChangelog);
+  }
+
+  if (changelogBtnPanel) {
+    changelogBtnPanel.addEventListener('click', openChangelog);
+  }
+
+  if (closeChangelogBtn) {
+    closeChangelogBtn.addEventListener('click', closeChangelog);
+  }
+
+  if (changelogModal) {
+    changelogModal.addEventListener('click', (e) => {
+      if (e.target === changelogModal) {
+        closeChangelog();
+      }
+    });
+  }
+
   // --- MANUAL CALCULATOR MODAL LOGIC ---
   
   const btnOpenManualCalc = document.getElementById('btnOpenManualCalc');

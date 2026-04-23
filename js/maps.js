@@ -4,7 +4,7 @@
 const MAP_DATABASE = {
   CAR: {
     name: "Carentan",
-    image: "images/maps/map_Carentan.webp",
+    image: "images/maps/map_carentan.webp",
     thumbnail: "images/maps/thumbnail/CAR.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
     
@@ -158,7 +158,7 @@ const MAP_DATABASE = {
   },
   EBR: { 
     name: "Elsenborn Ridge", 
-    image: "images/maps/TacMap_EBR_L_1944.webp", 
+    image: "images/maps/map_elsenborn.webp", 
     thumbnail: "images/maps/thumbnail/EBR.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
 
@@ -470,7 +470,7 @@ KUR: {
   },
   MOR: { 
     name: "Mortain", 
-    image: "images/maps/TacMap_MOR_L_1944.webp", 
+    image: "images/maps/map_mortain.webp", 
     thumbnail: "images/maps/thumbnail/MOR.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
     
@@ -861,7 +861,7 @@ SMM: {
   },
   SMO: { 
     name: "Smolensk", 
-    image: "images/maps/TacMap_SMO_L_1943.webp", 
+    image: "images/maps/map_smolensk.webp", 
     thumbnail: "images/maps/thumbnail/SMO.webp", 
     teams: { t1: "SOVIET UNION", t2: "GERMANY" },
     
@@ -873,7 +873,7 @@ SMM: {
     gunRotations: { "us": 90, "ger": -90 },
     gunSort: "y", 
 
-    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)"],
+    guns: ["HQ Gun 1 (North)", "HQ Gun 2 (Mid)", "HQ Gun 3 (South)", "HQ Gun 4 (Far North)", "HQ Gun 5 (Far South)"],
     strongpoints: [
       // NOTE: Y-Coordinates Inverted.
       // Map is West (Left/Ger) to East (Right/Sov).
@@ -912,11 +912,15 @@ SMM: {
       { label: "", id: "SOV_A1", gameX: 98300.0, gameY: 670.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
       { label: "", id: "SOV_A2", gameX: 98300.0, gameY: 2000.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
       { label: "", id: "SOV_A3", gameX: 98300.0, gameY: 3525.0, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
+      { label: "", id: "SOV_A4", gameX: 98111.0, gameY: -45867.996, radius: 500, team: "us", type: "point", rotation: 90.0 }, 
+      { label: "", id: "SOV_A5", gameX: 95375.56, gameY: 47680.367, radius: 500, team: "us", type: "point", rotation: 95.0 }, 
 
       // GERMANS (West - Negative X)
-      { label: "", id: "GER_A1", gameX: -98800.0, gameY: -1505.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
-      { label: "", id: "GER_A2", gameX: -98800.0, gameY: 570.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
-      { label: "", id: "GER_A3", gameX: -98800.0, gameY: 2695.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }
+      { label: "", id: "GER_A1", gameX: -98800.0, gameY: 570.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
+      { label: "", id: "GER_A2", gameX: -98800.0, gameY: 2695.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
+      { label: "", id: "GER_A3", gameX: -98800.0, gameY: -1505.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
+      { label: "", id: "GER_A4", gameX: -98613.016, gameY: 40709.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
+      { label: "", id: "GER_A5", gameX: -98696.92, gameY: -29907.863, radius: 500, team: "ger", type: "point", rotation: -73.467476 }
     ] 
   },
 STA: { 
@@ -980,7 +984,7 @@ STA: {
   },
   TOB: {
     name: "Tobruk",
-    image: "images/maps/TacMap_TOB_L_1942.webp",
+    image: "images/maps/map_tobruk.webp",
     thumbnail: "images/maps/thumbnail/TOB.webp",
     teams: { t1: "BRITISH 8TH ARMY", t2: "GERMANY" },
 
