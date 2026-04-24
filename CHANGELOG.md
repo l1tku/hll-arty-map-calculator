@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - **Firefox Mobile Darkening**: Reduced range overlay opacity in Firefox to fix map darkening at zoom level 4
+- **Carentan Map Loading**: Fixed case mismatch in filename reference (map_Carentan.webp → map_carentan.webp) for GitHub Pages compatibility
 
 ## [1.2.8] - 2026-04-22
 ### Added
