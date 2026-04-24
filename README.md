@@ -12,26 +12,37 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 2. Open `index.html` in any modern web browser.
 
 ### Option 3: Local Development
-#### Command Line Tutorial
+#### Clone Repository
 ```bash
-# Clone the repository
 git clone https://github.com/l1tku/hll-arty-map-calculator.git
 cd hll-arty-map-calculator
+```
 
-# Option A: Open directly in browser (Windows)
+#### Open Directly in Browser
+**Windows:**
+```bash
 start index.html
+```
 
-# Option B: Open directly in browser (macOS)
+**macOS:**
+```bash
 open index.html
+```
 
-# Option C: Open directly in browser (Linux)
+**Linux:**
+```bash
 xdg-open index.html
+```
 
-# Option D: Use a simple HTTP server (Python 3)
+#### Use HTTP Server
+**Python 3:**
+```bash
 python -m http.server 8000
 # Then visit http://localhost:8000 in your browser
+```
 
-# Option E: Use a simple HTTP server (Node.js)
+**Node.js:**
+```bash
 npx http-server -p 8000
 # Then visit http://localhost:8000 in your browser
 ```
