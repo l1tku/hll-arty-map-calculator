@@ -7,9 +7,34 @@ An interactive tactical map and high-precision artillery calculator for Hell Let
 ### Option 1: Live Web Access (Recommended)
 No installation required. Simply visit the [Live Demo Link](https://l1tku.github.io/hll-arty-map-calculator/) from any desktop or mobile browser.
 
-### Option 2: Local Development
+### Option 2: Manual Method
 1. **Clone** or download this repository.
 2. Open `index.html` in any modern web browser.
+
+### Option 3: Local Development
+#### Command Line Tutorial
+```bash
+# Clone the repository
+git clone https://github.com/l1tku/hll-arty-map-calculator.git
+cd hll-arty-map-calculator
+
+# Option A: Open directly in browser (Windows)
+start index.html
+
+# Option B: Open directly in browser (macOS)
+open index.html
+
+# Option C: Open directly in browser (Linux)
+xdg-open index.html
+
+# Option D: Use a simple HTTP server (Python 3)
+python -m http.server 8000
+# Then visit http://localhost:8000 in your browser
+
+# Option E: Use a simple HTTP server (Node.js)
+npx http-server -p 8000
+# Then visit http://localhost:8000 in your browser
+```
 
 ## Usage
 ### Method 1: Map Targeting
