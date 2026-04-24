@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.2.8 — Updated for Hell Let Loose Update 19.1**
+**v1.2.9 — Updated for Hell Let Loose Update 19.1**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
@@ -28,6 +28,8 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 2. Select your faction.
 3. Enter the distance using the keypad.
 4. Get instant Elevation MILs.
+5. Press **Enter** (desktop) or tap **SAVE** (mobile) to save calculation to history.
+6. View recent calculations in the history log below the keypad.
 
 ## Map Controls
 ### Desktop
@@ -48,7 +50,7 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 - **Custom Artillery**: Place up to 3 custom guns per team with move/delete support
 - **Gun Selection**: Select via dropdown or direct click on map icons
 - **Live HUD**: Real-time distance, MILs, grid, and bearing under cursor (desktop) or screen center (mobile)
-- **Manual Calculator**: Quick distance-to-MIL calculations with keypad
+- **Manual Calculator**: Quick distance-to-MIL calculations with keypad and calculation history
 - **Mobile Optimized**: Touch targets, haptic feedback, and snappy zoom
 - **Map Selector**: Visual grid with search bar
 

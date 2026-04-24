@@ -26,13 +26,13 @@
 
 
 
-  <link rel="icon" type="image/webp" href="images/favicon.webp?v=3.42">
+  <link rel="icon" type="image/webp" href="images/favicon.webp?v=3.43">
 
-  <link rel="icon" type="image/png" href="images/favicon.png?v=3.42">
+  <link rel="icon" type="image/png" href="images/favicon.png?v=3.43">
 
-  <link rel="apple-touch-icon" href="images/icon-180.png?v=3.42">
+  <link rel="apple-touch-icon" href="images/icon-180.png?v=3.43">
 
-  <link rel="stylesheet" href="css/style.css?v=3.46">
+  <link rel="stylesheet" href="css/style.css?v=3.47">
 
   
 
@@ -48,7 +48,7 @@
 
           // Cache-busting query parameter forces browser to check for new service worker code
 
-          navigator.serviceWorker.register('./service-worker.js?v=10')
+          navigator.serviceWorker.register('./service-worker.js?v=11')
 
             .then((reg) => console.log('Service Worker registered.', reg))
 
@@ -656,7 +656,7 @@
 
       <div class="modal-brand-header">
 
-        ARTY CALCULATOR
+        <span class="main-title">ARTY CALCULATOR</span>
 
         <button class="close-btn" id="closeCalcBtn" aria-label="Close Calculator">×</button>
 
@@ -730,11 +730,40 @@
 
         <button class="key" onclick="inputDigit(3)">3</button>
 
-        <button class="key action red" onclick="clearInput()">C</button>
+        <button class="key action" id="calcSaveBtn" onclick="saveCalculation()">
+          <span class="red-text">C</span>
+        </button>
 
         <button class="key" onclick="inputDigit(0)">0</button>
 
         <button class="key action" onclick="backspaceInput()">⌫</button>
+
+      </div>
+
+
+
+      <div class="calc-history-section">
+
+        <div class="history-header">
+
+          <span class="history-title">HISTORY</span>
+
+          <button class="history-clear-btn" id="clearHistoryBtn" aria-label="Clear History">CLEAR</button>
+
+          <label class="history-toggle-switch">
+            <input type="checkbox" id="historyEnabledToggle">
+            <span class="slider"></span>
+          </label>
+
+          <button class="history-toggle-btn" id="toggleHistoryBtn" aria-label="Toggle History">▼</button>
+
+        </div>
+
+        <div class="history-list" id="calcHistoryList" style="display: none;">
+
+          <div class="history-empty">No calculations yet</div>
+
+        </div>
 
       </div>
 
@@ -852,11 +881,11 @@
 
 
 
-<script src="js/maps.js?v=1.2.8"></script>
+<script src="js/maps.js?v=1.2.9"></script>
 
-<script src="js/ballistics.js?v=1.2.8"></script>
+<script src="js/ballistics.js?v=1.2.9"></script>
 
-<script src="js/script.js?v=1.2.8"></script>
+<script src="js/script.js?v=1.2.9"></script>
 
 </body>
 

@@ -2,11 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = (() => {
-  const script = document.querySelector('script[src*="script.js"]');
-  const match = script?.src.match(/\?v=([\d.]+)/);
-  return match ? `v${match[1]}` : "dev";
-})();
+const APP_VERSION = "v1.2.9";
 const GAME_VERSION = "Update 19.1";
 
 // Create a simple map of IDs and what text should go in them
@@ -63,6 +59,9 @@ let currentStrongpoints = [];
 let labelCache = [];
 let isRendering = false; 
 let calcInputVal = ""; // Stores the string
+let calcHistory = []; // Stores calculation history
+let historyCollapsed = true; // Track history visibility state (default collapsed)
+let historyEnabled = false; // Track history enabled/disabled state
 
 // Custom Artillery Variables
 let customArtillery = []; // Store user-placed artillery
@@ -3591,6 +3590,10 @@ function saveState() {
     // NEW: Save custom artillery state
     customArtillery: customArtillery,
     nextCustomGunId: nextCustomGunId,
+    // NEW: Save calculator history
+    calcHistory: calcHistory,
+    historyCollapsed: historyCollapsed,
+    historyEnabled: historyEnabled,
     timestamp: Date.now()
   };
   
@@ -3637,6 +3640,59 @@ function loadState() {
     manualCalcFaction = loaded.manualCalcFaction || 'us';
     rulerEnabled = loaded.rulerEnabled !== undefined ? loaded.rulerEnabled : false;
     hudEnabled = loaded.hudEnabled !== undefined ? loaded.hudEnabled : false;
+    
+    // NEW: Restore calculator history
+    calcHistory = loaded.calcHistory || [];
+    historyCollapsed = loaded.historyCollapsed || false;
+    historyEnabled = loaded.historyEnabled !== undefined ? loaded.historyEnabled : false;
+    
+    // Apply history enabled state to UI
+    const historyEnabledToggle = document.getElementById("historyEnabledToggle");
+    const historyList = document.getElementById("calcHistoryList");
+    const toggleBtn = document.getElementById("toggleHistoryBtn");
+    const clearBtn = document.getElementById("clearHistoryBtn");
+    
+    if (historyEnabledToggle) {
+      historyEnabledToggle.checked = historyEnabled;
+    }
+    
+    // Always apply collapsed state to toggle button
+    if (toggleBtn) {
+      // Directly set transform based on collapsed state (flipped logic)
+      if (historyCollapsed) {
+        toggleBtn.style.transform = 'rotate(0deg)';
+        toggleBtn.classList.add("collapsed");
+      } else {
+        toggleBtn.style.transform = 'rotate(180deg)';
+        toggleBtn.classList.remove("collapsed");
+      }
+    }
+    
+    // Apply collapsed state to history list
+    if (historyList) {
+      historyList.style.display = historyCollapsed ? "none" : "block";
+    }
+    
+    // Apply modal height based on collapsed state using CSS class
+    const modalContent = document.querySelector("#calcModal .modal-content");
+    if (modalContent) {
+      if (historyCollapsed) {
+        modalContent.classList.remove("history-expanded");
+      } else {
+        modalContent.classList.add("history-expanded");
+      }
+    }
+    
+    // Hide CLEAR button when history is disabled
+    if (clearBtn) {
+      clearBtn.style.visibility = historyEnabled ? "visible" : "hidden";
+    }
+    
+    // Update the calc button based on history enabled state
+    updateCalcButton();
+    
+    // Render the loaded history
+    renderCalcHistory();
     
     placementMode = false;
     moveMode = false;
@@ -4457,6 +4513,113 @@ if (closeCalcBtn) {
     closeCalcBtn.addEventListener("touchstart", handleClose, { passive: false });
 }
 
+// Clear history button listener
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+if (clearHistoryBtn) {
+    const handleClearHistory = (e) => {
+        if (e.cancelable) e.preventDefault();
+        calcHistory = [];
+        renderCalcHistory();
+        saveState();
+    };
+
+    clearHistoryBtn.addEventListener("click", handleClearHistory);
+    clearHistoryBtn.addEventListener("touchstart", handleClearHistory, { passive: false });
+}
+
+// History enabled toggle listener
+const historyEnabledToggle = document.getElementById("historyEnabledToggle");
+if (historyEnabledToggle) {
+    const handleHistoryEnabledToggle = (e) => {
+        historyEnabled = e.target.checked;
+        updateCalcButton();
+
+        // Update history display based on enabled state
+        if (historyEnabled) {
+            renderCalcHistory();
+            // Auto-expand history when enabled
+            if (historyCollapsed) {
+                const toggleHistoryBtn = document.getElementById("toggleHistoryBtn");
+                if (toggleHistoryBtn) {
+                    toggleHistoryBtn.click();
+                }
+            }
+        } else {
+            renderCalcHistory(); // This will show "History disabled" since calcHistory won't save when disabled
+            // Auto-collapse history when disabled
+            if (!historyCollapsed) {
+                const toggleHistoryBtn = document.getElementById("toggleHistoryBtn");
+                if (toggleHistoryBtn) {
+                    toggleHistoryBtn.click();
+                }
+            }
+        }
+
+        // Hide CLEAR button when history is disabled
+        const clearBtn = document.getElementById("clearHistoryBtn");
+        if (clearBtn) {
+            clearBtn.style.visibility = historyEnabled ? "visible" : "hidden";
+        }
+
+        saveState();
+    };
+
+    historyEnabledToggle.addEventListener("change", handleHistoryEnabledToggle);
+}
+
+// Function to update the C/SAVE button based on history enabled state
+function updateCalcButton() {
+    const saveBtn = document.getElementById('calcSaveBtn');
+    if (!saveBtn) return;
+    
+    if (historyEnabled) {
+        saveBtn.innerHTML = '<span class="red-text">C</span><hr class="button-divider"><span class="green-text">SAVE</span>';
+    } else {
+        saveBtn.innerHTML = '<span class="red-text">C</span>';
+    }
+}
+const toggleHistoryBtn = document.getElementById("toggleHistoryBtn");
+if (toggleHistoryBtn) {
+    const handleToggleHistory = (e) => {
+        if (e.cancelable) e.preventDefault();
+        historyCollapsed = !historyCollapsed;
+        const historyList = document.getElementById("calcHistoryList");
+        if (historyList) {
+            historyList.style.display = historyCollapsed ? "none" : "block";
+        }
+        
+        // Update modal height based on collapsed state using CSS class
+        const modalContent = document.querySelector("#calcModal .modal-content");
+        if (modalContent) {
+            if (historyCollapsed) {
+                modalContent.classList.remove("history-expanded");
+            } else {
+                modalContent.classList.add("history-expanded");
+            }
+        }
+        
+        // Update arrow rotation (flipped logic)
+        if (historyCollapsed) {
+            toggleHistoryBtn.style.transform = 'rotate(0deg)';
+            toggleHistoryBtn.classList.add("collapsed");
+        } else {
+            toggleHistoryBtn.style.transform = 'rotate(180deg)';
+            toggleHistoryBtn.classList.remove("collapsed");
+        }
+        
+        // Hide CLEAR button when history is disabled
+        const clearBtn = document.getElementById("clearHistoryBtn");
+        if (clearBtn) {
+            clearBtn.style.visibility = historyEnabled ? "visible" : "hidden";
+        }
+        
+        saveState();
+    };
+
+    toggleHistoryBtn.addEventListener("click", handleToggleHistory);
+    toggleHistoryBtn.addEventListener("touchstart", handleToggleHistory, { passive: false });
+}
+
 // UNIVERSAL FACTION TOGGLE (Strict Cycle with Debounce)
 const factionToggleBtn = document.getElementById("calcFactionToggle");
 let isToggleCooldown = false; // Debounce flag
@@ -4546,6 +4709,31 @@ window.backspaceInput = function() {
   updateCalcScreen();
 };
 
+window.saveCalculation = function() {
+  const dist = parseInt(calcInputVal);
+  const mils = getMilFromTable(dist, manualCalcFaction);
+  
+  // Only save to history if enabled
+  if (historyEnabled && mils !== null && !isNaN(dist)) {
+    calcHistory.unshift({
+      distance: dist,
+      mil: mils,
+      faction: manualCalcFaction,
+      timestamp: new Date().toLocaleTimeString()
+    });
+    
+    if (calcHistory.length > 10) {
+      calcHistory.pop();
+    }
+    
+    renderCalcHistory();
+    saveState();
+  }
+  // Clear input after saving (or just clear if history disabled)
+  calcInputVal = "0";
+  updateCalcScreen();
+};
+
 function fixKeypadEvents() {
   const keys = document.querySelectorAll('.calc-keypad .key');
   
@@ -4570,6 +4758,8 @@ function fixKeypadEvents() {
               window.clearInput();
           } else if (rawAction.includes('backspaceInput')) {
               window.backspaceInput();
+          } else if (rawAction.includes('saveCalculation')) {
+              window.saveCalculation();
           }
       };
 
@@ -4625,6 +4815,14 @@ if (calcInputEl) {
     calculateManual();
   });
 
+  // Clear 0 on focus
+  calcInputEl.addEventListener("focus", (e) => {
+    if (e.target.value === "0") {
+      e.target.value = "";
+      calcInputVal = "";
+    }
+  });
+
   // Handle special keys
   calcInputEl.addEventListener("keydown", (e) => {
     if (e.key === "Backspace") {
@@ -4636,6 +4834,25 @@ if (calcInputEl) {
       calcInputEl.value = calcInputVal;
       calculateManual();
     } else if (e.key === "Enter") {
+      // Save to history before clearing (only if enabled)
+      const dist = parseInt(calcInputVal);
+      const mils = getMilFromTable(dist, manualCalcFaction);
+      if (historyEnabled && mils !== null && !isNaN(dist)) {
+        calcHistory.unshift({
+          distance: dist,
+          mil: mils,
+          faction: manualCalcFaction,
+          timestamp: new Date().toLocaleTimeString()
+        });
+        
+        if (calcHistory.length > 10) {
+          calcHistory.pop();
+        }
+        
+        renderCalcHistory();
+        saveState();
+      }
+      // Clear input after saving (or just clear if history disabled)
       calcInputVal = "";
       calcInputEl.value = "";
       calculateManual();
@@ -4661,6 +4878,52 @@ function calculateManual() {
     milEl.className = "res-value text-yellow";
     milEl.innerText = mils;
   }
+}
+
+function renderCalcHistory() {
+  const historyList = document.getElementById("calcHistoryList");
+  if (!historyList) return;
+  
+  if (!historyEnabled) {
+    historyList.innerHTML = '<div class="history-empty">History disabled</div>';
+    return;
+  }
+  
+  if (calcHistory.length === 0) {
+    historyList.innerHTML = '<div class="history-empty">No calculations yet</div>';
+    return;
+  }
+  
+  historyList.innerHTML = calcHistory.map((entry, index) => {
+    let factionName = "US";
+    let flagPath = "images/flags/us.webp";
+    if (entry.faction === "ger" || entry.faction === "axis") {
+      factionName = "GER";
+      flagPath = "images/flags/ger.webp";
+    } else if (entry.faction === "us") {
+      factionName = "US";
+      flagPath = "images/flags/us.webp";
+    } else if (entry.faction === "rus") {
+      factionName = "SOV";
+      flagPath = "images/flags/rus.webp";
+    } else if (entry.faction === "gb") {
+      factionName = "ALLIES";
+      flagPath = "images/flags/gb.webp";
+    }
+    return `
+      <div class="history-item" data-index="${index}">
+        <div class="history-faction">
+          <img src="${flagPath}" class="history-flag" alt="${factionName}">
+          <span>${factionName}</span>
+        </div>
+        <div class="history-values">
+          <span class="history-mil text-yellow">${entry.mil} MIL</span>
+          <span class="history-dist">${entry.distance}m</span>
+        </div>
+        <div class="history-time">${entry.timestamp}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // --- LIVE HUD MOUSE TRACKING & RINGS (OPTIMIZED) ---

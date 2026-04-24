@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.9] - 2026-04-23
+### Added
+- **Calculator History**: Added calculation history log with faction flag, distance, MIL value, and timestamp
+- **History Controls**: Added toggle switch to enable/disable history and collapsible history section
+- **History Persistence**: History and settings are saved to localStorage
+
+### Changed
+- **Calculator Button**: C button now shows C/SAVE when history is enabled
+- **Input Behavior**: Calculator input clears to empty on click and Enter instead of showing "0"
+
+### Fixed
+- **Firefox Mobile Darkening**: Reduced range overlay opacity in Firefox to fix map darkening at zoom level 4
+
 ## [1.2.8] - 2026-04-22
 ### Added
 - **Changelog Modal**: Added 📋 button that opens an in-app changelog modal showing latest changes

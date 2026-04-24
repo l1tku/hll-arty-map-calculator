@@ -1407,7 +1407,7 @@ select.btn-map-select option {
 
 .modal-brand-header {
   position: relative; /* REQUIRED to anchor the X button */
-  padding: 25px 20px;
+  padding: 15px 20px;
   background: rgba(0, 0, 0, 0.4); 
   border-bottom: 1px solid rgba(255, 193, 7, 0.3); 
   
@@ -2388,7 +2388,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 /* Screen Area */
 .calc-screen {
   background: #000;
-  padding: 20px;
+  padding: 8px;
   border-bottom: 4px solid #ffc107;
 }
 
@@ -2397,7 +2397,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   flex-direction: column; 
   align-items: center; /* CHANGED: Centers items horizontally (was flex-end) */
   justify-content: center;
-  margin-bottom: 15px; 
+  margin-bottom: 4px; 
   text-align: center; /* Ensures text stays centered */
 }
 .screen-label { font-family: 'GothamSS', sans-serif; font-size: 10px; color: #888; margin-bottom: 4px; }
@@ -2419,7 +2419,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   color: #ffc107;
 }
 
-.screen-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0; }
+.screen-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 4px 0; }
 
 /* Screen Results Area */
 .screen-results { 
@@ -2447,6 +2447,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   margin-bottom: 5px; 
   text-transform: uppercase;
   letter-spacing: 1px;
+  padding-top: 2px;
 }
 
 /* Result Value Container - Fixed Height to prevent jumping */
@@ -2486,7 +2487,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
 .key {
   background: #1d1f27;
   border: none;
-  height: 70px;
+  height: 55px;
   color: white;
   font-family: 'GothamSS', sans-serif;
   font-size: 24px;
@@ -2495,15 +2496,244 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   transition: background 0.1s;
 }
 
-.key:active { background: #333; }
+.key:active { 
+  background-color: #ffc107 !important;
+  color: #000 !important;
+  transform: scale(0.95);
+}
 .key.action { background: #252830; font-size: 20px; }
 .key.action.red { color: #ff4444; }
+.key.action.green { color: #28a745; }
+
+.red-text {
+  color: #ff4444;
+}
+
+.green-text {
+  color: #28a745;
+}
+
+.button-divider {
+  margin: 2px 0;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%;
+}
 
 /* Add to your CSS file */
 .key.pressed {
   background-color: #ffc107 !important; /* Yellow flash */
   color: #000 !important;
   transform: scale(0.95);
+}
+
+/* Calculator History Section */
+.calc-history-section {
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px 10px 15px;
+  background: #1d1f27;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.history-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.history-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.history-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #28a745;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+.history-clear-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  font-family: 'GothamSS', sans-serif;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.history-toggle-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.history-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.history-toggle-btn.collapsed {
+  transform: rotate(180deg);
+}
+
+.history-toggle-btn:not(.collapsed) {
+  transform: rotate(0deg);
+}
+
+.history-title {
+  font-family: 'GothamSS', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 1px;
+}
+
+.history-clear-btn {
+  background: none;
+  border: none;
+  color: #ff4444;
+  font-family: 'GothamSS', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px 4px 8px;
+  border-radius: 3px;
+  transition: background 0.2s;
+  margin-right: 0px;
+}
+
+.history-clear-btn:hover {
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.history-list {
+  padding: 5px 0;
+}
+
+.history-empty {
+  text-align: center;
+  padding: 14px;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: 'GothamSS', sans-serif;
+  font-size: 15px;
+  background: transparent;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.history-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.history-faction {
+  font-family: 'GothamSS', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  width: 70px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.history-flag {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+.history-values {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.history-dist {
+  font-family: 'GothamSS', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+}
+
+.history-mil {
+  font-family: 'GothamSS', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.history-time {
+  font-family: 'GothamSS', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  min-width: 50px;
+  text-align: right;
 }
 
 /* --- LIVE CURSOR HUD STYLES --- */
@@ -2932,6 +3162,11 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     min-height: unset !important;
     max-height: 90vh;
     align-self: center; /* Centers vertically if it's short */
+}
+
+#calcModal .modal-content.history-expanded {
+    height: 790px !important;
+    min-height: 790px !important;
 }
 
 
@@ -3487,10 +3722,89 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
 
     /* --- 9. MODALS & MENUS --- */
     .modal-content {
-        height: 92vh !important;
+        height: auto !important;
         max-height: none !important;
-        margin: 0 !important;
+        margin: 20px auto 0 auto !important;
         width: 95% !important;
+        overflow-y: visible !important;
+    }
+
+    /* Change modal overlay alignment to start from top on mobile */
+    .modal-overlay {
+        align-items: flex-start !important;
+        padding: 10px 0 0 0 !important;
+        overflow-y: auto !important;
+    }
+
+    /* --- MOBILE CALCULATOR OPTIMIZATIONS --- */
+    /* Calculator modal positioned at top, expands downward */
+    #calcModal .modal-content {
+        margin-top: 10px !important;
+        margin-bottom: auto !important;
+    }
+
+    /* When history expands, modal stays at top and grows downward */
+    #calcModal .modal-content.history-expanded {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+    }
+
+    /* History section: flex column layout with scrolling list */
+    .calc-history-section {
+        max-height: 220px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Only add min-height when history list is visible (expanded) */
+    .calc-history-section .history-list:not([style*="none"]) {
+        min-height: 150px !important;
+    }
+
+    /* History header stays fixed at top */
+    .history-header {
+        position: relative !important;
+        z-index: 100 !important;
+        background: #1d1f27 !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* History list scrolls independently */
+    .history-list {
+        overflow-y: auto !important;
+        flex: 1 !important;
+        padding: 0 !important;
+    }
+
+    /* Reduce history item padding on mobile */
+    .history-item {
+        padding: 6px 15px !important;
+    }
+
+    /* History empty message - reduced padding */
+    .history-empty {
+        padding: 14px !important;
+        font-size: 15px !important;
+    }
+
+    /* Reduce header padding and title size */
+    .modal-brand-header {
+        padding: 10px 20px !important;
+        min-height: 50px !important;
+    }
+    #calcModal .modal-brand-header .main-title {
+        font-size: 25px !important;
+    }
+
+    /* Reduce faction bar padding */
+    .calc-faction-bar {
+        padding: 8px 15px !important;
+    }
+
+    /* Reduce screen padding */
+    .calc-screen {
+        padding: 6px !important;
     }
 
     /* --- THE FIX: Force Projects Modal to shrink to fit content --- */
@@ -3512,19 +3826,10 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
         text-align: center !important;
         
         /* THE ALIGNMENT FIX: 50px on both sides balances the Close Button */
-        padding: 20px 50px !important; 
+        padding: 12px 50px !important; 
         gap: 6px !important;
         min-height: 70px !important;
         position: relative !important;
-    }
-
-    /* 2. Main Title: Center Locked */
-    .main-title {
-        font-size: 22px !important;
-        letter-spacing: 1px !important;
-        width: 100% !important;
-        margin: 0 auto !important;
-        display: block !important;
     }
 
     /* 3. Credits/Version: Center Locked */
@@ -4311,6 +4616,13 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
   );
 }
 
+/* Firefox: Reduce opacity to compensate for mask-image rendering issues */
+@supports (-moz-appearance: none) {
+  #beyondRangeOverlay {
+    background: rgba(0, 0, 0, 0.15);
+  }
+}
+
 /* MIN RANGE DARK OVERLAY — darkens inside the dead zone (no outline) */
 #minRangeOverlay {
   position: absolute;
@@ -4333,6 +4645,13 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     black var(--min-range-r),
     transparent calc(var(--min-range-r) + 1px)
   );
+}
+
+/* Firefox: Reduce opacity to compensate for mask-image rendering issues */
+@supports (-moz-appearance: none) {
+  #minRangeOverlay {
+    background: rgba(0, 0, 0, 0.1);
+  }
 }
 
 /* ENEMY ARTILLERY — same perfect centering as friendly guns */
