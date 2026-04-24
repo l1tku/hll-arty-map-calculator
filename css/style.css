@@ -3293,7 +3293,12 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
 @media (max-width: 768px) {
 
     /* --- 1. MAIN UI & DRAWER --- */
-    
+
+    /* Reduce main title size on mobile */
+    .main-title {
+        font-size: 24px !important;
+    }
+
     /* THE FULL-SIZE FIX: Remove borders and padding from the main wrapper */
     .shell {
         padding: 0 !important;
@@ -3723,10 +3728,10 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     /* --- 9. MODALS & MENUS --- */
     .modal-content {
         height: auto !important;
-        max-height: none !important;
-        margin: 20px auto 0 auto !important;
-        width: 95% !important;
-        overflow-y: visible !important;
+        max-height: 85vh !important;
+        margin: 30px auto 20px auto !important;
+        width: 90% !important;
+        overflow-y: auto !important;
     }
 
     /* Change modal overlay alignment to start from top on mobile */
