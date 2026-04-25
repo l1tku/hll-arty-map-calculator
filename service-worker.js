@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hll-arty-cache-v18';
+const CACHE_NAME = 'hll-arty-cache-v1.3.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
