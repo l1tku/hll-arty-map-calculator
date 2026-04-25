@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.3.0";
+const APP_VERSION = "v1.3.1";
 const GAME_VERSION = "Update 19.1";
 
 // Create a simple map of IDs and what text should go in them
@@ -2192,7 +2192,10 @@ function switchMap(mapKey) {
     const imgElement = document.getElementById('mapImage');
     const markersLayer = document.getElementById("markers");
 
-    // 1. Fade out old map instantly
+    // 1. Hide old map image immediately to prevent flicker
+    imgElement.style.opacity = "0";
+
+    // Fade out map stage
     if (mapStage) {
         mapStage.style.transition = "opacity 0.2s ease-out";
         mapStage.style.opacity = "0";
@@ -2248,6 +2251,7 @@ function switchMap(mapKey) {
         render();
 
         // Fade in new map
+        imgElement.style.opacity = "1";
         if (mapStage) {
             mapStage.style.opacity = "1";
             setTimeout(() => {
@@ -2794,6 +2798,7 @@ function placeCustomArtillery(gameX, gameY) {
   placementMode = false;
   moveMode = false;
   movingGunId = null;
+  activeTarget = null;
 
   updateMapCursor();
   updateGunUI(MAP_DATABASE[activeMapKey]);
@@ -4531,6 +4536,8 @@ const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 if (clearHistoryBtn) {
     const handleClearHistory = (e) => {
         if (e.cancelable) e.preventDefault();
+        // Haptic feedback for Chrome/Android
+        if (navigator.vibrate) navigator.vibrate(10);
         calcHistory = [];
         renderCalcHistory();
         saveState();
@@ -4544,6 +4551,8 @@ if (clearHistoryBtn) {
 const historyEnabledToggle = document.getElementById("historyEnabledToggle");
 if (historyEnabledToggle) {
     const handleHistoryEnabledToggle = (e) => {
+        // Haptic feedback for Chrome/Android
+        if (navigator.vibrate) navigator.vibrate(10);
         historyEnabled = e.target.checked;
         updateCalcButton();
 

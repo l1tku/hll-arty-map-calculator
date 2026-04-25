@@ -1,6 +1,21 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-04-25
+### Added 
+- Haptic feedback on history buttons
+
+### Fixed
+- Map switch flicker
+- CLEAR button animation
+
+### Changed
+- Target panel closes on custom artillery placement
+- CLEAR button animation matches calculator keys
+
+### Fixed
+- **Mobile <370px Layout**: Fixed text wrapping and reduced icon size for very small screens
+
 ## [1.3.0] - 2026-04-25
 ### Fixed
 - **Strongpoint Stripe Clipping**: Fixed stripes overflowing circle boundary

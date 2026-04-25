@@ -2685,6 +2685,12 @@ input:checked + .slider:before {
   background: rgba(255, 68, 68, 0.1);
 }
 
+.history-clear-btn:active {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+  transform: translateX(-50%) scale(0.95);
+}
+
 .history-list {
   padding: 5px 0;
 }
@@ -3972,6 +3978,11 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     }
     
     /* TEXT: Occupies Column 2 (The Remaining Space) */
+    .modal-footer #btnOtherProjects {
+        /* Prevent text wrapping */
+        white-space: nowrap !important;
+    }
+    
     .modal-footer #btnOtherProjects span {
         /* Center yourself inside the remaining space */
         text-align: center !important; 
@@ -4757,4 +4768,25 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
 .marker.enemy-gun .arty-icon {
     width: 100% !important;
     height: 100% !important;
+}
+
+/* ==========================================
+   VERY SMALL MOBILE FIX: POLYGON ICON < 370px
+   ========================================== */
+@media (max-width: 370px) {
+    .modal-footer #btnOtherProjects {
+        font-size: 13px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        gap: 8px !important;
+    }
+    .modal-footer #btnOtherProjects .icon {
+        width: 20px !important;
+        height: 20px !important;
+        stroke-width: 2 !important;
+    }
+    .modal-footer #btnOtherProjects .icon polygon,
+    .modal-footer #btnOtherProjects .icon polyline {
+        stroke-width: 2 !important;
+    }
 }
