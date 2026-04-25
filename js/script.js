@@ -82,6 +82,8 @@ let rulerLabelPool = [];
 // --- PERFORMANCE CACHE ---
 let stickyLabelsCache = { cols: [], rows: [] }; // Stores grid label elements
 let cachedSubGrid = null; // Stores the keypad grid element
+let _mapRectCache = null; // Cached getBoundingClientRect result
+let _mapRectTime = 0;     // Timestamp of cache
 
 // (Top of script) ---
 let _lastMobDist = null;
@@ -121,13 +123,18 @@ const cached = {
 // ==========================================
 // MOBILE PERFORMANCE MODE
 // ==========================================
-const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+let IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
 const MOBILE_QUALITY = {
     showRangeCircle: !IS_MOBILE,           // disable big 1600m circle on phones
     rulerIntervalMeters: IS_MOBILE ? 100 : 50,   // fewer ruler ticks
-    maxRulerMarkers: IS_MOBILE ? 8 : 20
+    maxRulerMarkers: IS_MOBILE ? 8 : 32   // Desktop: 32 markers × 50m = 1600m
 };
+
+// Update IS_MOBILE on resize to avoid repeated innerWidth checks
+window.addEventListener('resize', () => {
+    IS_MOBILE = window.innerWidth <= 768;
+});
 
 // DOM Elements
 const mapContainer = document.getElementById("mapContainer");
@@ -222,7 +229,7 @@ function getPinchCenter(e) {
 }
 
 function syncToggleUI() {
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = IS_MOBILE;
 
   // 1. Sync Buttons
   const rulerBtn = document.getElementById('rulerToggleBtn');
@@ -321,17 +328,17 @@ function getEffectiveZoom() {
 
 function getGridRef(gameX, gameY) {
   // 1. Get dimensions for the current active map (Handles 2016m Carentan vs 1984m Driel)
-  const dims = getMapDimensions(); 
-  
+  const dims = getMapDimensions();
+
   // Calculate the "half" based on the actual map width, not the global 2000 default
   const halfWidth = dims.width / 2 / GAME_UNITS_PER_METER;
   const halfHeight = dims.height / 2 / GAME_UNITS_PER_METER;
-  
+
   // Convert Game Coords to Meter Offset from Top-Left
   // Standard logic: X grows right, Y grows up (in game) but down (in grid)
   const xMeters = (gameX / GAME_UNITS_PER_METER) + halfWidth;
-  const yMeters = halfHeight - (gameY / GAME_UNITS_PER_METER); 
-  
+  const yMeters = halfHeight - (gameY / GAME_UNITS_PER_METER);
+
   // Check bounds based on actual map size
   const totalW = dims.width / GAME_UNITS_PER_METER;
   const totalH = dims.height / GAME_UNITS_PER_METER;
@@ -340,22 +347,25 @@ function getGridRef(gameX, gameY) {
     return "---";
   }
 
-  // 200m Grid Squares
-  let colIndex = Math.floor(xMeters / 200); 
-  let rowIndex = Math.floor(yMeters / 200);
-  
+  // Grid Squares - calculate based on actual map dimensions for 1:1 accuracy
+  // Map is divided into 10 equal sections, not fixed 200m
+  const sectionWidthMeters = totalW / 10;
+  const sectionHeightMeters = totalH / 10;
+
+  let colIndex = Math.floor(xMeters / sectionWidthMeters);
+  let rowIndex = Math.floor(yMeters / sectionHeightMeters);
+
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-  
-  // Safety Clamp: Ensure we don't exceed the array if map is slightly larger (e.g., 2016m edge case)
-  // This forces 2008m to still read as column "J" (Index 9) if it falls in the last visual block
+
+  // Safety Clamp
   if (colIndex >= letters.length) colIndex = letters.length - 1;
   if (rowIndex >= 10) rowIndex = 9;
   if (colIndex < 0) colIndex = 0;
   if (rowIndex < 0) rowIndex = 0;
-  
+
   const colChar = letters[colIndex];
   const rowChar = rowIndex + 1;
-  
+
   return `${colChar}${rowChar}`;
 }
 
@@ -400,7 +410,10 @@ function setZoomLevel(newLevel, mouseX = null, mouseY = null) {
 }
 
 function clampPosition() {
-  const rect = mapContainer.getBoundingClientRect();
+  // PERFORMANCE FIX: Use cached rect if available from render loop
+  const mapContainer = cached.mapContainer;
+  if (!mapContainer) return;
+  const rect = _mapRectCache || mapContainer.getBoundingClientRect();
   const mapImage = document.getElementById("mapImage");
   const drawScale = state.scale * state.fitScale;
   const imgW = mapImage.naturalWidth * drawScale;
@@ -466,7 +479,7 @@ function updateStickyLabels(currentDrawScale) {
   const stepX = (w / 10) * currentDrawScale; 
   const stepY = (h / 10) * currentDrawScale; 
 
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = IS_MOBILE;
   const padding = isMobile ? 15 : 30; 
   
   const stickyTopY = Math.max(state.pointY, 0);
@@ -483,11 +496,9 @@ function updateStickyLabels(currentDrawScale) {
     const el = stickyLabelsCache.cols[i];
     const colScreenX = state.pointX + (i * stepX);
     const finalX = colScreenX + padding;
-    
-    let finalY;
-    if (i === 0) finalY = state.pointY + padding; 
-    else finalY = stickyTopY + padding;      
-    
+
+    const finalY = stickyTopY + padding;
+
     // Apply rounding only if NOT Firefox/HighDPI
     const xVal = useFloats ? finalX : Math.round(finalX);
     const yVal = useFloats ? finalY : Math.round(finalY);
@@ -497,15 +508,15 @@ function updateStickyLabels(currentDrawScale) {
 
   for (let i = 0; i < stickyLabelsCache.rows.length; i++) {
     const el = stickyLabelsCache.rows[i];
-    const gridIndex = i + 1; 
+    const gridIndex = i + 1;
     const finalX = stickyLeftX + padding;
     const rowScreenY = state.pointY + (gridIndex * stepY);
     const finalY = rowScreenY + padding;
-    
+
     // Apply rounding only if NOT Firefox/HighDPI
     const xVal = useFloats ? finalX : Math.round(finalX);
     const yVal = useFloats ? finalY : Math.round(finalY);
-    
+
     el.style.transform = `translate(${xVal}px, ${yVal}px) scale(${fontScale})`;
   }
 }
@@ -1408,8 +1419,7 @@ function renderTargeting() {
 
     // Mobile HUD Fire Button
     if (mobileFireBtn) {
-        const isMobile = window.innerWidth <= 768;
-        if (hudEnabled && isMobile) {
+        if (hudEnabled && IS_MOBILE) {
             mobileFireBtn.classList.remove("hidden");
         } else {
             mobileFireBtn.classList.add("hidden");
@@ -1665,13 +1675,20 @@ function renderTargeting() {
 
 // === FIX: SYNCHRONOUS RENDER (Prevents Chrome Checkerboards) ===
 function render() {
+  // PERFORMANCE FIX: Use cached rect - only updated on resize
+  const mapContainer = cached.mapContainer;
+  if (mapContainer && !_mapRectCache) {
+    // Initialize cache on first render
+    _mapRectCache = mapContainer.getBoundingClientRect();
+    _mapRectTime = Date.now();
+  }
+
   clampPosition();
   const drawScale = state.scale * state.fitScale;
   const markersLayer = cached.markersLayer;
   
   // 1. CSS Variables
-  const mapContainer = cached.mapContainer;
-  mapContainer.style.setProperty('--current-scale', drawScale); 
+  if (mapContainer) mapContainer.style.setProperty('--current-scale', drawScale); 
   const mapStage = cached.mapStage;
   mapStage.style.setProperty('--effective-zoom', drawScale);
   
@@ -1690,7 +1707,7 @@ function render() {
   }
 
   // --- MOBILE-AWARE ARTILLERY ICON SCALING ---
-  const isMobileScreen = IS_MOBILE || window.innerWidth <= 768;
+  const isMobileScreen = IS_MOBILE;
   const baseIconSize = isMobileScreen ? 300 : 128;   // ← bigger base on mobile (20× zoom)
 
   const normalizedZoom = Math.max(0, Math.min(1, (state.scale - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)));
@@ -1699,7 +1716,7 @@ function render() {
   mapContainer.style.setProperty('--dynamic-icon-size', `${dynSize}px`);
   
   // --- DYNAMIC STROKE SCALING ---
-  const isMob = window.innerWidth <= 768;
+  const isMob = IS_MOBILE;
   const strokeBase = isMob ? 10 : 8; 
   const strokeExp = isMob ? 0.5 : 0.6;
   const dynStroke = strokeBase / Math.pow(state.scale, strokeExp);
@@ -1735,7 +1752,7 @@ function render() {
   if (zoomIndicator) zoomIndicator.innerText = `${state.scale.toFixed(1)}x`;
   
   // --- FIREFOX OPTIMIZATION START: BATCH LABEL UPDATE ---
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = IS_MOBILE;
   const mobileScaleMultiplier = isMobile ? 2.5 : 1.0; 
 
   const TRANSITION_START_ZOOM = 1.0;
@@ -1798,7 +1815,7 @@ function updateRealScale(effectiveZoom) {
     const pixelsPerMeter = currentMapPixelWidth / TOTAL_PLAYABLE_METERS;
 
     // 3. Select BAR SIZE BASED ON ZOOM
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = IS_MOBILE;
     let barMeters;
 
     if (isMobile) {
@@ -1836,17 +1853,18 @@ function updateRealScale(effectiveZoom) {
 
 function updateDimensions() {
   const mapImage = document.getElementById("mapImage");
+  const mapContainer = cached.mapContainer;
   
   // FIX: Check naturalWidth to prevent "Stuck Zoom" bug on browser restore
   if (!mapImage.complete || mapImage.naturalWidth === 0) return;
+  if (!mapContainer) return;
   
-  const rect = mapContainer.getBoundingClientRect();
+  // PERFORMANCE FIX: Use cached rect if fresh (from render loop)
+  const rect = (_mapRectCache && Date.now() - _mapRectTime < 100) ? _mapRectCache : mapContainer.getBoundingClientRect();
   
   state.fitScale = Math.min(rect.width / mapImage.naturalWidth, rect.height / mapImage.naturalHeight);
   
-  const isMobile = window.innerWidth <= 768; 
-
-  if (isMobile) {
+  if (IS_MOBILE) {
       MAX_ZOOM = 20; 
   } else {
       MAX_ZOOM = 10; 
@@ -1858,8 +1876,11 @@ function updateDimensions() {
 
 function centerMap() {
   const mapImage = document.getElementById("mapImage");
+  const mapContainer = cached.mapContainer;
+  if (!mapContainer) return;
   state.scale = MIN_ZOOM;
-  const rect = mapContainer.getBoundingClientRect();
+  // PERFORMANCE FIX: Use cached rect if available
+  const rect = _mapRectCache || mapContainer.getBoundingClientRect();
   state.pointX = (rect.width - (mapImage.naturalWidth * state.fitScale)) / 2;
   state.pointY = (rect.height - (mapImage.naturalHeight * state.fitScale)) / 2;
   
@@ -2561,7 +2582,6 @@ function updateGunUI(config) {
 
 function updateMapCursor() {
   const mapContainer = document.getElementById("mapContainer");
-  const isMobile = window.innerWidth <= 768;
   const crosshair = document.getElementById("mobileCrosshair");
   const placeBtn = document.getElementById("mobilePlaceBtn");
   const fireBtn = document.getElementById("mobileFireBtn");
@@ -2569,7 +2589,7 @@ function updateMapCursor() {
   if (placementMode || moveMode) {
     mapContainer.style.cursor = "crosshair";
 
-    if (isMobile && crosshair) {
+    if (IS_MOBILE && crosshair) {
       crosshair.classList.remove("hidden");
       crosshair.classList.add("placement-mode");   // ← ONLY this line affects placement
       crosshair.style.display = "block";
@@ -2577,13 +2597,13 @@ function updateMapCursor() {
     }
 
     if (placeBtn) {
-      if (isMobile) placeBtn.classList.remove("hidden");
+      if (IS_MOBILE) placeBtn.classList.remove("hidden");
       else placeBtn.classList.add("hidden");
     }
     if (fireBtn) fireBtn.classList.add("hidden");
   }
   // Live HUD part stays completely untouched
-  else if (isMobile && hudEnabled) {
+  else if (IS_MOBILE && hudEnabled) {
     mapContainer.style.cursor = "crosshair";
     if (crosshair) {
       crosshair.classList.remove("hidden", "placement-mode");
@@ -2597,7 +2617,7 @@ function updateMapCursor() {
   }
   else {
     mapContainer.style.cursor = "default";
-    if (isMobile && crosshair) {
+    if (IS_MOBILE && crosshair) {
       crosshair.classList.add("hidden");
       crosshair.classList.remove("placement-mode");
       crosshair.style.display = "none";
@@ -2623,11 +2643,9 @@ function showPlacementFeedback() {
     return;
   }
 
-  const isMobile = window.innerWidth <= 768;
-
   if (placementMode) {
     // ← THIS IS THE FIXED PART
-    guideEl.innerText = isMobile 
+    guideEl.innerText = IS_MOBILE 
       ? "AIM WITH CROSSHAIR THEN TAP PLACE" 
       : "CLICK MAP TO PLACE ARTILLERY";
   } 
@@ -3181,11 +3199,9 @@ function initArtyControls() {
       const hudEl = document.getElementById("liveCursorHud");
       const crosshair = document.getElementById("mobileCrosshair");
       const fireBtn = document.getElementById("mobileFireBtn");
-      const isMobile = window.innerWidth <= 768;
-
       if (hudEnabled) {
           if (hudEl) hudEl.classList.remove("hidden");
-          if (isMobile) {
+          if (IS_MOBILE) {
               if (crosshair) crosshair.classList.remove("hidden");
               if (fireBtn) fireBtn.classList.remove("hidden");
           }
@@ -3645,7 +3661,7 @@ function loadState() {
     calcHistory = loaded.calcHistory || [];
     historyCollapsed = loaded.historyCollapsed || false;
     historyEnabled = loaded.historyEnabled !== undefined ? loaded.historyEnabled : false;
-    
+
     // Apply history enabled state to UI
     const historyEnabledToggle = document.getElementById("historyEnabledToggle");
     const historyList = document.getElementById("calcHistoryList");
@@ -3693,7 +3709,7 @@ function loadState() {
     
     // Render the loaded history
     renderCalcHistory();
-    
+
     placementMode = false;
     moveMode = false;
     movingGunId = null;
@@ -3748,9 +3764,7 @@ mapContainer.addEventListener("click", (e) => {
 
   // --- NEW: PLACEMENT MODE HANDLING ---
   if (placementMode) {
-    const isMobileDevice = window.innerWidth <= 768;
-    
-    if (isMobileDevice) {
+    if (IS_MOBILE) {
       // On mobile: Do NOTHING when tapping map.
       // Only the PLACE button is allowed to place custom artillery.
       return;
@@ -3906,8 +3920,7 @@ mapContainer.addEventListener("click", (e) => {
 
   // Only show pulse on map click if we are NOT on mobile using the HUD
   // (Because the HUD button handles the pulse for mobile users)
-  const isMobile = window.innerWidth <= 768;
-  if (!isMobile || !hudEnabled) { 
+  if (!IS_MOBILE || !hudEnabled) { 
       triggerFirePulse(rawImgX, rawImgY); 
       // Haptic feedback for desktop shooting (Chrome/Android)
       if (navigator.vibrate) navigator.vibrate(30);
@@ -3945,7 +3958,7 @@ mapContainer.addEventListener("click", (e) => {
   activeTarget = {
     gameX: targetPos.x,
     gameY: targetPos.y,
-    distance: correctedDistance, 
+    distance: correctedDistance,
     mil: mil
   };
 
@@ -4294,7 +4307,7 @@ function initZoomControls() {
 
       // 5. Zoom Logic
       // CHANGE: Mobile uses 2.0 step for speed, Desktop uses 1.0 for precision
-      const step = (window.innerWidth <= 768) ? 2.0 : 1.0; 
+      const step = IS_MOBILE ? 2.0 : 1.0; 
       
       let target = state.scale + (direction * step);
       target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, target));
@@ -4932,7 +4945,7 @@ let isHudUpdating = false; // Semaphore flag
 document.addEventListener("mousemove", (e) => {
     // 1. Global Checks
     if (!hudEnabled) return;
-    if (window.innerWidth <= 768) return; 
+    if (IS_MOBILE) return; 
 
     // 2. Visuals: Move these instantly (Force Override CSS)
     const hudEl = document.getElementById("liveCursorHud");
@@ -4965,7 +4978,12 @@ document.addEventListener("mousemove", (e) => {
                 return;
             }
 
-            const rect = mapContainer.getBoundingClientRect();
+            // PERFORMANCE FIX: Cache getBoundingClientRect, only recalc every 100ms
+            if (!_mapRectCache || Date.now() - _mapRectTime > 100) {
+                _mapRectCache = mapContainer.getBoundingClientRect();
+                _mapRectTime = Date.now();
+            }
+            const rect = _mapRectCache;
             
             // Bounds Check
             if (e.clientX < rect.left || e.clientX > rect.right || 
@@ -5025,7 +5043,7 @@ document.addEventListener("mousemove", (e) => {
 
 function updateMobileHud() {
   // Only run if HUD is enabled and we are on mobile
-  if (!hudEnabled || window.innerWidth > 768) return;
+  if (!hudEnabled || !IS_MOBILE) return;
 
   // SAFETY FORCE: Keep rings visible when Live HUD is active (even after faction change)
   const crosshair = document.getElementById("mobileCrosshair");
@@ -5038,7 +5056,10 @@ function updateMobileHud() {
   }
 
   const mapImage = document.getElementById("mapImage");
-  const rect = mapContainer.getBoundingClientRect();
+  const mapContainer = cached.mapContainer;
+  if (!mapContainer) return;
+  // PERFORMANCE FIX: Use cached rect if fresh (from render loop)
+  const rect = (_mapRectCache && Date.now() - _mapRectTime < 100) ? _mapRectCache : mapContainer.getBoundingClientRect();
   
   // --- 1. Calculate Center ---
   const centerX = rect.width / 2;
@@ -5251,10 +5272,16 @@ if (imgEl.complete) {
 }
 
 // Ensure ResizeObserver doesn't trigger bad math if image isn't ready
-new ResizeObserver(() => { 
+new ResizeObserver(() => {
     if (imgEl.naturalWidth > 0) {
-        updateDimensions(); 
-        render(); 
+        clearTimeout(window._resizeTimeout);
+        window._resizeTimeout = setTimeout(() => {
+            // PERFORMANCE FIX: Update cache on resize
+            _mapRectCache = mapContainer.getBoundingClientRect();
+            _mapRectTime = Date.now();
+            updateDimensions();
+            render();
+        }, 100); // Debounce: wait for resize to settle
     }
 }).observe(mapContainer);
 

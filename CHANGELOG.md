@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-25
+### Fixed
+- **Strongpoint Stripe Clipping**: Fixed stripes overflowing circle boundary
+- **Ballistic Ruler Range**: Fixed ruler stopping at 1000m on desktop (now shows full 1600m)
+
+### Performance
+- **Reduced Layout Thrashing**: Cached getBoundingClientRect() calls and eliminated repeated window.innerWidth checks for smoother panning/zooming
+
 ## [1.2.9] - 2026-04-23
 ### Added
 - **Calculator History**: Added calculation history log with faction flag, distance, MIL value, and timestamp

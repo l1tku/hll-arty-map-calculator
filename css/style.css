@@ -681,8 +681,24 @@ body {
     /* Draw outline INSIDE the circle (do not grow the circle outward) */
     border: none;
     background-color: transparent; 
-    background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1) 16px, #000000 16px, #000000 18px);
+    /* Original 16px stripe pattern */
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        rgba(255, 255, 255, 0.1) 0px, 
+        rgba(255, 255, 255, 0.1) 16px, 
+        #000000 16px, 
+        #000000 18px
+    );
     pointer-events: none; z-index: 1; 
+    /* FIX: Use mask to clip stripes to circle - more reliable than clip-path on mobile */
+    mask-image: radial-gradient(circle, black 99%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle, black 99%, transparent 100%);
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+    mask-position: center;
+    -webkit-mask-position: center;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
     box-shadow:
       inset 0 0 0 8px #000000,
       0 0 4px rgba(0,0,0,0.5);
@@ -1039,9 +1055,14 @@ svg.icon {
     .modal-footer .footer-btn .icon {
         margin-right: 15px !important; /* More breathing room for bigger icon */
     }
-    
+
     .modal-footer .footer-btn {
         padding: 0 30px !important; /* Wider buttons to accommodate size */
+    }
+
+    .main-title {
+        padding-bottom: 0 !important;
+        padding-top: 5px !important;
     }
 }
 
@@ -2535,6 +2556,7 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   overflow-y: auto;
 }
 
+
 .history-header {
   display: flex;
   justify-content: space-between;
@@ -2545,6 +2567,13 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+/* Center clear button in the middle of history-header */
+.history-header .history-clear-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .history-actions {
@@ -2575,9 +2604,9 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.2);
-  transition: .4s;
-  border-radius: 20px;
+  background-color: #3a3a3a;
+  transition: 0.3s;
+  border-radius: 18px;
 }
 
 .slider:before {
@@ -2585,33 +2614,19 @@ button.btn-map-select:hover { border-left-color: #ffffff; }
   content: "";
   height: 14px;
   width: 14px;
-  left: 3px;
-  bottom: 3px;
+  left: 2px;
+  bottom: 2px;
   background-color: white;
-  transition: .4s;
+  transition: 0.3s;
   border-radius: 50%;
 }
 
 input:checked + .slider {
-  background-color: #28a745;
+  background-color: #ffc107;
 }
 
 input:checked + .slider:before {
   transform: translateX(16px);
-}
-
-.history-clear-btn {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 10px;
-  font-family: 'GothamSS', sans-serif;
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 3px;
-  transition: all 0.2s;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .history-toggle-btn {
@@ -2623,6 +2638,7 @@ input:checked + .slider:before {
   padding: 4px 6px;
   border-radius: 3px;
   transition: all 0.2s;
+  pointer-events: auto !important;
 }
 
 .history-toggle-btn:hover {
@@ -2644,6 +2660,11 @@ input:checked + .slider:before {
   font-weight: 700;
   color: rgba(255, 255, 255, 0.6);
   letter-spacing: 1px;
+  cursor: pointer;
+  padding: 4px 8px 4px 8px;
+  border-radius: 3px;
+  transition: background 0.2s;
+  margin-right: 0px;
 }
 
 .history-clear-btn {
@@ -2657,7 +2678,7 @@ input:checked + .slider:before {
   padding: 4px 8px 4px 8px;
   border-radius: 3px;
   transition: background 0.2s;
-  margin-right: 0px;
+  pointer-events: auto !important;
 }
 
 .history-clear-btn:hover {
@@ -2684,11 +2705,14 @@ input:checked + .slider:before {
   padding: 8px 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background 0.2s;
+  pointer-events: auto !important;
+  cursor: pointer;
 }
 
 .history-item:hover {
   background: rgba(255, 255, 255, 0.05);
 }
+
 
 .history-faction {
   font-family: 'GothamSS', sans-serif;
@@ -2720,6 +2744,13 @@ input:checked + .slider:before {
   font-size: 14px;
   font-weight: 700;
   color: white;
+}
+
+.history-grid {
+  font-family: 'GothamSS', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .history-mil {
@@ -4106,6 +4137,15 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
 /* 1. SELECTED (Active - GREEN) */
 .marker.strongpoint.is-confirmed .marker-visual {
     border: none !important;
+    /* Clip stripes to circle */
+    mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    -webkit-mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    mask-size: 100% 100% !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-position: center !important;
+    -webkit-mask-position: center !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-repeat: no-repeat !important;
     /* Thick GREEN Ring + Glow */
     box-shadow: 
         inset 0 0 0 8px #00ff00, 
@@ -4143,13 +4183,22 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     /* Inset 4px RED ring (No white dots) */
     box-shadow: inset 0 0 0 4px #ff4444 !important; 
     border: none !important; 
+    /* Clip stripes to circle */
+    mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    -webkit-mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    mask-size: 100% 100% !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-position: center !important;
+    -webkit-mask-position: center !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-repeat: no-repeat !important;
     
     background-color: transparent !important;
 
     /* RED Diagonal Lines */
     background-image: repeating-linear-gradient(
         -45deg, 
-        rgba(255, 68, 68, 0.15), 
+        rgba(255, 68, 68, 0.15) 0px, 
         rgba(255, 68, 68, 0.15) 16px, 
         #ff4444 16px, 
         #ff4444 18px
@@ -4175,12 +4224,21 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     /* DEFAULT BLACK RING */
     box-shadow: inset 0 0 0 8px #000000 !important; 
     border: none !important; /* Removes the white dots */
+    /* Clip stripes to circle */
+    mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    -webkit-mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    mask-size: 100% 100% !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-position: center !important;
+    -webkit-mask-position: center !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-repeat: no-repeat !important;
     background-color: transparent !important;
 
     /* DEFAULT BLACK LINES */
     background-image: repeating-linear-gradient(
         -45deg, 
-        rgba(255, 255, 255, 0.05), 
+        rgba(255, 255, 255, 0.05) 0px, 
         rgba(255, 255, 255, 0.05) 16px, 
         #000000 16px, 
         #000000 18px
@@ -4205,12 +4263,21 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     /* DEFAULT BLACK RING */
     box-shadow: inset 0 0 0 8px #000000, 0 0 4px rgba(0,0,0,0.5) !important;
     border: none !important;
+    /* Clip stripes to circle */
+    mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    -webkit-mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    mask-size: 100% 100% !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-position: center !important;
+    -webkit-mask-position: center !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-repeat: no-repeat !important;
     background-color: transparent !important;
 
     /* DEFAULT BLACK LINES */
     background-image: repeating-linear-gradient(
         -45deg, 
-        rgba(255, 255, 255, 0.1), 
+        rgba(255, 255, 255, 0.1) 0px, 
         rgba(255, 255, 255, 0.1) 16px, 
         #000000 16px, 
         #000000 18px
@@ -4236,6 +4303,15 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
 
 .marker.strongpoint.setup-active:hover .marker-visual {
     border: none !important;
+    /* Clip stripes to circle */
+    mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    -webkit-mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
+    mask-size: 100% 100% !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-position: center !important;
+    -webkit-mask-position: center !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-repeat: no-repeat !important;
     /* PREVIEW: Thick GREEN Ring + Glow */
     box-shadow: 
         inset 0 0 0 8px #00ff00, 
@@ -4244,7 +4320,7 @@ body.placement-active .controls-drawer:not(.closed) .fire-guide-arrow.placement-
     /* PREVIEW: Green Lines */
     background-image: repeating-linear-gradient(
         -45deg, 
-        rgba(0, 255, 0, 0.05), 
+        rgba(0, 255, 0, 0.05) 0px, 
         rgba(0, 255, 0, 0.05) 16px, 
         #00ff00 16px, 
         #00ff00 18px
