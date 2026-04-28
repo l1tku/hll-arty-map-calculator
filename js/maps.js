@@ -7,6 +7,37 @@ const MAP_DATABASE = {
     image: "images/maps/map_carentan.webp",
     thumbnail: "images/maps/thumbnail/CAR.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Carentan (June 10-14, 1944)",
+      description: "After landing on D-Day, the 101st Airborne Division was ordered to capture Carentan to link the Utah and Omaha beachheads. German 6th Fallschirmjäger Regiment under Colonel von der Heydte defended the town. The battle involved crossing causeways through flooded fields, with the 502nd PIR attacking from the southwest and the 327th GIR crossing the Douve River at Brévands for a double envelopment.",
+      tactics: "The flooded terrain forced attackers along narrow causeways, making them vulnerable to German machine guns and mortars. US forces used artillery support and coordinated infantry assaults to capture the bridges and high ground. The fighting included the famous charge by Cole's 3rd Battalion across an open field under heavy fire, now known as 'Purple Heart Lane.'",
+      significance: "Carentan was vital for connecting the two American beachheads into a continuous front. Its capture allowed Allied supplies to flow directly into Normandy and prevented German forces from splitting the invasion. The battle demonstrated the importance of airborne troops in seizing key objectives ahead of ground forces.",
+      images: [
+        {
+          thumbnail: "images/history/carentan/carentan_1944_airborne_troops_kubelwagen_thumbnail.webp",
+          full: "images/history/carentan/carentan_1944_airborne_troops_kubelwagen.webp",
+          caption: "U.S. Airborne paratroopers in and on a captured VW Kübelwagen and by houses in Carentan, Battle of Normandy, 1944."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/carentan/carentan_1944_thumbnail.webp",
+            full: "images/history/carentan/carentan_1944.webp",
+            caption: "Troops in a jeep tow light artillery through a street in Carentan, France, the first French town taken by the Allied armies. 12 June, 1944. 101st Airborne Division."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/carentan/carentan_1944_chaplain_prayer_thumbnail.webp",
+            full: "images/history/carentan/carentan_1944_chaplain_prayer.webp",
+            caption: "The monument, draped with parachutes, is a World War 1 tribute from the citizens of Carentan to its soldier dead. 19 June, 1944. 101st Airborne Division."
+          }
+        ]
+      }
+    },
     
     // --- FIX 1: Exact Dimensions from MapMeta file ---
     // 40320 units * 5 sectors = 2016 meters
@@ -56,7 +87,38 @@ const MAP_DATABASE = {
     name: "Driel", 
     image: "images/maps/map_driel.webp", 
     thumbnail: "images/maps/thumbnail/DRI.webp", 
-    teams: { t1: "ALLIES", t2: "GERMANY" }, 
+    teams: { t1: "ALLIES", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Arnhem - Oosterbeek Perimeter (September 17-25, 1944)",
+      description: "During Operation Market Garden, the British 1st Airborne Division established a defensive perimeter around Oosterbeek after failing to capture the Arnhem road bridge. The railway bridge at Oosterbeek was blown up by German forces on September 17, just before British paratroopers reached it. Approximately 3,600 men defended a 3-mile perimeter centered on the Hotel Hartenstein divisional headquarters, holding out against repeated German attacks for nine days before evacuation.",
+      tactics: "The British organized the perimeter into defensive pockets in houses and foxholes rather than a continuous line. German forces captured the Westerbouwing Heights overlooking the Driel ferry using captured French tanks, allowing them to observe and interdict river crossings. The flat open terrain and railway embankments provided limited cover. The 64th Medium Regiment provided critical artillery support via radio link, bombarding German positions around the perimeter.",
+      significance: "Oosterbeek was the British 1st Airborne's last stand during Operation Market Garden. The failure to secure a bridgehead across the Rhine doomed the operation, as XXX Corps could not relieve the paratroopers. The evacuation across the Rhine (Operation Berlin) rescued about 2,400 men, but nearly 8,000 were killed or captured from the original 10,000. The battle demonstrated the risks of airborne operations without adequate ground support.",
+      images: [
+        {
+          thumbnail: "images/history/driel/driel_1944_thumbnail.webp",
+          full: "images/history/driel/driel_1944.webp",
+          caption: "British crew manning a 6-pdr anti-tank gun of No. 26 Anti-Tank Platoon, 1st Border Regiment, in action at Oosterbeek, 20 September 1944. The gun successfully knocked out a German flamethrower tank."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/driel/driel_1944_british_paratroopers_thumbnail.webp",
+            full: "images/history/driel/driel_1944_british_paratroopers.webp",
+            caption: "Four British paratroopers moving through a shell-damaged house in Oosterbeek to which they had retreated after being driven out of Arnhem. Operation Market Garden (the Battle For Arnhem), 17-25 September 1944."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/driel/driel_1944_bridge_thumbnail.webp",
+            full: "images/history/driel/driel_1944_bridge.webp",
+            caption: "Four British paratroops of the 1st Para Squadron, Royal Engineers, clamber ashore from a rowing boat at Nijmegen after escaping from German captivity near Arnhem Bridge. Operation Market Garden, September 1944."
+          }
+        ]
+      }
+    }, 
 
 // --- SCALE FIX: 1984 METERS ---
     // Although SectorWidth indicates 2016m, the Level Settings (HLLWorldSettings)
@@ -113,6 +175,38 @@ const MAP_DATABASE = {
     teams: {
         t1: "BRITISH 8TH ARMY",
         t2: "AFRIKA KORPS"
+    },
+    history: {
+      battle: "Second Battle of El Alamein (October 23 - November 11, 1942)",
+      description: "Lieutenant-General Bernard Montgomery's Eighth Army attacked General Erwin Rommel's Panzerarmee Afrika in the Egyptian desert. The battle began with a 1,000-gun artillery barrage on October 23, with Allied forces advancing through deep Axis minefields known as the Devil's Gardens. The narrow front between the Mediterranean and the Qatara Depression forced frontal attacks against heavily fortified positions.",
+      tactics: "Montgomery employed massive artillery superiority with over 800 guns firing 529,000 shells in the opening barrage. Engineers had to clear 24-foot gaps through 5 miles of minefields for tanks to advance. The battle progressed through five phases: the initial infantry break-in, the crumbling of Axis defenses, counter-attacks, Operation Supercharge (the armored breakthrough), and the final breakout. The 1st South African Division secured Miteirya Ridge while armored divisions engaged in tank duels with German Panzers.",
+      significance: "El Alamein was the turning point of the North African Campaign and the first major British victory against German forces. It halted the Axis advance toward the Suez Canal and Middle Eastern oil fields, with Axis losses of 500 tanks and 30,000 prisoners. The victory restored Allied morale and paved the way for Operation Torch in North Africa and the eventual invasion of Sicily and Italy. Winston Churchill called it 'the end of the beginning.'",
+      images: [
+        {
+          src: "images/history/el_alamein/el_alamein_1942.webp",
+          caption: "A 25-pdr gun firing during the British night artillery barrage which opened Second Battle of El Alamein, 23 October 1942."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            src: "images/history/el_alamein/el_alamein_1942_tanks.webp",
+            caption: "British tanks advancing during the Second Battle of El Alamein, October-November 1942."
+          },
+          {
+            src: "images/history/el_alamein/el_alamein_1942_barrage.webp",
+            caption: "General view of the British night artillery barrage which opened the second Battle of El Alamein. Infantry carriers and ambulances waiting to move up are silhouetted against the glare from the guns. 23 October 1942."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            src: "images/history/el_alamein/el_alamein_1942_british_soldier_v_victory.webp",
+            caption: "A British soldier gives a V-for-Victory sign to German prisoners captured at El Alamein, 26 October 1942."
+          }
+        ]
+      }
     }, 
 
     widthMeters: 1984, 
@@ -161,6 +255,26 @@ const MAP_DATABASE = {
     image: "images/maps/map_elsenborn.webp", 
     thumbnail: "images/maps/thumbnail/EBR.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Elsenborn Ridge (December 16-26, 1944)",
+      description: "During the Battle of the Bulge (Operation Wacht am Rhein), German forces launched a surprise offensive through the Ardennes on December 16, 1944. Sepp Dietrich's 6th Panzer Army, including the 1st SS Panzer Division with Joachim Peiper's kampfgruppe, attacked American positions at Elsenborn Ridge in heavy snow and freezing temperatures. The German advance was slowed by destroyed bridges, minefields, and the stubborn defense of the US 2nd and 99th Infantry Divisions.",
+      tactics: "American forces employed defense in depth using field fortifications around villages and choke points. The 18-man reconnaissance platoon at Lanzerath Ridge delayed Peiper's advance for hours. American defenders used bazookas, anti-tank mines including 'daisy chains' dragged across roads, and heavy artillery support. Tank destroyers like the M36 Jackson and anti-tank guns fired from covered positions. The dense forest and frozen terrain channeled German armor onto roads where they were vulnerable to ambush.",
+      significance: "Elsenborn Ridge was the only sector of the American front during the Battle of the Bulge where German forces failed to advance. This defense blocked three of five planned German routes to Antwerp, forcing the northern pincer to alter its plans and significantly slowing the advance. Historian John S.D. Eisenhower called the action of the 2nd and 99th Divisions 'the most decisive of the Ardennes campaign.' The failure to break through at Elsenborn Ridge contributed to the overall collapse of the German offensive.",
+      images: [
+        {
+          src: "images/history/elsenborn_ridge/elsenborn_ridge_1944.webp",
+          caption: "Discarded artillery shell casings litter a U.S. artillery position on Elsenborn Ridge during the Battle of the Bulge, December 1944."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            src: "images/history/elsenborn_ridge/elsenborn_ridge_1944_mortar_man_on_radio.webp",
+            caption: "American mortar crewman on radio at Elsenborn Ridge during the Battle of the Bulge, December 1944."
+          }
+        ]
+      }
+    },
 
     // --- DIMENSIONS ---
     // Calculated from LayoutMeta: 5 sectors * 40000 units = 2000m.
@@ -221,6 +335,27 @@ const MAP_DATABASE = {
     image: "images/maps/map_foy.webp", 
     thumbnail: "images/maps/thumbnail/FOY.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Foy (December 20, 1944 – January 14, 1945)",
+      description: "During the Battle of the Bulge, the village of Foy was occupied by German forces while the U.S. 101st Airborne Division held defensive positions in the Bois Jacques (Jack's Wood) just outside town. The 506th Parachute Infantry Regiment set up in the area on December 19, 1944, and faced intense fighting from elements of the German 2nd Panzer Division and 26th Volksgrenadier Division. After being relieved by General George S. Patton's U.S. Third Army, the 101st launched an assault to retake the town.",
+      tactics: "On January 13, 1945, in difficult winter conditions, Companies E and I of the 506th PIR led the assault on Foy under covering fire. The attack required house-to-house fighting to clear snipers from the village buildings. Despite the open terrain exposing attackers to German machine guns and artillery, the coordinated infantry assault succeeded in capturing Foy with dozens of German soldiers taken prisoner. The next day, German forces counterattacked but failed to retake the village.",
+      significance: "Foy was a key objective for breaking out from the Bastogne perimeter and advancing northward. Its capture allowed the 101st Airborne, with support from the U.S. 11th Armored Division, to gradually liberate territories north of Bastogne including Noville and Cobru. The battle demonstrated the resilience of airborne troops who, despite weeks of siege and brutal winter conditions, could still execute effective offensive operations. Foy changed hands four times during the battle, ultimately remaining in American control.",
+      images: [
+        {
+          thumbnail: "images/history/foy/foy_1944_thumbnail.webp",
+          full: "images/history/foy/foy_1944.webp",
+          caption: "101st Airborne troops move out of Bastogne, December 31, 1944, after the siege was relieved by Patton's Third Army."
+        }
+      ],
+      strategicContext: {
+        images: [
+          {
+            src: "images/history/foy/foy_1944_101st_airborne.webp",
+            caption: "101st Airborne Division receives airdropped supplies during the siege of Bastogne, December 1944."
+          }
+        ]
+      }
+    },
 
     // Verified standard dimensions
     widthMeters: 1984, 
@@ -273,6 +408,19 @@ H4: {
     image: "images/maps/map_hill400.webp", 
     thumbnail: "images/maps/thumbnail/H4.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Hill 400 (December 6, 1944)",
+      description: "Hill 400 was a 400-meter-high hill located one kilometer east of Bergstein, Germany, in the Hürtgen Forest, dominating the Rur River valley. As part of the Siegfried Line defenses, it was heavily fortified by German forces. During the Battle of Hürtgen Forest, multiple U.S. divisions (9th, 28th, and 8th Infantry Divisions) had failed to capture the hill. The 5th Armored Division's Combat Command Reserve also attempted to take it in early December but was repulsed, with the 47th Armored Infantry Battalion barely holding Bergstein against German counterattacks.",
+      tactics: "The 2nd Ranger Battalion had relieved elements of the 112th Infantry Regiment on November 14, 1944. On December 6, the Rangers moved on Bergstein and subsequently took the strategic position of Hill 400 from defending troops of the 980th Grenadier Regiment of the 272nd Volksgrenadier Division. Working with the 5th Armored Division's Combat Command Reserve, the Rangers assaulted the hill in difficult winter conditions. They secured the hilltop and held it against German counterattacks until being relieved by the 13th Regiment. On the last day of the Hürtgen battle, the Germans retook the hill from the 13th Regiment.",
+      significance: "Hill 400 was a key strategic position overlooking the Rur River valley and provided observation of the surrounding area. Its capture was essential for advancing toward the Roer River dams and breaking through the Siegfried Line. The Rangers' success demonstrated the effectiveness of specialized infantry units in difficult terrain where conventional divisions had failed. The hill changed hands multiple times during the Hürtgen Forest campaign, with the U.S. Army not securing it permanently until February 1945.",
+      images: [
+        {
+          thumbnail: "images/history/hill_400/hill_400_1944_thumbnail.webp",
+          full: "images/history/hill_400/hill_400_1944.webp",
+          caption: "Weary infantrymen take a brief rest on a slope in the Hurtgen forest in Germany during the Hürtgen Forest campaign, November-December 1944. Left to right, Pfc. Maurice Berzon, Buffalo, N.Y., S Sgt. Bernard Spurr, Newark, Ohio, and S Sgt. Harold Glessler."
+        }
+      ]
+    },
 
     widthMeters: 1984, 
     heightMeters: 1984, 
@@ -320,6 +468,42 @@ H4: {
     image: "images/maps/map_hurtgen.webp", // Verify filename
     thumbnail: "images/maps/thumbnail/HUR.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Hürtgen Forest (September 19 – December 16, 1944)",
+      description: "The Battle of Hürtgen Forest was a series of fierce battles fought between American and German forces in the Hürtgen Forest, a rugged 140 km² area about 5 km east of the Belgian-German border. The dense conifer forest, rough terrain, and poor weather conditions severely limited Allied air superiority and vehicular movement. German defenders had prepared the area with Siegfried Line bunkers, minefields, barbed wire, and booby-traps, using the terrain to great advantage.",
+      tactics: "The forest terrain prevented proper use of Allied advantages in armor, mobility, and air support. Dense forest limited tank use and provided cover for German anti-tank teams with Panzerfaust weapons. The few roads and clearings allowed German machine gun, mortar, and artillery teams to pre-range their weapons accurately. American divisions suffered heavy casualties in the difficult conditions, with inexperienced replacements fed directly into combat. Engineers had to blast tank routes through the forest to enable armored support.",
+      significance: "The Hürtgen Forest was the longest battle the U.S. Army fought on German soil during World War II. American commanders sought to secure the route to the Rur River dams to prevent German flooding of downstream areas. The battle demonstrated how well-prepared defenders in difficult terrain could negate Allied numerical and technological advantages. The campaign ultimately delayed Allied advances toward the Rhine and contributed to the timing of the Battle of the Bulge.",
+      images: [
+        {
+          thumbnail: "images/history/hurtgen_forest/hurtgen_forest_1944_thumbnail.webp",
+          full: "images/history/hurtgen_forest/hurtgen_forest_1944.webp",
+          caption: "American infantry in the Hürtgen Forest during the Battle of Hürtgen Forest, September-December 1944."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/hurtgen_forest/hurtgen_forest_1944_muddy_road_thumbnail.webp",
+            full: "images/history/hurtgen_forest/hurtgen_forest_1944_muddy_road.webp",
+            caption: "American vehicles struggle through muddy roads in the Hürtgen Forest, demonstrating the difficult terrain conditions that hampered Allied mobility."
+          },
+          {
+            thumbnail: "images/history/hurtgen_forest/hurtgen_forest_1944_ger_heavy_infantry_guns.webp",
+            full: "images/history/hurtgen_forest/hurtgen_forest_1944_ger_heavy_infantry_guns.webp",
+            caption: "German heavy infantry guns firing in the Hürtgen Forest during the repelling of American attacks. 22 November 1944."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/hurtgen_forest/hurtgen_forest_1944_damaged_trees.webp",
+            full: "images/history/hurtgen_forest/hurtgen_forest_1944_damaged_trees.webp",
+            caption: "Artillery-damaged trees during the Battle of Hürtgen Forest. Date between 1944 and 1945."
+          }
+        ]
+      }
+    },
 
     widthMeters: 1984,
     heightMeters: 1984,
@@ -368,6 +552,37 @@ KHA: {
     image: "images/maps/map_kharkov.webp",
     thumbnail: "images/maps/thumbnail/KHA.webp",
     teams: { t1: "SOVIET UNION", t2: "GERMANY" },
+    history: {
+      battle: "Third Battle of Kharkov (February 19 – March 15, 1943)",
+      description: "Following the Soviet recapture of Kharkov on February 16, 1943, Field Marshal Erich von Manstein launched a counteroffensive known as the Donets Campaign. The German SS Panzer Corps, including the 1st SS Leibstandarte, 2nd SS Das Reich, and 3rd SS Totenkopf divisions, struck at overextended Soviet forces. The battle involved intense urban fighting as German forces recaptured Kharkov on March 15, 1943, and subsequently took Belgorod on March 18.",
+      tactics: "Manstein's three-stage offensive targeted Soviet spearheads that had overextended themselves during Operation Star. The SS Panzer Corps used mobile warfare tactics, cutting Soviet supply lines and encircling enemy units. German forces exploited intelligence on Soviet strength to achieve tactical numerical superiority. The battle featured combined arms operations with Panzer divisions, infantry, and close air support from Ju 87 Stuka dive bombers. Urban combat in Kharkov required house-to-house fighting.",
+      significance: "The Third Battle of Kharkov was the last major German victory on the Eastern Front. It temporarily stabilized the German front after the disaster at Stalingrad and delayed the Soviet advance. The success gave Hitler confidence to launch the offensive against the Kursk salient, which would become the Battle of Kursk - the largest tank battle in history. The battle demonstrated Manstein's skill in defensive counteroffensive operations but could not reverse Germany's strategic decline.",
+      images: [
+        {
+          thumbnail: "images/history/kharkov/kharkov_1943.webp",
+          full: "images/history/kharkov/kharkov_1943.webp",
+          caption: "Artillerymen of the German 'Großdeutschland' division at a heavy field howitzer in a raised position, with an anti-aircraft machine gun in the front, 1943."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/kharkov/kharkov_1943_ss_colonel_witt.webp",
+            full: "images/history/kharkov/kharkov_1943_ss_colonel_witt.webp",
+            caption: "SS Colonel Witt standing at a car and reading a map during the Third Battle of Kharkov, 1943."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/kharkov/kharkov_1943_adolf_hitler.webp",
+            full: "images/history/kharkov/kharkov_1943_adolf_hitler.webp",
+            caption: "On 10 March 1943, during the Third Battle of Kharkov, Hitler flew under heavy security to Army Group South's headquarters at Zaporozh'ye, Ukraine to meet with Generalfeldmarschall Erich von Manstein. Seen here, Manstein greets Hitler on the airfield; on the right are Hans Baur and Luftwaffe Generalfeldmarschall Wolfram von Richthofen. This visit came as Manstein's counteroffensive was successfully recapturing Kharkov."
+          }
+        ]
+      }
+    },
 
     widthMeters: 1984, // Confirmed
     heightMeters: 1984,
@@ -411,14 +626,45 @@ KHA: {
       { label: "GERMAN FUEL DUMP", id: "B15", gameX: 41168.31, gameY: 70231.15, radius: 3750.0, team: "us", type: "strongpoint" }
     ],
   },
-KUR: { 
-    name: "Kursk", 
-    image: "images/maps/map_kursk.webp", 
-    thumbnail: "images/maps/thumbnail/KUR.webp", 
+KUR: {
+    name: "Kursk",
+    image: "images/maps/map_kursk.webp",
+    thumbnail: "images/maps/thumbnail/KUR.webp",
     teams: { t1: "SOVIET UNION", t2: "GERMANY" },
-    
+    history: {
+      battle: "Battle of Kursk (July 5 – August 23, 1943)",
+      description: "The Battle of Kursk was a major World War II Eastern Front battle between German and Soviet forces near the Kursk salient in western Russia. Following the Third Battle of Kharkov, a 250 km by 160 km Soviet salient centered on Kursk protruded into German lines. Hitler launched Operation Citadel to encircle and destroy Soviet forces in the salient, hoping to regain the strategic initiative. The battle featured the largest tank engagements in history, including the Battle of Prokhorovka on July 12.",
+      tactics: "The Soviets created a deep defensive system with multiple fortified belts, minefields, and anti-tank positions. German forces attacked on two fronts: the 9th Army from the north and the 4th Panzer Army and II SS Panzer Corps from the south. The Battle of Prokhorovka saw the Soviet 5th Guards Tank Army clash with the II SS Panzer Corps in one of history's largest tank battles. Soviet defenses absorbed the German attacks, and their operational reserves prevented breakthroughs.",
+      significance: "The Battle of Kursk was a decisive Soviet victory and a turning point on the Eastern Front. For the first time, a major German offensive was stopped before achieving a breakthrough. The Soviet Union gained the operational initiative, which it held for the remainder of the war. The battle demonstrated the effectiveness of Soviet deep defensive tactics and the growing superiority of Soviet armored forces. German losses in men and equipment were irreplaceable, while Soviet industrial capacity allowed them to absorb and replace their losses.",
+      images: [
+        {
+          thumbnail: "images/history/kursk/kursk_1943.webp",
+          full: "images/history/kursk/kursk_1943.webp",
+          caption: "Soviet Union, near Pokrovka - Operation Citadel - Group of light field howitzers 18/2 on PzKpfw II chassis (Sf) Wespe (Sd.Kfz. 124) standing on the front line in a field, 1943."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/kursk/kursk_1943_hünersdorff.webp",
+            full: "images/history/kursk/kursk_1943_hünersdorff.webp",
+            caption: "Soviet Union - Operation 'Citadel' - Major General von Hünersdorff during the Battle of Kursk, 1943."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/kursk/kursk_1943_soviet_victory.webp",
+            full: "images/history/kursk/kursk_1943_soviet_victory.webp",
+            caption: "Soviet soldiers inspect German Ferdinand tank destroyers destroyed on the Orel section of the front, July 1943."
+          }
+        ]
+      }
+    },
+
     // Confirmed 1984m
-    widthMeters: 1984, 
+    widthMeters: 1984,
     heightMeters: 1984, 
     
     // Soviets (North) face South (0), Germans (South) face North (180)
@@ -468,12 +714,34 @@ KUR: {
       { label: "", id: "SOV_A3", gameX: 5641.0, gameY: 91341.0, radius: 500, team: "us", type: "point", rotation: 0.0 }  // East
     ] 
   },
-  MOR: { 
-    name: "Mortain", 
-    image: "images/maps/map_mortain.webp", 
-    thumbnail: "images/maps/thumbnail/MOR.webp", 
+  MOR: {
+    name: "Mortain",
+    image: "images/maps/map_mortain.webp",
+    thumbnail: "images/maps/thumbnail/MOR.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
-    
+    history: {
+      battle: "Battle of Mortain - Operation Lüttich (August 6-13, 1944)",
+      description: "Following the American breakout from Normandy in Operation Cobra, German forces launched a desperate counteroffensive code-named Operation Lüttich to recapture Mortain and cut off General Patton's Third Army advance. The German attack involved the 2nd Panzer Division, 1st SS Panzer Division Leibstandarte, 2nd SS Panzer Division Das Reich, and 116th Panzer Division. The U.S. 30th Infantry Division defended the critical high ground around Mortain against overwhelming German armored forces.",
+      tactics: "German forces achieved initial surprise and briefly captured Mortain, but the U.S. 30th Infantry Division's 2nd Battalion, 120th Infantry Regiment held Hill 314, the dominant terrain feature. Despite being cut off for five days, they were resupplied by parachute drops and held their position. Allied air power proved decisive when RAF Typhoon fighter-bombers and US 9th Air Force achieved complete air superiority, attacking German armored formations in the open ground east of Mortain.",
+      significance: "The failure of Operation Lüttich was a turning point in the Normandy campaign. The German counteroffensive cost them over 120 tanks and assault guns with no strategic gain. The failed attack left German forces exposed, leading to the creation of the Falaise Pocket and the eventual destruction of the German 7th Army. The 30th Infantry Division's heroic stand at Hill 314 was later recognized with the Presidential Unit Citation.",
+      images: [
+        {
+          thumbnail: "images/history/mortain/mortain_1944.webp",
+          full: "images/history/mortain/mortain_1944.webp",
+          caption: "Aftermath of bombardment of Mortain in front of the station of Mortain-Le-Neufbourg, showing a half-track vehicle Sd.Kfz. of the 2nd SS Panzer Division 'Das Reich' and the corpse of a dead German soldier, August 1944."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/mortain/mortain_1944_americans.webp",
+            full: "images/history/mortain/mortain_1944_americans.webp",
+            caption: "American forces moving through the ruins of Mortain during the German counterattack of Operation Lüttich, August 1944."
+          }
+        ]
+      }
+    },
+
     // --- DIMENSIONS FROM FModel LayoutMeta DATA ---
     // Source: MOR_L_LayoutMeta (MapLayoutMetaDataAsset)
     // SectorWidth: 40000.0 units × MapWidth: 5 sectors = 200,000 units = 2000m
@@ -549,12 +817,43 @@ KUR: {
       { label: "", id: "GER_A3", gameX: 90346.56, gameY: 5372.948, radius: 500, team: "ger", type: "point", rotation: 100.0 }
     ]
   },
-  OMA: { 
-    name: "Omaha Beach", 
-    image: "images/maps/map_omaha.webp", 
-    thumbnail: "images/maps/thumbnail/OMA.webp", 
+  OMA: {
+    name: "Omaha Beach",
+    image: "images/maps/map_omaha.webp",
+    thumbnail: "images/maps/thumbnail/OMA.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
-    
+    history: {
+      battle: "Omaha Beach Landings - D-Day (June 6, 1944)",
+      description: "Omaha Beach was the code name for one of the five sectors of the Allied invasion of German-occupied France during the Normandy landings. It was the most heavily fortified of the D-Day beaches, defended by the German 352nd Infantry Division. The U.S. 1st and 29th Infantry Divisions assaulted the 5-mile wide beach, which was bounded by high cliffs and featured five natural draws (valleys) that served as the only exits. The Germans had constructed extensive defenses including beach obstacles, mines, concrete bunkers, and 15 strongpoints called Widerstandsnester.",
+      tactics: "The initial assault faced unexpectedly rough seas that swamped many landing craft and sunk amphibious DD tanks. Pre-landing naval and air bombardment failed to significantly damage the German defenses due to overcast conditions. As landing craft approached, they came under heavy automatic weapons and artillery fire. Many units landed far from their intended sectors due to smoke and strong currents. Small groups of soldiers eventually scaled the steep bluffs using the draws between strongpoints, eventually overwhelming the defenders despite taking heavy casualties.",
+      significance: "Omaha Beach was the bloodiest of the D-Day landings, with approximately 2,000 American casualties. Despite heavy losses and initial chaos, the assaulting forces secured a beachhead by the end of June 6. The capture of Omaha Beach linked the British landing at Gold Beach with the American landing at Utah Beach, creating a continuous Allied front in Normandy. The success at Omaha was crucial to the overall success of Operation Overlord and the liberation of France.",
+      images: [
+        {
+          thumbnail: "images/history/omaha_beach/omaha_beach_1944_thumbnail.webp",
+          full: "images/history/omaha_beach/omaha_beach_1944.webp",
+          caption: "USS Landing Craft Infantry (LCI)-553 and USS LCI-410 land troops on Omaha Beach, during the initial assault there on D-Day, 6 June 1944. Photographed from the conning station of another LCI. LCI-553, hit by two shells, was left a wreck on the beach on D-Day."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/omaha_beach/omaha_beach_1944_american_assault_troops_thumbnail.webp",
+            full: "images/history/omaha_beach/omaha_beach_1944_american_assault_troops.webp",
+            caption: "A large group of American assault troops of the 3rd Battalion, 16th Infantry Regiment, 1st U.S. Infantry Division, having gained the comparative safety offered by the chalk cliff at their backs, takes a 'breather' before moving onto the continent at Colleville-Sur-Mer, Omaha Beach, in Normandy, France. Medics who landed with the men treat them for minor injuries. 8 Jun 1944."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/omaha_beach/omaha_beach_1944_us_troops_land_at_normandy_thumbnail.webp",
+            full: "images/history/omaha_beach/omaha_beach_1944_us_troops_land_at_normandy.webp",
+            caption: "American assault troops land on the northern coast of France, at Omaha Beach. Half-tracks and a beached DUKW (amphibious truck) indicate the successful landing of the initial waves. 6 June, 1944."
+          }
+        ]
+      }
+    },
+
     // --- DIMENSIONS ---
     // Using standard 1984m square (same as Driel, Kharkov)
     // MBPBounds: -99200 to 99200 units = 1984 meters
@@ -631,11 +930,24 @@ KUR: {
     ] 
   },
 PHL: { 
-    name: "Purple Heart Lane", 
-    image: "images/maps/map_purpleheartlane.webp", 
-    thumbnail: "images/maps/thumbnail/PHL.webp", 
+    name: "Purple Heart Lane",
+    image: "images/maps/map_purpleheartlane.webp",
+    thumbnail: "images/maps/thumbnail/PHL.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
-    
+    history: {
+      battle: "Purple Heart Lane - Battle of Carentan (June 10-11, 1944)",
+      description: "Purple Heart Lane was the nickname given to the Carentan-Sainte-Mère-Église highway (National Road 13) where the U.S. 101st Airborne Division's 3rd Battalion, 502nd PIR under Lt. Col. Robert G. Cole suffered heavy casualties attacking German positions. The German 6th Fallschirmjäger Regiment under Colonel Friedrich von der Heydte defended the approach to Carentan from a farmhouse and hedgerow positions. The paratroopers had to advance single file down a narrow causeway under continuous fire from German machine guns, mortars, and an 88mm gun.",
+      tactics: "On June 10, the 3rd/502nd PIR crossed the Douve River using an improvised footbridge and advanced down the causeway crouching and crawling. They took heavy casualties from artillery, mortar, sniper, and machine gun fire. At 23:30, two German Ju 87 Stukas strafed the causeway, killing 30 men and knocking I Company out of the battle. On June 11, Lt. Col. Cole led a bayonet charge against the German positions at the farmhouse, using a smoke screen for concealment. The charge overwhelmed the defenders in savage close combat, for which Cole was awarded the Medal of Honor.",
+      significance: "The 3rd/502nd PIR suffered approximately 67% casualties during the Purple Heart Lane fighting, earning the highway its grim nickname. Despite the heavy losses, the attack was crucial to the capture of Carentan, which linked the Utah and Omaha beachheads. Cole's bayonet charge became one of the most famous actions of the Normandy campaign. The battle demonstrated the tenacity of American airborne troops and the ferocity of German Fallschirmjäger defenders.",
+      images: [
+        {
+          thumbnail: "images/history/purple_heart_lane/purple_heart_lane_1944.webp",
+          full: "images/history/purple_heart_lane/purple_heart_lane_1944.webp",
+          caption: "View of the Carentan causeway from the north, with bridges 3 and 4 marking waterways crossed by the causeway, and the town of Carentan in the background."
+        }
+      ]
+    },
+
     // Standard 1984m square map (same as Driel, Kharkov, etc.)
     widthMeters: 1984,
     heightMeters: 1984,
@@ -688,12 +1000,43 @@ PHL: {
       { label: "", id: "GER_A3", gameX: 1718.97, gameY: -90134.83, radius: 500, team: "ger", type: "point", rotation: -171.6 }
     ] 
   },
-REM: { 
-    name: "Remagen", 
-    image: "images/maps/map_remagen.webp", 
-    thumbnail: "images/maps/thumbnail/REM.webp", 
+REM: {
+    name: "Remagen",
+    image: "images/maps/map_remagen.webp",
+    thumbnail: "images/maps/thumbnail/REM.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
-    
+    history: {
+      battle: "Battle of Remagen - Capture of Ludendorff Bridge (March 7-25, 1945)",
+      description: "The Battle of Remagen was fought when U.S. forces unexpectedly captured the Ludendorff Bridge over the Rhine River intact on March 7, 1945. The bridge was one of the few remaining crossings over the Rhine that the Germans had not destroyed. Task Force Engeman of Combat Command B, 9th Armored Division under Lt. Col. Leonard Engeman, with Company A of the 14th Tank Battalion led by Lt. Karl H. Timmermann, captured the bridge after advancing through Remagen against light resistance from Volkssturm defenders.",
+      tactics: "When scouts reported the bridge was still standing at 12:56 on March 7, Brig. General William Hoge ordered an immediate capture. U.S. tanks and infantry advanced quickly through Remagen, reaching the bridge by 3:00 pm. Despite German demolition charges, the bridge remained standing due to faulty explosives and sabotage by German engineer Captain Willi Bratge. U.S. forces crossed under fire, establishing a bridgehead on the east bank. The Germans launched relentless counterattacks using aircraft, artillery, V-2 rockets, and frogmen with floating mines, but American defenses held the bridgehead.",
+      significance: "The capture of the Ludendorff Bridge was a major strategic breakthrough. It was the first intact bridge captured over the Rhine, allowing Allied forces to establish a bridgehead on the east bank of Germany's natural defensive barrier. This shortened the war by enabling massive Allied forces to cross into the German heartland. The bridge collapsed on March 17 due to cumulative damage from German attacks, but by then the Allies had built additional pontoon bridges. The German commander responsible for failing to destroy the bridge, Captain Willi Bratge, was court-martialed and sentenced to death, though the sentence was not carried out.",
+      images: [
+        {
+          thumbnail: "images/history/remagen/remagen_1945_thumbnail.webp",
+          full: "images/history/remagen/remagen_1945.webp",
+          caption: "Poster printed by the US Army commemorating the capturing of the Ludendorff Bridge at Remagen. The Remagen Bridgehead - 7 March 1945. Here, on the Ludendorff Bridge crossing the Rhine at Remagen, Combat Command B, 9th Armored Division -- headed by the 27th Armored Infantry Battalion -- successfully effected the first bridgehead across Germany's formidable river barrier and so contributed decisively to the defeat of the enemy. The 27th Battalion reached Remagen, found the bridge intact but mined for demolition. Although its destruction was imminent, without hesitation and in face of heavy fire the infantrymen rushed across the structure, and with energy and skill seized the surrounding high ground."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/remagen/remagen_1945_bridge.webp",
+            full: "images/history/remagen/remagen_1945_bridge.webp",
+            caption: "The Ludendorff Bridge at Remagen, Germany, after capture by U.S. forces, March 1945."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/remagen/remagen_bridge_after_capture_thumbnail.webp",
+            full: "images/history/remagen/remagen_1945_bridge_after_capture.webp",
+            caption: "Ludendorff Bridge and Erpeler Ley tunnel at Erpel (eastern side of the Rhine) – First U.S. Army men and equipment pour across the Remagen Bridge; two knocked out jeeps in foreground. Germany, 11 March 1945."
+          }
+        ]
+      }
+    },
+
     // Standard 1984m dimensions
     widthMeters: 1984, 
     heightMeters: 1984, 
@@ -742,12 +1085,43 @@ REM: {
       { label: "", id: "GER_A3", gameX: 17936.605, gameY: 93962.43, radius: 500, team: "ger", type: "point", rotation: -1.3 }
     ]
   },
-SMM: { 
-    name: "Sainte-Marie-du-Mont", 
-    image: "images/maps/map_smdmv2.webp", 
-    thumbnail: "images/maps/thumbnail/SMM.webp", 
+SMM: {
+    name: "Sainte-Marie-du-Mont",
+    image: "images/maps/map_smdmv2.webp",
+    thumbnail: "images/maps/thumbnail/SMM.webp",
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
-    
+    history: {
+      battle: "Sainte-Marie-du-Mont - D-Day Drop Zone C (June 6, 1944)",
+      description: "Sainte-Marie-du-Mont was the scene of a military engagement between the American 101st Airborne Division and the German Wehrmacht on D-Day, June 6, 1944. The village was occupied by approximately 60 German soldiers of Artillerie-Regiment 191 (91. Infanterie Division) who used the church tower as an observation post. The village was located at the southern edge of Drop Zone C, behind Utah Beach. Troops of the 506th Parachute Infantry Regiment and the 3rd Battalion of the 501st Parachute Infantry Regiment were tasked with landing in Zone C to clear a route for soldiers arriving by sea.",
+      tactics: "A thick fog bank and heavy flak from coastal guns forced pilots away from their targets, leaving paratroopers scattered in unknown territory. Only two-thirds of troops designated for Zone C were accurately dropped. Many paratroopers landed in and around Sainte-Marie-du-Mont and immediately engaged surprised German forces. The famous assault on Brécourt Manor by Easy Company (506th PIR) under Lieutenant Richard Winters destroyed four German 105mm howitzers that were firing on Utah Beach, a action depicted in the HBO series Band of Brothers.",
+      significance: "The capture of Sainte-Marie-du-Mont and the destruction of German artillery at Brécourt Manor were crucial to the success of the Utah Beach landings. The 101st Airborne's actions in this area secured the inland exits from Utah Beach and prevented German counterattacks against the landing forces. The Brécourt Manor assault became one of the most celebrated small-unit actions of the Normandy campaign and is still studied in military academies today.",
+      images: [
+        {
+          thumbnail: "images/history/st_marie_du_mont/stmdm_1944_aerial_1.webp",
+          full: "images/history/st_marie_du_mont/stmdm_1944_aerial_1.webp",
+          caption: "Aerial view of Sainte-Marie-du-Mont, June 1944."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/st_marie_du_mont/stmdm_1944_soldiers_thumbnail.webp",
+            full: "images/history/st_marie_du_mont/stmdm_1944_soldiers.webp",
+            caption: "A group of American soldiers including 4 MPs at the village fountain surrounded by women and children, on June 12 at Sainte-Marie-du-Mont. The building facades show bullet damage from the fighting. U.S. National Archives, public domain."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/st_marie_du_mont/stmdm_1944_aerial_2.webp",
+            full: "images/history/st_marie_du_mont/stmdm_1944_aerial_2.webp",
+            caption: "Aerial view of Sainte-Marie-du-Mont looking south, June 1944. In-game this view leads towards the German bottom right HQ. Utah Beach would have been northbound via the road leading out at the bottom of the photo."
+          }
+        ]
+      }
+    },
+
     // Standard 1984m dimensions
     widthMeters: 1984, 
     heightMeters: 1984, 
@@ -806,6 +1180,42 @@ SMM: {
     image: "images/maps/map_stmereeglise.webp", 
     thumbnail: "images/maps/thumbnail/SME.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Sainte-Mère-Église (June 6-7, 1944)",
+      description: "Sainte-Mère-Église played a significant role in the Normandy landings due to its position on Route N13, which the Germans would have used to counterattack Allied landings on Utah and Omaha Beaches. In the early morning of June 6, 1944, mixed units of the U.S. 82nd Airborne and 101st Airborne Divisions occupied the town during Mission Boston, making it one of the first towns liberated in the invasion. The town was held by lightly armed airborne troops until reinforced by tanks from Utah Beach on the afternoon of June 7.",
+      tactics: "Early airborne landings at approximately 1:40 a.m. resulted in heavy casualties as buildings in town caught fire, illuminating the sky and making descending paratroopers easy targets. Many paratroopers were shot while hanging from trees and utility poles. At 5 a.m., Lt. Col. Edward C. Krause of the 505th PIR captured the town with little resistance as the German garrison was confused and had retired for the night. Heavy German counterattacks began later on June 6 and continued into June 7, but the airborne troops held the town until reinforced by tanks from Utah Beach.",
+      significance: "Sainte-Mère-Église was one of the first towns liberated on D-Day, securing a crucial crossroads on Route N13 that would have been used for German counterattacks against the Utah and Omaha beachheads. The capture demonstrated the importance of airborne operations in seizing key objectives ahead of ground forces. The famous incident of paratrooper John Steele, whose parachute caught on the church spire, became one of the most iconic images of D-Day and was portrayed in the film The Longest Day. Lt. Col. Krause and Lt. Col. Vandervoort received the Distinguished Service Cross for their actions.",
+      images: [
+        {
+          thumbnail: "images/history/st_mere_eglise/stme_1944_thumbnail.webp",
+          full: "images/history/st_mere_eglise/stme_1944.webp",
+          caption: "Sainte-Mère-Église, France, possibly from before the battle (pre-June 6, 1944)."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/st_mere_eglise/stme_1944_soldiers_thumbnail.webp",
+            full: "images/history/st_mere_eglise/stme_1944_soldiers.webp",
+            caption: "Four members of the 82nd Airborne Division enter the village of St. Mere-Eglise, France, under heavy German artillery fire. The city was later taken by the Allies."
+          },
+          {
+            thumbnail: "images/history/st_mere_eglise/stme_1944_paratroopers_thumbnail.webp",
+            full: "images/history/st_mere_eglise/stme_1944_paratroopers.webp",
+            caption: "Finding horses plentiful in St. Mere Eglise, France, American paratroopers utilize them as transportation for patrolling the street, after clearing the town of German defenders. 6th June 1944."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/st_mere_eglise/stme_1944_wounded_german_soldier_thumbnail.webp",
+            full: "images/history/st_mere_eglise/stme_1944_wounded_german_soldier.webp",
+            caption: "U.S. medics giving blood plasma to a wounded German soldier. St. Mere Eglise, Normandy, 15 June, 1944."
+          }
+        ]
+      }
+    },
     
     // Standard 2000m dimensions
     widthMeters: 1984, 
@@ -864,6 +1274,37 @@ SMM: {
     image: "images/maps/map_smolensk.webp", 
     thumbnail: "images/maps/thumbnail/SMO.webp", 
     teams: { t1: "SOVIET UNION", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Smolensk (August 7 - October 2, 1943)",
+      description: "The Battle of Smolensk was a major Soviet offensive operation aimed at liberating the Smolensk region from German occupation. Following the German defeat at Kursk, the Soviet High Command launched simultaneous offensives on the Dnieper River and at Smolensk to weaken German defenses and liberate occupied territories. The operation involved the Kalinin Front and Western Front against German Army Group Center, which had established fortified defensive positions in the area.",
+      tactics: "The Smolensk operation consisted of multiple coordinated offensives: Spas-Demensk (August 7-20), Dukhovshchina-Demidov (August 13-18 and September 14-October 2), Yelnia-Dorogobuzh (August 28-September 6), and Smolensk-Roslavl (September 15-October 2). Soviet forces used massive artillery bombardments to break through German lines, creating salients and conducting assault river crossings of the Dnieper. The third stage (September 7-October 2) saw Soviet troops advance 100-180 km in 20 days, capturing key positions like Dukhovshchina and Yartsevo before reaching Smolensk.",
+      significance: "The liberation of Smolensk on September 25, 1943, was a major Soviet victory that opened the path to Belarus and threatened German Army Group Center's flank. The operation forced German forces to retreat from the Panther-Wotan defensive line and deprived them of a crucial strategic position on the approach to Moscow. The battle demonstrated the Soviet Union's ability to conduct large-scale coordinated offensives following the victory at Kursk and contributed significantly to the eventual liberation of Belarus and the advance toward Germany.",
+      images: [
+        {
+          thumbnail: "images/history/smolensk/smolensk_1943_thumbnail.webp",
+          full: "images/history/smolensk/smolensk_1943.webp",
+          caption: "Soviet Red Army soldiers defend the city of Smolensk: Summer 1941"
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/smolensk/smolensk_1943_soviet_artillery_thumbnail.webp",
+            full: "images/history/smolensk/smolensk_1943_soviet_artillery.webp",
+            caption: "Soviet artillerymen of the 2nd Guards Cavalry Corps fire on the enemy from a camouflaged position. In the foreground: 45-mm anti-tank gun 53-K (model 1937), in the background: 76-mm regimental gun (model 1927). Bryansk Front. September 1943."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/smolensk/smolensk_1943_yelnya_liberated_thumbnail.webp",
+            full: "images/history/smolensk/smolensk_1943_yelnya_liberated.webp",
+            caption: "Salute in honor of raising the red flag in the liberated city of Yelnya. Yelnya was liberated during the Yelnia-Dorogobuzh Offensive Operation, part of the Smolensk operation. 30 August 1943."
+          }
+        ]
+      }
+    },
     
     // Confirmed 2000m based on data spread
     widthMeters: 2000, 
@@ -928,6 +1369,52 @@ STA: {
     image: "images/maps/map_stalingrad.webp", 
     thumbnail: "images/maps/thumbnail/STA.webp", 
     teams: { t1: "SOVIET UNION", t2: "GERMANY" },
+    history: {
+      battle: "Battle of Stalingrad (August 23, 1942 - February 2, 1943)",
+      description: "The Battle of Stalingrad was the largest and bloodiest battle of World War II, fought between Nazi Germany and the Soviet Union for control of the city that bore Stalin's name. Hitler ordered the capture of Stalingrad to destroy its industrial capacity, block Volga River traffic crucial for Soviet logistics, and achieve a major propaganda victory. The German 6th Army under General Friedrich Paulus advanced on the city in August 1942, beginning a brutal urban battle that lasted for months. The Soviet defenders, led by General Vasily Chuikov's 62nd Army, fought street-by-street and house-by-house, inflicting massive casualties on the Germans while holding key positions.",
+      tactics: "The battle began with massive German air raids that devastated much of the city. The initial German advance was successful, but Soviet resistance stiffened in the urban environment, where German armor and air superiority were less effective. The Soviets used close-quarters combat, snipers, and fortified positions in buildings like Pavlov's House to delay the Germans. In November 1942, the Soviets launched Operation Uranus, a massive counter-offensive that struck the weaker Romanian and Italian flanks of the German forces, surrounding the 6th Army in Stalingrad. Subsequent operations (Koltso and Little Saturn) prevented German relief attempts and expanded the Soviet offensive.",
+      significance: "The Battle of Stalingrad is widely regarded as the turning point of World War II on the Eastern Front and the entire war. The destruction of the German 6th Army, approximately 300,000 men, marked the greatest single defeat in German military history and shattered the myth of the invincible Wehrmacht. The Soviet victory restored national pride after the devastating losses of 1941-1942 and demonstrated that Germany could be defeated. The battle shifted the strategic initiative to the Soviet Union, from which Germany would never recover. Historians have described it as the most important military-political event of World War II and a battle that changed the course of history.",
+      images: [
+        {
+          thumbnail: "images/history/stalingrad/stalingrad_1942.webp",
+          full: "images/history/stalingrad/stalingrad_1942.webp",
+          caption: "German gun position in Stalingrad, Soviet Union-South sector, 1942."
+        },
+        {
+          thumbnail: "images/history/stalingrad/stalingrad_1942_soldier.webp",
+          full: "images/history/stalingrad/stalingrad_1942_soldier.webp",
+          caption: "Captain Wilhelm Traub with Russian submachine gun PPSh 41 in cover between ruins during the Battle for Stalingrad. Late autumn 1942."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/stalingrad/stalingrad_1942_german_tank_thumbnail.webp",
+            full: "images/history/stalingrad/stalingrad_1942_german_tank.webp",
+            caption: "German tank Pz.Kpfw. IV Ausf. F1 in positions during the battle for Stalingrad. In the foreground is a machine gunner armed with an MG 34. December 1942."
+          },
+          {
+            thumbnail: "images/history/stalingrad/stalingrad_1943_soviet_soldiers.webp",
+            full: "images/history/stalingrad/stalingrad_1943_soviet_soldiers.webp",
+            caption: "Red Army soldiers fight the enemy from the roof of a house in Stalingrad, January 1943. The battle began July 1942. During the Soviet counter-offensive in November 1942, over 300,000 Axis troops were surrounded. The remaining 91,000 surrendered on January 31 and February 2, 1943."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/stalingrad/stalingrad_1943_axis_prisoners_thumbnail.webp",
+            full: "images/history/stalingrad/stalingrad_1943_axis_prisoners.webp",
+            caption: "Column of Axis prisoners of war: Germans, Italians, Hungarians. Voronezh Front. January 1943."
+          },
+          {
+            thumbnail: "images/history/stalingrad/stalingrad_1943_liberation_thumbnail.webp",
+            full: "images/history/stalingrad/stalingrad_1943_liberation.webp",
+            caption: "Red Army soldier raising the Red Flag on February 2, 1943, in honor of the liberation of Stalingrad from German fascist invaders, on the square where the headquarters of German Field Marshal Friedrich Paulus was located in the central department store building."
+          }
+        ]
+      }
+    },
     
     // Confirmed 1984m (MbPBounds -99200 to 99200)
     widthMeters: 1984, 
@@ -987,6 +1474,52 @@ STA: {
     image: "images/maps/map_tobruk.webp",
     thumbnail: "images/maps/thumbnail/TOB.webp",
     teams: { t1: "BRITISH 8TH ARMY", t2: "GERMANY" },
+    history: {
+      battle: "Siege of Tobruk (April 10 - November 27, 1941)",
+      description: "The Siege of Tobruk was a 241-day confrontation during the Western Desert Campaign of World War II. After the British defeat at Gazala, Axis forces under General Erwin Rommel advanced on the Libyan port of Tobruk, which was defended by British and Commonwealth forces, primarily the Australian 9th Division. The garrison of approximately 25,000 men held out against repeated Axis assaults, becoming a symbol of Allied resistance in North Africa. Tobruk's capture was crucial for Rommel's advance toward Egypt, but its stubborn defense denied the Axis a vital supply port and tied down significant Axis forces.",
+      tactics: "The Tobruk perimeter was fortified with a double semi-circle of concrete strongpoints, an anti-tank ditch, and barbed wire defenses. The defenders used aggressive patrolling, counter-attacks, and artillery to maintain the perimeter. The port remained operational throughout the siege, allowing supply deliveries by sea despite Axis air attacks. Rommel attempted several assaults, most notably at El Adem road and Ras el Medauar, but Australian and British forces repelled these attacks. The Luftwaffe and Regia Aeronautica conducted heavy bombing raids, but the garrison held firm until relief came through Operation Crusader in November 1941.",
+      significance: "The defense of Tobruk was a major Allied victory that boosted morale after earlier defeats in North Africa. The siege denied the Axis a critical supply port and forced Rommel to divert significant forces to contain the garrison, delaying his advance toward Egypt. The 241-day defense demonstrated the effectiveness of fortified positions and determined resistance against mechanized forces. The successful relief of Tobruk through Operation Crusader marked a turning point in the North African campaign and led to the recapture of Cyrenaica. The Australian defenders became known as the 'Rats of Tobruk,' a term adopted with pride as a badge of honor.",
+      images: [
+        {
+          thumbnail: "images/history/tobruk/tobruk_1941_thumbnail.webp",
+          full: "images/history/tobruk/tobruk_1941.webp",
+          caption: "The British offensive in Libya. Artillery shelling enemy position. 1941."
+        },
+        {
+          thumbnail: "images/history/tobruk/tobruk_1941_australian_forces.webp",
+          full: "images/history/tobruk/tobruk_1941_australian_forces.webp",
+          caption: "Australian Forces in North Africa during the Second World War. The 'Rats of Tobruk' - some of the 15,000 men of General Morshead's 9th Australian Division shelter in caves during an air raid during the siege of Tobruk. After six months besieged in the vital supply port the Australians were evacuated by sea and relieved by fresh troops. 823 men had been killed, 2214 wounded and 700 captured. 13 June 1941."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/tobruk/tobruk_1941_planning_thumbnail.webp",
+            full: "images/history/tobruk/tobruk_1941_planning.webp",
+            caption: "The second battle of Libya. Before zero hour. The Brigadier commanding tank units in Tobruk instructing tank commanders on the operations, using a sand table for demonstration purposes. 1941."
+          },
+          {
+            thumbnail: "images/history/tobruk/tobruk_1941_message.webp",
+            full: "images/history/tobruk/tobruk_1941_message.webp",
+            caption: "The commanding officer of an armoured unit receives a message at his HQ located in a tunnel within the Tobruk perimeter, 12 September 1941."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/tobruk/tobruk_1941_ruins_thumbnail.webp",
+            full: "images/history/tobruk/tobruk_1941_ruins.webp",
+            caption: "Ruins of Tobruk. A soldier walking along the road is visible. February 1942."
+          },
+          {
+            thumbnail: "images/history/tobruk/tobruk_1941_soldiers_of_the_allied_armies_thumbnail.webp",
+            full: "images/history/tobruk/tobruk_1941_soldiers_of_the_allied_armies.webp",
+            caption: "Soldiers from each of five different allied armies fighting together against the Germans and Italians in Tobruk, Libya. From the left they are Polish, British, Indian, Australian and Czech. 22 October 1941."
+          }
+        ]
+      }
+    },
 
     widthMeters: 2000,
     heightMeters: 2000,
@@ -1035,6 +1568,52 @@ UTA: {
     image: "images/maps/map_utahbeach.webp", 
     thumbnail: "images/maps/thumbnail/UTA.webp", 
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
+    history: {
+      battle: "Utah Beach Landings (June 6, 1944)",
+      description: "Utah Beach was the westernmost of the five D-Day landing beaches, assaulted by the U.S. 4th Infantry Division along with airborne troops from the 101st and 82nd Airborne Divisions. The landing was preceded by airborne drops beginning at 01:30 to secure inland exits and destroy bridges over the Douve River. Naval bombardment commenced at 05:45, followed by air strikes at 06:10. The first infantry waves landed at 06:30. Strong currents pushed the landing craft about 2,000 yards south of their intended landing zone, but Brigadier General Theodore Roosevelt Jr. decided to continue from the new location, which proved advantageous with fewer enemy strongpoints.",
+      tactics: "The 4th Infantry Division landed in four waves, with infantry first, followed by engineers, DD tanks, and conventional Sherman tanks. The misdirected landing actually benefited the assault, as the new sector had only one strongpoint (WN7) instead of two, and it had been heavily damaged by preliminary bombardment. Engineers quickly cleared obstacles and mines before the tide came in at 10:30. The beach was secured within an hour, and combat teams pushed inland along the causeways. The 101st Airborne secured the western flank and causeways, while the 82nd Airborne captured Sainte-Mère-Église, the first town liberated in the invasion.",
+      significance: "Utah Beach was the most successful of the D-Day landings, with only 197 casualties among the 4th Infantry Division compared to thousands at Omaha Beach. The landing secured a vital beachhead and allowed Allied forces to penetrate 4 miles inland by the end of D-Day. The capture of Sainte-Mère-Église and the causeways linked Utah Beach with the rest of the Allied front. The success at Utah demonstrated the effectiveness of combined arms operations, airborne assaults, and the importance of flexible leadership in adapting to changing circumstances.",
+      images: [
+        {
+          thumbnail: "images/history/utah_beach/utah_beach_1944.webp",
+          full: "images/history/utah_beach/utah_beach_1944.webp",
+          caption: "U.S. Army Air Forces C-47 transport planes fly low over a Coast Guard manned Landing Craft Infantry (LCI) off Utah Beach, during the Normandy invasion, 6 June 1944. U.S. Coast Guard Collection."
+        },
+        {
+          thumbnail: "images/history/utah_beach/utah_beach_1944_uss_nevada_thumbnail.webp",
+          full: "images/history/utah_beach/utah_beach_1944_uss_nevada.webp",
+          caption: "Forward 14 inch/45 guns of USS Nevada (BB-36) fire on positions ashore, during the landings on Utah Beach, 6 June 1944."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/utah_beach/utah_beach_1944_coast_guard_thumbnail.webp",
+            full: "images/history/utah_beach/utah_beach_1944_coast_guard.webp",
+            caption: "Allied troops storm Utah Beach under heavy German artillery and machine gun fire in Normandy, France, June 6, 1944. More than 23,000 men of the U.S. 4th Infantry Division landed on Utah Beach, the westernmost of the assault beaches. U.S. Coast Guard photo."
+          },
+          {
+            thumbnail: "images/history/utah_beach/utah_beach_1944_troops_seawall_thumbnail.webp",
+            full: "images/history/utah_beach/utah_beach_1944_troops_seawall.webp",
+            caption: "U.S. Soldiers of the 8th Infantry Regiment, 4th Infantry Division, move out over the seawall on Utah Beach after coming ashore. Other troops are resting behind the concrete wall. 6 or 9 June 1944."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/utah_beach/utah_beach_1944_american_soldiers_thumbnail.webp",
+            full: "images/history/utah_beach/utah_beach_1944_american_soldiers.webp",
+            caption: "American soldiers land on Utah Beach and cross the barbed wire laid by German troops to slow the Allied advance. They are supported by a Sherman tank. 1944."
+          },
+          {
+            thumbnail: "images/history/utah_beach/utah_beach_1944_supplies_thumbnail.webp",
+            full: "images/history/utah_beach/utah_beach_1944_supplies.webp",
+            caption: "Supplies move forward with advancing troops as they forge ahead on Utah Beach, France. 10 June 1944."
+          }
+        ]
+      }
+    },
     
     // Confirmed 1984m (Standard Warfare Map)
     widthMeters: 1984, 

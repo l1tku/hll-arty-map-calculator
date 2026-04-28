@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.2] - 2026-04-28
+### Added
+- History section for map (click the book icon on map thumbnails to view)
+
+### Changed
+- App is now fully offline-capable (PWA improvements)
+
+### Fixed
+- Infinite spinner when a map image fails to load
+- Various minor bugs and security hardening
+
 ## [1.3.1] - 2026-04-25
 ### Added 
 - Haptic feedback on history buttons

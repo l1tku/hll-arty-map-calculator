@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.3.1 — Updated for Hell Let Loose Update 19.1**
+**v1.3.2 — Updated for Hell Let Loose Update 19.1**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
@@ -21,15 +21,19 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 4. **Aim**: Click on map to place target or use Live Tracking
 5. **Result**: View firing solution in the data panel
 
-**Custom Gun Management**: Click icon to select, right-click for Move/Delete menu. Mobile: remove from dropdown menu.
+**Custom Gun Management**: Click icon to select. Desktop: right-click icon on map for Move/Delete menu. Mobile: remove guns from the dropdown menu where you select the gun.
 
 ### Method 2: Manual Calculator
 1. Click the Calculator Icon in the sidebar or within the Map Selection footer.
-2. Select your faction.
-3. Enter the distance using the keypad.
+2. Select your faction on the topside of the calculator. 
+3. Enter the distance using the keypad or type directly in the input field.
 4. Get instant Elevation MILs.
-5. Press **Enter** (desktop) or tap **SAVE** (mobile) to save calculation to history.
-6. View recent calculations in the history log below the keypad.
+5. Press **Enter** (desktop) or tap the C keypad button to reset the value.
+
+**History Features (Optional)**
+- Toggle history on to enable saving calculations.
+- When history is on: The C keypad button becomes **SAVE** on both desktop and mobile. Press **Enter** or tap **SAVE** to save the calculation before clearing.
+- View recent calculations in the history log below the keypad.
 
 ## Map Controls
 ### Desktop
@@ -93,6 +97,14 @@ Feel free to submit issues and enhancement requests.
 This project is a community-made tool and is **not** affiliated with, endorsed by, or sponsored by Team17, Cover 6 Studios, or Black Matter.  
 **Hell Let Loose** content and materials are trademarks and copyrights of their respective owners.  
 * **Game Assets:** All game images (maps, icons) are the property of the Hell Let Loose developers and publishers. They are used here for non-commercial, educational, and informational purposes.
+
+## Historical Images Attribution
+Historical photographs used in the map history sections are sourced from:
+- **Wikimedia Commons** - Public domain and Creative Commons licensed images
+- **U.S. National Archives** - Public domain U.S. government photographs
+- **Imperial War Museums** - Public domain photographs
+
+All historical images are used for educational and historical documentation purposes. Specific image attributions are provided in the image captions within the application.
 
 ## License
 The source code (HTML, CSS, JavaScript) of this project is licensed under the **MIT License**.  
