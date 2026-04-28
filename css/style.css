@@ -2733,6 +2733,18 @@ button.btn-map-select:hover {
     display: block;
 }
 
+.image-viewer-loading {
+    color: #f5ead6;
+    font-family: "SpecialElite", "Courier New", monospace;
+    font-size: 16px;
+    text-align: center;
+    padding: 40px;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .image-viewer-close {
     position: absolute;
     top: 0;

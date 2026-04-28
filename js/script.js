@@ -393,7 +393,8 @@ function openImageViewer(imageSrc, caption, imgCaption) {
   viewer.innerHTML = `
         <div class="image-viewer-content" style="opacity: 0; transition: opacity 0.2s ease;">
             <button class="image-viewer-close" aria-label="Close">&times;</button>
-            <img src="${imageSrc}" alt="${caption}" class="image-viewer-img">
+            <div class="image-viewer-loading">Loading...</div>
+            <img src="${imageSrc}" alt="${caption}" class="image-viewer-img" style="display: none;">
             ${displayCaption ? `<div class="image-viewer-caption">${displayCaption}</div>` : ""}
         </div>
     `;
@@ -401,13 +402,25 @@ function openImageViewer(imageSrc, caption, imgCaption) {
 
   const img = viewer.querySelector(".image-viewer-img");
   const content = viewer.querySelector(".image-viewer-content");
+  const loading = viewer.querySelector(".image-viewer-loading");
 
-  if (img.complete) {
+  img.onload = () => {
+    loading.style.display = "none";
+    img.style.display = "block";
     content.style.opacity = "1";
-  } else {
-    img.onload = () => {
-      content.style.opacity = "1";
-    };
+  };
+
+  img.onerror = () => {
+    loading.innerHTML = "Failed to load image.<br>Try refreshing the page.";
+    loading.style.color = "#ff6b6b";
+    console.error("Failed to load image:", imageSrc);
+  };
+
+  // Handle already cached images
+  if (img.complete && img.naturalWidth > 0) {
+    loading.style.display = "none";
+    img.style.display = "block";
+    content.style.opacity = "1";
   }
 
   // Close on click

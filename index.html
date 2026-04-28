@@ -34,12 +34,22 @@
 
         <script>
             if ("serviceWorker" in navigator) {
-                // Only register on HTTPS (production), not HTTP (localhost)
-                if (window.location.protocol === "https:") {
+                // Only register service worker on GitHub Pages (HTTPS), not local development
+                const isLocalhost = location.hostname === "localhost" ||
+                                   location.hostname === "127.0.0.1" ||
+                                   location.hostname.startsWith("192.168.");
+
+                if (!isLocalhost) {
                     window.addEventListener("load", () => {
+                        // Calculate scope for GitHub Pages subdirectory support
+                        const pathname = window.location.pathname;
+                        const basePath = pathname.substring(0, pathname.lastIndexOf("/") + 1);
+
                         // Cache-busting query parameter forces browser to check for new service worker code
                         navigator.serviceWorker
-                            .register("./service-worker.js?v=1.3.4")
+                            .register("./service-worker.js?v=1.3.4-8", {
+                                scope: basePath || "/"
+                            })
                             .then((reg) =>
                                 console.log("Service Worker registered.", reg),
                             )
@@ -50,6 +60,24 @@
                                 ),
                             );
                     });
+                } else {
+                    // FORCE UNREGISTER any existing service workers on localhost
+                    navigator.serviceWorker.getRegistrations().then((regs) => {
+                        regs.forEach((reg) => {
+                            console.log("[Local Dev] Unregistering old Service Worker:", reg);
+                            reg.unregister();
+                        });
+                    });
+                    // Also clear all caches
+                    if (window.caches) {
+                        caches.keys().then((names) => {
+                            names.forEach((name) => {
+                                console.log("[Local Dev] Deleting cache:", name);
+                                caches.delete(name);
+                            });
+                        });
+                    }
+                    console.log("Service Worker disabled for local development");
                 }
             }
         </script>
