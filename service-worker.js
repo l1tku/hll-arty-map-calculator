@@ -13,7 +13,7 @@
  * - Same app version, JS bugfix: "1.3.4-2"  <-- bump build number
  * - App v1.3.5 released: "1.3.5-1"
  */
-const SW_VERSION = "1.3.4-2";  // Change this to force cache refresh
+const SW_VERSION = "1.3.4-3";  // Change this to force cache refresh
 const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
 const ASSETS_TO_CACHE = [
   "./",
@@ -99,7 +99,9 @@ self.addEventListener("fetch", (e) => {
           const cache = await caches.open(CACHE_NAME);
           const keys = await cache.keys();
           for (const request of keys) {
-            if (request.url.includes(path) || path.includes(request.pathname)) {
+            const cachedUrl = new URL(request.url);
+            const cachedPath = cachedUrl.pathname;
+            if (cachedPath === path || cachedPath.includes(path) || path.includes(cachedPath)) {
               cachedResponse = await cache.match(request);
               break;
             }

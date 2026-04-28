@@ -2612,11 +2612,10 @@ function switchMap(mapKey) {
   const imgElement = cached.mapImage;
   const markersLayer = cached.markersLayer;
 
-  // 1. Hide old map immediately and keep it hidden until new map is ready
-  imgElement.style.visibility = "hidden";
-  imgElement.style.opacity = "0";
+  // 1. Show loading overlay immediately
+  showLoading();
 
-  // Keep map stage visible but hide content during transition
+  // Keep map stage visible but fade out content
   if (mapStage) {
     mapStage.style.opacity = "0";
   }
@@ -2624,13 +2623,13 @@ function switchMap(mapKey) {
   // Clear old markers immediately
   if (markersLayer) markersLayer.innerHTML = "";
 
-  // Show loading overlay and keep it visible
-  showLoading();
-
   const config = MAP_DATABASE[mapKey];
 
-  // 2. Runs once the image is both downloaded AND decoded.
-  function onImageReady() {
+  // 2. Create temp image to preload new map without affecting current display
+  const tempImg = new Image();
+  const imageUrl = config.image + "?t=" + Date.now();
+  
+  function onNewImageReady() {
     activeMapKey = mapKey;
     currentStrongpoints = config.strongpoints || [];
 
@@ -2649,6 +2648,9 @@ function switchMap(mapKey) {
     updateMapCursor();
     // =====================================
 
+    // Swap to new image (already loaded, no flash)
+    imgElement.src = imageUrl;
+    
     // Re-build grid and markers for new map dimensions
     buildGrid();
     initMap();
@@ -2664,44 +2666,31 @@ function switchMap(mapKey) {
     updateGunUI(config);
     updateGunDropdownUI();
 
-    // Final render (renders on hidden image - no flash of old map)
+    // Final render
     renderMarkers();
     renderTargeting();
     render();
 
-    // Show new image and fade in
-    imgElement.style.visibility = "visible";
-    imgElement.style.opacity = "1";
-    
+    // Fade in map stage
     if (mapStage) {
       mapStage.style.opacity = "1";
     }
 
-    // Wait for next frame to ensure browser has painted before hiding loading
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        hideLoading();
-      });
-    });
+    // Hide loading overlay after a brief delay to ensure paint
+    setTimeout(() => {
+      hideLoading();
+    }, 100);
   }
 
-  // 3. Trigger load, then pre-decode before the first paint.
-  //    img.decode() resolves only after the browser has fully decompressed the
-  //    image data into a paintable bitmap — eliminating the "Image decoding"
-  //    spike that was appearing synchronously on the paint thread in the profiler.
-  //    Add cache-busting to ensure fresh image is loaded (not from service worker cache)
-  imgElement.src = config.image + "?t=" + Date.now();
-  imgElement
-    .decode()
-    .then(onImageReady)
-    .catch(() => {
-      // decode() rejects if the fetch fails; fall back to onload so the spinner
-      // eventually clears and the error overlay can handle it gracefully.
-      imgElement.onload = function () {
-        onImageReady();
-        imgElement.onload = null;
-      };
-    });
+  // 3. Load new image in temp element, then swap
+  tempImg.onload = function() {
+    onNewImageReady();
+  };
+  tempImg.onerror = function() {
+    // If load fails, still try to switch (will show error overlay)
+    onNewImageReady();
+  };
+  tempImg.src = imageUrl;
 }
 
 // ==========================================
