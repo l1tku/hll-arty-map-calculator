@@ -65,12 +65,17 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(
     (async () => {
       try {
-        // Try cache first with multiple strategies
-        let cachedResponse = await caches.match(e.request, { ignoreSearch: true });
+        const url = new URL(e.request.url);
+        
+        // Strip cache-busting query parameters for cache matching
+        const cacheKey = new URL(url);
+        cacheKey.search = ""; // Remove all query params
+        
+        // Try cache first with stripped URL
+        let cachedResponse = await caches.match(cacheKey.toString(), { ignoreSearch: true });
         
         // If not found, try matching by URL path only (ignoring domain/encoding)
         if (!cachedResponse) {
-          const url = new URL(e.request.url);
           const path = url.pathname;
           const cache = await caches.open(CACHE_NAME);
           const keys = await cache.keys();
@@ -83,11 +88,21 @@ self.addEventListener("fetch", (e) => {
         }
 
         if (cachedResponse) {
+          // For map images with cache-busting (?t=), skip cache and go to network
+          if (url.searchParams.has('t')) {
+            const networkResponse = await fetch(e.request);
+            if (networkResponse.ok) {
+              const cache = await caches.open(CACHE_NAME);
+              await cache.put(cacheKey.toString(), networkResponse.clone());
+            }
+            return networkResponse;
+          }
+          
           // Stale-while-revalidate: update cache in background
           fetch(e.request)
             .then((networkResponse) => {
               if (networkResponse.ok) {
-                caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
+                caches.open(CACHE_NAME).then((cache) => cache.put(cacheKey.toString(), networkResponse));
               }
             })
             .catch(() => {}); // Silent fail for background update
@@ -98,7 +113,7 @@ self.addEventListener("fetch", (e) => {
         const networkResponse = await fetch(e.request);
         if (networkResponse.ok) {
           const cache = await caches.open(CACHE_NAME);
-          await cache.put(e.request, networkResponse.clone());
+          await cache.put(cacheKey.toString(), networkResponse.clone());
         }
         return networkResponse;
       } catch (err) {

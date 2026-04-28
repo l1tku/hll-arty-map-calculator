@@ -2685,7 +2685,8 @@ function switchMap(mapKey) {
   //    img.decode() resolves only after the browser has fully decompressed the
   //    image data into a paintable bitmap — eliminating the "Image decoding"
   //    spike that was appearing synchronously on the paint thread in the profiler.
-  imgElement.src = config.image;
+  //    Add cache-busting to ensure fresh image is loaded (not from service worker cache)
+  imgElement.src = config.image + "?t=" + Date.now();
   imgElement
     .decode()
     .then(onImageReady)
