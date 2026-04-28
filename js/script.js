@@ -2612,19 +2612,19 @@ function switchMap(mapKey) {
   const imgElement = cached.mapImage;
   const markersLayer = cached.markersLayer;
 
-  // 1. Hide old map image immediately to prevent flicker
+  // 1. Hide old map immediately and keep it hidden until new map is ready
+  imgElement.style.visibility = "hidden";
   imgElement.style.opacity = "0";
 
-  // Fade out map stage
+  // Keep map stage visible but hide content during transition
   if (mapStage) {
-    mapStage.style.transition = "opacity 0.2s ease-out";
     mapStage.style.opacity = "0";
   }
 
   // Clear old markers immediately
   if (markersLayer) markersLayer.innerHTML = "";
 
-  // Show loading overlay
+  // Show loading overlay and keep it visible
   showLoading();
 
   const config = MAP_DATABASE[mapKey];
@@ -2664,21 +2664,25 @@ function switchMap(mapKey) {
     updateGunUI(config);
     updateGunDropdownUI();
 
-    // Final render
+    // Final render (renders on hidden image - no flash of old map)
     renderMarkers();
     renderTargeting();
     render();
 
-    // Fade in new map
+    // Show new image and fade in
+    imgElement.style.visibility = "visible";
     imgElement.style.opacity = "1";
+    
     if (mapStage) {
       mapStage.style.opacity = "1";
-      setTimeout(() => {
-        mapStage.style.transition = "opacity 0.3s ease-in-out";
-      }, 50);
     }
 
-    hideLoading();
+    // Wait for next frame to ensure browser has painted before hiding loading
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        hideLoading();
+      });
+    });
   }
 
   // 3. Trigger load, then pre-decode before the first paint.

@@ -1,4 +1,20 @@
-const CACHE_NAME = "hll-arty-cache-v1.3.4";
+/**
+ * Service Worker Versioning Strategy:
+ * 
+ * SW_VERSION controls the cache name and forces clients to get fresh JS/CSS.
+ * Bump this when you update JS/CSS files and want existing users to get the changes.
+ * 
+ * Format: "{app-version}-{build}" (e.g., "1.3.4-2")
+ * - app-version: Matches your app version for reference
+ * - build: Increment when you need to force cache refresh
+ * 
+ * Examples:
+ * - App v1.3.4, first SW release: "1.3.4-1"
+ * - Same app version, JS bugfix: "1.3.4-2"  <-- bump build number
+ * - App v1.3.5 released: "1.3.5-1"
+ */
+const SW_VERSION = "1.3.4-2";  // Change this to force cache refresh
+const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -19,10 +35,13 @@ const ASSETS_TO_CACHE = [
 ];
 
 // Install: Cache core assets + skip waiting for immediate activation
+console.log(`[SW] Installing service worker v${SW_VERSION}`);
+
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
+      console.log(`[SW] Caching assets for v${SW_VERSION}`);
       // Cache assets individually to handle partial failures gracefully
       const results = await Promise.allSettled(
         ASSETS_TO_CACHE.map((url) =>
