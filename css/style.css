@@ -384,11 +384,13 @@ body {
    ========================================== */
 /* 1025px ensures this NEVER runs on phones (even Pro Max in landscape) */
 @media (min-width: 1025px) {
-    /* 1. Hardware Acceleration Removed (Fixes Mobile Chrome Checkerboarding) */
-    /* Modern Chrome auto-promotes transform elements without will-change */
-
-    .marker,
-    .hll-grid-line {
+    /* 1. Hardware Acceleration for Markers Only */
+    /* translateZ(0) is intentionally NOT applied to .hll-grid-line.
+       Grid lines are static inside the already-composited mapStage and need no
+       individual GPU layers. Promoting 21+ grid lines was costing ~34% of total
+       frame time in GPU Paint (compositor blending 21+ layers per frame).
+       Markers keep their layers because they rotate independently. */
+    .marker {
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         transform: translateZ(0);
@@ -2406,6 +2408,13 @@ button.btn-map-select:hover {
     transition: opacity 0.2s ease;
     line-height: 1;
     pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    color: #ffc107;
+}
+
+.changelog-btn svg {
+    display: block;
 }
 
 .changelog-btn:hover {
@@ -2437,6 +2446,14 @@ button.btn-map-select:hover {
     font-size: 13px;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.8);
+}
+
+.changelog-content h1 {
+    font-size: 18px;
+    font-weight: 900;
+    color: #ffc107;
+    margin: 0 0 16px 0;
+    letter-spacing: 0.05em;
 }
 
 .changelog-content h2 {
@@ -2616,6 +2633,64 @@ button.btn-map-select:hover {
     .history-images img:hover {
         opacity: 1;
         filter: sepia(0%) contrast(1.1) brightness(1.05);
+    }
+}
+
+@media (max-width: 768px) {
+    .history-modal {
+        width: 94vw;
+        max-height: 88dvh;
+    }
+
+    .history-modal .modal-brand-header {
+        padding: 10px 16px;
+        letter-spacing: 2px;
+    }
+
+    .history-modal .modal-brand-header::before {
+        font-size: 8px;
+        letter-spacing: 3px;
+    }
+
+    .history-modal .modal-brand-header .main-title {
+        font-size: 17px !important;
+        letter-spacing: 2px;
+    }
+
+    .history-content {
+        margin: 12px 18px 18px 18px;
+        padding: 16px 20px;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .history-section h3 {
+        font-size: 13px;
+        letter-spacing: 1.5px;
+        margin-bottom: 12px;
+    }
+
+    .history-section h4 {
+        font-size: 11px;
+        letter-spacing: 2px;
+    }
+
+    .history-section p {
+        margin-bottom: 12px;
+    }
+
+    .history-img-caption {
+        font-size: 10px;
+        line-height: 1.4;
+    }
+}
+
+@media (max-width: 380px) {
+    .history-content {
+        margin: 10px 14px 14px 14px;
+        padding: 14px 16px;
+        font-size: 11px;
+        line-height: 1.6;
     }
 }
 

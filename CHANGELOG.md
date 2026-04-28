@@ -1,5 +1,13 @@
 # Changelog
-All notable changes to this project will be documented in this file.
+### Not seeing the latest version?
+The app updates automatically — **refresh the page twice** and it will update. Still stuck? Force a full reload:
+- **PC:** Ctrl + Shift + R
+- **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
+- **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
+
+## [1.3.3] - 2026-04-28
+### Performance
+- Render loop optimisations: element caching, dirty-checks, O(n) sector lookup, image pre-decode, and service worker cache fixes for smoother panning and faster map switches
 
 ## [1.3.2] - 2026-04-28
 ### Added

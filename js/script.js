@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.3.2";
+const APP_VERSION = "v1.3.3";
 const GAME_VERSION = "Update 19.1";
 
 // Create a simple map of IDs and what text should go in them
@@ -101,6 +101,13 @@ let _lastMobDist = null;
 let _lastMobMil = null;
 let _lastMobGrid = null;
 
+// --- DIRTY-CHECK & CACHED COMPUTED VALUES ---
+let _lastRingDiameter = -1; // updateDesktopRingScale: skip DOM write when unchanged
+let _lastCursorMode = null; // updateMapCursor: skip all DOM writes when mode unchanged
+let _cachedDPR = window.devicePixelRatio > 1; // cached at load, refreshed on resize
+let _lastMobContainerSize = -1; // updateMobileHud ring container: skip write when unchanged
+let _lastMajorThickness = -1; // render() grid thickness: skip setProperty when unchanged
+
 // Match Setup Variables
 let filterMode = false; // Is the setup menu open?
 let confirmedPoints = new Set(); // Stores IDs of the "Chosen" points
@@ -178,6 +185,8 @@ const MOBILE_QUALITY = {
 // Update IS_MOBILE on resize to avoid repeated innerWidth checks
 window.addEventListener("resize", () => {
   IS_MOBILE = window.innerWidth <= 768;
+  _cachedDPR = window.devicePixelRatio > 1; // refresh cache (window may move to a different display)
+  _lastCursorMode = null; // force cursor re-check (IS_MOBILE may have toggled)
 });
 
 // DOM Elements
@@ -498,7 +507,7 @@ function syncToggleUI() {
 }
 
 function updateDesktopRingScale() {
-  const ringsEl = document.getElementById("desktopCursorRings");
+  const ringsEl = cached.getElem("desktopCursorRings");
   if (!ringsEl || !hudEnabled) return;
 
   const mapImage = cached.mapImage; // Use cached
@@ -517,8 +526,12 @@ function updateDesktopRingScale() {
   // (e.g., 41.3 -> 42, 40.1 -> 40)
   const diameterPx = Math.round(rawDiameter / 2) * 2;
 
-  ringsEl.style.width = `${diameterPx}px`;
-  ringsEl.style.height = `${diameterPx}px`;
+  // Skip the DOM write if the size hasn't actually changed (avoids layout recalc during panning)
+  if (diameterPx !== _lastRingDiameter) {
+    ringsEl.style.width = `${diameterPx}px`;
+    ringsEl.style.height = `${diameterPx}px`;
+    _lastRingDiameter = diameterPx;
+  }
 }
 
 // Show loading immediately
@@ -705,7 +718,7 @@ function updateStickyLabels(currentDrawScale) {
   if (fontScale > 1.0) fontScale = 1.0;
 
   // FIX: Detect if we should use floats (Firefox/HighDPI) to prevent label vibration
-  const isHighDPI = window.devicePixelRatio > 1;
+  const isHighDPI = _cachedDPR; // use cached value — window.devicePixelRatio on every frame is wasteful
   const useFloats = isHighDPI || isFirefox;
 
   for (let i = 0; i < stickyLabelsCache.cols.length; i++) {
@@ -929,6 +942,17 @@ function renderMarkers() {
   const dims = getMapDimensions();
   const pxPerMeter = (w / dims.width) * GAME_UNITS_PER_METER;
 
+  // PERF FIX: Pre-compute which sectors have a confirmed point in one O(n) pass.
+  // Avoids an O(n²) currentStrongpoints.some() call inside the forEach below.
+  const confirmedSectors = new Set();
+  if (confirmedPoints.size > 0) {
+    currentStrongpoints.forEach((p) => {
+      if (p.type === "strongpoint" && confirmedPoints.has(p.id)) {
+        confirmedSectors.add(getPointSector(p, isVerticalMap));
+      }
+    });
+  }
+
   currentStrongpoints.forEach((point) => {
     // NEW: We now render enemy artillery too
     if (point.type === "point") {
@@ -940,12 +964,8 @@ function renderMarkers() {
       const isConfirmed = confirmedPoints.has(point.id);
       const mySector = getPointSector(point, isVerticalMap);
 
-      const sectorHasConfirmation = currentStrongpoints.some(
-        (p) =>
-          p.type === "strongpoint" &&
-          confirmedPoints.has(p.id) &&
-          getPointSector(p, isVerticalMap) === mySector,
-      );
+      // O(1) Set lookup replaces the O(n) .some() that was here
+      const sectorHasConfirmation = confirmedSectors.has(mySector);
 
       if (!filterMode) {
         if (sectorHasConfirmation && !isConfirmed) return;
@@ -1050,12 +1070,8 @@ function renderMarkers() {
         const mySector = getPointSector(point, isVerticalMap);
         const isConfirmed = confirmedPoints.has(point.id);
 
-        const sectorHasConfirmation = currentStrongpoints.some(
-          (p) =>
-            p.type === "strongpoint" &&
-            confirmedPoints.has(p.id) &&
-            getPointSector(p, isVerticalMap) === mySector,
-        );
+        // O(1) Set lookup — confirmedSectors was pre-computed above the forEach
+        const sectorHasConfirmation = confirmedSectors.has(mySector);
 
         // 1. Determine Visual State
         if (isConfirmed) {
@@ -1897,10 +1913,18 @@ function renderTargeting() {
       // FIX: Use 2D translate. Safer for memory, prevents checkerboarding, still fast.
       milLabel.style.transform = `translate(${labelX}px, ${labelY}px) translate(-50%, -100%)`;
 
-      milLabel.innerHTML = `
-                <div class="mil-value">${mils}</div>
-                <div class="meter-subtext">${distanceAtMarker}m</div>
-            `;
+      // PERF FIX: Avoid innerHTML (triggers HTML parser on every update).
+      // Pre-create child elements once; after that just update textContent.
+      if (!milLabel.firstChild) {
+        const milDiv = document.createElement("div");
+        milDiv.className = "mil-value";
+        const subDiv = document.createElement("div");
+        subDiv.className = "meter-subtext";
+        milLabel.appendChild(milDiv);
+        milLabel.appendChild(subDiv);
+      }
+      milLabel.firstChild.textContent = mils !== null ? String(mils) : "---";
+      milLabel.lastChild.textContent = `${distanceAtMarker}m`;
 
       poolIdx++;
     }
@@ -2082,7 +2106,7 @@ function render() {
   );
 
   // 2. Move Map (Conditional Precision)
-  const isHighDPI = window.devicePixelRatio > 1;
+  const isHighDPI = _cachedDPR; // use cached value — window.devicePixelRatio on every frame is wasteful
 
   // Use floats only if zoomed in or on HighDPI, otherwise snap to integers for 1x sharpness
   const useFloats = isHighDPI || (isFirefox && state.scale > 1.05);
@@ -2138,11 +2162,17 @@ function render() {
 
   // Update Grid Thickness
   const majorThickness = Math.max(1.0, 2.0 / drawScale);
-  const gridLayer = document.getElementById("gridLayer");
+  const gridLayer = cached.getElem("gridLayer"); // use element cache instead of getElementById each frame
   if (gridLayer) {
-    gridLayer.style.setProperty("--major-width", `${majorThickness}px`);
+    // Only write the CSS variable when the value actually changes (panning doesn't change thickness)
+    if (majorThickness !== _lastMajorThickness) {
+      gridLayer.style.setProperty("--major-width", `${majorThickness}px`);
+      _lastMajorThickness = majorThickness;
+    }
 
-    const subGrid = gridLayer.querySelector(".keypad-grid");
+    // Use the existing cachedSubGrid instead of a fresh querySelector every frame
+    if (!cachedSubGrid) cachedSubGrid = gridLayer.querySelector(".keypad-grid");
+    const subGrid = cachedSubGrid;
     if (subGrid) {
       subGrid.style.opacity = state.scale >= 3.0 ? "0.4" : "0";
       const minorThickness = Math.max(1.0, 1.0 / drawScale);
@@ -2578,9 +2608,9 @@ function SelectMapFromGrid(key) {
 function switchMap(mapKey) {
   if (!MAP_DATABASE[mapKey]) return;
 
-  const mapStage = document.getElementById("mapStage");
-  const imgElement = document.getElementById("mapImage");
-  const markersLayer = document.getElementById("markers");
+  const mapStage = cached.mapStage;
+  const imgElement = cached.mapImage;
+  const markersLayer = cached.markersLayer;
 
   // 1. Hide old map image immediately to prevent flicker
   imgElement.style.opacity = "0";
@@ -2599,9 +2629,8 @@ function switchMap(mapKey) {
 
   const config = MAP_DATABASE[mapKey];
 
-  // 2. Load new image
-  imgElement.onload = function () {
-    // Ensure correct state
+  // 2. Runs once the image is both downloaded AND decoded.
+  function onImageReady() {
     activeMapKey = mapKey;
     currentStrongpoints = config.strongpoints || [];
 
@@ -2613,7 +2642,7 @@ function switchMap(mapKey) {
     rulerLabelPool.forEach((label) => label.remove());
     rulerLabelPool = [];
     activeGunIndex = -1;
-    activeCustomGunId = null; // ← THIS WAS MISSING
+    activeCustomGunId = null;
     placementMode = false;
     moveMode = false;
     movingGunId = null;
@@ -2650,11 +2679,24 @@ function switchMap(mapKey) {
     }
 
     hideLoading();
-    imgElement.onload = null;
-  };
+  }
 
-  // Trigger load
+  // 3. Trigger load, then pre-decode before the first paint.
+  //    img.decode() resolves only after the browser has fully decompressed the
+  //    image data into a paintable bitmap — eliminating the "Image decoding"
+  //    spike that was appearing synchronously on the paint thread in the profiler.
   imgElement.src = config.image;
+  imgElement
+    .decode()
+    .then(onImageReady)
+    .catch(() => {
+      // decode() rejects if the fetch fails; fall back to onload so the spinner
+      // eventually clears and the error overlay can handle it gracefully.
+      imgElement.onload = function () {
+        onImageReady();
+        imgElement.onload = null;
+      };
+    });
 }
 
 // ==========================================
@@ -3001,10 +3043,18 @@ function updateGunUI(config) {
 // ==========================================
 
 function updateMapCursor() {
-  const mapContainer = document.getElementById("mapContainer");
-  const crosshair = document.getElementById("mobileCrosshair");
-  const placeBtn = document.getElementById("mobilePlaceBtn");
-  const fireBtn = document.getElementById("mobileFireBtn");
+  // PERF FIX: Encode the four inputs that control cursor state into a string.
+  // If nothing changed since last call, skip all DOM reads and writes entirely.
+  // This function is called on every render frame (60fps during pan/zoom) but the
+  // mode almost never changes, so this early-exit saves the work on nearly every call.
+  const newCursorMode = `${placementMode ? 1 : 0}|${moveMode ? 1 : 0}|${hudEnabled ? 1 : 0}|${IS_MOBILE ? 1 : 0}`;
+  if (newCursorMode === _lastCursorMode) return;
+  _lastCursorMode = newCursorMode;
+
+  const mapContainer = cached.mapContainer;
+  const crosshair = cached.getElem("mobileCrosshair");
+  const placeBtn = cached.getElem("mobilePlaceBtn");
+  const fireBtn = cached.getElem("mobileFireBtn");
 
   if (placementMode || moveMode) {
     mapContainer.style.cursor = "crosshair";
@@ -3029,7 +3079,7 @@ function updateMapCursor() {
       crosshair.classList.remove("hidden", "placement-mode");
       crosshair.style.display = "block";
       crosshair.style.opacity = "1";
-      const ringContainer = document.getElementById("mobileRingContainer");
+      const ringContainer = cached.getElem("mobileRingContainer");
       if (ringContainer) ringContainer.style.display = "block";
     }
     if (placeBtn) placeBtn.classList.add("hidden");
@@ -4949,9 +4999,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function parseMarkdown(text) {
     // Simple markdown parser for changelog
     let html = text;
-    // Convert headers
-    html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+    // Convert headers (order matters: h3 before h2 before h1)
     html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+    html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+    html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
     // Convert lists
     html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
     // Wrap lists
@@ -5557,8 +5608,9 @@ document.addEventListener("mousemove", (e) => {
   if (IS_MOBILE) return;
 
   // 2. Visuals: Move these instantly (Force Override CSS)
-  const hudEl = document.getElementById("liveCursorHud");
-  const ringsEl = document.getElementById("desktopCursorRings");
+  // PERF FIX: Use element cache — these two lookups ran on every mousemove event (pre-RAF throttle)
+  const hudEl = cached.getElem("liveCursorHud");
+  const ringsEl = cached.getElem("desktopCursorRings");
 
   if (hudEl) {
     // FIX: Use 'important' to beat any CSS centering rules
@@ -5581,7 +5633,7 @@ document.addEventListener("mousemove", (e) => {
 
     requestAnimationFrame(() => {
       // Safety Check: Ensure mapContainer exists before calculating
-      const mapContainer = document.getElementById("mapContainer");
+      const mapContainer = cached.mapContainer;
       if (!mapContainer) {
         isHudUpdating = false;
         return;
@@ -5612,7 +5664,9 @@ document.addEventListener("mousemove", (e) => {
       const rawImgX = clickX / effectiveZoom;
       const rawImgY = clickY / effectiveZoom;
 
-      const mapImage = document.getElementById("mapImage");
+      // PERF FIX: Use cached element references throughout — all these getElementById
+      // calls were running on every RAF tick while the mouse was moving.
+      const mapImage = cached.mapImage;
       if (mapImage) {
         const w = mapImage.naturalWidth;
         const h = mapImage.naturalHeight;
@@ -5628,23 +5682,22 @@ document.addEventListener("mousemove", (e) => {
             Math.sqrt(dx * dx + dy * dy) / GAME_UNITS_PER_METER,
           );
 
-          const factionLabel =
-            document.getElementById("factionLabel").innerText;
+          const factionLabel = cached.factionLabel.innerText;
           const mil = getMilFromTable(dist, factionLabel);
 
-          const hudDist = document.getElementById("hudDist");
-          const hudMil = document.getElementById("hudMil");
+          const hudDist = cached.getElem("hudDist");
+          const hudMil = cached.getElem("hudMil");
 
           if (hudDist) hudDist.innerText = dist + "m";
           if (hudMil) hudMil.innerText = mil !== null ? mil : "---";
         } else {
-          const hudDist = document.getElementById("hudDist");
-          const hudMil = document.getElementById("hudMil");
+          const hudDist = cached.getElem("hudDist");
+          const hudMil = cached.getElem("hudMil");
           if (hudDist) hudDist.innerText = "---";
           if (hudMil) hudMil.innerText = "---";
         }
 
-        const hudGrid = document.getElementById("hudGrid");
+        const hudGrid = cached.getElem("hudGrid");
         if (hudGrid) hudGrid.innerText = getGridRef(targetPos.x, targetPos.y);
       }
 
@@ -5662,8 +5715,8 @@ function updateMobileHud() {
   if (!hudEnabled || !IS_MOBILE) return;
 
   // SAFETY FORCE: Keep rings visible when Live HUD is active (even after faction change)
-  const crosshair = document.getElementById("mobileCrosshair");
-  const ringContainer = document.getElementById("mobileRingContainer");
+  const crosshair = cached.getElem("mobileCrosshair");
+  const ringContainer = cached.getElem("mobileRingContainer");
   if (crosshair && !crosshair.classList.contains("placement-mode")) {
     crosshair.classList.remove("hidden");
     crosshair.style.display = "block";
@@ -5671,7 +5724,7 @@ function updateMobileHud() {
     if (ringContainer) ringContainer.style.display = "block";
   }
 
-  const mapImage = document.getElementById("mapImage");
+  const mapImage = cached.mapImage; // use element cache instead of getElementById each frame
   const mapContainer = cached.mapContainer;
   if (!mapContainer) return;
   // PERFORMANCE FIX: Use cached rect if fresh (from render loop)
@@ -5703,10 +5756,12 @@ function updateMobileHud() {
   // FIX: Force Even Integer for perfect centering
   const containerSize = Math.round(rawSize / 2) * 2;
 
-  const containerEl = document.getElementById("mobileRingContainer");
-  if (containerEl) {
+  const containerEl = cached.getElem("mobileRingContainer");
+  // Skip the DOM write when the size hasn't changed (panning at fixed zoom hits this every frame)
+  if (containerEl && containerSize !== _lastMobContainerSize) {
     containerEl.style.width = `${containerSize}px`;
     containerEl.style.height = `${containerSize}px`;
+    _lastMobContainerSize = containerSize;
   }
 
   // --- 3. Update HUD Text (Optimized) ---
@@ -5720,19 +5775,19 @@ function updateMobileHud() {
       Math.sqrt(dx * dx + dy * dy) / GAME_UNITS_PER_METER,
     );
 
-    const factionLabel = document.getElementById("factionLabel").innerText;
+    const factionLabel = cached.factionLabel.innerText; // use element cache instead of getElementById each frame
 
     // OPTIMIZATION: Only calculate Mil if distance changed OR if we have no cached mil value
     if (dist !== _lastMobDist || _lastMobMil === null) {
       const mil = getMilFromTable(dist, factionLabel);
       _lastMobMil = mil; // Update cache
 
-      const hudMil = document.getElementById("hudMil");
+      const hudMil = cached.getElem("hudMil");
       if (hudMil) {
         hudMil.innerText = mil !== null ? mil : "---";
       }
 
-      const hudDist = document.getElementById("hudDist");
+      const hudDist = cached.getElem("hudDist");
       if (hudDist) {
         hudDist.innerText = dist + "m";
       }
@@ -5741,10 +5796,10 @@ function updateMobileHud() {
   } else {
     // --- FIX: CLEAR HUD WHEN NO GUN IS SELECTED ---
     // This runs when you switch factions (activeGunIndex becomes -1)
-    const hudMil = document.getElementById("hudMil");
+    const hudMil = cached.getElem("hudMil");
     if (hudMil && hudMil.innerText !== "---") hudMil.innerText = "---";
 
-    const hudDist = document.getElementById("hudDist");
+    const hudDist = cached.getElem("hudDist");
     if (hudDist && hudDist.innerText !== "---") hudDist.innerText = "---";
 
     // Reset cache so it updates instantly when a gun IS selected later
@@ -5755,7 +5810,7 @@ function updateMobileHud() {
   // Grid Ref optimization
   const gridRef = getGridRef(targetPos.x, targetPos.y);
   if (gridRef !== _lastMobGrid) {
-    const hudGrid = document.getElementById("hudGrid");
+    const hudGrid = cached.getElem("hudGrid");
     if (hudGrid) hudGrid.innerText = gridRef;
     _lastMobGrid = gridRef;
   }
