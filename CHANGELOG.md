@@ -5,6 +5,15 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.3.4] - 2026-04-28
+### Fixed
+- Service worker error handling with improved fetch interception
+- Map loading screen now shows loading overlay correctly when switching maps
+- Cache-busting added to map images to prevent stale map display
+
+### Changed
+- Service worker now only registers on HTTPS (not HTTP localhost)
+
 ## [1.3.3] - 2026-04-28
 ### Performance
 - Render loop optimisations: element caching, dirty-checks, O(n) sector lookup, image pre-decode, and service worker cache fixes for smoother panning and faster map switches
