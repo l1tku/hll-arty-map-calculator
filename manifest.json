@@ -1,7 +1,9 @@
 {
   "name": "HLL Artillery Calculator",
   "short_name": "HLL Arty",
-  "start_url": "./index.html",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#1d1f27",
   "theme_color": "#ffc107",
