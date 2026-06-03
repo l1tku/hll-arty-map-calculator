@@ -547,7 +547,99 @@ H4: {
       { label: "GROSSHAU APPROACH", id: "B15", gameX: 73663.0, gameY: 38895.0, radius: 3750.0, team: "ger", type: "strongpoint" }  // Booster 24 (Scale 3.75 * 1000)
     ],
   },
-KHA: {
+  JUN: {
+    name: "Juno Beach",
+    image: "images/maps/map_juno_beach.webp",
+    thumbnail: "images/maps/thumbnail/JUN.webp",
+    teams: { t1: "CANADA", t2: "GERMANY" },
+    history: {
+      battle: "Juno Beach Landings (June 6, 1944)",
+      description: "Juno Beach was one of the five D-Day landing sectors, assigned to the 3rd Canadian Infantry Division under Major-General Rod Keller. The beach spanned 6 miles between Courseulles-sur-Mer and Saint-Aubin-sur-Mer. The Canadians faced heavy resistance from the German 716th Infantry Division's fortified Atlantic Wall positions, including concrete bunkers, machine gun nests, and beach obstacles deployed in a 'devil's garden' between the tide marks.",
+      tactics: "The 3rd Canadian Infantry Division landed with support from the 2nd Canadian Armoured Brigade. Duplex Drive Sherman tanks swam ashore to support the infantry, though rough seas disrupted some landings. The 7th Brigade attacked Mike and Nan Green sectors while the 8th Brigade assaulted Nan White and Nan Red. Specialized armored vehicles including Churchill AVREs assisted in destroying fortified positions. Despite heavy casualties in the first waves—particularly at Bernières and Courseulles—the Canadians pushed through the Atlantic Wall defenses and advanced inland.",
+      significance: "Juno Beach was crucial for connecting the British beachheads at Gold and Sword into a continuous Allied front. The 3rd Canadian Infantry Division suffered approximately 961 casualties on D-Day (340 killed, 574 wounded, 47 captured)—fewer than the predicted 2,000. The Canadians were the only Allied division to reach their final D-Day objectives, advancing further inland than any other force, though they later withdrew from some positions due to flanking concerns. Carpiquet airfield, an objective for D-Day, was eventually captured during Operation Windsor on July 5.",
+      images: [
+        {
+          thumbnail: "images/history/juno_beach/juno_beach_landing.webp",
+          full: "images/history/juno_beach/juno_beach_landing.webp",
+          caption: "Personnel of Royal Canadian Navy Beach Commando 'W' landing on Mike Beach, Juno sector of the Normandy beachhead. June 6th, 1944. Most are wearing Mk III helmets. From the National Archives of Canada."
+        },
+        {
+          thumbnail: "images/history/juno_beach/juno_beach_landing_second_wave_thumbnail.webp",
+          full: "images/history/juno_beach/juno_beach_landing_second_wave.webp",
+          caption: "Second wave troops of 9th Canadian Infantry Brigade, probably Highland Light Infantry of Canada, disembarking with bicycles from LCI(L)s onto 'Nan White' Beach at Bernières-sur-Mer, shortly before midday on 6 June 1944."
+        }
+      ],
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/juno_beach/juno_beach_wounded.webp",
+            full: "images/history/juno_beach/juno_beach_wounded.webp",
+            caption: "Wounded Canadian soldiers await evacuation from a casualty clearing station on Juno beach, June 6, 1944."
+          },
+          {
+            thumbnail: "images/history/juno_beach/juno_beach_centaur_iv_thumbnail.webp",
+            full: "images/history/juno_beach/juno_beach_centaur_iv.webp",
+            caption: "A British Centaur IV of the Royal Marine Support Group towing an ammunition sled."
+          }
+        ]
+      },
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/juno_beach/juno_beach_reinforcements_thumbnail.webp",
+            full: "images/history/juno_beach/juno_beach_reinforcements.webp",
+            caption: "Canadian infantry reinforcements landing on Juno Beach. A multitude of soldiers from the Canadian infantry disembarking on the beaches."
+          },
+          {
+            thumbnail: "images/history/juno_beach/juno_beach_pow_thumbnail.webp",
+            full: "images/history/juno_beach/juno_beach_pow.webp",
+            caption: "Corporal Victor Deblois of the Régiment de la Chaudière interrogating two German prisoners captured by Canadian troops at Juno Beach on D-Day. Other prisoners sit along the anti-tank wall."
+          }
+        ]
+      }
+    },
+
+    widthMeters: 2000,
+    heightMeters: 2000,
+
+    gunSort: "x",
+    gunRotations: { "ger": 180, "can": 0 },
+
+    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
+    strongpoints: [
+      // --- AXIS GUNS ---
+      { label: "", id: "GER_A1", gameX: -8018.951, gameY: -92411.57, radius: 500, team: "ger", type: "point", rotation: 180.00027 },
+      { label: "", id: "GER_A2", gameX: -4803.604, gameY: -92667.13, radius: 500, team: "ger", type: "point", rotation: 180.00029 },
+      { label: "", id: "GER_A3", gameX: -6399.269, gameY: -93328.29, radius: 500, team: "ger", type: "point", rotation: 180.00027 },
+
+      // --- ALLIES GUNS ---
+      { label: "", id: "CAN_A1", gameX: 7514.3633, gameY: 90534.19, radius: 500, team: "can", type: "point", rotation: 0.0 },
+      { label: "", id: "CAN_A2", gameX: 9229.401, gameY: 91303.36, radius: 500, team: "can", type: "point", rotation: -22.474886 },
+      { label: "", id: "CAN_A3", gameX: 6146.0317, gameY: 91758.02, radius: 500, team: "can", type: "point", rotation: 25.595324 },
+
+      // --- CANADIAN SECTORS ---
+      { label: "GRAYE-SUR-MER OUTSKIRTS", id: "B18", gameX: -39670.0, gameY: -69078.0, radius: 5500.0, team: "can", type: "strongpoint" },
+      { label: "RADAR STATION", id: "B19", gameX: -2611.0, gameY: -67760.0, radius: 6000.0, team: "can", type: "strongpoint" },
+      { label: "CHEM DE LA LAMPE", id: "B20", gameX: 39765.0, gameY: -70210.0, radius: 8000.0, team: "can", type: "strongpoint" },
+      { label: "WEAPONS FACTORY", id: "B15", gameX: -39610.0, gameY: -41685.0, radius: 8000.0, team: "can", type: "strongpoint" },
+      { label: "LE SENTIER SEULLES", id: "B16", gameX: -10.0, gameY: -41685.0, radius: 8000.0, team: "can", type: "strongpoint" },
+      { label: "ROAD TO BENY-SUR-MER", id: "B17", gameX: 39765.0, gameY: -41685.0, radius: 8000.0, team: "can", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "GRAYE-SUR-MER", id: "B12", gameX: -39610.0, gameY: -4660.0, radius: 8000.0, team: "neu", type: "strongpoint" },
+      { label: "LA SEULLES RIVER", id: "B13", gameX: -10.0, gameY: -4660.0, radius: 8000.0, team: "neu", type: "strongpoint" },
+      { label: "MARKET SQUARE", id: "B14", gameX: 39765.0, gameY: -4660.0, radius: 8000.0, team: "neu", type: "strongpoint" },
+
+      // --- AXIS SECTORS ---
+      { label: "REGINA LANDING", id: "B6", gameX: -39610.0, gameY: 71720.0, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "BUNKER R612", id: "B7", gameX: -10.0, gameY: 71606.0, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "WN29", id: "B8", gameX: 39765.0, gameY: 71312.0, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "LA PLATINE", id: "B9", gameX: -39610.0, gameY: 40340.0, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "LA MARINA", id: "B10", gameX: -10.0, gameY: 40340.0, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "HEROULT HOUSE", id: "B11", gameX: 50583.223, gameY: 44190.965, radius: 8000.0, team: "ger", type: "strongpoint" }
+    ]
+  },
+  KHA: {
     name: "Kharkov",
     image: "images/maps/map_kharkov.webp",
     thumbnail: "images/maps/thumbnail/KHA.webp",
@@ -734,7 +826,7 @@ KUR: {
       tacticalSituation: {
         images: [
           {
-            thumbnail: "images/history/mortain/mortain_1944_americans.webp",
+            thumbnail: "images/history/mortain/mortain_1944_americans_thumbnail.webp",
             full: "images/history/mortain/mortain_1944_americans.webp",
             caption: "American forces moving through the ruins of Mortain during the German counterattack of Operation Lüttich, August 1944."
           }

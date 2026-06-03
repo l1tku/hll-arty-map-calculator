@@ -30,7 +30,7 @@
 
         <link rel="apple-touch-icon" href="images/icon-180.png?v=3.43" />
 
-        <link rel="stylesheet" href="css/style.css?v=1.3.4" />
+        <link rel="stylesheet" href="css/style.css?v=1.3.5" />
 
         <script>
             if ("serviceWorker" in navigator) {
@@ -47,7 +47,7 @@
 
                         // Cache-busting query parameter forces browser to check for new service worker code
                         navigator.serviceWorker
-                            .register("./service-worker.js?v=1.3.4-8", {
+                            .register("./service-worker.js?v=1.3.5-1", {
                                 scope: basePath || "/"
                             })
                             .then((reg) =>
@@ -193,6 +193,16 @@
                                     />
 
                                     <span class="item-text">US</span>
+                                </div>
+
+                                <div class="dropdown-item" data-value="can">
+                                    <img
+                                        class="faction-flag item-flag"
+                                        src="images/flags/can.webp"
+                                        alt=""
+                                    />
+
+                                    <span class="item-text">CANADA</span>
                                 </div>
 
                                 <div class="dropdown-item" data-value="ger">
@@ -358,7 +368,7 @@
                 ></a>
                 <span class="watermark-bullet">•</span>
                 <a
-                    href="https://www.hellletloose.com/blog/patch-19-1-changelog"
+                    href="https://www.hellletloose.com/blog/update-20-changelog"
                     target="_blank"
                     rel="noopener noreferrer"
                     id="gameVersionPanel"
@@ -440,7 +450,7 @@
                         <span class="spacer">•</span>
 
                         <a
-                            href="https://www.hellletloose.com/blog/patch-19-1-changelog"
+                            href="https://www.hellletloose.com/blog/update-20-changelog"
                             target="_blank"
                             rel="noopener noreferrer"
                             id="gameVersion"
@@ -1065,10 +1075,10 @@
             </div>
         </div>
 
-        <script src="js/maps.js?v=1.3.4"></script>
+        <script src="js/maps.js?v=1.3.5"></script>
 
-        <script src="js/ballistics.js?v=1.3.4"></script>
+        <script src="js/ballistics.js?v=1.3.5"></script>
 
-        <script src="js/script.js?v=1.3.4"></script>
+        <script src="js/script.js?v=1.3.5"></script>
     </body>
 </html>

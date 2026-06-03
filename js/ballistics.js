@@ -45,5 +45,16 @@ const ARTY_DATA = {
       { dist: 1300, mil: 320 }, { dist: 1400, mil: 302 }, { dist: 1500, mil: 284 },
       { dist: 1600, mil: 267 }
     ]
+  },
+  CAN: {
+    minDist: 100, maxDist: 1600,
+    table: [
+      { dist: 100, mil: 533 }, { dist: 200, mil: 516 }, { dist: 300, mil: 498 },
+      { dist: 400, mil: 480 }, { dist: 500, mil: 462 }, { dist: 600, mil: 444 },
+      { dist: 700, mil: 427 }, { dist: 800, mil: 409 }, { dist: 900, mil: 391 },
+      { dist: 1000, mil: 373 }, { dist: 1100, mil: 356 }, { dist: 1200, mil: 338 },
+      { dist: 1300, mil: 320 }, { dist: 1400, mil: 302 }, { dist: 1500, mil: 284 },
+      { dist: 1600, mil: 267 }
+    ]
   }
 };

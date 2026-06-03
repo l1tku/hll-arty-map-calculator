@@ -2,8 +2,8 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.3.4";
-const GAME_VERSION = "Update 19.1";
+const APP_VERSION = "v1.3.5";
+const GAME_VERSION = "Update 20";
 
 // Create a simple map of IDs and what text should go in them
 const versionMap = {
@@ -896,6 +896,9 @@ function getGunBaseRotation(team, mapConfig, individualRotation) {
     if (mapConfig.gunRotations["us"] !== undefined) {
       return mapConfig.gunRotations["us"];
     }
+    if (mapConfig.gunRotations["can"] !== undefined) {
+      return mapConfig.gunRotations["can"];
+    }
   }
 
   // Fallback based on map orientation
@@ -1327,6 +1330,8 @@ function renderMarkers() {
           baseRotation = mapConfig.gunRotations["ger"];
         else if (mapConfig.gunRotations["us"] !== undefined)
           baseRotation = mapConfig.gunRotations["us"];
+        else if (mapConfig.gunRotations["can"] !== undefined)
+          baseRotation = mapConfig.gunRotations["can"];
       } else {
         const sortMode = mapConfig ? mapConfig.gunSort : "y";
         if (sortMode === "x") baseRotation = isAxis ? -90 : 90;
@@ -1474,6 +1479,7 @@ function getMilFromTable(distance, factionName) {
   else if (f.includes("SOVIET") || f.includes("RUS")) key = "RUS";
   else if (f.includes("BRITISH") || f.includes("ALLIES") || f.includes("GB"))
     key = "GB";
+  else if (f.includes("CANADA") || f.includes("CAN")) key = "CAN";
   else key = "US";
 
   const data = ARTY_DATA[key];
@@ -1850,6 +1856,8 @@ function renderTargeting() {
     else if (f.includes("SOVIET") || f.includes("RUS")) factionKey = "RUS";
     else if (f.includes("BRITISH") || f.includes("ALLIES") || f.includes("GB"))
       factionKey = "GB";
+    else if (f.includes("CANADA") || f.includes("CAN"))
+      factionKey = "CAN";
 
     const factionData = ARTY_DATA[factionKey];
 
@@ -2747,6 +2755,14 @@ function getFlagImage(teamName) {
     return "images/flags/ger.webp";
   }
 
+  // Canada
+  if (
+    lower === "can" ||
+    lower.includes("canada")
+  ) {
+    return "images/flags/can.webp";
+  }
+
   // Default to US for everything else (US, United States, Allies)
   return "images/flags/us.webp";
 }
@@ -2765,11 +2781,28 @@ function updateFactionUI(config) {
 
   // 3. Update Dropdown Items (The hidden list)
   const item1 = document.querySelector('.dropdown-item[data-value="us"]');
+  const itemCan = document.querySelector('.dropdown-item[data-value="can"]');
   const item2 = document.querySelector('.dropdown-item[data-value="ger"]');
 
+  // Hide US and show CAN if map is Canadian, otherwise show US and hide CAN
+  const isCanadianMap = t1Label.includes("CANADA") || t1Flag.includes("can.webp");
   if (item1) {
-    item1.querySelector(".item-text").innerText = t1Label;
-    item1.querySelector(".item-flag").src = t1Flag;
+    if (isCanadianMap) {
+      item1.style.display = "none";
+    } else {
+      item1.style.display = "flex";
+      item1.querySelector(".item-text").innerText = t1Label;
+      item1.querySelector(".item-flag").src = t1Flag;
+    }
+  }
+  if (itemCan) {
+    if (isCanadianMap) {
+      itemCan.style.display = "flex";
+      itemCan.querySelector(".item-text").innerText = t1Label;
+      itemCan.querySelector(".item-flag").src = t1Flag;
+    } else {
+      itemCan.style.display = "none";
+    }
   }
   if (item2) {
     item2.querySelector(".item-text").innerText = t2Label;
@@ -2791,7 +2824,7 @@ function updateFactionUI(config) {
       mainLabel.style.color = "#ffffff"; // White
       mainFlag.style.display = "inline-block"; // Show flag
 
-      if (activeFaction === "us" || activeFaction === "allies") {
+      if (activeFaction === "us" || activeFaction === "allies" || activeFaction === "can") {
         mainLabel.innerText = t1Label;
         mainFlag.src = t1Flag;
       } else {
@@ -5272,13 +5305,15 @@ if (factionToggleBtn) {
       e.stopPropagation();
     }
 
-    // STRICT CYCLE: US -> GER -> RUS -> GB -> US
+    // STRICT CYCLE: US -> GER -> RUS -> GB -> CAN -> US
     if (manualCalcFaction === "us") {
       manualCalcFaction = "ger";
     } else if (manualCalcFaction === "ger") {
       manualCalcFaction = "rus";
     } else if (manualCalcFaction === "rus") {
       manualCalcFaction = "gb";
+    } else if (manualCalcFaction === "gb") {
+      manualCalcFaction = "can";
     } else {
       manualCalcFaction = "us"; // Default loop back
     }
@@ -5319,6 +5354,9 @@ function updateCalcFactionDisplay() {
       break;
     case "gb":
       name = "ALLIES";
+      break;
+    case "can":
+      name = "CANADA";
       break;
     default:
       name = "UNITED STATES";
@@ -5562,6 +5600,9 @@ function renderCalcHistory() {
     } else if (entry.faction === "gb") {
       factionName = "ALLIES";
       flagPath = "images/flags/gb.webp";
+    } else if (entry.faction === "can") {
+      factionName = "CAN";
+      flagPath = "images/flags/can.webp";
     }
 
     const item = document.createElement("div");
