@@ -1585,6 +1585,7 @@ select.btn-map-select option {
     z-index: 3000;
     transition: opacity 0.2s ease-in-out;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     /* FIX 4: Disable Backdrop Filter on Mobile (GPU Hog) */
     /* Default: No Blur (Mobile Safe) */
@@ -1593,6 +1594,7 @@ select.btn-map-select option {
 }
 .modal-overlay.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: all;
 }
 

@@ -273,6 +273,9 @@ function escapeAttr(str) {
 }
 
 function openMapHistory(mapKey) {
+  const mapModal = document.getElementById("mapModal");
+  if (!mapModal || !mapModal.classList.contains("active")) return;
+
   const mapData = MAP_DATABASE[mapKey];
   if (!mapData || !mapData.history) return;
 

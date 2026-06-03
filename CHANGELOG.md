@@ -11,6 +11,7 @@ The app updates automatically — **refresh the page twice** and it will update.
 
 ### Fixed
 - Prevented accidental map history popups caused by rapid duplicate touch/click input in the map selector
+- Blocked map history from opening unless the map selector is actually open, and hardened hidden modal overlays so invisible layers cannot catch clicks
 
 ## [1.3.4] - 2026-04-28
 ### Fixed
