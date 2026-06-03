@@ -13,7 +13,7 @@
  * - Same app version, JS bugfix: "1.3.4-2"  <-- bump build number
  * - App v1.3.5 released: "1.3.5-1"
  */
-const SW_VERSION = "1.3.5-1";  // Change this to force cache refresh
+const SW_VERSION = "1.3.5-2";  // Change this to force cache refresh
 const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
 
 // Detect base path for GitHub Pages subdirectory support

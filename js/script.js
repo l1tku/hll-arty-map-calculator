@@ -2379,12 +2379,39 @@ function initMap() {
 // VISUAL MAP SelectOR (MODAL LOGIC)
 // ==========================================
 
+function bindDedupedPress(element, handler, options = {}) {
+  if (!element || typeof handler !== "function") return;
+
+  const minInterval = options.minInterval ?? 350;
+  let lastPressTime = 0;
+
+  const wrappedHandler = (e) => {
+    if (e?.cancelable && e.type === "touchstart") {
+      e.preventDefault();
+    }
+    if (typeof e?.stopPropagation === "function" && options.stopPropagation) {
+      e.stopPropagation();
+    }
+
+    const now = Date.now();
+    if (now - lastPressTime < minInterval) return;
+    lastPressTime = now;
+
+    handler(e);
+  };
+
+  element.addEventListener("click", wrappedHandler);
+  element.addEventListener("touchstart", wrappedHandler, { passive: false });
+}
+
 function initMapSelector() {
   const btn = document.getElementById("openMapBtn");
   const searchInput = document.getElementById("mapSearchInput");
   const clearBtn = document.getElementById("clearSearchBtn");
 
-  if (btn) btn.addEventListener("click", openMapSelector);
+  bindDedupedPress(btn, () => {
+    openMapSelector();
+  });
 
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
@@ -2433,7 +2460,7 @@ function initMapSelector() {
   // --- NEW BUTTONS ---
   const btnManual = document.getElementById("btnManualCalc");
   if (btnManual) {
-    btnManual.addEventListener("click", () => {
+    bindDedupedPress(btnManual, () => {
       closeMapSelector(); // Close map Selector
       openManualCalculator(); // Open new calc
     });
@@ -2483,7 +2510,9 @@ function renderMapGrid(filter = "") {
     card.dataset.mapKey = key; // <-- RELIABLE KEY STORAGE
     if (key === activeMapKey) card.classList.add("active");
 
-    card.onclick = () => SelectMapFromGrid(key);
+    bindDedupedPress(card, () => {
+      SelectMapFromGrid(key);
+    });
 
     const img = document.createElement("img");
     img.className = "map-card-img";
@@ -2510,10 +2539,13 @@ function renderMapGrid(filter = "") {
       infoBtn.innerHTML =
         '<svg viewBox="0 0 26 26" width="26" height="26"><circle cx="13" cy="13" r="11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"/><path d="M18 7H8c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM8 9h4v5l-2-1.5L8 14V9z" fill="rgba(255,255,255,0.9)"/></svg>';
       infoBtn.title = "View map history";
-      infoBtn.onclick = (e) => {
-        e.stopPropagation();
-        openMapHistory(key);
-      };
+      bindDedupedPress(
+        infoBtn,
+        () => {
+          openMapHistory(key);
+        },
+        { stopPropagation: true },
+      );
       card.appendChild(infoBtn);
     }
 
