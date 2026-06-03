@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.3.4 — Updated for Hell Let Loose Update 19.1**
+**v1.3.5 — Updated for Hell Let Loose Update 20**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
@@ -71,12 +71,13 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 * Foy (FOY)
 * Hill 400 (H4)
 * Hurtgen Forest (HUR)
+* Juno Beach (JUN)
 * Kharkov (KHA)
 * Kursk (KUR)
 * Mortain (MOR)
 * Omaha Beach (OMA)
 * Purple Heart Lane (PHL)
-* Remagen (REM) – updated for Update 19.1
+* Remagen (REM)
 * Sainte-Marie-du-Mont (SMM)
 * Sainte-Mère-Église (SME)
 * Smolensk (SMO)
