@@ -3360,10 +3360,11 @@ button.btn-map-select:hover {
     height: 14px;
     width: 14px;
     left: 2px;
-    bottom: 2px;
+    top: 50%;
     background-color: white;
     transition: 0.3s;
     border-radius: 50%;
+    transform: translateY(-50%);
 }
 
 input:checked + .slider {
@@ -3371,7 +3372,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(16px);
+    transform: translate(16px, -50%);
 }
 
 .history-toggle-btn {
