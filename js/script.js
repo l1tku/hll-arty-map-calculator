@@ -2386,12 +2386,16 @@ function bindDedupedPress(element, handler, options = {}) {
   if (!element || typeof handler !== "function") return;
 
   const minInterval = options.minInterval ?? 350;
+  const moveThreshold = options.moveThreshold ?? 10;
+  const touchClickBlockWindow = options.touchClickBlockWindow ?? 500;
   let lastPressTime = 0;
+  let lastTouchHandledTime = 0;
+  let touchActive = false;
+  let touchMoved = false;
+  let startX = 0;
+  let startY = 0;
 
-  const wrappedHandler = (e) => {
-    if (e?.cancelable && e.type === "touchstart") {
-      e.preventDefault();
-    }
+  const invokeHandler = (e) => {
     if (typeof e?.stopPropagation === "function" && options.stopPropagation) {
       e.stopPropagation();
     }
@@ -2403,8 +2407,66 @@ function bindDedupedPress(element, handler, options = {}) {
     handler(e);
   };
 
-  element.addEventListener("click", wrappedHandler);
-  element.addEventListener("touchstart", wrappedHandler, { passive: false });
+  element.addEventListener("click", (e) => {
+    if (Date.now() - lastTouchHandledTime < touchClickBlockWindow) return;
+    invokeHandler(e);
+  });
+
+  element.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length !== 1) {
+        touchActive = false;
+        return;
+      }
+
+      const touch = e.touches[0];
+      touchActive = true;
+      touchMoved = false;
+      startX = touch.clientX;
+      startY = touch.clientY;
+    },
+    { passive: true },
+  );
+
+  element.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!touchActive || e.touches.length !== 1) return;
+
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - startX);
+      const deltaY = Math.abs(touch.clientY - startY);
+
+      if (deltaX > moveThreshold || deltaY > moveThreshold) {
+        touchMoved = true;
+      }
+    },
+    { passive: true },
+  );
+
+  element.addEventListener(
+    "touchend",
+    (e) => {
+      if (!touchActive) return;
+      touchActive = false;
+
+      if (touchMoved) return;
+
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+
+      lastTouchHandledTime = Date.now();
+      invokeHandler(e);
+    },
+    { passive: false },
+  );
+
+  element.addEventListener("touchcancel", () => {
+    touchActive = false;
+    touchMoved = false;
+  });
 }
 
 function initMapSelector() {

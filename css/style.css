@@ -1146,6 +1146,34 @@ body {
     animation: spin 1s ease-in-out infinite;
     margin-bottom: 12px;
 }
+
+/* Adapted from Uiverse.io by aryamitra06 */
+.arty-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    margin-bottom: 12px;
+}
+
+.arty-loader .bar {
+    display: inline-block;
+    width: 3px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    animation: arty-loader-pulse 1s linear infinite;
+}
+
+.arty-loader .bar:nth-child(2) {
+    height: 35px;
+    margin: 0 5px;
+    animation-delay: 0.25s;
+}
+
+.arty-loader .bar:nth-child(3) {
+    animation-delay: 0.5s;
+}
 .loading-text {
     color: white;
     font-size: 16px;
@@ -1155,6 +1183,17 @@ body {
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes arty-loader-pulse {
+    20% {
+        background-color: #fff;
+        transform: scaleY(1.5);
+    }
+
+    40% {
+        transform: scaleY(1);
     }
 }
 
