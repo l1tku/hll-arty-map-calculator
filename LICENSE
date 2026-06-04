@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 HLL Arty Map Calculator
+Copyright (c) 2026 l1tku
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,11 @@ SOFTWARE.
 
 SCOPE OF LICENSE (ASSET EXCLUSION)
 
-The MIT License above applies to the source code (HTML, CSS, and JavaScript) 
+The MIT License above applies to the source code (HTML, CSS, and JavaScript)
 contained within this repository.
 
-The game assets, including but not limited to tactical map images, icons, 
-and faction flags located in the "images/" directory, are the intellectual 
-property of their respective owners (Team17 / Black Matter). They are 
-excluded from this license and are present in this repository for 
-educational, informational, and non-commercial gaming purposes.
+The game assets, including but not limited to tactical map images, icons,
+and faction flags located in the "images/" directory, are the intellectual
+property of their respective owners. They are excluded from this license and
+are present in this repository for educational, informational, and non-commercial
+gaming purposes.
