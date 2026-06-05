@@ -1672,48 +1672,63 @@ function getActiveGunCoords() {
 }
 
 // ====================== BEYOND RANGE OVERLAY (always visible when gun selected) ======================
-function updateBeyondRangeOverlay() {
-  const beyondOverlay = document.getElementById("beyondRangeOverlay");
-  if (!beyondOverlay) return;
-
+function getRangeOverlayScreenState() {
   const gunPos = getActiveGunCoords();
   const mapImage = cached.mapImage;
-  if (!gunPos || !mapImage || mapImage.naturalWidth === 0) {
-    beyondOverlay.style.display = "none";
-    return;
-  }
+  if (!gunPos || !mapImage || mapImage.naturalWidth === 0) return null;
 
   const w = mapImage.naturalWidth;
   const h = mapImage.naturalHeight;
   const gunPixel = gameToImagePixels(gunPos.x, gunPos.y, w, h);
-  const radiusPx =
-    1600 * ((w / getMapDimensions().width) * GAME_UNITS_PER_METER); // accurate scale
+  const drawScale = state.scale * state.fitScale;
 
-  beyondOverlay.style.setProperty("--gun-x", `${gunPixel.x}px`);
-  beyondOverlay.style.setProperty("--gun-y", `${gunPixel.y}px`);
+  // Match the same rounding path used by render() so the overlay stays locked to the map.
+  const useFloats = _cachedDPR || (isFirefox && state.scale > 1.05);
+  const renderedX = useFloats ? state.pointX : Math.round(state.pointX);
+  const renderedY = useFloats ? state.pointY : Math.round(state.pointY);
+  const metersToPixels = (w / getMapDimensions().width) * GAME_UNITS_PER_METER;
+
+  return {
+    screenX: renderedX + gunPixel.x * drawScale,
+    screenY: renderedY + gunPixel.y * drawScale,
+    drawScale,
+    metersToPixels,
+  };
+}
+
+function updateBeyondRangeOverlay() {
+  const beyondOverlay = cached.getElem("beyondRangeOverlay");
+  if (!beyondOverlay) return;
+
+  const overlayState = getRangeOverlayScreenState();
+  if (!overlayState) {
+    beyondOverlay.style.display = "none";
+    return;
+  }
+
+  const radiusPx = 1600 * overlayState.metersToPixels * overlayState.drawScale;
+
+  beyondOverlay.style.setProperty("--gun-x", `${overlayState.screenX}px`);
+  beyondOverlay.style.setProperty("--gun-y", `${overlayState.screenY}px`);
   beyondOverlay.style.setProperty("--max-range-r", `${radiusPx}px`);
   beyondOverlay.style.display = "block";
 }
 
 function updateMinRangeOverlay() {
-  const minOverlay = document.getElementById("minRangeOverlay");
+  const minOverlay = cached.getElem("minRangeOverlay");
   if (!minOverlay) return;
 
-  const gunPos = getActiveGunCoords();
-  const mapImage = cached.mapImage;
-  if (!gunPos || !mapImage || mapImage.naturalWidth === 0) {
+  const overlayState = getRangeOverlayScreenState();
+  if (!overlayState) {
     minOverlay.style.display = "none";
     return;
   }
 
-  const w = mapImage.naturalWidth;
-  const h = mapImage.naturalHeight;
-  const gunPixel = gameToImagePixels(gunPos.x, gunPos.y, w, h);
   const radiusPx =
-    MIN_RANGE_METERS * ((w / getMapDimensions().width) * GAME_UNITS_PER_METER);
+    MIN_RANGE_METERS * overlayState.metersToPixels * overlayState.drawScale;
 
-  minOverlay.style.setProperty("--gun-x", `${gunPixel.x}px`);
-  minOverlay.style.setProperty("--gun-y", `${gunPixel.y}px`);
+  minOverlay.style.setProperty("--gun-x", `${overlayState.screenX}px`);
+  minOverlay.style.setProperty("--gun-y", `${overlayState.screenY}px`);
   minOverlay.style.setProperty("--min-range-r", `${radiusPx}px`);
   minOverlay.style.display = "block";
 }
@@ -2148,6 +2163,9 @@ function render() {
     markersLayer.style.transform = transformString;
   }
 
+  updateBeyondRangeOverlay();
+  updateMinRangeOverlay();
+
   // 3. Update Text & Grid
   updateRealScale(drawScale);
   const zoomIndicator = cached.zoomIndicator;
@@ -2351,7 +2369,9 @@ function initMap() {
   if (!beyondOverlay) {
     beyondOverlay = document.createElement("div");
     beyondOverlay.id = "beyondRangeOverlay";
-    cached.mapStage.appendChild(beyondOverlay);
+  }
+  if (beyondOverlay.parentElement !== cached.mapContainer) {
+    cached.mapContainer.appendChild(beyondOverlay);
   }
   // ====================================================================================
 
@@ -2360,7 +2380,9 @@ function initMap() {
   if (!minOverlay) {
     minOverlay = document.createElement("div");
     minOverlay.id = "minRangeOverlay";
-    cached.mapStage.appendChild(minOverlay);
+  }
+  if (minOverlay.parentElement !== cached.mapContainer) {
+    cached.mapContainer.appendChild(minOverlay);
   }
   // ====================================================================================
 

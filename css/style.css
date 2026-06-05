@@ -5545,29 +5545,14 @@ body.placement-active
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
+    background: radial-gradient(
+        circle at var(--gun-x) var(--gun-y),
+        transparent var(--max-range-r),
+        rgba(0, 0, 0, 0.3) calc(var(--max-range-r) + 1px)
+    );
     pointer-events: none;
     z-index: 96;
     display: none;
-
-    /* Clean transparent circle (hole) centered on gun */
-    mask-image: radial-gradient(
-        circle at var(--gun-x) var(--gun-y),
-        transparent var(--max-range-r),
-        black calc(var(--max-range-r) + 1px)
-    );
-    -webkit-mask-image: radial-gradient(
-        circle at var(--gun-x) var(--gun-y),
-        transparent var(--max-range-r),
-        black calc(var(--max-range-r) + 1px)
-    );
-}
-
-/* Firefox: Reduce opacity to compensate for mask-image rendering issues */
-@supports (-moz-appearance: none) {
-    #beyondRangeOverlay {
-        background: rgba(0, 0, 0, 0.15);
-    }
 }
 
 /* MIN RANGE DARK OVERLAY — darkens inside the dead zone (no outline) */
@@ -5577,28 +5562,14 @@ body.placement-active
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.2); /* same softness as your max range */
+    background: radial-gradient(
+        circle at var(--gun-x) var(--gun-y),
+        rgba(0, 0, 0, 0.2) var(--min-range-r),
+        transparent calc(var(--min-range-r) + 1px)
+    );
     pointer-events: none;
     z-index: 95; /* slightly below max overlay */
     display: none;
-
-    mask-image: radial-gradient(
-        circle at var(--gun-x) var(--gun-y),
-        black var(--min-range-r),
-        transparent calc(var(--min-range-r) + 1px)
-    );
-    -webkit-mask-image: radial-gradient(
-        circle at var(--gun-x) var(--gun-y),
-        black var(--min-range-r),
-        transparent calc(var(--min-range-r) + 1px)
-    );
-}
-
-/* Firefox: Reduce opacity to compensate for mask-image rendering issues */
-@supports (-moz-appearance: none) {
-    #minRangeOverlay {
-        background: rgba(0, 0, 0, 0.1);
-    }
 }
 
 /* ENEMY ARTILLERY — same perfect centering as friendly guns */

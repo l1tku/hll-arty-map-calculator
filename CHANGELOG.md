@@ -14,6 +14,7 @@ The app updates automatically — **refresh the page twice** and it will update.
 - Blocked map history from opening unless the map selector is actually open, and hardened hidden modal overlays so invisible layers cannot catch clicks
 - Restored normal mobile scrolling in the map selector so vertical swipes no longer instantly activate a map card
 - Centered the calculator history toggle thumb
+- Fixed Firefox mobile zoom darkening by replacing the transformed range-mask overlays with lighter screen-space radial overlays
 
 ## [1.3.4] - 2026-04-28
 ### Fixed
