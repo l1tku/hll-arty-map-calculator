@@ -13,39 +13,99 @@
  * - Same app version, JS bugfix: "1.3.4-2"  <-- bump build number
  * - App v1.3.5 released: "1.3.5-1"
  */
-const SW_VERSION = "1.3.5-6";  // Change this to force cache refresh
+const SW_VERSION = "1.3.5-8";  // Change this to force cache refresh
 const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
-
-// Detect base path for GitHub Pages subdirectory support
-const BASE_PATH = self.location.pathname.replace(/\/service-worker\.js$/, "") || "";
-const normalizePath = (path) => {
-  // Remove leading ./ and ensure proper base path
-  let cleanPath = path.replace(/^\.\//, "");
-  if (BASE_PATH && !cleanPath.startsWith(BASE_PATH)) {
-    // If path doesn't already include base path, add it
-    cleanPath = BASE_PATH + "/" + cleanPath;
-  }
-  return cleanPath.replace(/\/+/g, "/");
-};
 
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
+  "./manifest.json",
   "./css/style.css",
   "./js/script.js",
   "./js/maps.js",
   "./js/ballistics.js",
   "./fonts/Gotham.otf",
+  "./fonts/Roboto-Black.ttf",
+  "./fonts/SpecialElite.ttf",
+  "./images/favicon.webp",
+  "./images/favicon.png",
+  "./images/icon-180.png",
+  "./images/icon-192.png",
+  "./images/icon-512.png",
+  "./images/ui/artillery_position_enemy.webp",
   "./images/ui/artillery_position_v2.webp",
+  "./images/ui/artillery_position_v2_white.webp",
   "./images/ui/garrison_lining_dot_2.png",
+  "./images/flags/can.webp",
   "./images/flags/us.webp",
   "./images/flags/ger.webp",
   "./images/flags/rus.webp",
   "./images/flags/gb.webp",
   // Core map files
   "./images/maps/map_carentan.webp",
+  "./images/maps/map_driel.webp",
+  "./images/maps/map_elalamein.webp",
+  "./images/maps/map_elsenborn.webp",
+  "./images/maps/map_foy.webp",
+  "./images/maps/map_hill400.webp",
+  "./images/maps/map_hurtgen.webp",
+  "./images/maps/map_juno_beach.webp",
+  "./images/maps/map_kharkov.webp",
+  "./images/maps/map_kursk.webp",
+  "./images/maps/map_mortain.webp",
+  "./images/maps/map_omaha.webp",
+  "./images/maps/map_purpleheartlane.webp",
+  "./images/maps/map_remagen.webp",
+  "./images/maps/map_smdmv2.webp",
+  "./images/maps/map_smolensk.webp",
+  "./images/maps/map_stalingrad.webp",
+  "./images/maps/map_stmereeglise.webp",
+  "./images/maps/map_tobruk.webp",
+  "./images/maps/map_utahbeach.webp",
   "./images/maps/thumbnail/CAR.webp",
+  "./images/maps/thumbnail/DRI.webp",
+  "./images/maps/thumbnail/EBR.webp",
+  "./images/maps/thumbnail/ELA.webp",
+  "./images/maps/thumbnail/FOY.webp",
+  "./images/maps/thumbnail/H4.webp",
+  "./images/maps/thumbnail/HUR.webp",
+  "./images/maps/thumbnail/JUN.webp",
+  "./images/maps/thumbnail/KHA.webp",
+  "./images/maps/thumbnail/KUR.webp",
+  "./images/maps/thumbnail/MOR.webp",
+  "./images/maps/thumbnail/OMA.webp",
+  "./images/maps/thumbnail/PHL.webp",
+  "./images/maps/thumbnail/REM.webp",
+  "./images/maps/thumbnail/SME.webp",
+  "./images/maps/thumbnail/SMM.webp",
+  "./images/maps/thumbnail/SMO.webp",
+  "./images/maps/thumbnail/STA.webp",
+  "./images/maps/thumbnail/TOB.webp",
+  "./images/maps/thumbnail/UTA.webp",
 ];
+
+const APP_SHELL_FALLBACK = "./index.html";
+
+function toCacheKey(input) {
+  const url = new URL(
+    typeof input === "string" ? input : input.url,
+    self.location.href,
+  );
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
+
+async function putInCache(request, response) {
+  if (!response || !response.ok) return;
+  const cache = await caches.open(CACHE_NAME);
+  await cache.put(toCacheKey(request), response.clone());
+}
+
+async function matchFromCache(request) {
+  const cache = await caches.open(CACHE_NAME);
+  return cache.match(toCacheKey(request));
+}
 
 // Install: Cache core assets + skip waiting for immediate activation
 console.log(`[SW] Installing service worker v${SW_VERSION}`);
@@ -58,12 +118,11 @@ self.addEventListener("install", (e) => {
       // Cache assets individually to handle partial failures gracefully
       return Promise.all(
         ASSETS_TO_CACHE.map((url) => {
-          // Convert relative URL to absolute for consistent cache keys
           const absoluteUrl = new URL(url, self.location.href).toString();
-          return fetch(url, { cache: "no-store" })
+          return fetch(absoluteUrl, { cache: "no-store" })
             .then((response) => {
               if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
-              return cache.put(absoluteUrl, response);
+              return cache.put(toCacheKey(absoluteUrl), response);
             })
             .catch((err) => {
               console.warn(`[SW] Failed to cache: ${url}`, err.message);
@@ -84,45 +143,47 @@ self.addEventListener("install", (e) => {
 
 // Activate: Clean up old caches + claim clients immediately
 self.addEventListener("activate", (e) => {
-  self.clients.claim();
   e.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(
+    caches.keys().then((keyList) =>
+      Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
+          return Promise.resolve(false);
         }),
-      );
-    }),
+      ).then(() => self.clients.claim()),
+    ),
   );
 });
 
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  const requestUrl = new URL(e.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
 
-  // Always start with the network request immediately
-  const networkFetch = fetch(e.request);
-
-  // Set up caching in the background (don't await, don't block)
-  networkFetch.then((response) => {
-    if (!response.ok) return;
-
-    try {
-      const url = new URL(e.request.url);
-      const cacheKey = url.origin + url.pathname;
-
-      caches.open(CACHE_NAME).then((cache) => {
-        cache.put(cacheKey, response.clone());
-      }).catch(() => {});
-    } catch (err) {}
-  }).catch(() => {});
-
-  // Return the network response immediately with fallback
   e.respondWith(
-    networkFetch.catch((err) => {
-      console.error('[SW] Network fetch failed:', err);
-      return new Response(null, { status: 404, statusText: "Not Found" });
-    })
+    fetch(e.request)
+      .then(async (response) => {
+        await putInCache(e.request, response);
+        return response;
+      })
+      .catch(async (err) => {
+        console.warn("[SW] Network fetch failed, falling back to cache:", e.request.url, err);
+
+        const cachedResponse = await matchFromCache(e.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        if (e.request.mode === "navigate") {
+          const appShell = await matchFromCache(APP_SHELL_FALLBACK);
+          if (appShell) {
+            return appShell;
+          }
+        }
+
+        return new Response(null, { status: 404, statusText: "Not Found" });
+      }),
   );
 });

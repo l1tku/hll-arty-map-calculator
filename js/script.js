@@ -255,9 +255,20 @@ function showLoading() {
   if (loading) loading.style.display = "flex";
 }
 
+function isStandaloneAppWindow() {
+  return (
+    (window.matchMedia &&
+      (window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: window-controls-overlay)").matches)) ||
+    window.navigator.standalone === true
+  );
+}
+
 function updatePageTitle(mapName) {
-  // Dynamically updates the browser tab title using the original case
-  document.title = `HLL Arty Calculator - ${mapName}`;
+  // In installed PWAs, the app name is already shown in the window chrome.
+  document.title = isStandaloneAppWindow()
+    ? mapName
+    : `HLL Arty Map Calculator - ${mapName}`;
 }
 
 /**

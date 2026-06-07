@@ -9,9 +9,11 @@
             content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         />
 
-        <title>HLL Artillery Calculator</title>
+        <title>HLL Arty Map Calculator</title>
 
-        <link rel="manifest" href="manifest.json?v=1.3.5" />
+        <link rel="manifest" href="manifest.json?v=1.3.5-2" />
+
+        <meta name="theme-color" content="#ffc107" />
 
         <meta name="mobile-web-app-capable" content="yes" />
 
@@ -22,7 +24,10 @@
             content="black-translucent"
         />
 
-        <meta name="apple-mobile-web-app-title" content="HLL Arty" />
+        <meta
+            name="apple-mobile-web-app-title"
+            content="HLL Arty Map Calculator"
+        />
 
         <link rel="icon" type="image/webp" href="images/favicon.webp?v=3.43" />
 
@@ -33,23 +38,37 @@
         <link rel="stylesheet" href="css/style.css?v=1.3.5" />
 
         <script>
+            const isStandaloneWindow =
+                (window.matchMedia &&
+                    (window.matchMedia("(display-mode: standalone)").matches ||
+                        window.matchMedia("(display-mode: window-controls-overlay)")
+                            .matches)) ||
+                window.navigator.standalone === true;
+
+            if (isStandaloneWindow) {
+                document.title = "Loading Map";
+            }
+        </script>
+
+        <script>
             if ("serviceWorker" in navigator) {
-                // Only register service worker on GitHub Pages (HTTPS), not local development
-                const isLocalhost = location.hostname === "localhost" ||
-                                   location.hostname === "127.0.0.1" ||
-                                   location.hostname.startsWith("192.168.");
+                const SERVICE_WORKER_VERSION = "1.3.5-8";
+                const isLocalhost =
+                    location.hostname === "localhost" ||
+                    location.hostname === "127.0.0.1" ||
+                    location.hostname.startsWith("192.168.");
 
-                if (!isLocalhost) {
+                if (window.isSecureContext && !isLocalhost) {
                     window.addEventListener("load", () => {
-                        // Calculate scope for GitHub Pages subdirectory support
-                        const pathname = window.location.pathname;
-                        const basePath = pathname.substring(0, pathname.lastIndexOf("/") + 1);
+                        const scope = new URL("./", window.location.href).pathname;
 
-                        // Cache-busting query parameter forces browser to check for new service worker code
                         navigator.serviceWorker
-                            .register("./service-worker.js?v=1.3.5-1", {
-                                scope: basePath || "/"
-                            })
+                            .register(
+                                `./service-worker.js?v=${SERVICE_WORKER_VERSION}`,
+                                {
+                                    scope,
+                                },
+                            )
                             .then((reg) =>
                                 console.log("Service Worker registered.", reg),
                             )
@@ -61,23 +80,35 @@
                             );
                     });
                 } else {
-                    // FORCE UNREGISTER any existing service workers on localhost
-                    navigator.serviceWorker.getRegistrations().then((regs) => {
-                        regs.forEach((reg) => {
-                            console.log("[Local Dev] Unregistering old Service Worker:", reg);
-                            reg.unregister();
-                        });
-                    });
-                    // Also clear all caches
-                    if (window.caches) {
-                        caches.keys().then((names) => {
-                            names.forEach((name) => {
-                                console.log("[Local Dev] Deleting cache:", name);
-                                caches.delete(name);
+                    if (isLocalhost) {
+                        navigator.serviceWorker.getRegistrations().then((regs) => {
+                            regs.forEach((reg) => {
+                                console.log(
+                                    "[Local Dev] Unregistering old Service Worker:",
+                                    reg,
+                                );
+                                reg.unregister();
                             });
                         });
+                        if (window.caches) {
+                            caches.keys().then((names) => {
+                                names.forEach((name) => {
+                                    console.log(
+                                        "[Local Dev] Deleting cache:",
+                                        name,
+                                    );
+                                    caches.delete(name);
+                                });
+                            });
+                        }
+                        console.log(
+                            "Service Worker disabled for local development",
+                        );
+                    } else {
+                        console.log(
+                            "Service Worker skipped because this origin is not secure",
+                        );
                     }
-                    console.log("Service Worker disabled for local development");
                 }
             }
         </script>
@@ -1083,6 +1114,6 @@
 
         <script src="js/ballistics.js?v=1.3.5"></script>
 
-        <script src="js/script.js?v=1.3.5"></script>
+        <script src="js/script.js?v=1.3.5-2"></script>
     </body>
 </html>

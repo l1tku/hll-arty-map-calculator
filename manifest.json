@@ -1,9 +1,11 @@
 {
-  "name": "HLL Artillery Calculator",
-  "short_name": "HLL Arty",
+  "name": "HLL Arty Map Calculator",
+  "short_name": "HLL Arty Map Calculator",
+  "description": "Interactive tactical map and high-precision artillery calculator for Hell Let Loose.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
+  "lang": "en",
   "display": "standalone",
   "background_color": "#1d1f27",
   "theme_color": "#ffc107",
@@ -12,12 +14,14 @@
     {
       "src": "images/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "images/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "images/icon-512.png",
