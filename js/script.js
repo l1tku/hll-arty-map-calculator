@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.3.5";
+const APP_VERSION = "v1.3.6";
 const GAME_VERSION = "Update 20";
 
 // Create a simple map of IDs and what text should go in them

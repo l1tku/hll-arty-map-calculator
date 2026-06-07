@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.3.5 — Updated for Hell Let Loose Update 20**
+**v1.3.6 — Updated for Hell Let Loose Update 20**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
@@ -60,8 +60,8 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 
 ## Technical Details
 - **Dynamic Caching**: "Stale-While-Revalidate" – only downloads and caches maps you open, keeping storage low while ensuring instant reloads.
-- **PWA Ready**: Installable to home screen on mobile for native-like experience (offline-capable once cached).
 - **Performance**: GPU-accelerated on desktop, memory-safe transforms on mobile, throttled HUD updates, batch rendering.
+- **PWA Ready**: Installable to home screen on mobile for native-like experience (offline-capable once cached).
 
 ## Supported Maps
 * Carentan (CAR)

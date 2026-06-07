@@ -2414,7 +2414,9 @@ button.btn-map-select:hover {
 #appVersionPanel,
 #appVersion,
 #gameVersion,
-#gameVersionPanel {
+#gameVersionPanel,
+#authorProfilePanel,
+#authorProfile {
     text-decoration: none;
     color: inherit;
     pointer-events: auto;
@@ -2426,14 +2428,21 @@ button.btn-map-select:hover {
 }
 
 #appVersion,
-#gameVersion {
+#gameVersion,
+#authorProfile {
     color: rgba(255, 255, 255, 0.5);
+}
+
+#authorProfilePanel {
+    color: rgba(46, 45, 45, 0.6);
 }
 
 #appVersionPanel:hover,
 #appVersion:hover,
 #gameVersion:hover,
-#gameVersionPanel:hover {
+#gameVersionPanel:hover,
+#authorProfilePanel:hover,
+#authorProfile:hover {
     opacity: 0.7;
 }
 

@@ -4,16 +4,16 @@
  * SW_VERSION controls the cache name and forces clients to get fresh JS/CSS.
  * Bump this when you update JS/CSS files and want existing users to get the changes.
  *
- * Format: "{app-version}-{build}" (e.g., "1.3.4-2")
+ * Format: "{app-version}-{build}" (e.g., "1.3.6-1")
  * - app-version: Matches your app version for reference
  * - build: Increment when you need to force cache refresh
  *
  * Examples:
- * - App v1.3.4, first SW release: "1.3.4-1"
- * - Same app version, JS bugfix: "1.3.4-2"  <-- bump build number
- * - App v1.3.5 released: "1.3.5-1"
+ * - App v1.3.5, first SW release: "1.3.5-1"
+ * - Same app version, JS bugfix: "1.3.5-2"  <-- bump build number
+ * - App v1.3.6 released: "1.3.6-1"
  */
-const SW_VERSION = "1.3.5-8";  // Change this to force cache refresh
+const SW_VERSION = "1.3.6-1";  // Change this to force cache refresh
 const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
 
 const ASSETS_TO_CACHE = [
