@@ -5,6 +5,10 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.3.7] - 2026-06-10
+### Added
+- Added missing west and east side HQ guns on Juno Beach
+
 ## [1.3.6] - 2026-06-07
 ### Changed
 - Assigned the PWA a dedicated manifest identity, start URL, and scope under `/hll-arty-map-calculator/` so it installs separately from other projects on the same domain

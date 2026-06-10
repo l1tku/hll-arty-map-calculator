@@ -1622,7 +1622,6 @@ select.btn-map-select option {
     justify-content: center;
     align-items: center;
     z-index: 3000;
-    transition: opacity 0.2s ease-in-out;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -1658,7 +1657,6 @@ select.btn-map-select option {
     display: flex;
     flex-direction: column;
     transform: translateY(20px);
-    transition: transform 0.2s ease-in-out;
 }
 .modal-overlay.active .modal-content {
     transform: translateY(0);
