@@ -1369,10 +1369,36 @@ svg.icon {
         width: auto !important;
 
         /* THE FIX: Identical spacing for BOTH buttons */
-        padding-left: 15px !important; /* Edge -> Icon */
+        padding-left: 20px !important; /* Edge -> Icon */
         gap: 15px !important; /* Icon -> Text */
-        padding-right: 25px !important; /* Text -> Edge */
+        padding-right: 30px !important; /* Text -> Edge */
+        font-size: 15px !important; /* RESTORED LARGER TEXT */
+        flex-shrink: 1 !important;
+        min-width: 0 !important;
     }
+
+    .modal-footer .footer-btn span {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
+
+/* --- MEDIUM DESKTOP FIX: Prevent Overlap --- */
+@media (min-width: 769px) and (max-width: 1050px) {
+    .modal-footer .footer-btn,
+    .modal-footer .footer-btn:first-child,
+    .modal-footer .footer-btn:last-child {
+        padding-left: 12px !important;
+        padding-right: 18px !important;
+        font-size: 13px !important;
+        gap: 10px !important;
+    }
+    .modal-footer {
+        padding: 10px 15px !important;
+        gap: 10px !important;
+    }
+}
 
     /* 1. Calculator Icon (Keep it slightly larger as requested before) */
     #btnOpenManualCalc .icon {
@@ -1382,6 +1408,7 @@ svg.icon {
         margin: 0 !important;
         display: inline-block !important;
         vertical-align: middle;
+        flex-shrink: 0 !important; /* PREVENT SQUEEZING */
     }
 
     /* 2. More Projects Icon (Standard Size) */
@@ -1392,6 +1419,7 @@ svg.icon {
         margin: 0 !important;
         display: inline-block !important;
         vertical-align: middle;
+        flex-shrink: 0 !important; /* PREVENT SQUEEZING */
     }
 }
 
@@ -1951,9 +1979,15 @@ select.btn-map-select option {
     background: rgba(0, 0, 0, 0.6);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.modal-footer .footer-btn-group {
+    display: flex;
     gap: 15px;
-    flex-shrink: 0; /* Prevents shrinking */
+    align-items: center;
 }
 
 /* 4. NEW: Footer Buttons */
@@ -1964,7 +1998,8 @@ select.btn-map-select option {
     font-family: "GothamSS", sans-serif;
     font-weight: 700;
     font-size: 13px;
-    padding: 12px 24px;
+    height: 54px; /* RESTORED CHUNKY HEIGHT */
+    padding: 0 24px;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1994,6 +2029,54 @@ select.btn-map-select option {
 /* Optional: Different style for "Other Projects" if you want */
 .footer-btn.secondary {
     border-color: rgba(255, 255, 255, 0.1);
+}
+
+.kofi-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    background: #7baafa; /* Ko-fi Blue */
+    padding: 0 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #1f1f1f;
+    font-family: "Nunito", "Segoe UI", sans-serif;
+    font-weight: 900;
+    font-size: 12px;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.kofi-icon {
+    height: 22px;
+    width: auto;
+    flex-shrink: 0;
+    animation: kofi-idle 3s ease-in-out 2s infinite;
+}
+
+.kofi-text {
+    white-space: nowrap;
+}
+
+.kofi-btn:hover {
+    background: #6a9af0;
+    transform: translateY(-1px);
+}
+
+.kofi-btn:active {
+    transform: translateY(0);
+}
+
+@keyframes kofi-idle {
+    0%, 80%, 100% { transform: rotate(0deg); }
+    85% { transform: rotate(-10deg); }
+    90% { transform: rotate(8deg); }
+    95% { transform: rotate(-4deg); }
+}
+
+.kofi-btn .kofi-mobile {
+    display: none;
 }
 
 /* ==========================================
@@ -4712,20 +4795,29 @@ body.placement-active
     .modal-footer {
         display: flex !important;
         flex-direction: row !important;
-        align-items: stretch !important;
+        align-items: center !important;
+        justify-content: space-between !important;
         gap: 10px !important;
         padding: 12px 10px !important;
         flex-shrink: 0 !important;
+        position: relative !important;
     }
-    .modal-footer .footer-btn:first-child {
+    .footer-btn-group {
+        display: flex !important; /* RESTORE FLEX INSTEAD OF CONTENTS */
+        flex: 1 !important; /* Take remaining space */
+        gap: 10px !important;
+        align-items: center !important;
+    }
+    #btnOpenManualCalc {
         position: relative !important;
         flex: 0 0 54px !important;
         width: 54px !important;
+        min-width: 54px !important; /* THE NUCLEAR FIX */
         height: 54px !important;
         padding: 0 !important;
         font-size: 0 !important;
     }
-    .modal-footer .footer-btn:first-child .icon {
+    #btnOpenManualCalc .icon {
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
@@ -4734,6 +4826,7 @@ body.placement-active
         height: 32px !important;
         margin: 0 !important;
         display: block !important;
+        flex-shrink: 0 !important;
     }
     /* 2. PROJECTS BUTTON (Mobile: Grid Layout) */
     .modal-footer #btnOtherProjects {
@@ -4793,26 +4886,31 @@ body.placement-active
         /* Reset padding since Grid Gap handles the spacing */
         padding: 0 !important;
         margin: 0 !important;
+}
+
+    .modal-footer a[href*="ko-fi"] {
+        flex: 0 0 54px !important;
+        width: 54px !important;
+        height: 54px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+        background: #7baafa !important;
+        border: none !important;
+        border-radius: 4px !important;
+    }
+    .modal-footer .kofi-text {
+        display: none !important;
+    }
+    .modal-footer .kofi-icon {
+        width: 32px !important;
+        height: 32px !important;
+        flex-shrink: 0 !important;
+        filter: none !important;
+        object-fit: contain !important;
+        animation: kofi-idle 3s ease-in-out infinite !important;
     }
 
     /* Projects Hub List Fix */
-    .projects-list .footer-btn {
-        flex: 0 0 auto !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 54px !important;
-        font-size: 13px !important;
-        padding: 12px 20px !important;
-        justify-content: flex-start !important;
-    }
-    .projects-list .footer-project-icon,
-    .projects-list .icon {
-        position: static !important;
-        transform: none !important;
-        margin-right: 15px !important;
-        width: 24px !important;
-        height: 24px !important;
-    }
 
     /* --- 10. HIDES & UTILITIES --- */
     [data-tooltip]::before,
@@ -5603,24 +5701,114 @@ body.placement-active
     height: 100% !important;
 }
 
-/* ==========================================
-   VERY SMALL MOBILE FIX: POLYGON ICON < 370px
-   ========================================== */
-@media (max-width: 370px) {
+@media (max-width: 420px) {
+    .modal-footer {
+        padding: 8px 6px !important;
+        gap: 6px !important;
+    }
+    .footer-btn-group {
+        gap: 6px !important;
+    }
+    #btnOpenManualCalc {
+        flex: 0 0 44px !important;
+        width: 44px !important;
+        min-width: 44px !important; /* PREVENT SQUEEZING */
+        height: 44px !important;
+        min-height: 44px !important;
+    }
+    #btnOpenManualCalc .icon {
+        width: 26px !important;
+        height: 26px !important;
+        flex-shrink: 0 !important;
+    }
     .modal-footer #btnOtherProjects {
-        font-size: 13px !important;
-        padding-left: 12px !important;
-        padding-right: 12px !important;
-        gap: 8px !important;
+        flex: 1 !important;
+        height: 44px !important;
+        font-size: 12px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        gap: 6px !important;
     }
     .modal-footer #btnOtherProjects .icon {
         width: 20px !important;
         height: 20px !important;
-        stroke-width: 2 !important;
+        flex-shrink: 0 !important;
     }
-    .modal-footer #btnOtherProjects .icon polygon,
-    .modal-footer #btnOtherProjects .icon polyline {
-        stroke-width: 2 !important;
+    .modal-footer a[href*="ko-fi"] {
+        flex: 0 0 44px !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        background: #7baafa !important;
+        border: none !important;
+        border-radius: 4px !important;
+    }
+    .modal-footer .kofi-text {
+        display: none !important;
+    }
+    .modal-footer .kofi-icon {
+        width: 26px !important;
+        height: 26px !important;
+        filter: none !important;
+        object-fit: contain !important;
+        animation: kofi-idle 3s ease-in-out infinite !important;
+    }
+}
+
+/* VERY SMALL MOBILE FIX: POLYGON ICON < 370px */
+@media (max-width: 380px) {
+    .modal-footer {
+        padding: 6px 4px !important;
+        gap: 4px !important;
+    }
+    .footer-btn-group {
+        gap: 4px !important;
+    }
+    #btnOpenManualCalc {
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        min-width: 36px !important; /* PREVENT SQUEEZING */
+        height: 36px !important;
+        min-height: 36px !important;
+    }
+    #btnOpenManualCalc .icon {
+        width: 22px !important;
+        height: 22px !important;
+        flex-shrink: 0 !important;
+    }
+    .modal-footer #btnOtherProjects {
+        flex: 1 !important;
+        height: 36px !important;
+        font-size: 10px !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        gap: 4px !important;
+    }
+    .modal-footer #btnOtherProjects .icon {
+        width: 16px !important;
+        height: 16px !important;
+        flex-shrink: 0 !important;
+    }
+    .modal-footer a[href*="ko-fi"] {
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        background: #7baafa !important;
+        border: none !important;
+        border-radius: 4px !important;
+    }
+    .modal-footer .kofi-text {
+        display: none !important;
+    }
+    .modal-footer .kofi-icon {
+        width: 20px !important;
+        height: 20px !important;
+        filter: none !important;
+        object-fit: contain !important;
+        animation: kofi-idle 3s ease-in-out infinite !important;
     }
 }
 

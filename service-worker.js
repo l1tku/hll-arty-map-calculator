@@ -13,7 +13,7 @@
  * - Same app version, JS bugfix: "1.3.5-2"  <-- bump build number
  * - App v1.3.6 released: "1.3.6-1"
  */
-const SW_VERSION = "1.3.7-1";  // Change this to force cache refresh
+const SW_VERSION = "1.3.8-1";  // Change this to force cache refresh
 const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
 
 const ASSETS_TO_CACHE = [

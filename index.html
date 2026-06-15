@@ -11,7 +11,7 @@
 
         <title>HLL Arty Map Calculator</title>
 
-        <link rel="manifest" href="manifest.json?v=1.3.6-1" />
+        <link rel="manifest" href="manifest.json?v=1.3.8-1" />
 
         <meta name="theme-color" content="#ffc107" />
 
@@ -35,7 +35,10 @@
 
         <link rel="apple-touch-icon" href="images/icon-180.png?v=3.43" />
 
-        <link rel="stylesheet" href="css/style.css?v=1.3.6" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="css/style.css?v=1.3.8" />
 
         <script>
             const isStandaloneWindow =
@@ -52,7 +55,7 @@
 
         <script>
             if ("serviceWorker" in navigator) {
-                const SERVICE_WORKER_VERSION = "1.3.6-1";
+                const SERVICE_WORKER_VERSION = "1.3.8-1";
                 const isLocalhost =
                     location.hostname === "localhost" ||
                     location.hostname === "127.0.0.1" ||
@@ -543,97 +546,113 @@
                 <div class="map-grid" id="mapGrid"></div>
 
                 <div class="modal-footer">
-                    <div class="footer-btn" id="btnOpenManualCalc">
-                        <svg
-                            class="icon"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                    <div class="footer-btn-group">
+                        <div class="footer-btn" id="btnOpenManualCalc">
+                            <svg
+                                class="icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <rect x="5" y="3" width="14" height="18" rx="2" />
+
+                                <line x1="8" y1="7" x2="16" y2="7" />
+
+                                <circle
+                                    cx="8.5"
+                                    cy="12"
+                                    r="0.8"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="0.8"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+
+                                <circle
+                                    cx="15.5"
+                                    cy="12"
+                                    r="0.8"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+
+                                <circle
+                                    cx="8.5"
+                                    cy="16"
+                                    r="0.8"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+
+                                <circle
+                                    cx="12"
+                                    cy="16"
+                                    r="0.8"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+
+                                <circle
+                                    cx="15.5"
+                                    cy="16"
+                                    r="0.8"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+                            </svg>
+
+                            <span>MANUAL CALCULATOR</span>
+                        </div>
+
+                        <button
+                            class="footer-btn secondary"
+                            id="btnOtherProjects"
+                            onclick="openProjectsModal()"
                         >
-                            <rect x="5" y="3" width="14" height="18" rx="2" />
+                            <svg
+                                class="icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polygon
+                                    points="12 2 2 7 12 12 22 7 12 2"
+                                ></polygon>
 
-                            <line x1="8" y1="7" x2="16" y2="7" />
+                                <polyline points="2 17 12 22 22 17"></polyline>
 
-                            <circle
-                                cx="8.5"
-                                cy="12"
-                                r="0.8"
-                                fill="currentColor"
-                                stroke="none"
-                            />
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
 
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="0.8"
-                                fill="currentColor"
-                                stroke="none"
-                            />
-
-                            <circle
-                                cx="15.5"
-                                cy="12"
-                                r="0.8"
-                                fill="currentColor"
-                                stroke="none"
-                            />
-
-                            <circle
-                                cx="8.5"
-                                cy="16"
-                                r="0.8"
-                                fill="currentColor"
-                                stroke="none"
-                            />
-
-                            <circle
-                                cx="12"
-                                cy="16"
-                                r="0.8"
-                                fill="currentColor"
-                                stroke="none"
-                            />
-
-                            <circle
-                                cx="15.5"
-                                cy="16"
-                                r="0.8"
-                                fill="currentColor"
-                                stroke="none"
-                            />
-                        </svg>
-
-                        <span>MANUAL CALCULATOR</span>
+                            MORE PROJECTS
+                        </button>
                     </div>
 
-                    <button
-                        class="footer-btn secondary"
-                        id="btnOtherProjects"
-                        onclick="openProjectsModal()"
+                    <a
+                        href="https://ko-fi.com/litku"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="kofi-btn"
                     >
-                        <svg
-                            class="icon"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <polygon
-                                points="12 2 2 7 12 12 22 7 12 2"
-                            ></polygon>
-
-                            <polyline points="2 17 12 22 22 17"></polyline>
-
-                            <polyline points="2 12 12 17 22 12"></polyline>
-                        </svg>
-
-                        MORE PROJECTS
-                    </button>
+                        <img
+                            src="images/kofi_symbol.png"
+                            class="kofi-icon"
+                            alt="Ko-fi"
+                        />
+                        <span class="kofi-text">Buy me a coffee</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1123,10 +1142,10 @@
             </div>
         </div>
 
-        <script src="js/maps.js?v=1.3.6"></script>
+        <script src="js/maps.js?v=1.3.8"></script>
 
-        <script src="js/ballistics.js?v=1.3.6"></script>
+        <script src="js/ballistics.js?v=1.3.8"></script>
 
-        <script src="js/script.js?v=1.3.6-1"></script>
+        <script src="js/script.js?v=1.3.8-1"></script>
     </body>
 </html>
