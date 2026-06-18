@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.3.8";
+const APP_VERSION = "v1.3.9";
 const GAME_VERSION = "Update 20";
 
 // Create a simple map of IDs and what text should go in them
@@ -128,6 +128,9 @@ const cached = {
   get mapContainer() {
     return this.getElem("mapContainer");
   },
+  get mapWrap() {
+    return this.getElem("mapContainer");
+  },
   get mapStage() {
     return this.getElem("mapStage");
   },
@@ -232,19 +235,32 @@ const stopMapInteraction = (e) => {
 
 // --- HELPER: Visual Shooting Pulse ---
 function triggerFirePulse(x, y) {
-  const stage = cached.mapStage; // Must be mapStage!
-  if (!stage) return;
+  const wrap = cached.mapWrap || document.getElementById("mapContainer");
+  if (!wrap) return;
+  if (isNaN(x) || isNaN(y)) return;
+
+  // Convert image-pixel coords → screen-relative pixels inside .map-wrap
+  // mapStage transform: translate(pointX, pointY) scale(drawScale)
+  // So screenPos = pointX + imgPixel * drawScale
+  const drawScale = state.scale * state.fitScale;
+  const screenX = state.pointX + x * drawScale;
+  const screenY = state.pointY + y * drawScale;
 
   const pulse = document.createElement("div");
   pulse.className = "shot-pulse";
+  pulse.style.left = `${Math.round(screenX)}px`;
+  pulse.style.top = `${Math.round(screenY)}px`;
+  pulse.style.setProperty("--zoom-scale", drawScale);
 
-  // Position exactly at target pixels
-  pulse.style.left = `${Math.round(x)}px`;
-  pulse.style.top = `${Math.round(y)}px`;
+  wrap.appendChild(pulse);
 
-  stage.appendChild(pulse);
+  // Force reflow then start animation on next frame for reliability
+  void pulse.offsetWidth;
+  requestAnimationFrame(() => {
+    pulse.classList.add("active");
+  });
 
-  // Cleanup slightly after animation ends (400ms animation -> 450ms cleanup)
+  // Cleanup slightly after animation ends (300ms animation -> 450ms cleanup)
   setTimeout(() => {
     pulse.remove();
   }, 450);

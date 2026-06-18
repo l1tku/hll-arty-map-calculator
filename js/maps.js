@@ -611,23 +611,11 @@ H4: {
       { label: "", id: "GER_A1", gameX: -8018.951, gameY: -92411.57, radius: 500, team: "ger", type: "point", rotation: 180.00027 },
       { label: "", id: "GER_A2", gameX: -4803.604, gameY: -92667.13, radius: 500, team: "ger", type: "point", rotation: 180.00029 },
       { label: "", id: "GER_A3", gameX: -6399.269, gameY: -93328.29, radius: 500, team: "ger", type: "point", rotation: 180.00027 },
-      { label: "", id: "GER_A4", gameX: -50262.953, gameY: -96754.25, radius: 500, team: "ger", type: "point", rotation: 180.00037 },
-      { label: "", id: "GER_A5", gameX: -48846.27, gameY: -97493.72, radius: 500, team: "ger", type: "point", rotation: 180.00037 },
-      { label: "", id: "GER_A6", gameX: -48063.594, gameY: -95802.66, radius: 500, team: "ger", type: "point", rotation: 180.00037 },
-      { label: "", id: "GER_A7", gameX: 54331.04, gameY: -97746.79, radius: 500, team: "ger", type: "point", rotation: 180.00027 },
-      { label: "", id: "GER_A8", gameX: 55950.723, gameY: -98663.51, radius: 500, team: "ger", type: "point", rotation: 180.00027 },
-      { label: "", id: "GER_A9", gameX: 57546.39, gameY: -97898.484, radius: 500, team: "ger", type: "point", rotation: 180.00029 },
 
       // --- ALLIES GUNS ---
       { label: "", id: "CAN_A1", gameX: 7514.3633, gameY: 90534.19, radius: 500, team: "can", type: "point", rotation: 0.0 },
       { label: "", id: "CAN_A2", gameX: 9229.401, gameY: 91303.36, radius: 500, team: "can", type: "point", rotation: -22.474886 },
       { label: "", id: "CAN_A3", gameX: 6146.0317, gameY: 91758.02, radius: 500, team: "can", type: "point", rotation: 25.595324 },
-      { label: "", id: "CAN_A4", gameX: 44337.242, gameY: 90478.945, radius: 500, team: "can", type: "point", rotation: 14.078249 },
-      { label: "", id: "CAN_A5", gameX: 44870.062, gameY: 90081.34, radius: 500, team: "can", type: "point", rotation: 14.078249 },
-      { label: "", id: "CAN_A6", gameX: 45348.168, gameY: 90079.11, radius: 500, team: "can", type: "point", rotation: 30.96733 },
-      { label: "", id: "CAN_A7", gameX: -52440.633, gameY: 93110.24, radius: 500, team: "can", type: "point", rotation: 8.447243 },
-      { label: "", id: "CAN_A8", gameX: -51555.4, gameY: 93038.38, radius: 500, team: "can", type: "point", rotation: 5.631441 },
-      { label: "", id: "CAN_A9", gameX: -50885.77, gameY: 92976.6, radius: 500, team: "can", type: "point", rotation: 14.078623 },
 
       // --- CANADIAN SECTORS ---
       { label: "GRAYE-SUR-MER OUTSKIRTS", id: "B18", gameX: -39670.0, gameY: -69078.0, radius: 5500.0, team: "can", type: "strongpoint" },

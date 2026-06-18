@@ -5,6 +5,10 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.3.9] - 2026-06-18
+### Fixed
+- Fixed shot-pulse ring not animating
+
 ## [1.3.8] - 2026-06-14
 ### Added
 - Added Ko-fi support button
