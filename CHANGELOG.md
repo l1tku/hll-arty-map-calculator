@@ -5,6 +5,11 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.4.0] - 2026-09-16
+### Added
+- Added SEO meta description, Open Graph, Twitter card, and Schema.org WebSite metadata for proper Google Search listing and site name branding
+- Added high-resolution 192x192 and 512x512 icon definitions for search engines and mobile devices
+
 ## [1.3.9] - 2026-06-18
 ### Fixed
 - Fixed shot-pulse ring not animating
