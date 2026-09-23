@@ -1797,7 +1797,7 @@ select.btn-map-select option {
     line-height: 1;
     cursor: pointer;
     padding: 0;
-    transition: all 0.2s ease;
+    transition: none;
     z-index: 2000; /* Ensure it sits on top of everything */
 }
 
@@ -1972,7 +1972,7 @@ select.btn-map-select option {
     padding: 12px 24px;
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: none;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2018,7 +2018,7 @@ select.btn-map-select option {
     font-weight: 900;
     font-size: 12px;
     gap: 8px;
-    transition: all 0.2s ease;
+    transition: none;
     margin-left: auto;
 }
 
