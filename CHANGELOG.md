@@ -5,6 +5,12 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.4.1] - 2026-09-23
+### Changed
+- Updated game version compatibility to **Hell Let Loose Update 21**
+- Game version link now points to the new Update 21 changelog
+- Bumped Service Worker cache version to force refresh for returning visitors
+
 ## [1.4.0] - 2026-09-16
 ### Added
 - Added SEO meta description, Open Graph, Twitter card, and Schema.org WebSite metadata for proper Google Search listing and site name branding
