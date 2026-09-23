@@ -8,14 +8,12 @@ The app updates automatically — **refresh the page twice** and it will update.
 ## [1.4.2] - 2026-09-23
 ### Changed
 - Removed the slow fade animation from modal close (X) buttons — hover feedback is now instant
-- Removed the fade transition from modal footer buttons (Manual Calculator, More Projects, Buy me a coffee) so they no longer fade out when the hover ends
-- Bumped version and cache-buster versions to force refresh for returning visitors
+- Removed the fade transition from modal footer buttons so they no longer fade out when the hover ends
 
 ## [1.4.1] - 2026-09-23
 ### Changed
 - Updated game version compatibility to **Hell Let Loose Update 21**
 - Game version link now points to the new Update 21 changelog
-- Bumped Service Worker cache version to force refresh for returning visitors
 
 ## [1.4.0] - 2026-09-16
 ### Added
