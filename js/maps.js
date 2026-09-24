@@ -106,7 +106,7 @@ const MAP_DATABASE = {
           {
             thumbnail: "images/history/driel/driel_1944_bridge_thumbnail.webp",
             full: "images/history/driel/driel_1944_bridge.webp",
-            caption: "Four British paratroops of the 1st Para Squadron, Royal Engineers, clamber ashore from a rowing boat at Nijmegen after escaping from German captivity near Arnhem Bridge. Operation Market Garden, September 1944."
+            caption: "Four British paratroopers of the 1st Para Squadron, Royal Engineers, clamber ashore from a rowing boat at Nijmegen after escaping from German captivity near Arnhem Bridge. Operation Market Garden, September 1944."
           }
         ]
       }
@@ -162,8 +162,8 @@ const MAP_DATABASE = {
     },
     history: {
       battle: "Second Battle of El Alamein (October 23 - November 11, 1942)",
-      description: "Lieutenant-General Bernard Montgomery's Eighth Army attacked General Erwin Rommel's Panzerarmee Afrika in the Egyptian desert. The battle began with a 1,000-gun artillery barrage on October 23, with Allied forces advancing through deep Axis minefields known as the Devil's Gardens. The narrow front between the Mediterranean and the Qatara Depression forced frontal attacks against heavily fortified positions.",
-      tactics: "Montgomery employed massive artillery superiority with over 800 guns firing 529,000 shells in the opening barrage. Engineers had to clear 24-foot gaps through 5 miles of minefields for tanks to advance. The battle progressed through five phases: the initial infantry break-in, the crumbling of Axis defenses, counter-attacks, Operation Supercharge (the armored breakthrough), and the final breakout. The 1st South African Division secured Miteirya Ridge while armored divisions engaged in tank duels with German Panzers.",
+      description: "Lieutenant-General Bernard Montgomery's Eighth Army attacked General Erwin Rommel's Panzerarmee Afrika in the Egyptian desert. The battle began with a 1,000-gun artillery barrage on October 23, with Allied forces advancing through deep Axis minefields known as the Devil's Gardens. The narrow front between the Mediterranean and the Qattara Depression forced frontal attacks against heavily fortified positions.",
+      tactics: "Montgomery employed massive artillery superiority with over 800 guns firing 529,000 shells in the opening barrage. Engineers had to clear 24-foot lanes through 5 miles of minefields for tanks to advance. The battle progressed through five phases: the initial infantry break-in, the crumbling of Axis defenses, counter-attacks, Operation Supercharge (the armored breakthrough), and the final breakout. The 1st South African Division secured Miteirya Ridge while armored divisions engaged in tank duels with German Panzers.",
       significance: "El Alamein was the turning point of the North African Campaign and the first major British victory against German forces. It halted the Axis advance toward the Suez Canal and Middle Eastern oil fields, with Axis losses of 500 tanks and 30,000 prisoners. The victory restored Allied morale and paved the way for Operation Torch in North Africa and the eventual invasion of Sicily and Italy. Winston Churchill called it 'the end of the beginning.'",
       images: [
         {
@@ -209,26 +209,26 @@ const MAP_DATABASE = {
       { label: "", id: "GER_A2", gameX: -90921.03, gameY: 6183.05, radius: 500, team: "ger", type: "point", rotation: -91.3 }, 
       { label: "", id: "GER_A3", gameX: -94109.44, gameY: 9760.08, radius: 500, team: "ger", type: "point", rotation: -91.3 },
 
-      // --- AXIS SECTORS ---
-      { label: "MITEIRIYA RIDGE", id: "B11", gameX: -79261.70, gameY: -36680.63, radius: 6000.0, team: "ger", type: "strongpoint" },
-      { label: "ARTILLERY GUNS", id: "B6", gameX: -71609.83, gameY: 8175.46, radius: 6000.0, team: "ger", type: "strongpoint" },
-      { label: "VEHICLE DEPOT", id: "B1", gameX: -68233.38, gameY: 37264.52, radius: 6000.0, team: "ger", type: "strongpoint" },
-      { label: "WATCHTOWER", id: "B12", gameX: -40818.59, gameY: -37838.59, radius: 6000.0, team: "ger", type: "strongpoint" },
-      { label: "EL MREIR", id: "B7", gameX: -37776.82, gameY: 2887.53, radius: 6000.0, team: "ger", type: "strongpoint" },
-      { label: "HAMLET RUINS", id: "B2", gameX: -37466.63, gameY: 37732.38, radius: 6000.0, team: "ger", type: "strongpoint" },
-
-      // --- NEUTRAL SECTORS ---
-      { label: "VALLEY", id: "B13", gameX: 1970.44, gameY: -35186.07, radius: 8190.72, team: "neu", type: "strongpoint" },
-      { label: "OASIS", id: "B8", gameX: -2900.92, gameY: 851.28, radius: 6000.0, team: "neu", type: "strongpoint" },
-      { label: "DESERT RAT TRENCHES", id: "B3", gameX: 4880.01, gameY: 40988.05, radius: 6000.0, team: "neu", type: "strongpoint" },
-
       // --- ALLIES SECTORS ---
       { label: "AIRFIELD HANGARS", id: "B14", gameX: 41085.37, gameY: -32927.33, radius: 8000.0, team: "us", type: "strongpoint" },
       { label: "AIRFIELD COMMAND", id: "B9", gameX: 38495.92, gameY: 4155.89, radius: 6000.0, team: "us", type: "strongpoint" },
       { label: "FUEL DEPOT", id: "B4", gameX: 43333.85, gameY: 35426.48, radius: 7000.0, team: "us", type: "strongpoint" },
       { label: "QUARRY", id: "B15", gameX: 78760.73, gameY: -41540.40, radius: 6000.0, team: "us", type: "strongpoint" },
       { label: "AMBUSHED CONVOY", id: "B10", gameX: 72480.45, gameY: 2526.44, radius: 6000.0, team: "us", type: "strongpoint" },
-      { label: "CLIFFSIDE VILLAGE", id: "B5", gameX: 68942.24, gameY: 39028.40, radius: 6000.0, team: "us", type: "strongpoint" }
+      { label: "CLIFFSIDE VILLAGE", id: "B5", gameX: 68942.24, gameY: 39028.40, radius: 6000.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "VALLEY", id: "B13", gameX: 1970.44, gameY: -35186.07, radius: 8190.72, team: "neu", type: "strongpoint" },
+      { label: "OASIS", id: "B8", gameX: -2900.92, gameY: 851.28, radius: 6000.0, team: "neu", type: "strongpoint" },
+      { label: "DESERT RAT TRENCHES", id: "B3", gameX: 4880.01, gameY: 40988.05, radius: 6000.0, team: "neu", type: "strongpoint" },
+
+      // --- AXIS SECTORS ---
+      { label: "MITEIRIYA RIDGE", id: "B11", gameX: -79261.70, gameY: -36680.63, radius: 6000.0, team: "ger", type: "strongpoint" },
+      { label: "ARTILLERY GUNS", id: "B6", gameX: -71609.83, gameY: 8175.46, radius: 6000.0, team: "ger", type: "strongpoint" },
+      { label: "VEHICLE DEPOT", id: "B1", gameX: -68233.38, gameY: 37264.52, radius: 6000.0, team: "ger", type: "strongpoint" },
+      { label: "WATCHTOWER", id: "B12", gameX: -40818.59, gameY: -37838.59, radius: 6000.0, team: "ger", type: "strongpoint" },
+      { label: "EL MREIR", id: "B7", gameX: -37776.82, gameY: 2887.53, radius: 6000.0, team: "ger", type: "strongpoint" },
+      { label: "HAMLET RUINS", id: "B2", gameX: -37466.63, gameY: 37732.38, radius: 6000.0, team: "ger", type: "strongpoint" }
     ]
   },
 
@@ -239,7 +239,7 @@ const MAP_DATABASE = {
     teams: { t1: "UNITED STATES", t2: "GERMANY" },
     history: {
       battle: "Battle of Elsenborn Ridge (December 16-26, 1944)",
-      description: "During the Battle of the Bulge (Operation Wacht am Rhein), German forces launched a surprise offensive through the Ardennes on December 16, 1944. Sepp Dietrich's 6th Panzer Army, including the 1st SS Panzer Division with Joachim Peiper's kampfgruppe, attacked American positions at Elsenborn Ridge in heavy snow and freezing temperatures. The German advance was slowed by destroyed bridges, minefields, and the stubborn defense of the US 2nd and 99th Infantry Divisions.",
+      description: "During the Battle of the Bulge (Operation Wacht am Rhein), German forces launched a surprise offensive through the Ardennes on December 16, 1944. Sepp Dietrich's 6th Panzer Army, including the 1st SS Panzer Division with Joachim Peiper's Kampfgruppe, attacked American positions at Elsenborn Ridge in heavy snow and freezing temperatures. The German advance was slowed by destroyed bridges, minefields, and the stubborn defense of the US 2nd and 99th Infantry Divisions.",
       tactics: "American forces employed defense in depth using field fortifications around villages and choke points. The 18-man reconnaissance platoon at Lanzerath Ridge delayed Peiper's advance for hours. American defenders used bazookas, anti-tank mines including 'daisy chains' dragged across roads, and heavy artillery support. Tank destroyers like the M36 Jackson and anti-tank guns fired from covered positions. The dense forest and frozen terrain channeled German armor onto roads where they were vulnerable to ambush.",
       significance: "Elsenborn Ridge was the only sector of the American front during the Battle of the Bulge where German forces failed to advance. This defense blocked three of five planned German routes to Antwerp, forcing the northern pincer to alter its plans and significantly slowing the advance. Historian John S.D. Eisenhower called the action of the 2nd and 99th Divisions 'the most decisive of the Ardennes campaign.' The failure to break through at Elsenborn Ridge contributed to the overall collapse of the German offensive.",
       images: [
@@ -342,26 +342,26 @@ const MAP_DATABASE = {
       { label: "", id: "GER_A2", gameX: 7401.13, gameY: 93871.51, radius: 500, team: "ger", type: "point", rotation: 0.0 }, 
       { label: "", id: "GER_A3", gameX: 8783.13, gameY: 93871.70, radius: 500, team: "ger", type: "point", rotation: 0.0 },
 
-      // --- AXIS SECTORS ---
-      { label: "ROAD TO RECOGNE", id: "B11", gameX: -49755.0, gameY: 74340.0, radius: 2750.0, team: "ger", type: "strongpoint" }, 
-      { label: "COBRU APPROACH", id: "B13", gameX: 9952.0, gameY: 74787.0, radius: 3500.0, team: "ger", type: "strongpoint" },  
-      { label: "ROAD TO NOVILLE", id: "B12", gameX: 38286.18, gameY: 76947.95, radius: 5343.75, team: "ger", type: "strongpoint" }, 
-      { label: "COBRU FACTORY", id: "B10", gameX: -29988.0, gameY: 44676.0, radius: 5500.0, team: "ger", type: "strongpoint" }, 
-      { label: "FOY", id: "B15", gameX: -9586.0, gameY: 34052.0, radius: 3250.0, team: "ger", type: "strongpoint" }, 
-      { label: "FLAK BATTERY", id: "B8", gameX: 45241.0, gameY: 39594.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
-
-      // --- NEUTRAL SECTORS ---
-      { label: "WEST BEND", id: "B9", gameX: -53153.0, gameY: 12966.0, radius: 5500.0, team: "neu", type: "strongpoint" }, 
-      { label: "SOUTHERN EDGE", id: "B3", gameX: -1114.0, gameY: -589.0, radius: 4738.37, team: "neu", type: "strongpoint" }, 
-      { label: "DUGOUT BARN", id: "B14", gameX: 46085.04, gameY: 4721.09, radius: 4139.88, team: "neu", type: "strongpoint" }, 
-
       // --- ALLIES SECTORS ---
       { label: "N30 HIGHWAY", id: "B4", gameX: -38407.0, gameY: -31775.0, radius: 6250.0, team: "us", type: "strongpoint" }, 
       { label: "BIZORY-FOY ROAD", id: "B2", gameX: 10035.0, gameY: -39390.0, radius: 3500.0, team: "us", type: "strongpoint" }, 
       { label: "EASTERN OURTHE", id: "B1", gameX: 45845.0, gameY: -27822.0, radius: 4531.25, team: "us", type: "strongpoint" }, 
       { label: "ROAD TO BASTOGNE", id: "B7", gameX: -52862.0, gameY: -63773.0, radius: 4000.0, team: "us", type: "strongpoint" }, 
       { label: "BOIS JACQUES", id: "B5", gameX: -5582.0, gameY: -68237.0, radius: 5000.0, team: "us", type: "strongpoint" }, 
-      { label: "FOREST OUTSKIRTS", id: "B6", gameX: 46279.0, gameY: -67141.0, radius: 5000.0, team: "us", type: "strongpoint" }
+      { label: "FOREST OUTSKIRTS", id: "B6", gameX: 46279.0, gameY: -67141.0, radius: 5000.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "WEST BEND", id: "B9", gameX: -53153.0, gameY: 12966.0, radius: 5500.0, team: "neu", type: "strongpoint" }, 
+      { label: "SOUTHERN EDGE", id: "B3", gameX: -1114.0, gameY: -589.0, radius: 4738.37, team: "neu", type: "strongpoint" }, 
+      { label: "DUGOUT BARN", id: "B14", gameX: 46085.04, gameY: 4721.09, radius: 4139.88, team: "neu", type: "strongpoint" }, 
+
+      // --- AXIS SECTORS ---
+      { label: "ROAD TO RECOGNE", id: "B11", gameX: -49755.0, gameY: 74340.0, radius: 2750.0, team: "ger", type: "strongpoint" }, 
+      { label: "COBRU APPROACH", id: "B13", gameX: 9952.0, gameY: 74787.0, radius: 3500.0, team: "ger", type: "strongpoint" },  
+      { label: "ROAD TO NOVILLE", id: "B12", gameX: 38286.18, gameY: 76947.95, radius: 5343.75, team: "ger", type: "strongpoint" }, 
+      { label: "COBRU FACTORY", id: "B10", gameX: -29988.0, gameY: 44676.0, radius: 5500.0, team: "ger", type: "strongpoint" }, 
+      { label: "FOY", id: "B15", gameX: -9586.0, gameY: 34052.0, radius: 3250.0, team: "ger", type: "strongpoint" }, 
+      { label: "FLAK BATTERY", id: "B8", gameX: 45241.0, gameY: 39594.0, radius: 4000.0, team: "ger", type: "strongpoint" }
     ]
   },
 
@@ -379,7 +379,7 @@ H4: {
         {
           thumbnail: "images/history/hill_400/hill_400_1944_thumbnail.webp",
           full: "images/history/hill_400/hill_400_1944.webp",
-          caption: "Weary infantrymen take a brief rest on a slope in the Hurtgen forest in Germany during the Hürtgen Forest campaign, November-December 1944. Left to right, Pfc. Maurice Berzon, Buffalo, N.Y., S Sgt. Bernard Spurr, Newark, Ohio, and S Sgt. Harold Glessler."
+          caption: "Weary infantrymen take a brief rest on a slope in the Hurtgen forest in Germany during the Hürtgen Forest campaign, November-December 1944. Left to right, Pfc. Maurice Berzon, Buffalo, N.Y., S/Sgt. Bernard Spurr, Newark, Ohio, and S/Sgt. Harold Glessler."
         }
       ]
     },
@@ -587,7 +587,7 @@ H4: {
       { label: "", id: "GER_A8", gameX: 55950.723, gameY: -98663.51, radius: 500, team: "ger", type: "point", rotation: 180.00027 },
       { label: "", id: "GER_A9", gameX: 57546.39, gameY: -97898.484, radius: 500, team: "ger", type: "point", rotation: 180.00029 },
 
-      // --- CANADIAN SECTORS ---
+      // --- ALLIES SECTORS ---
       { label: "GRAYE-SUR-MER OUTSKIRTS", id: "B18", gameX: -39670.0, gameY: -69078.0, radius: 5500.0, team: "can", type: "strongpoint" },
       { label: "RADAR STATION", id: "B19", gameX: -2611.0, gameY: -67760.0, radius: 6000.0, team: "can", type: "strongpoint" },
       { label: "CHEM DE LA LAMPE", id: "B20", gameX: 39765.0, gameY: -70210.0, radius: 8000.0, team: "can", type: "strongpoint" },
@@ -664,26 +664,26 @@ H4: {
       { label: "", id: "GER_A2", gameX: -1593.68, gameY: -90886.69, radius: 500, team: "ger", type: "point", rotation: -172.8 }, 
       { label: "", id: "GER_A3", gameX: 206.03, gameY: -91623.68, radius: 500, team: "ger", type: "point", rotation: -159.1 }, 
 
-      // --- AXIS SECTORS ---
-      { label: "WEHRMACHT OUTLOOK", id: "B1", gameX: -37313.91, gameY: -72972.37, radius: 3750.0, team: "ger", type: "strongpoint" },
-      { label: "HAY STORAGE", id: "B2", gameX: 4240.65, gameY: -71736.38, radius: 3750.0, team: "ger", type: "strongpoint" },
-      { label: "OVERPASS", id: "B3", gameX: 41180.39, gameY: -70416.95, radius: 3750.0, team: "ger", type: "strongpoint" },
-      { label: "RIVER CROSSING", id: "B4", gameX: -27116.35, gameY: -40003.02, radius: 3750.0, team: "ger", type: "strongpoint" },
-      { label: "BELGOROD OUTSKIRTS", id: "B5", gameX: 8105.97, gameY: -38673.01, radius: 9000.0, team: "ger", type: "strongpoint" },
-      { label: "LUMBERYARD", id: "B6", gameX: 46774.79, gameY: -37490.91, radius: 3750.0, team: "ger", type: "strongpoint" },
-
-      // --- NEUTRAL SECTORS ---
-      { label: "WATER MILL", id: "B7", gameX: -36761.05, gameY: 3563.89, radius: 3750.0, team: "neu", type: "strongpoint" },
-      { label: "ST MARY", id: "B8", gameX: 6074.99, gameY: 633.23, radius: 6000.0, team: "neu", type: "strongpoint" },
-      { label: "DISTILLERY", id: "B9", gameX: 44449.21, gameY: 4542.49, radius: 3750.0, team: "neu", type: "strongpoint" },
-
       // --- ALLIES SECTORS ---
       { label: "BITTER SPRING", id: "B10", gameX: -37433.28, gameY: 38891.41, radius: 8000.0, team: "us", type: "strongpoint" },
       { label: "LUMBER WORKS", id: "B11", gameX: 7916.14, gameY: 39814.16, radius: 3750.0, team: "us", type: "strongpoint" },
       { label: "WINDMILL HILLSIDE", id: "B12", gameX: 46877.23, gameY: 41370.87, radius: 3750.0, team: "us", type: "strongpoint" },
       { label: "MARSH TOWN", id: "B13", gameX: -36517.52, gameY: 70661.75, radius: 3750.0, team: "us", type: "strongpoint" },
       { label: "SOVIET VANTAGE POINT", id: "B14", gameX: 8032.91, gameY: 70714.63, radius: 3750.0, team: "us", type: "strongpoint" },
-      { label: "GERMAN FUEL DUMP", id: "B15", gameX: 41168.31, gameY: 70231.15, radius: 3750.0, team: "us", type: "strongpoint" }
+      { label: "GERMAN FUEL DUMP", id: "B15", gameX: 41168.31, gameY: 70231.15, radius: 3750.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "WATER MILL", id: "B7", gameX: -36761.05, gameY: 3563.89, radius: 3750.0, team: "neu", type: "strongpoint" },
+      { label: "ST MARY", id: "B8", gameX: 6074.99, gameY: 633.23, radius: 6000.0, team: "neu", type: "strongpoint" },
+      { label: "DISTILLERY", id: "B9", gameX: 44449.21, gameY: 4542.49, radius: 3750.0, team: "neu", type: "strongpoint" },
+
+      // --- AXIS SECTORS ---
+      { label: "WEHRMACHT OUTLOOK", id: "B1", gameX: -37313.91, gameY: -72972.37, radius: 3750.0, team: "ger", type: "strongpoint" },
+      { label: "HAY STORAGE", id: "B2", gameX: 4240.65, gameY: -71736.38, radius: 3750.0, team: "ger", type: "strongpoint" },
+      { label: "OVERPASS", id: "B3", gameX: 41180.39, gameY: -70416.95, radius: 3750.0, team: "ger", type: "strongpoint" },
+      { label: "RIVER CROSSING", id: "B4", gameX: -27116.35, gameY: -40003.02, radius: 3750.0, team: "ger", type: "strongpoint" },
+      { label: "BELGOROD OUTSKIRTS", id: "B5", gameX: 8105.97, gameY: -38673.01, radius: 9000.0, team: "ger", type: "strongpoint" },
+      { label: "LUMBERYARD", id: "B6", gameX: 46774.79, gameY: -37490.91, radius: 3750.0, team: "ger", type: "strongpoint" }
     ]
   },
   
@@ -741,26 +741,26 @@ KUR: {
       { label: "", id: "GER_A2", gameX: -584.95,  gameY: -91323.79, radius: 500, team: "ger", type: "point", rotation: 181.9 },
       { label: "", id: "GER_A3", gameX: 249.13,   gameY: -91934.51, radius: 500, team: "ger", type: "point", rotation: 175.6 },
 
-      // --- AXIS SECTORS ---
-      { label: "ROAD TO KURSK", id: "B1", gameX: -31287.0, gameY: -68120.0, radius: 4500.0, team: "ger", type: "strongpoint" },
-      { label: "AMMO DUMP", id: "B14", gameX: -1729.0, gameY: -66294.0, radius: 5447.0, team: "ger", type: "strongpoint" },
-      { label: "EASTERN POSITION", id: "B13", gameX: 36100.0, gameY: -65758.0, radius: 6000.0, team: "ger", type: "strongpoint" },
-      { label: "RUDNO", id: "B2", gameX: -27089.0, gameY: -40069.0, radius: 6000.0, team: "ger", type: "strongpoint" },
-      { label: "DESTROYED BATTERY", id: "B15", gameX: -990.0, gameY: -39981.0, radius: 4500.0, team: "ger", type: "strongpoint" },
-      { label: "THE MUDDY CHURN", id: "B12", gameX: 41089.0, gameY: -42772.0, radius: 4500.0, team: "ger", type: "strongpoint" },
-
-      // --- NEUTRAL SECTORS ---
-      { label: "THE WINDMILLS", id: "B3", gameX: -26712.39, gameY: 4842.25, radius: 6000.0, team: "neu", type: "strongpoint" },
-      { label: "YAMKI", id: "B10", gameX: 9609.0, gameY: -3974.0, radius: 6973.0, team: "neu", type: "strongpoint" },
-      { label: "OLEG'S HOUSE", id: "B11", gameX: 39754.0, gameY: -7774.0, radius: 4500.0, team: "neu", type: "strongpoint" },
-
       // --- ALLIES SECTORS ---
       { label: "PANZER'S END", id: "B4", gameX: -35117.0, gameY: 31958.0, radius: 6000.0, team: "us", type: "strongpoint" },
       { label: "DEFENCE IN DEPTH", id: "B9", gameX: 1604.0, gameY: 34906.0, radius: 7022.0, team: "us", type: "strongpoint" },
       { label: "LISTENING POST", id: "B8", gameX: 40413.0, gameY: 36000.0, radius: 7673.0, team: "us", type: "strongpoint" },
       { label: "ARTILLERY POSITION", id: "B5", gameX: -35117.0, gameY: 68921.0, radius: 6000.0, team: "us", type: "strongpoint" },
       { label: "GRUSHKI", id: "B6", gameX: 7070.0, gameY: 68141.0, radius: 4961.0, team: "us", type: "strongpoint" },
-      { label: "GRUSHKI FLANK", id: "B7", gameX: 47151.0, gameY: 67169.0, radius: 4500.0, team: "us", type: "strongpoint" }
+      { label: "GRUSHKI FLANK", id: "B7", gameX: 47151.0, gameY: 67169.0, radius: 4500.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "THE WINDMILLS", id: "B3", gameX: -26712.39, gameY: 4842.25, radius: 6000.0, team: "neu", type: "strongpoint" },
+      { label: "YAMKI", id: "B10", gameX: 9609.0, gameY: -3974.0, radius: 6973.0, team: "neu", type: "strongpoint" },
+      { label: "OLEG'S HOUSE", id: "B11", gameX: 39754.0, gameY: -7774.0, radius: 4500.0, team: "neu", type: "strongpoint" },
+
+      // --- AXIS SECTORS ---
+      { label: "ROAD TO KURSK", id: "B1", gameX: -31287.0, gameY: -68120.0, radius: 4500.0, team: "ger", type: "strongpoint" },
+      { label: "AMMO DUMP", id: "B14", gameX: -1729.0, gameY: -66294.0, radius: 5447.0, team: "ger", type: "strongpoint" },
+      { label: "EASTERN POSITION", id: "B13", gameX: 36100.0, gameY: -65758.0, radius: 6000.0, team: "ger", type: "strongpoint" },
+      { label: "RUDNO", id: "B2", gameX: -27089.0, gameY: -40069.0, radius: 6000.0, team: "ger", type: "strongpoint" },
+      { label: "DESTROYED BATTERY", id: "B15", gameX: -990.0, gameY: -39981.0, radius: 4500.0, team: "ger", type: "strongpoint" },
+      { label: "THE MUDDY CHURN", id: "B12", gameX: 41089.0, gameY: -42772.0, radius: 4500.0, team: "ger", type: "strongpoint" }
     ] 
   },
   
@@ -885,26 +885,26 @@ KUR: {
       { label: "", id: "GER_A2", gameX: -93742.41, gameY: 662.3068, radius: 500, team: "ger", type: "point", rotation: -89.5 },
       { label: "", id: "GER_A3", gameX: -93369.984, gameY: -4131.0264, radius: 500, team: "ger", type: "point", rotation: -89.5 },
 
-      // --- AXIS SECTORS ---
-      { label: "BEAUMONT ROAD", id: "B11", gameX: -66508.0, gameY: 34528.0, radius: 5000.0, team: "ger", type: "strongpoint" },
-      { label: "CROSSROADS", id: "B12", gameX: -63975.723, gameY: -2684.23, radius: 3713.8135, team: "ger", type: "strongpoint" },
-      { label: "CHURCH ROAD", id: "B9", gameX: -36692.0, gameY: 9308.0, radius: 5000.0, team: "ger", type: "strongpoint" },
-      { label: "REAR BATTERY", id: "B10", gameX: -40364.508, gameY: 47019.88, radius: 5000.0, team: "ger", type: "strongpoint" },
-      { label: "LES ISLES", id: "B13", gameX: -65785.0, gameY: -33673.0, radius: 5000.0, team: "ger", type: "strongpoint" },
-      { label: "THE ORCHARDS", id: "B8", gameX: -44319.355, gameY: -27163.912, radius: 4000.0, team: "ger", type: "strongpoint" },
-      
-      // --- NEUTRAL SECTORS ---
-      { label: "WEST VIERVILLE", id: "B5", gameX: 4665.0, gameY: 40540.0, radius: 5000.0, team: "neu", type: "strongpoint" },
-      { label: "VIERVILLE SUR MER", id: "B6", gameX: -2661.8896, gameY: 2895.0942, radius: 5000.0, team: "neu", type: "strongpoint" },
-      { label: "ARTILLERY BATTERY", id: "B7", gameX: 2342.277, gameY: -31510.633, radius: 5000.0, team: "neu", type: "strongpoint" },
-      
       // --- ALLIES SECTORS ---
       { label: "WN73", id: "B4", gameX: 54259.0, gameY: 44498.0, radius: 5000.0, team: "us", type: "strongpoint" },
       { label: "DOG GREEN", id: "B3", gameX: 67602.0, gameY: 31262.0, radius: 6250.0, team: "us", type: "strongpoint" },
       { label: "WN71", id: "B1", gameX: 55132.387, gameY: 5791.973, radius: 3750.0, team: "us", type: "strongpoint" },
       { label: "THE DRAW", id: "B14", gameX: 71322.0, gameY: 7432.0, radius: 3750.0, team: "us", type: "strongpoint" },
       { label: "WN70", id: "B2", gameX: 46516.0, gameY: -30340.0, radius: 5000.0, team: "us", type: "strongpoint" },
-      { label: "DOG WHITE", id: "B15", gameX: 71817.0, gameY: -30284.0, radius: 5000.0, team: "us", type: "strongpoint" }
+      { label: "DOG WHITE", id: "B15", gameX: 71817.0, gameY: -30284.0, radius: 5000.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "WEST VIERVILLE", id: "B5", gameX: 4665.0, gameY: 40540.0, radius: 5000.0, team: "neu", type: "strongpoint" },
+      { label: "VIERVILLE SUR MER", id: "B6", gameX: -2661.8896, gameY: 2895.0942, radius: 5000.0, team: "neu", type: "strongpoint" },
+      { label: "ARTILLERY BATTERY", id: "B7", gameX: 2342.277, gameY: -31510.633, radius: 5000.0, team: "neu", type: "strongpoint" },
+      
+      // --- AXIS SECTORS ---
+      { label: "BEAUMONT ROAD", id: "B11", gameX: -66508.0, gameY: 34528.0, radius: 5000.0, team: "ger", type: "strongpoint" },
+      { label: "CROSSROADS", id: "B12", gameX: -63975.723, gameY: -2684.23, radius: 3713.8135, team: "ger", type: "strongpoint" },
+      { label: "CHURCH ROAD", id: "B9", gameX: -36692.0, gameY: 9308.0, radius: 5000.0, team: "ger", type: "strongpoint" },
+      { label: "REAR BATTERY", id: "B10", gameX: -40364.508, gameY: 47019.88, radius: 5000.0, team: "ger", type: "strongpoint" },
+      { label: "LES ISLES", id: "B13", gameX: -65785.0, gameY: -33673.0, radius: 5000.0, team: "ger", type: "strongpoint" },
+      { label: "THE ORCHARDS", id: "B8", gameX: -44319.355, gameY: -27163.912, radius: 4000.0, team: "ger", type: "strongpoint" }
     ] 
   },
 
@@ -944,7 +944,7 @@ PHL: {
       { label: "", id: "GER_A2", gameX: 1502.01, gameY: -92441.29, radius: 500, team: "ger", type: "point", rotation: -185.6 }, 
       { label: "", id: "GER_A3", gameX: 1718.97, gameY: -90134.83, radius: 500, team: "ger", type: "point", rotation: -171.6 },
 
-      // --- ALLIES SECTORS (North) ---
+      // --- ALLIES SECTORS ---
       { label: "BLOODY BEND", id: "B12", gameX: -53699.133, gameY: 68803.984, radius: 2750.0, team: "ger", type: "strongpoint" },
       { label: "DEAD MAN'S CORNER", id: "B8", gameX: 740.8672, gameY: 65433.984, radius: 4000.0, team: "neu", type: "strongpoint" },
       { label: "FORWARD BATTERY", id: "B6", gameX: 33330.867, gameY: 66643.984, radius: 4000.0, team: "us", type: "strongpoint" },
@@ -957,7 +957,7 @@ PHL: {
       { label: "CARENTAN CAUSEWAY", id: "B3", gameX: 787.74744, gameY: -1346.289, radius: 3500.0, team: "us", type: "strongpoint" },
       { label: "FLAK POSITION", id: "B13", gameX: 45592.906, gameY: 4116.6772, radius: 4750.0, team: "ger", type: "strongpoint" },
       
-      // --- AXIS SECTORS (South) ---
+      // --- AXIS SECTORS ---
       { label: "MADELEINE FARM", id: "B10", gameX: -33264.676, gameY: -30204.594, radius: 3250.0, team: "ger", type: "strongpoint" },
       { label: "MADELEINE BRIDGE", id: "B1", gameX: 1928.2188, gameY: -39878.098, radius: 3000.0, team: "us", type: "strongpoint" },
       { label: "AID STATION", id: "B11", gameX: 47043.207, gameY: -32172.8, radius: 3250.0, team: "ger", type: "strongpoint" },
@@ -1021,26 +1021,26 @@ REM: {
       { label: "", id: "GER_A2", gameX: 16394.264, gameY: 94198.32, radius: 500, team: "ger", type: "point", rotation: -1.3 }, 
       { label: "", id: "GER_A3", gameX: 17936.605, gameY: 93962.43, radius: 500, team: "ger", type: "point", rotation: -1.3 },
 
-      // --- AXIS SECTORS ---
-      { label: "ALTE LIEBE BARSCH", id: "B11", gameX: -41114.0, gameY: 69583.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
-      { label: "BEWALDET KREUZUNG", id: "B12", gameX: -891.0, gameY: 69550.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
-      { label: "DAN RADART 512", id: "B15", gameX: 41625.0, gameY: 69063.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
-      { label: "ERPEL", id: "B10", gameX: -39275.0, gameY: 40853.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
-      { label: "ERPELER LEY", id: "B13", gameX: 9697.0, gameY: 42679.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
-      { label: "KASBACH OUTLOOK", id: "B14", gameX: 38436.418, gameY: 41098.23, radius: 4000.0, team: "ger", type: "strongpoint" }, 
-
-      // --- NEUTRAL SECTORS ---
-      { label: "ST. SEVERIN CHAPEL", id: "B9", gameX: -39275.0, gameY: 12967.0, radius: 4000.0, team: "neu", type: "strongpoint" }, 
-      { label: "LUDENDORFF BRIDGE", id: "B1", gameX: 3032.2412, gameY: -7.0210953, radius: 8000.0, team: "neu", type: "strongpoint" }, 
-      { label: "BAUERNHOF AM RHEIN", id: "B6", gameX: 38817.02, gameY: -15613.944, radius: 4000.0, team: "neu", type: "strongpoint" }, 
-
       // --- ALLIES SECTORS ---
       { label: "REMAGEN", id: "B7", gameX: -35925.75, gameY: -39434.0, radius: 4000.0, team: "us", type: "strongpoint" }, 
       { label: "MÖBELFABRIK", id: "B2", gameX: -1000.0, gameY: -40824.0, radius: 5000.0, team: "us", type: "strongpoint" }, 
       { label: "SCHLIEFFEN AUSWEG", id: "B5", gameX: 39053.0, gameY: -38264.0, radius: 4000.0, team: "us", type: "strongpoint" }, 
       { label: "WALDBURG", id: "B8", gameX: -40954.977, gameY: -80279.71, radius: 4000.0, team: "us", type: "strongpoint" }, 
       { label: "MÜHLENWEG", id: "B3", gameX: 3742.6152, gameY: -72094.91, radius: 4000.0, team: "us", type: "strongpoint" }, 
-      { label: "HAGELKREUZ", id: "B4", gameX: 37607.746, gameY: -68933.32, radius: 4000.0, team: "us", type: "strongpoint" }
+      { label: "HAGELKREUZ", id: "B4", gameX: 37607.746, gameY: -68933.32, radius: 4000.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "ST. SEVERIN CHAPEL", id: "B9", gameX: -39275.0, gameY: 12967.0, radius: 4000.0, team: "neu", type: "strongpoint" }, 
+      { label: "LUDENDORFF BRIDGE", id: "B1", gameX: 3032.2412, gameY: -7.0210953, radius: 8000.0, team: "neu", type: "strongpoint" }, 
+      { label: "BAUERNHOF AM RHEIN", id: "B6", gameX: 38817.02, gameY: -15613.944, radius: 4000.0, team: "neu", type: "strongpoint" }, 
+
+      // --- AXIS SECTORS ---
+      { label: "ALTE LIEBE BARSCH", id: "B11", gameX: -41114.0, gameY: 69583.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
+      { label: "BEWALDET KREUZUNG", id: "B12", gameX: -891.0, gameY: 69550.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
+      { label: "DAN RADART 512", id: "B15", gameX: 41625.0, gameY: 69063.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
+      { label: "ERPEL", id: "B10", gameX: -39275.0, gameY: 40853.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
+      { label: "ERPELER LEY", id: "B13", gameX: 9697.0, gameY: 42679.0, radius: 4000.0, team: "ger", type: "strongpoint" }, 
+      { label: "KASBACH OUTLOOK", id: "B14", gameX: 38436.418, gameY: 41098.23, radius: 4000.0, team: "ger", type: "strongpoint" }
     ]
   },
 
@@ -1261,26 +1261,26 @@ SMM: {
       { label: "", id: "GER_A4", gameX: -98613.016, gameY: 40709.0, radius: 500, team: "ger", type: "point", rotation: -90.0 }, 
       { label: "", id: "GER_A5", gameX: -98696.92, gameY: -29907.863, radius: 500, team: "ger", type: "point", rotation: -73.467476 },
 
-      // --- AXIS SECTORS ---
-      { label: "PANZER LOADING STATION", id: "SMO_GER_Base1", gameX: -68850.08, gameY: 40044.95, radius: 7000.0, team: "ger", type: "strongpoint" },
-      { label: "TRAM DEPOT", id: "SMO_GER_Base2", gameX: -67850.08, gameY: 5084.95, radius: 7000.0, team: "ger", type: "strongpoint" },
-      { label: "SMOLENSK OUTSKIRTS", id: "SMO_GER_Base3", gameX: -68850.08, gameY: -40680.05, radius: 6500.0, team: "ger", type: "strongpoint" },
-      { label: "SMOLENSK HAUPTBAHNHOF", id: "SMO_GER_Mid1", gameX: -38450.08, gameY: 40044.95, radius: 7000.0, team: "ger", type: "strongpoint" },
-      { label: "LUMBER YARD", id: "SMO_GER_Mid2", gameX: -36050.08, gameY: -8915.05, radius: 9000.0, team: "ger", type: "strongpoint" },
-      { label: "DNIEPER WEST CROSSING", id: "SMO_GER_Mid3", gameX: -40450.08, gameY: -39680.05, radius: 7000.0, team: "ger", type: "strongpoint" },
-
-      // --- NEUTRAL SECTORS ---
-      { label: "PYATNITSKII OVERPASS", id: "SMO_Mid1", gameX: 1000.0, gameY: 38544.95, radius: 6500.0, team: "neu", type: "strongpoint" },
-      { label: "ZHELYABOVA SQUARE", id: "SMO_Mid2", gameX: 1000.0, gameY: 0.0, radius: 6500.0, team: "neu", type: "strongpoint" },
-      { label: "84TH BATTALION BRIDGE", id: "SMO_Mid3", gameX: 1000.0, gameY: -40680.05, radius: 6000.0, team: "neu", type: "strongpoint" },
-
       // --- ALLIES SECTORS ---
       { label: "ZADNEPROVIE DISTRICT", id: "SMO_SOV_Mid1", gameX: 39264.92, gameY: 40444.95, radius: 6500.0, team: "us", type: "strongpoint" },
       { label: "MOSKOVSKAYA STREET", id: "SMO_SOV_Mid2", gameX: 39764.92, gameY: 1084.95, radius: 6500.0, team: "us", type: "strongpoint" },
       { label: "SMOLENSK CITADEL", id: "SMO_SOV_Mid3", gameX: 39264.92, gameY: -40680.05, radius: 7000.0, team: "us", type: "strongpoint" },
       { label: "RAILYARD STORAGE", id: "SMO_SOV_Base1", gameX: 68709.92, gameY: 40044.95, radius: 7000.0, team: "us", type: "strongpoint" },
       { label: "APARTMENT BLOCK", id: "SMO_SOV_Base2", gameX: 69209.92, gameY: 1084.95, radius: 7000.0, team: "us", type: "strongpoint" },
-      { label: "BOMBARDED RIVERFRONT", id: "SMO_SOV_Base3", gameX: 69209.92, gameY: -40080.05, radius: 7000.0, team: "us", type: "strongpoint" }
+      { label: "BOMBARDED RIVERFRONT", id: "SMO_SOV_Base3", gameX: 69209.92, gameY: -40080.05, radius: 7000.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "PYATNITSKII OVERPASS", id: "SMO_Mid1", gameX: 1000.0, gameY: 38544.95, radius: 6500.0, team: "neu", type: "strongpoint" },
+      { label: "ZHELYABOVA SQUARE", id: "SMO_Mid2", gameX: 1000.0, gameY: 0.0, radius: 6500.0, team: "neu", type: "strongpoint" },
+      { label: "84TH BATTALION BRIDGE", id: "SMO_Mid3", gameX: 1000.0, gameY: -40680.05, radius: 6000.0, team: "neu", type: "strongpoint" },
+
+      // --- AXIS SECTORS ---
+      { label: "PANZER LOADING STATION", id: "SMO_GER_Base1", gameX: -68850.08, gameY: 40044.95, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "TRAM DEPOT", id: "SMO_GER_Base2", gameX: -67850.08, gameY: 5084.95, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "SMOLENSK OUTSKIRTS", id: "SMO_GER_Base3", gameX: -68850.08, gameY: -40680.05, radius: 6500.0, team: "ger", type: "strongpoint" },
+      { label: "SMOLENSK HAUPTBAHNHOF", id: "SMO_GER_Mid1", gameX: -38450.08, gameY: 40044.95, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "LUMBER YARD", id: "SMO_GER_Mid2", gameX: -36050.08, gameY: -8915.05, radius: 9000.0, team: "ger", type: "strongpoint" },
+      { label: "DNIEPER WEST CROSSING", id: "SMO_GER_Mid3", gameX: -40450.08, gameY: -39680.05, radius: 7000.0, team: "ger", type: "strongpoint" }
     ] 
   },
 
@@ -1353,26 +1353,26 @@ STA: {
       { label: "", id: "GER_A2", gameX: -93397.79, gameY: -3805.0764, radius: 500, team: "ger", type: "point", rotation: -89.5 }, 
       { label: "", id: "GER_A3", gameX: -93916.195, gameY: -2579.355, radius: 500, team: "ger", type: "point", rotation: -97.5 },
 
-      // --- AXIS SECTORS ---
-      { label: "CITY OVERLOOK", id: "B11", gameX: -69346.0, gameY: -48417.0, radius: 8000.0, team: "ger", type: "strongpoint" },
-      { label: "NAIL FACTORY", id: "B10", gameX: -71016.0, gameY: -11068.0, radius: 8000.0, team: "ger", type: "strongpoint" },
-      { label: "MAMAYEV APPROACH", id: "B9", gameX: -69500.0, gameY: 47966.0, radius: 7000.0, team: "ger", type: "strongpoint" },
-      { label: "KOMSOMOL HQ", id: "B14", gameX: -39683.0, gameY: -39676.0, radius: 8000.0, team: "ger", type: "strongpoint" },
-      { label: "YELLOW HOUSE", id: "B12", gameX: -39693.0, gameY: 1.5, radius: 8000.0, team: "ger", type: "strongpoint" },
-      { label: "DOLGIY RAVINE", id: "B8", gameX: -39681.0, gameY: 48845.0, radius: 7500.0, team: "ger", type: "strongpoint" },
-
-      // --- NEUTRAL SECTORS ---
-      { label: "TRAIN STATION", id: "B15", gameX: 6.0, gameY: -39678.0, radius: 8000.0, team: "neu", type: "strongpoint" },
-      { label: "CARRIAGE DEPOT", id: "B13", gameX: -15.0, gameY: -13.0, radius: 8500.0, team: "neu", type: "strongpoint" },
-      { label: "RAILWAY CROSSING", id: "B7", gameX: 7.0, gameY: 39673.0, radius: 8000.0, team: "neu", type: "strongpoint" },
-
       // --- ALLIES SECTORS ---
       { label: "THE BREWERY", id: "B3", gameX: 39674.0, gameY: -41970.0, radius: 7500.0, team: "us", type: "strongpoint" },
       { label: "PAVLOV'S HOUSE", id: "B1", gameX: 48586.0, gameY: -1452.0, radius: 7000.0, team: "us", type: "strongpoint" },
       { label: "HOUSE OF THE WORKERS", id: "B5", gameX: 36591.0, gameY: 40602.0, radius: 9500.0, team: "us", type: "strongpoint" },
       { label: "VOLGA BANKS", id: "B4", gameX: 70121.0, gameY: -43351.0, radius: 7500.0, team: "us", type: "strongpoint" },
       { label: "GRUDININ'S MILL", id: "B2", gameX: 70063.0, gameY: 32.0, radius: 7000.0, team: "us", type: "strongpoint" },
-      { label: "L-SHAPED HOUSE", id: "B6", gameX: 68875.0, gameY: 35043.0, radius: 7500.0, team: "us", type: "strongpoint" }
+      { label: "L-SHAPED HOUSE", id: "B6", gameX: 68875.0, gameY: 35043.0, radius: 7500.0, team: "us", type: "strongpoint" },
+
+      // --- NEUTRAL SECTORS ---
+      { label: "TRAIN STATION", id: "B15", gameX: 6.0, gameY: -39678.0, radius: 8000.0, team: "neu", type: "strongpoint" },
+      { label: "CARRIAGE DEPOT", id: "B13", gameX: -15.0, gameY: -13.0, radius: 8500.0, team: "neu", type: "strongpoint" },
+      { label: "RAILWAY CROSSING", id: "B7", gameX: 7.0, gameY: 39673.0, radius: 8000.0, team: "neu", type: "strongpoint" },
+
+      // --- AXIS SECTORS ---
+      { label: "CITY OVERLOOK", id: "B11", gameX: -69346.0, gameY: -48417.0, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "NAIL FACTORY", id: "B10", gameX: -71016.0, gameY: -11068.0, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "MAMAYEV APPROACH", id: "B9", gameX: -69500.0, gameY: 47966.0, radius: 7000.0, team: "ger", type: "strongpoint" },
+      { label: "KOMSOMOL HQ", id: "B14", gameX: -39683.0, gameY: -39676.0, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "YELLOW HOUSE", id: "B12", gameX: -39693.0, gameY: 1.5, radius: 8000.0, team: "ger", type: "strongpoint" },
+      { label: "DOLGIY RAVINE", id: "B8", gameX: -39681.0, gameY: 48845.0, radius: 7500.0, team: "ger", type: "strongpoint" }
     ] 
   },
 
