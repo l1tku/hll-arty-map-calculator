@@ -1,84 +1,73 @@
 /* ==========================================
-   MODAL HEADER (Version Positioning Fix)
+   MODAL HEADER
    ========================================== */
 
-/* Container for the stacked title */
 .modal-brand-header {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* Balanced padding */
     padding: 25px 20px 20px;
-    /* CHANGE: Increased gap from 4px to 12px to push credits down */
     gap: 12px;
     position: relative;
     flex-shrink: 0;
 
-    /* Background & Border (Moved here from your lower code for organization) */
     background: rgba(0, 0, 0, 0.4);
     border-bottom: 1px solid rgba(255, 193, 7, 0.3);
 }
 
-/* The Main Project Name */
 .main-title {
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
-    font-size: 36px !important; /* Kept your larger size preference */
+    font-size: 36px !important;
     color: #ffc107;
     text-transform: uppercase;
     letter-spacing: 2px;
-    line-height: 1; /* Tighter line height for the title itself */
+    line-height: 1;
     text-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
     text-align: center;
     padding-bottom: 5px;
 }
 
-/* Your Credit Line */
 .main-subtitle-credits {
     font-family: "GothamSS", sans-serif;
     font-weight: 700;
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5); /* Slightly brighter for better "sit" */
-    letter-spacing: 3px; /* Wider spacing looks more "premium" */
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 3px;
     text-transform: uppercase;
     display: flex;
     align-items: center;
     gap: 10px;
     text-shadow: none;
 
-    /* CHANGE: Force it slightly further down explicitly */
     margin-top: 2px;
 }
 
 /* ==========================================
-   TRAJECTORY STEPPER BUTTONS (Zoom Style Sync)
+   TRAJECTORY STEPPER BUTTONS
    ========================================== */
 
 .traj-step-btn {
-    /* Exact Background and Border from Zoom Icons */
     background-color: rgba(20, 20, 20, 0.95) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: white !important;
 
-    /* Font Styling */
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
     font-size: 14px;
 
-    /* Layout: THE SQUARE FIX */
     width: 36px !important;
     height: 36px !important;
-    aspect-ratio: 1 / 1 !important; /* Forces a perfect square */
-    flex-shrink: 0 !important; /* Prevents the buttons from squishing */
-    padding: 0 !important; /* Removes padding that affects squareness */
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
 
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
 
-    /* Interactions */
     transition:
         background-color 0.1s,
         color 0.1s,
@@ -88,7 +77,6 @@
     border-radius: 0;
 }
 
-/* Hover State (Desktop Only) */
 @media (hover: hover) {
     .traj-step-btn:hover {
         background-color: #ffc107 !important;
@@ -97,7 +85,6 @@
     }
 }
 
-/* Pressed State (Physical Feedback) */
 .traj-step-btn:active,
 .traj-step-btn.pressed {
     background-color: #ffc107 !important;
@@ -107,10 +94,9 @@
     box-shadow: none !important;
 }
 
-/* Ensure the step groups are aligned correctly */
 .traj-step-group {
     display: flex;
-    gap: 8px; /* Slightly wider gap for accessibility */
+    gap: 8px;
     align-items: center;
 }
 
@@ -121,23 +107,21 @@
 }
 
 /* ==========================================
-   TRAJECTORY BUTTON - EXACT HUD CLONE
+   TRAJECTORY BUTTON
    ========================================== */
 
-/* SVG Handling */
 #trajToggleBtn svg {
     display: block;
     pointer-events: none;
 }
 
-/* Base State (Exact HUD Clone) */
 #trajToggleBtn {
     background-color: rgba(20, 20, 20, 0.95) !important;
     color: white !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    touch-action: manipulation; /* Removes 300ms browser delay */
-    -webkit-tap-highlight-color: transparent; /* Optional: removes tap highlight box */
-    user-select: none; /* Prevents text selection on rapid taps */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
     transition:
         background-color 0.1s,
         color 0.1s;
@@ -147,7 +131,6 @@
     cursor: pointer;
 }
 
-/* Hover State (Exact HUD Clone) */
 @media (hover: hover) {
     #trajToggleBtn:not(.active):hover {
         background-color: rgba(60, 60, 60, 1) !important;
@@ -155,24 +138,22 @@
     }
 }
 
-/* Active State (Exact HUD Clone) */
 #trajToggleBtn.active {
     background-color: #ffc107 !important;
     color: black !important;
     border-color: #ffc107 !important;
 }
 
-/* Visual feedback on press (Exact HUD Clone) */
 #trajToggleBtn:active {
     transform: scale(0.95);
 }
 
 /* ==========================================
-   TRAJECTORY SLIDER - VISUAL RESTORATION
+   TRAJECTORY SLIDER
    ========================================== */
 
 .traj-slider-container {
-    position: fixed !important; /* Locks to screen glass, ignores map movement */
+    position: fixed !important;
     bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
@@ -187,14 +168,11 @@
 
     padding: 12px 10px !important;
 
-    /* CHANGED: Lowered to 400.
-       This places it BELOW the Target Panel (3000) to prevent stacking conflicts. */
     z-index: 400 !important;
 
     pointer-events: auto;
 }
 
-/* Forces slider track to expand between button groups */
 .traj-controls-wrapper {
     display: flex !important;
     align-items: center !important;
@@ -206,7 +184,7 @@
 
 .traj-slider-inner {
     position: relative;
-    flex: 1 !important; /* CRITICAL: Forces track to fill middle */
+    flex: 1 !important;
     display: flex;
     align-items: center;
     min-width: 100px;
@@ -218,17 +196,15 @@
     cursor: pointer;
     accent-color: #ffc107;
     display: block;
-    height: 30px; /* Larger hit area for fingers */
+    height: 30px;
     touch-action: none;
 }
 
-/* Hide old text displays for good */
 .traj-current-val-display,
 .traj-meter-display {
     display: none !important;
 }
 
-/* Ensure step buttons stay tactical squares */
 .traj-step-group {
     display: flex;
     gap: 5px;
@@ -248,10 +224,9 @@
     --grid-color: rgba(255, 255, 255, 1);
     --major-width: 2px;
     --minor-width: 1px;
-    color-scheme: dark; /* Force dark system controls */
+    color-scheme: dark;
 }
 
-/* --- Flag Styles --- */
 .faction-flag {
     width: 28px;
     height: auto;
@@ -261,13 +236,11 @@
     vertical-align: middle;
 }
 
-/* Ensure flex alignment in the dropdown items */
 .dropdown-item {
     display: flex;
     align-items: center;
 }
 
-/* Ensure flex alignment in the main button */
 #factionBtn {
     display: flex;
     align-items: center;
@@ -285,7 +258,6 @@
     font-style: normal;
 }
 
-/* Chrome/Blink rendering fixes */
 .marker-label,
 .hll-grid-label,
 .data-value {
@@ -294,16 +266,12 @@
 }
 
 html {
-    /* STOPS Pull-to-Refresh on Android */
     overscroll-behavior-y: none;
 
-    /* STOPS the whole page from bouncing on iOS */
     overflow: hidden;
 
-    /* STOPS double-tap to zoom on buttons */
     touch-action: none;
 
-    /* Fixes the "Address Bar" jumping issue */
     height: 100dvh;
 }
 
@@ -344,25 +312,14 @@ body {
     border-radius: 4px;
     overflow: hidden;
 
-    /* FIX 1: Performance Isolation */
-    /* Tells browser this container is isolated, preventing layout thrashing */
     contain: layout paint style;
 
-    /* --- CUSTOM CURSOR --- */
-    /* 16 16 sets the "hotspot" (click point) to the center of a 32x32 image. */
-    /* Change 'png' to 'webp' if your file is .webp */
-    /* cursor: url('../images/ui/garrison_lining_dot_2.png') 16 16, auto; */
 }
 
-/* Ensure the cursor changes to a grabbing hand when you click/drag */
 .map-wrap:active {
     cursor: grabbing;
 }
 
-/* ==========================================
-   MAP CONTAINER & STAGE
-   ========================================== */
-/* --- FIX 3: Performance Safety --- */
 .map-stage {
     transform-origin: 0 0;
     position: absolute;
@@ -370,54 +327,35 @@ body {
     left: 0;
     transition: opacity 0.4s ease-in-out;
 
-    /* --- FIX: REMOVE THESE LINES --- */
-    /* will-change: transform; */
-    /* -webkit-backface-visibility: hidden; */
-    /* backface-visibility: hidden; */
 
-    /* Modern browsers handle 2D transforms efficiently on the CPU/Compositor
-     without forcing a dedicated high-memory layer. */
 }
 
 /* ==========================================
-   DESKTOP SMOOTH ZOOM FIX (Safe for Mobile)
+   DESKTOP SMOOTH ZOOM
    ========================================== */
-/* 1025px ensures this NEVER runs on phones (even Pro Max in landscape) */
 @media (min-width: 1025px) {
-    /* 1. Hardware Acceleration for Markers Only */
-    /* translateZ(0) is intentionally NOT applied to .hll-grid-line.
-       Grid lines are static inside the already-composited mapStage and need no
-       individual GPU layers. Promoting 21+ grid lines was costing ~34% of total
-       frame time in GPU Paint (compositor blending 21+ layers per frame).
-       Markers keep their layers because they rotate independently. */
     .marker {
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         transform: translateZ(0);
     }
 
-    /* 2. Smooth Zoom Transitions (Desktop Only) */
-    /* We move the transition logic HERE so mobile doesn't crash trying to animate huge textures */
     .map-stage.zoom-transition {
         transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1) !important;
     }
 
     .label-layer.zoom-transition .hll-grid-label {
         transition: transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1) !important;
-        /* will-change: transform; REMOVED - causes checkerboarding on mobile Chrome */
     }
 
-    /* FIX: Smooth out BOTH position and scale */
     .map-stage.zoom-transition .marker-label {
         transition:
             transform 0.25s cubic-bezier(0.1, 0.2, 0.1, 1),
             top 0.25s cubic-bezier(0.1, 0.2, 0.1, 1) !important;
 
-        /* Tells the GPU to get ready to animate these properties */
         will-change: transform, top;
     }
 
-    /* FIX: Smooth out the arrow fading too */
     .map-stage.zoom-transition .marker-label::after {
         transition: opacity 0.25s cubic-bezier(0.1, 0.2, 0.1, 1) !important;
     }
@@ -428,13 +366,10 @@ body {
     pointer-events: none;
     max-width: none;
     max-height: none;
-    /* FIX 2: Reduce Scaling Cost */
-    /* CHANGE: high-quality causes checkerboarding on mobile zoom. Use auto. */
     image-rendering: auto;
-    /* Ensure no hardware acceleration hints are accidentally applied */
     transform: none;
     transition: opacity 0.3s ease-in-out;
-    background-color: black; /* Prevents white flashes */
+    background-color: black;
 }
 
 /* ==========================================
@@ -476,36 +411,28 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- GRID LINES (FIXED: No Dark Overlaps) --- */
 .hll-grid-line {
     position: absolute;
     z-index: 2;
     pointer-events: none;
 
-    /* 1. White Core */
     background-color: #ffffff !important;
 
-    /* 2. No standard border */
     border: none !important;
 
-    /* 3. THE FIX: Use a subtle hard shadow instead of a fuzzy one */
-    /* We reduce opacity to 0.5 so the overlap isn't as harsh */
     box-shadow:
         1px 0 0 rgba(0, 0, 0, 0.5),
         -1px 0 0 rgba(0, 0, 0, 0.5),
         0 1px 0 rgba(0, 0, 0, 0.5),
         0 -1px 0 rgba(0, 0, 0, 0.5) !important;
 
-    /* Optional: Mix-blend-mode can help lines merge,
-       but 'normal' is usually safest for UI overlays */
     mix-blend-mode: normal;
 }
 
-/* Ensure JS thickness logic works */
 .hll-grid-line.vertical {
     width: var(--major-width, 1px);
     height: 100%;
-    transform-origin: top left; /* Sharp rendering */
+    transform-origin: top left;
 }
 
 .hll-grid-line.horizontal {
@@ -528,9 +455,6 @@ body {
     overflow: hidden;
 }
 
-/* ==========================================
-   LABELS (Sticky Axis)
-   ========================================== */
 .hll-grid-label {
     position: absolute;
     top: 0;
@@ -540,17 +464,11 @@ body {
     font-size: 24px;
     color: #ffffff;
 
-    /* --- THE FIX --- */
-    /* 1. Remove the old shadow hack */
     text-shadow: none !important;
 
-    /* 2. Add a real vector stroke (Black, 3px thick) */
     -webkit-text-stroke: 3px #000000;
 
-    /* 3. CRITICAL: Draw the stroke BEHIND the white fill */
-    /* Without this, the black line will cover half your white text */
     paint-order: stroke fill;
-    /* ---------------- */
 
     display: flex;
     align-items: center;
@@ -567,33 +485,27 @@ body {
    PERFORMANCE FIX: GPU LABEL SCALING
    ========================================== */
 
-/* Apply variables to the container so all children inherit instantly */
 #markers {
-    /* Set default values to prevent pop-in */
     --label-arrow-op: 0;
     --label-top: 0%;
     --label-transform: translate(-50%, -100%) scale(1);
 }
 
 .marker-label {
-    /* REMOVE manual transitions here if any exist to ensure instant sync */
     transition: none !important;
 
-    /* READ values from the parent container */
     top: var(--label-top, 50%) !important;
     transform: var(
         --label-transform,
         translate(-50%, -100%) scale(1)
     ) !important;
 
-    /* Keep existing styles */
     position: absolute;
     left: 50%;
-    will-change: transform, top; /* Hint for Firefox */
+    will-change: transform, top;
 }
 
 .marker-label::after {
-    /* READ opacity from parent */
     opacity: var(--label-arrow-op, 0) !important;
     transition: none !important;
 }
@@ -605,15 +517,12 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    /* We will set width/height in JS to match the map image exactly */
-    /* width: 100%; height: 100%;  <-- These will be overridden by JS */
 
     pointer-events: none;
     z-index: 110;
     text-rendering: geometricPrecision;
     shape-rendering: geometricPrecision;
 
-    /* FIX: Clip dashed lines at the edge of the map */
     overflow: hidden !important;
 }
 
@@ -625,37 +534,30 @@ body {
     justify-content: center;
 }
 
-/* --- ARTILLERY ICONS (Dynamic Scaling Fix) --- */
 .marker.point {
-    /* 1. DYNAMIC SIZING */
     width: var(--dynamic-icon-size, 32px) !important;
     height: var(--dynamic-icon-size, 32px) !important;
 
-    /* 2. INSTANT CENTERING */
     margin-left: calc(var(--dynamic-icon-size, 32px) / -2) !important;
     margin-top: calc(var(--dynamic-icon-size, 32px) / -2) !important;
 
-    /* 3. PERFORMANCE: NO TRANSITIONS */
     transition: none !important;
 
-    /* 4. ALIGNMENT & LAYER */
-    z-index: 100; /* Stays above labels */
+    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
     position: absolute;
-    pointer-events: auto; /* Keeps them clickable for gun switching */
+    pointer-events: auto;
 }
 
 .arty-icon {
-    /* Force the image to fill the dynamic container completely */
     width: 100% !important;
     height: 100% !important;
 
     display: block;
     pointer-events: none;
 
-    /* Rotation transition remains */
     transition: transform 0.2s ease-out;
 
     outline: 1px solid transparent;
@@ -668,17 +570,14 @@ body {
     filter: none !important;
 }
 
-/* Ensure the active gun is above the trajectory line (100) */
 .marker.active-gun {
     z-index: 105 !important;
 }
 
-/* Ensure the tiny X stays at the absolute top */
 .impact-marker {
     z-index: 110 !important;
 }
 
-/* Context Menu Styling */
 #artilleryContextMenu {
     font-family: "GothamSS", sans-serif;
     font-size: 12px;
@@ -695,30 +594,24 @@ body {
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Dropdown separator styling */
 .dropdown-separator {
     background-color: rgba(255, 255, 255, 0.2) !important;
     height: 1px !important;
     margin: 4px 8px !important;
 }
 
-/* Keep the trajectory line and circles at 100 */
 .trajectory-visual,
 .impact-circles-svg {
     z-index: 100 !important;
 }
 
-/* --- UNSELECTED GUNS (Dimmed State) --- */
 .marker.dimmed-gun {
-    /* Sit below the active gun (105) and trajectory (100) */
     z-index: 90 !important;
 
     opacity: 1 !important;
 
-    /* No grayscale - full color */
     filter: none !important;
 
-    /* REMOVED TRANSITION: Instant state change */
     transition: none !important;
 }
 
@@ -733,7 +626,6 @@ body {
     overflow: visible;
     transform-origin: center center;
     box-sizing: border-box;
-    /* Lower than the line (was 25) */
     z-index: 10 !important;
 }
 
@@ -745,10 +637,8 @@ body {
     height: 100%;
     border-radius: 50%;
     box-sizing: border-box;
-    /* Draw outline INSIDE the circle (do not grow the circle outward) */
     border: none;
     background-color: transparent;
-    /* Original 16px stripe pattern */
     background-image: repeating-linear-gradient(
         -45deg,
         rgba(255, 255, 255, 0.1) 0px,
@@ -758,7 +648,6 @@ body {
     );
     pointer-events: none;
     z-index: 1;
-    /* FIX: Use mask to clip stripes to circle - more reliable than clip-path on mobile */
     mask-image: radial-gradient(circle, black 99%, transparent 100%);
     -webkit-mask-image: radial-gradient(circle, black 99%, transparent 100%);
     mask-size: 100% 100%;
@@ -775,37 +664,28 @@ body {
 .marker-label {
     z-index: 15 !important;
 
-    /* Font Settings */
     font-size: 42px;
     font-family: "GothamSS", sans-serif;
     font-weight: 700;
     color: white;
 
-    /* Box Settings */
     padding: 2px 6px;
     background-color: rgba(20, 20, 20, 0.7);
     border-radius: 2px;
 
-    /* Layout */
     text-align: center;
     white-space: nowrap;
     pointer-events: none;
 
-    /* --- CHROME BLUR FIX START --- */
 
-    /* 1. Force High-Quality Font Rendering */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility; /* Crucial for sharp text */
+    text-rendering: optimizeLegibility;
 
-    /* 2. Prevent Bitmap Caching (Stop GPU Blur) */
     -webkit-backface-visibility: visible !important;
     backface-visibility: visible !important;
 
-    /* FIX: REMOVE THIS LINE to prevent memory exhaustion */
-    /* will-change: transform; */
 
-    /* --- CHROME BLUR FIX END --- */
 }
 
 .marker-label::after {
@@ -815,76 +695,59 @@ body {
     left: 50%;
     transform: translateX(-50%);
 
-    /* Your custom size (Keep this) */
     border-left: 20px solid transparent;
     border-right: 20px solid transparent;
     border-top: 20px solid rgba(20, 20, 20, 0.7);
 
     opacity: var(--arrow-opacity, 0);
 
-    /* --- DELETE THIS LINE TO STOP FLICKER --- */
-    /* transition: opacity 0.2s; */
 }
 
-/* --- CONTROLS DRAWER --- */
 .controls-drawer {
-    /* Position absolute at bottom to allow sliding off screen */
     position: relative;
-    /* CHANGE: Force full width to remove side gaps */
     width: 100%;
     max-width: 100%;
 
-    /* Animation settings */
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(0); /* Default: Open */
+    transform: translateY(0);
 
-    /* Flex to center the content */
     display: flex;
     flex-direction: column;
     align-items: center;
-    pointer-events: none; /* Let clicks pass through invisible areas */
-    /* CHANGE: High Z-Index to beat the HUD */
+    pointer-events: none;
     z-index: 1000 !important;
 
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* CLOSED STATE: Slide down 100% (flush with bottom) */
 .controls-drawer.closed,
 .controls-drawer.hidden-by-default {
-    /* CHANGE: Removed " + 20px" so it tucks away perfectly */
     transform: translateY(100%);
 }
 
 /* ==========================================
-   UNIFIED UI THEME (Exact Color Match Fix)
+   UNIFIED UI THEME
    ========================================== */
 
-/* Define the exact shared background color here */
 :root {
     --drawer-bg: #181818;
 }
 
-/* LAYER 1: The Drawer Tab (Lowest) */
 .drawer-tab {
     position: absolute;
     top: -31px !important;
     height: 32px;
     width: 80px;
 
-    /* Z-INDEX 1200: Lower than the Panel */
     z-index: 1200 !important;
 
-    /* EXACT COLOR MATCH */
     background-color: var(--drawer-bg) !important;
 
-    /* Borders */
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-left: 1px solid rgba(255, 255, 255, 0.3);
     border-right: 1px solid rgba(255, 255, 255, 0.3);
     border-bottom: none !important;
 
-    /* Shape */
     border-radius: 10px 10px 0 0 !important;
     cursor: pointer;
     pointer-events: auto;
@@ -892,19 +755,15 @@ body {
     align-items: center;
     justify-content: center;
 
-    /* REMOVE SHADOWS to flatten the look */
     box-shadow: none !important;
 }
 
-/* LAYER 2: The Main Panel (Middle) */
 .controls-content {
     position: relative;
     top: 1px;
 
-    /* Z-INDEX 1300: Higher than Tab */
     z-index: 1300 !important;
 
-    /* EXACT COLOR MATCH */
     background-color: var(--drawer-bg) !important;
 
     display: flex;
@@ -915,51 +774,41 @@ body {
     padding: 8px 12px;
     gap: 10px;
 
-    /* Borders */
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-bottom: none;
     border-radius: 6px 6px 0 0;
 }
 
-/* LAYER 2.5: The "Eraser" Patch */
 .controls-content::before {
     content: "";
     position: absolute;
 
-    /* Position slightly higher to cover the seam aggressively */
     top: -3px;
     left: 50%;
     transform: translateX(-50%);
 
-    /* Width matches the inner width of the tab (80px - borders) */
     width: 78px;
 
-    /* Taller height to ensure full coverage */
     height: 6px;
 
-    /* EXACT COLOR MATCH */
     background-color: var(--drawer-bg);
 
     z-index: 1301;
 }
 
-/* --- 4. THE ARROW (White) --- */
 .tab-arrow {
     color: transparent;
     display: block;
     width: 8px;
     height: 8px;
 
-    /* WHITE lines to match sidebar icons */
     border-right: 2px solid white;
     border-bottom: 2px solid white;
 
-    /* Orientation: Down */
     transform: rotate(45deg) translateY(-2px);
     transition: transform 0.3s ease;
 }
 
-/* Arrow Orientation: Up (Closed) */
 .controls-drawer.closed .tab-arrow {
     transform: rotate(225deg) translateY(-2px);
 }
@@ -967,10 +816,9 @@ body {
 /* ==========================================
    UI CONTROLS
    ========================================== */
-/* 1. RAISE THE MAIN UI CONTAINER (Map/Faction/Gun Panel) */
 .main-ui-overlay {
     position: absolute;
-    bottom: 0; /* CHANGE: Was 20px. Now 0 to dock it to the edge. */
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -978,13 +826,11 @@ body {
     align-items: center;
     gap: 5px;
 
-    /* CRITICAL CHANGE: Increased to 3000 to beat EVERYTHING */
     z-index: 3000 !important;
 
-    pointer-events: none; /* Lets clicks pass through empty spaces */
+    pointer-events: none;
 }
 
-/* SCALE BAR & ZOOM INDICATOR */
 .scale-container {
     width: 100%;
     max-width: 400px;
@@ -995,7 +841,6 @@ body {
     position: relative;
     padding: 0;
 
-    /* THE FIX: Let touches pass through the empty space around the bar */
     pointer-events: none !important;
 }
 
@@ -1012,7 +857,6 @@ body {
     height: 8px;
     width: 100%;
     box-sizing: border-box;
-    /* FIX: Sharp white border, no fuzzy shadow */
     border: 1px solid #ffffff;
     background: linear-gradient(to right, #ffffff 50%, #000000 50%);
     box-shadow: none !important;
@@ -1028,7 +872,6 @@ body {
     color: #ffffff;
     white-space: nowrap;
     line-height: 1;
-    /* FIX: Use stroke instead of shadow */
     text-shadow: none !important;
     -webkit-text-stroke: 2px #000000;
     paint-order: stroke fill;
@@ -1073,9 +916,7 @@ body {
     left: 100%;
 }
 
-/* ZOOM INDICATOR */
 .zoom-indicator-inline {
-    /* CHANGE: Moved further right (was -40px) to prevent overlap */
     position: absolute;
     right: -70px;
     bottom: 15px;
@@ -1090,16 +931,11 @@ body {
     line-height: 1 !important;
     color: #fff;
 
-    /* --- THE FIXES --- */
-    /* 1. Force the font to be thick/heavy so the white shows through */
     font-family: "GothamSS", sans-serif !important;
     font-weight: 900 !important;
 
-    /* 2. Remove Shadow */
     text-shadow: none !important;
 
-    /* 3. Use a thinner stroke (1.5px) for this small text */
-    /* 2px was too thick for 16px text */
     -webkit-text-stroke: 2px #000000;
     paint-order: stroke fill;
 }
@@ -1147,7 +983,6 @@ body {
     margin-bottom: 12px;
 }
 
-/* Adapted from Uiverse.io by aryamitra06 */
 .arty-loader {
     display: flex;
     align-items: center;
@@ -1197,43 +1032,36 @@ body {
     }
 }
 
-/* Ensure SVG icons scale with font-size and inherit color */
 svg.icon {
     width: 1em;
     height: 1em;
     fill: currentColor;
-    display: block; /* Removes baseline gap issues */
+    display: block;
 }
 
-/* --- MODAL FOOTER ICON SIZE INCREASE --- */
 
-/* Target icons only inside modal footer */
 .modal-footer .footer-btn .icon {
-    /* Increased from 20px/22px to 28px for better visibility */
     width: 28px !important;
     height: 28px !important;
 
-    /* Ensure colors and strokes stay consistent */
     fill: none !important;
     stroke: currentColor !important;
     vector-effect: non-scaling-stroke !important;
 }
 
-/* Specific fix for the 'dots' in the calculator icon to make them bigger too */
 .modal-footer .footer-btn .icon circle {
     fill: currentColor !important;
     stroke: none !important;
-    r: 1.2; /* Slightly larger dots for larger icon */
+    r: 1.2;
 }
 
-/* Desktop: Adjust spacing for the larger icons */
 @media (min-width: 769px) {
     .modal-footer .footer-btn .icon {
-        margin-right: 15px !important; /* More breathing room for bigger icon */
+        margin-right: 15px !important;
     }
 
     .modal-footer .footer-btn {
-        padding: 0 30px !important; /* Wider buttons to accommodate size */
+        padding: 0 30px !important;
     }
 
     .main-title {
@@ -1242,9 +1070,7 @@ svg.icon {
     }
 }
 
-/* --- DESKTOP WHITE BLOCK FIX --- */
 
-/* Mobile PLACE button — slightly smaller, same position */
 #mobilePlaceBtn {
     position: absolute;
     bottom: 230px;
@@ -1255,8 +1081,8 @@ svg.icon {
     color: white;
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
-    font-size: 14px; /* smaller */
-    padding: 11px 30px; /* smaller */
+    font-size: 14px;
+    padding: 11px 30px;
     border-radius: 4px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -1273,15 +1099,14 @@ svg.icon {
 }
 
 /* ==============================================================
-   MOBILE PLACEMENT CROSSHAIR ONLY (Custom Artillery)
-   Live HUD is completely untouched
+   MOBILE PLACEMENT CROSSHAIR
    ============================================================== */
 
 #mobileCrosshair.placement-mode {
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important; /* single clean translate */
+    transform: translate(-50%, -50%) !important;
     width: 68px !important;
     height: 68px !important;
     z-index: 200 !important;
@@ -1301,53 +1126,46 @@ svg.icon {
     padding: 0 !important;
 }
 
-/* Hide rings ONLY during placement (does not affect live HUD) */
 #mobileCrosshair.placement-mode #mobileRingContainer,
 #mobileCrosshair.placement-mode .m-ring {
     display: none !important;
 }
 
-/* CLEAN CUSTOM ARTILLERY - No square border */
 .marker.custom-artillery {
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
 }
 
-/* ACTIVE GUN - Clean without yellow glow */
 .marker.custom-artillery.active-gun .arty-icon {
     filter: invert(1);
-    transform: scale(1.08); /* slight pop */
+    transform: scale(1.08);
     transition:
         filter 0.2s ease,
         transform 0.15s ease;
 }
 
-/* Dimmed guns stay clean */
 .marker.custom-artillery.dimmed-gun .arty-icon {
     filter: none;
     transform: scale(1);
 }
 @media (min-width: 769px) {
-    /* 1. Force the icon to be an outline, not a solid block */
     .modal-footer .footer-btn .icon {
         position: static !important;
         transform: none !important;
-        fill: none !important; /* This stops the white background block */
-        stroke: currentColor !important; /* This ensures the lines are visible */
+        fill: none !important;
+        stroke: currentColor !important;
         width: 20px !important;
         height: 20px !important;
         margin-right: 12px !important;
         display: inline-block !important;
     }
 
-    /* 2. Specific fix for the tiny dots inside the calculator */
     .modal-footer .footer-btn .icon circle {
-        fill: currentColor !important; /* Only the dots should be solid */
+        fill: currentColor !important;
         stroke: none !important;
     }
 
-    /* 3. Ensure the button doesn't force absolute centering on desktop */
     .modal-footer .footer-btn:first-child {
         width: auto !important;
         flex: 0 1 auto !important;
@@ -1355,9 +1173,7 @@ svg.icon {
     }
 }
 
-/* --- DESKTOP FOOTER: UNIFIED SPACING & SIZE --- */
 @media (min-width: 769px) {
-    /* Target BOTH buttons explicitly to override any specific previous rules */
     .modal-footer .footer-btn,
     .modal-footer .footer-btn:first-child,
     .modal-footer .footer-btn:last-child {
@@ -1368,13 +1184,11 @@ svg.icon {
         height: 54px !important;
         width: auto !important;
 
-        /* THE FIX: Identical spacing for BOTH buttons */
-        padding-left: 15px !important; /* Edge -> Icon */
-        gap: 15px !important; /* Icon -> Text */
-        padding-right: 25px !important; /* Text -> Edge */
+        padding-left: 15px !important;
+        gap: 15px !important;
+        padding-right: 25px !important;
     }
 
-    /* 1. Calculator Icon (Keep it slightly larger as requested before) */
     #btnOpenManualCalc .icon {
         position: static !important;
         width: 32px !important;
@@ -1384,7 +1198,6 @@ svg.icon {
         vertical-align: middle;
     }
 
-    /* 2. More Projects Icon (Standard Size) */
     #btnOtherProjects .icon {
         position: static !important;
         width: 20px !important;
@@ -1396,7 +1209,7 @@ svg.icon {
 }
 
 /* ==========================================
-   SHOOTING PULSE (Original Sonic Boom - Fixed)
+   SHOOTING PULSE
    ========================================== */
 
 @keyframes shot-ripple {
@@ -1418,7 +1231,6 @@ svg.icon {
     pointer-events: none;
     z-index: 9999 !important;
 
-    /* Original Sharp White Ring Gradient */
     background: radial-gradient(
         circle,
         transparent 55%,
@@ -1430,7 +1242,6 @@ svg.icon {
     border: none;
     box-shadow: none;
 
-    /* Hidden by default — only visible when .active is added */
     transform: translate(-50%, -50%) scale(calc(0.5 * var(--zoom-scale, 1)));
     opacity: 0.8;
 }
@@ -1443,7 +1254,6 @@ svg.icon {
    ERROR FEEDBACK ANIMATION
    ========================================== */
 
-/* Margin-based shake (Safe for Mobile layers) */
 @keyframes shake-red-safe {
     0%,
     100% {
@@ -1473,15 +1283,11 @@ svg.icon {
 
 .btn-error {
     animation: shake-red-safe 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-    /* Force colors */
     border-color: #ff4444 !important;
     color: #ff4444 !important;
-    /* Ensure relative positioning for margins to work */
     position: relative;
 }
 
-/* Hide the default tooltip if the error is active
-   (Prevents double text on Desktop) */
 .btn-error::before,
 .btn-error::after {
     display: none !important;
@@ -1491,34 +1297,26 @@ svg.icon {
    ALLOW 2-LINE TEXT WRAPPING
    ========================================== */
 
-/* --- UNIFY THE BASE BUTTON COLOR --- */
 .btn-map-select {
-    /* Allow height to grow for 2 lines */
     height: auto !important;
 
-    /* Force a minimum height that fits 2 lines of text */
     min-height: 56px !important;
 
-    /* Vertical Padding helps when text wraps */
     padding: 4px 10px;
 
-    /* Use Flexbox to vertically center single-line text (like 'Germany') */
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    /* Optional: Ensure text wrapping for long map names */
     white-space: normal;
     line-height: 1.2;
     text-align: left;
 
-    /* CHANGE: Replace the gradient with a solid charcoal to match the menu */
     background: rgba(29, 31, 39, 0.9) !important;
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-left: 3px solid #ffc107;
     border-radius: 0 3px 3px 0;
 
-    /* Keep your existing Gotham font styles */
     color: white;
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
@@ -1531,33 +1329,28 @@ svg.icon {
     transition: background 0.2s ease;
 }
 
-/* 2. Text Labels: Fix Wrapping Logic */
 #currentMapName,
 #factionLabel,
 #gunLabel {
-    /* ENABLE WRAPPING but keep words intact */
-    white-space: normal; /* Allow wrapping */
+    white-space: normal;
 
-    /* CRITICAL FIX: Stop breaking words like "BRITI-SH" */
     word-break: normal;
-    overflow-wrap: break-word; /* Only break if a single word is wider than the box */
+    overflow-wrap: break-word;
 
-    /* Layout improvements */
     line-height: 1.1;
-    text-align: left; /* Or 'center' if you prefer */
-    margin-right: 4px; /* Reduced margin to give text more space */
+    text-align: left;
+    margin-right: 4px;
     display: block;
     flex: 1;
 }
 
-/* Active state for faction button when dropdown is open */
 .btn-map-select.active {
     background-color: rgba(
         45,
         48,
         60,
         1
-    ) !important; /* Slightly lighter when menu is open */
+    ) !important;
 }
 
 button.btn-map-select:active {
@@ -1611,7 +1404,7 @@ select.btn-map-select option {
 }
 
 /* ==========================================
-   MAP SELECTOR GRID (FIXED)
+   MAP SELECTOR GRID
    ========================================== */
 .modal-overlay {
     position: fixed;
@@ -1625,15 +1418,12 @@ select.btn-map-select option {
     align-items: center;
     z-index: 3000;
     
-    /* Default Closed State */
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     
-    /* INSTANT CLOSE: No transition when removing .active class */
     transition: none; 
 
-    /* Default: No Blur (Mobile Safe) */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
@@ -1643,13 +1433,10 @@ select.btn-map-select option {
     visibility: visible;
     pointer-events: all;
     
-    /* FADE IN ON OPEN ONLY: Apply 0.2s transition when opening */
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 }
 
-/* FIX 4: Desktop Only: Re-enable Blur */
 @media (min-width: 769px) {
-    /* Apply blur ONLY when active on desktop to prevent background rendering bugs while hidden */
     .modal-overlay.active {
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
@@ -1662,7 +1449,7 @@ select.btn-map-select option {
     border-radius: 6px;
     width: 90%;
     max-width: 1100px;
-    height: 85%; /* Increased height slightly */
+    height: 85%;
     overflow-y: hidden;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
     display: flex;
@@ -1675,11 +1462,11 @@ select.btn-map-select option {
 }
 
 /* ==========================================
-   MODAL HEADERS (UPDATED X POSITION)
+   MODAL HEADERS
    ========================================== */
 
 .modal-brand-header {
-    position: relative; /* REQUIRED to anchor the X button */
+    position: relative;
     padding: 15px 20px;
     background: rgba(0, 0, 0, 0.4);
     border-bottom: 1px solid rgba(255, 193, 7, 0.3);
@@ -1733,7 +1520,7 @@ select.btn-map-select option {
 
 .search-clear-btn {
     position: absolute;
-    right: 12px; /* Move to right edge since search icon is removed */
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -1742,14 +1529,14 @@ select.btn-map-select option {
     font-size: 20px;
     cursor: pointer;
     padding: 5px;
-    display: none; /* Hidden by default */
+    display: none;
     line-height: 1;
     transition: color 0.2s;
 }
 
 @supports (-moz-appearance: none) {
     .search-clear-btn {
-        top: 45%; /* Adjust for Firefox */
+        top: 45%;
     }
 }
 
@@ -1757,7 +1544,6 @@ select.btn-map-select option {
     color: #ff4444;
 }
 
-/* Show the clear button only when there is text in the input */
 #mapSearchInput:not(:placeholder-shown) ~ .search-clear-btn {
     display: block;
 }
@@ -1794,9 +1580,9 @@ select.btn-map-select option {
 
 .close-btn {
     position: absolute;
-    right: 15px; /* Move to corner */
-    top: 10px; /* Pin to top */
-    transform: none; /* Remove the centering transform */
+    right: 15px;
+    top: 10px;
+    transform: none;
 
     background: none;
     border: none;
@@ -1806,13 +1592,12 @@ select.btn-map-select option {
     cursor: pointer;
     padding: 0;
     transition: none;
-    z-index: 2000; /* Ensure it sits on top of everything */
+    z-index: 2000;
 }
 
-/* Hover effect */
 .close-btn:hover {
     color: #ff4444;
-    transform: scale(1.1); /* Subtle zoom only */
+    transform: scale(1.1);
 }
 
 .map-grid {
@@ -1820,18 +1605,18 @@ select.btn-map-select option {
     overflow-y: auto;
     padding: 20px;
     display: grid;
-    /* CHANGE: Use grid-auto-rows to ensure all rows are exactly the same height */
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     grid-auto-rows: min-content;
-    align-content: start; /* Forces the grid to the top of the container */
+    align-content: start;
     gap: 15px;
     width: 100%;
     box-sizing: border-box;
 }
 
 /* ==========================================
-   MAP SELECTOR GRID IMAGE FIX              */
-/* ========================================== */
+   MAP SELECTOR GRID IMAGE FIX
+   ========================================== */
+
 .map-card {
     position: relative;
     border-radius: 4px;
@@ -1839,14 +1624,12 @@ select.btn-map-select option {
     cursor: pointer;
     background: #111;
 
-    /* FIX: Ensure border exists but is transparent so it doesn't jump */
     border: 3px solid transparent;
 
     width: 100%;
     aspect-ratio: 16 / 9;
     height: auto;
 
-    /* FIX: Add box-shadow to the transition so the glow fades in/out smoothly */
     transition:
         transform 0.2s,
         border-color 0.2s,
@@ -1861,37 +1644,31 @@ select.btn-map-select option {
     height: 100%;
     object-fit: cover;
     display: block;
-    opacity: 1 !important; /* Force visibility */
+    opacity: 1 !important;
     transition: transform 0.3s ease;
 }
 
-/* --- DESKTOP HOVER: YELLOW HIGHLIGHT --- */
 @media (hover: hover) and (min-width: 769px) {
-    /* When hovering ANY card that is NOT currently selected */
     .map-card:not(.active):hover {
-        border-color: #ffc107; /* Tactical Yellow */
-        box-shadow: 0 0 15px rgba(255, 193, 7, 0.4); /* Yellow Glow */
-        z-index: 5; /* Ensure glow sits on top of neighbors */
+        border-color: #ffc107;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
+        z-index: 5;
     }
 
     .map-card:not(.active):hover .map-card-img {
-        transform: scale(1.05); /* Subtle zoom on image */
+        transform: scale(1.05);
     }
 
-    /* Optional: When hovering the ALREADY SELECTED (Green) card */
     .map-card.active:hover {
-        /* Keep Green Border */
         border-color: #28a745 !important;
-        /* Add Green Glow instead of Yellow */
         box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
     }
 
     .map-card.active:hover .map-card-img {
-        transform: scale(1.05); /* Subtle zoom on image */
+        transform: scale(1.05);
     }
 }
 
-/* Ensure the green highlight beats everything */
 .map-card.active {
     border-color: #28a745 !important;
 }
@@ -1912,7 +1689,6 @@ select.btn-map-select option {
     text-shadow: 0 1px 2px black;
 }
 
-/* --- MAP INFO BUTTON --- */
 .map-info-btn {
     position: absolute;
     top: 8px;
@@ -1957,7 +1733,6 @@ select.btn-map-select option {
     transform: scale(0.95);
 }
 
-/* 3. NEW: Modal Footer */
 .modal-footer {
     padding: 15px 20px;
     background: rgba(0, 0, 0, 0.6);
@@ -1966,10 +1741,9 @@ select.btn-map-select option {
     justify-content: flex-start;
     align-items: center;
     gap: 15px;
-    flex-shrink: 0; /* Prevents shrinking */
+    flex-shrink: 0;
 }
 
-/* 4. NEW: Footer Buttons */
 .footer-btn {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1990,7 +1764,7 @@ select.btn-map-select option {
 
 .footer-btn .icon {
     font-size: 16px;
-    filter: grayscale(1); /* Muted icon */
+    filter: grayscale(1);
 }
 
 .footer-btn:hover {
@@ -2001,10 +1775,9 @@ select.btn-map-select option {
 }
 
 .footer-btn:hover .icon {
-    filter: none; /* Color icon on hover */
+    filter: none;
 }
 
-/* Optional: Different style for "Other Projects" if you want */
 .footer-btn.secondary {
     border-color: rgba(255, 255, 255, 0.1);
 }
@@ -2012,6 +1785,7 @@ select.btn-map-select option {
 /* ==========================================
    KO-FI SUPPORT BUTTON
    ========================================== */
+
 .kofi-btn {
     display: inline-flex;
     align-items: center;
@@ -2064,16 +1838,15 @@ select.btn-map-select option {
 /* ==========================================
    CUSTOM DROPDOWNS
    ========================================== */
+
 .custom-dropdown {
     position: relative;
     height: auto;
     display: flex;
     flex-direction: column;
-    /* Above the 'Eraser' patch and Tab */
     z-index: 1400 !important;
 }
 
-/* --- UNIFY THE DROPDOWN MENU COLOR --- */
 .dropdown-menu {
     position: absolute;
     bottom: 100%;
@@ -2081,12 +1854,9 @@ select.btn-map-select option {
     width: 100%;
     min-width: 150px;
 
-    /* MATCH: Use the exact same color as the button */
     background-color: rgba(29, 31, 39, 0.95) !important;
     border: 1px solid rgba(255, 255, 255, 0.15);
 
-    /* FIX 4: Disable Backdrop Filter on Mobile (GPU Hog) */
-    /* Default: No Blur (Mobile Safe) */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 
@@ -2101,9 +1871,7 @@ select.btn-map-select option {
     pointer-events: auto;
 }
 
-/* FIX 4: Desktop Only: Re-enable Blur */
 @media (min-width: 769px) {
-    /* Desktop Only: Re-enable Blur */
     .dropdown-menu {
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
@@ -2129,12 +1897,10 @@ select.btn-map-select option {
 .dropdown-item:last-child {
     border-bottom: none;
 }
-/* --- HOVER STATE UNIFICATION --- */
 .dropdown-item:hover,
 button.btn-map-select:hover {
-    /* Use a lighter grey for the hover highlight */
     background-color: rgba(60, 64, 75, 1) !important;
-    color: #ffc107; /* Tactical yellow text on hover */
+    color: #ffc107;
 }
 
 .dropdown-item:hover {
@@ -2145,19 +1911,16 @@ button.btn-map-select:hover {
 }
 
 /* ==========================================
-   TRAJECTORY & TARGETING (SHARP FIX)
+   TRAJECTORY & TARGETING
    ========================================== */
 
-/* 1. Trajectory Line */
 .trajectory-visual {
-    /* Set much higher to clear everything */
     z-index: 100 !important;
     position: absolute;
     pointer-events: none;
 }
 
 .trajectory-visual line {
-    /* The variable MUST come first */
     stroke-width: var(--dynamic-stroke, 3px) !important;
     stroke: #ff0000;
     stroke-linecap: butt;
@@ -2165,33 +1928,29 @@ button.btn-map-select:hover {
     vector-effect: non-scaling-stroke !important;
 }
 
-/* THE SVG CIRCLES */
 .impact-circles-svg {
     position: absolute;
     z-index: 100 !important;
     pointer-events: none;
 
-    /* FIX: Ensure the SVG coordinate 0,0 is treated as the center */
     overflow: visible;
-    transform: translate(0, 0); /* Reset any accidental shifts */
+    transform: translate(0, 0);
 }
 
-/* Ensure the circles inside the SVG are centered on 0,0 */
 .impact-circles-svg circle {
     cx: 0;
     cy: 0;
 }
 
 /* ==========================================
-   IMPACT POINT "X" (Longer & Sharp)
+   IMPACT POINT "X"
    ========================================== */
+
 .impact-marker {
     position: absolute;
     width: 12px;
     height: 12px;
 
-    /* CRITICAL FIX: This shifts the element back by half its width/height
-       to put the intersection of the X exactly on the coordinate */
     transform: translate(-50%, -50%) !important;
 
     pointer-events: none;
@@ -2206,7 +1965,7 @@ button.btn-map-select:hover {
     top: 50%;
     left: 0;
     width: 100%;
-    height: 1px; /* Keeping it needle thin */
+    height: 1px;
     background-color: #ffc107;
     box-shadow: none;
 }
@@ -2218,40 +1977,36 @@ button.btn-map-select:hover {
     transform: translateY(-50%) rotate(-45deg);
 }
 
-/* Ruler tick marks (The Balls) */
 .trajectory-visual .ruler-tick {
-    fill: #ff4444; /* Tactical Red */
-    stroke: #ffffff; /* White outline for contrast */
+    fill: #ff4444;
+    stroke: #ffffff;
     stroke-width: 1px;
-    /* Optional: add a slight outer glow to make it stand out more */
     filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
 }
 
-/* Ruler distance labels */
 .trajectory-visual .ruler-text {
     fill: #000000;
     font-size: 10px;
     font-family: "Roboto-Black", sans-serif;
     font-weight: 900;
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
-    dominant-baseline: middle; /* Helps with rotation centering */
+    dominant-baseline: middle;
     paint-order: stroke;
     stroke: rgba(
         0,
         0,
         0,
         0.5
-    ); /* Adds a thin outline for better contrast on any map */
+    );
     stroke-width: 0.5px;
-    display: none; /* Hide meter text since we're only showing mil boxes now */
+    display: none;
 }
 
-/* Ruler MIL Label Container */
 .ruler-mil-label {
     position: absolute;
     z-index: 105;
     font-family: "GothamSS", sans-serif;
-    padding: 3px 6px; /* Slightly more vertical padding */
+    padding: 3px 6px;
     background-color: rgba(20, 20, 20, 0.85);
     border-radius: 2px;
     text-align: center;
@@ -2260,12 +2015,11 @@ button.btn-map-select:hover {
     transform: translate(-50%, -100%);
     margin-top: -10px;
     display: flex;
-    flex-direction: column; /* Stack mil over meters */
+    flex-direction: column;
     align-items: center;
     gap: 0px;
 }
 
-/* The MIL Number (Yellow) */
 .ruler-mil-label .mil-value {
     font-size: 14px;
     font-weight: 700;
@@ -2273,17 +2027,15 @@ button.btn-map-select:hover {
     line-height: 1.1;
 }
 
-/* THE FIX: The Meter Subtext (Small White) */
 .ruler-mil-label .meter-subtext {
     font-size: 7px;
     font-weight: 400;
-    color: #ffffff; /* White text */
+    color: #ffffff;
     opacity: 0.9;
     line-height: 1;
     margin-top: 1px;
 }
 
-/* The Arrow for the MIL Label */
 .ruler-mil-label::after {
     content: "";
     position: absolute;
@@ -2295,7 +2047,6 @@ button.btn-map-select:hover {
     border-top: 5px solid rgba(20, 20, 20, 0.85);
 }
 
-/* Ruler toggle button states */
 #rulerToggleBtn.active {
     background-color: #ffc107;
     color: #000;
@@ -2306,14 +2057,12 @@ button.btn-map-select:hover {
     color: white;
 }
 
-/* Hidden ruler elements */
 .trajectory-visual.ruler-hidden .ruler-tick,
 .trajectory-visual.ruler-hidden .ruler-text,
 .trajectory-visual.ruler-hidden .ruler-mil-text {
     display: none;
 }
 
-/* 2. Impact Circles Common */
 .deadzone-circle,
 .dispersion-circle,
 .blast-circle {
@@ -2323,9 +2072,7 @@ button.btn-map-select:hover {
     z-index: 30;
 }
 
-/* 3. Specifics */
 .deadzone-circle {
-    /* RESTORE FILL */
     fill: rgba(255, 0, 0, 0.3) !important;
     vector-effect: non-scaling-stroke !important;
 }
@@ -2334,20 +2081,16 @@ button.btn-map-select:hover {
     stroke-width: var(--dynamic-circle-stroke, 2px) !important;
     stroke: rgba(0, 0, 0, 0.6);
     stroke-dasharray: calc(var(--dynamic-circle-stroke, 2px) * 2);
-    /* RESTORE FILL */
     fill: rgba(255, 0, 0, 0.15) !important;
     vector-effect: non-scaling-stroke !important;
 }
 
-/* --- THE FIX FOR BLURRY RED CIRCLE --- */
 .blast-circle {
     stroke: none;
-    /* RESTORE SOLID FILL */
     fill: rgba(255, 0, 0, 0.5) !important;
     vector-effect: non-scaling-stroke !important;
 }
 
-/* --- TACTICAL PANEL (INVERTED) --- */
 .target-data-panel {
     position: absolute;
     top: 70px;
@@ -2356,15 +2099,13 @@ button.btn-map-select:hover {
 
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* Stretch rows to full width */
+    align-items: stretch;
 
     background-color: rgba(15, 15, 15, 0.95);
-    /* FIX 4: Disable Backdrop Filter on Mobile (GPU Hog) */
-    /* Default: No Blur (Mobile Safe) */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top: 3px solid #ffc107; /* Yellow Top Bar */
+    border-top: 3px solid #ffc107;
     border-radius: 4px;
 
     min-width: 300px;
@@ -2372,29 +2113,23 @@ button.btn-map-select:hover {
     pointer-events: none;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 
-    /* CRITICAL: Allow watermark to "hang" outside */
     overflow: visible !important;
-    /* Push panel down so watermark doesn't hit screen edge */
     margin-top: 25px;
 }
 
-/* FIX 4: Desktop Only: Re-enable Blur */
 @media (min-width: 769px) {
-    /* Desktop Only: Re-enable Blur */
     .target-data-panel {
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
     }
 }
 
-/* Force standard hidden behavior without transitions */
 .target-data-panel.hidden {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
 }
 
-/* --- ROW 1: THE BIG NUMBER --- */
 .panel-row.main-row {
     padding: 10px 0 5px 0;
     text-align: center;
@@ -2412,14 +2147,13 @@ button.btn-map-select:hover {
     justify-content: center;
 }
 
-/* --- ROW 2: THE CONTEXT --- */
 .panel-row.context-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 15px 10px 15px; /* More padding on bottom */
+    padding: 8px 15px 10px 15px;
     gap: 10px;
-    background-color: rgba(0, 0, 0, 0.2); /* Slightly darker bottom */
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .data-group {
@@ -2429,7 +2163,6 @@ button.btn-map-select:hover {
     flex: 1;
 }
 
-/* --- UTILITIES --- */
 .panel-horiz-divider {
     width: 100%;
     height: 1px;
@@ -2437,19 +2170,15 @@ button.btn-map-select:hover {
 }
 
 .panel-watermark {
-    /* Maintain your topside positioning */
     position: absolute;
     bottom: calc(100% + 3px);
 
-    /* FORCE HORIZONTAL CENTER */
     left: 50% !important;
     transform: translateX(-50%) !important;
 
-    /* Ensure it doesn't wrap and stays in a single line */
     width: max-content;
     white-space: nowrap;
 
-    /* Spacing from the yellow border */
     padding-bottom: 3px;
 
     text-align: center;
@@ -2465,15 +2194,13 @@ button.btn-map-select:hover {
     user-select: none;
 }
 
-/* Bullet Style */
 .watermark-bullet {
-    color: #ffc107 !important; /* Tactical Yellow */
+    color: #ffc107 !important;
     margin: 0 4px;
     font-size: 12px;
     vertical-align: 0px;
 }
 
-/* Version Links - remove default link styling */
 #appVersionPanel,
 #appVersion,
 #gameVersion,
@@ -2509,7 +2236,6 @@ button.btn-map-select:hover {
     opacity: 0.7;
 }
 
-/* Changelog Button */
 .changelog-btn {
     background: none;
     border: none;
@@ -2543,7 +2269,6 @@ button.btn-map-select:hover {
     font-size: 12px;
 }
 
-/* Changelog Modal */
 .changelog-modal {
     max-width: 700px;
     max-height: 80vh;
@@ -2599,7 +2324,6 @@ button.btn-map-select:hover {
     color: rgba(255, 255, 255, 0.9);
 }
 
-/* --- MAP HISTORY MODAL --- */
 .history-modal {
     max-width: 600px;
     max-height: 85vh;
@@ -2613,7 +2337,6 @@ button.btn-map-select:hover {
         0 0 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Field Manual Header */
 .history-modal .modal-brand-header {
     background: #c9a86c;
     border-bottom: 2px solid #2d2d2d;
@@ -2654,7 +2377,6 @@ button.btn-map-select:hover {
     opacity: 1;
 }
 
-/* Field Manual Content with Frame */
 .history-content {
     flex: 1;
     margin: 15px 20px 20px 20px;
@@ -2699,7 +2421,6 @@ button.btn-map-select:hover {
     margin-bottom: 0;
 }
 
-/* Historical Images */
 .history-images {
     margin: 15px 0 20px 0;
     display: flex;
@@ -2807,7 +2528,6 @@ button.btn-map-select:hover {
     }
 }
 
-/* Full Image Viewer Overlay */
 .image-viewer-overlay {
     position: fixed;
     top: 0;
@@ -2837,7 +2557,6 @@ button.btn-map-select:hover {
     max-height: 75vh;
     object-fit: contain;
     display: block;
-    /* Aged photo look */
     border: 4px solid #e8dcc8;
     border-bottom: none;
     filter: none;
@@ -2916,9 +2635,8 @@ button.btn-map-select:hover {
     }
 }
 
-/* --- TYPOGRAPHY --- */
 .lbl-main {
-    font-size: 9px !important; /* Slightly smaller than before */
+    font-size: 9px !important;
     letter-spacing: 1.5px !important;
     opacity: 0.5;
     font-family: "GothamSS", sans-serif;
@@ -2927,13 +2645,10 @@ button.btn-map-select:hover {
 }
 
 .val-huge {
-    /* Reduced from 52px to 44px */
     font-size: 44px !important;
 
-    /* Ensure the line-height is tight so the box doesn't grow vertically */
     line-height: 0.9 !important;
 
-    /* Keep your existing style preferences */
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
     color: #ffc107;
@@ -2950,15 +2665,13 @@ button.btn-map-select:hover {
     margin-bottom: 3px;
 }
 
-/* Ensure val-mid is the master controller for size/weight */
 .val-mid {
     font-family: "GothamSS", sans-serif;
-    font-size: 16px !important; /* Desktop Size */
+    font-size: 16px !important;
     font-weight: 900 !important;
     color: white;
 }
 
-/* Ensure colors inherit the size/weight from val-mid */
 .val-mid.text-green,
 .val-mid.text-yellow {
     font-size: inherit !important;
@@ -2966,8 +2679,6 @@ button.btn-map-select:hover {
     line-height: inherit !important;
 }
 
-/* --- FONT ENFORCER --- */
-/* This forces all text inside the panel to use your custom font */
 .target-data-panel,
 .target-data-panel span,
 .target-data-panel div {
@@ -2976,15 +2687,12 @@ button.btn-map-select:hover {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- OPTIONAL: Refined Weights --- */
-/* Ensure labels are thick enough to be readable */
 .lbl-tiny,
 .lbl-main {
     font-weight: 700 !important;
     letter-spacing: 1px !important;
 }
 
-/* Ensure numbers are extra heavy */
 .val-mid,
 .val-huge {
     font-weight: 900 !important;
@@ -3003,13 +2711,13 @@ button.btn-map-select:hover {
 /* ==========================================
    VERTICAL ZOOM SLIDER
    ========================================== */
+
 .zoom-slider-container {
     position: absolute;
     right: 40px;
     top: 50%;
     transform: translateY(-50%);
 
-    /* UPDATED: Increased height */
     height: 475px;
 
     width: 40px;
@@ -3019,7 +2727,6 @@ button.btn-map-select:hover {
     gap: 20px;
     z-index: 100;
 
-    /* THE FIX: Let touches pass through the gaps between buttons */
     pointer-events: none !important;
 }
 
@@ -3032,7 +2739,7 @@ button.btn-map-select:hover {
     border-radius: 0;
     cursor: pointer;
 
-    pointer-events: auto !important; /* Allow clicking the slider track */
+    pointer-events: auto !important;
 }
 
 .zoom-slider-fill {
@@ -3059,8 +2766,7 @@ button.btn-map-select:hover {
     cursor: grab;
     touch-action: none;
 
-    pointer-events: auto !important; /* Allow grabbing the handle */
-    /* CHANGE: Removed box-shadow */
+    pointer-events: auto !important;
     box-shadow: none !important;
 }
 
@@ -3082,7 +2788,7 @@ button.btn-map-select:hover {
     width: 32px;
     height: 32px;
     background-color: rgba(20, 20, 20, 0.95);
-    pointer-events: auto !important; /* Allow clicking the buttons (+, -, etc.) */
+    pointer-events: auto !important;
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 0;
@@ -3096,7 +2802,6 @@ button.btn-map-select:hover {
     user-select: none;
     transition: background-color 0.1s;
     -webkit-tap-highlight-color: transparent;
-    /* CHANGE: Removed box-shadow */
     box-shadow: none !important;
 }
 
@@ -3114,30 +2819,26 @@ button.btn-map-select:hover {
     color: black !important;
     border-color: #ffc107 !important;
     transform: scale(0.95);
-    /* CHANGE: Force shadow removal on press */
     box-shadow: none !important;
 }
 
-/* Ensure the Ruler icon inside the zoom slider looks correct */
 #rulerToggleBtn svg {
     display: block;
     pointer-events: none;
 }
 
-/* 1. Base State (Off) */
 #rulerToggleBtn {
     background-color: rgba(20, 20, 20, 0.95) !important;
     color: white !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    touch-action: manipulation; /* Removes 300ms browser delay */
-    -webkit-tap-highlight-color: transparent; /* Optional: removes tap highlight box */
-    user-select: none; /* Prevents text selection on rapid taps */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
     transition:
         background-color 0.1s,
         color 0.1s;
 }
 
-/* 2. Hover State (Only applies when NOT active to show it's clickable) */
 @media (hover: hover) {
     #rulerToggleBtn:not(.active):hover {
         background-color: rgba(60, 60, 60, 1) !important;
@@ -3145,30 +2846,26 @@ button.btn-map-select:hover {
     }
 }
 
-/* 3. Active State (ON - Always Yellow) */
 #rulerToggleBtn.active {
     background-color: #ffc107 !important;
     color: black !important;
     border-color: #ffc107 !important;
 }
 
-/* 4. Active + Hover (Slightly darker yellow so you see click happened) */
 @media (hover: hover) {
     #rulerToggleBtn.active:hover {
-        background-color: #e5ad06 !important; /* Slightly darker gold */
+        background-color: #e5ad06 !important;
     }
 }
 
-/* Specific Modal Size for Calc - FIX: Remove fixed height */
 .calc-content {
     max-width: 400px !important;
-    height: auto !important; /* Shrinks to fit content */
+    height: auto !important;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Faction Bar */
 .calc-faction-bar {
     background: rgba(255, 255, 255, 0.05);
     padding: 10px 20px;
@@ -3202,7 +2899,6 @@ button.btn-map-select:hover {
     cursor: pointer;
 }
 
-/* Screen Area */
 .calc-screen {
     background: #000;
     padding: 8px;
@@ -3212,10 +2908,10 @@ button.btn-map-select:hover {
 .screen-row {
     display: flex;
     flex-direction: column;
-    align-items: center; /* CHANGED: Centers items horizontally (was flex-end) */
+    align-items: center;
     justify-content: center;
     margin-bottom: 4px;
-    text-align: center; /* Ensures text stays centered */
+    text-align: center;
 }
 .screen-label {
     font-family: "GothamSS", sans-serif;
@@ -3223,11 +2919,10 @@ button.btn-map-select:hover {
     color: #888;
     margin-bottom: 4px;
 }
-/* Screen Input (Target Distance) - Reduced Size */
 .screen-input {
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
-    font-size: 36px; /* Reduced from 48px to 36px */
+    font-size: 36px;
     color: white;
     line-height: 1;
     background: transparent;
@@ -3247,10 +2942,8 @@ button.btn-map-select:hover {
     margin: 4px 0;
 }
 
-/* Screen Results Area */
 .screen-results {
     display: flex;
-    /* Center the single item horizontally */
     justify-content: center;
     align-items: center;
     width: 100%;
@@ -3261,11 +2954,9 @@ button.btn-map-select:hover {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    /* CHANGED: Let it take full width (was 48%) */
     width: 100%;
 }
 
-/* Ensure labels are centered */
 .res-label {
     font-family: "GothamSS", sans-serif;
     font-size: 10px;
@@ -3276,25 +2967,21 @@ button.btn-map-select:hover {
     padding-top: 2px;
 }
 
-/* Result Value Container - Fixed Height to prevent jumping */
 .res-value {
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
     line-height: 1;
 
-    /* THE FIX: Force a minimum height equal to font size */
     min-height: 48px;
-    display: block; /* Required for min-height to work */
+    display: block;
 }
 
-/* Elevation (Yellow) - Big */
 .text-yellow.res-value {
     font-size: 48px;
 }
 
-/* Error State (Red) - Ensure it matches the height */
 .text-red.res-value {
-    font-size: 48px; /* Match yellow size so layout doesn't shift */
+    font-size: 48px;
     color: #ff4444;
 }
 
@@ -3307,12 +2994,11 @@ button.btn-map-select:hover {
     text-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
 }
 
-/* Keypad Grid */
 .calc-keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1px;
-    background: rgba(255, 255, 255, 0.1); /* Grid lines color */
+    background: rgba(255, 255, 255, 0.1);
     padding-top: 1px;
 }
 
@@ -3359,14 +3045,12 @@ button.btn-map-select:hover {
     width: 100%;
 }
 
-/* Add to your CSS file */
 .key.pressed {
-    background-color: #ffc107 !important; /* Yellow flash */
+    background-color: #ffc107 !important;
     color: #000 !important;
     transform: scale(0.95);
 }
 
-/* Calculator History Section */
 .calc-history-section {
     background: transparent;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -3386,7 +3070,6 @@ button.btn-map-select:hover {
     z-index: 10;
 }
 
-/* Center clear button in the middle of history-header */
 .history-header .history-clear-btn {
     position: absolute;
     left: 50%;
@@ -3590,9 +3273,7 @@ input:checked + .slider:before {
     text-align: right;
 }
 
-/* --- LIVE CURSOR HUD STYLES --- */
 
-/* 1. The Toggle Button (Matches Ruler Button Logic) */
 #hudToggleBtn svg {
     display: block;
     pointer-events: none;
@@ -3602,9 +3283,9 @@ input:checked + .slider:before {
     background-color: rgba(20, 20, 20, 0.95) !important;
     color: white !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    touch-action: manipulation; /* Removes 300ms browser delay */
-    -webkit-tap-highlight-color: transparent; /* Optional: removes tap highlight box */
-    user-select: none; /* Prevents text selection on rapid taps */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
     transition:
         background-color 0.1s,
         color 0.1s;
@@ -3617,24 +3298,20 @@ input:checked + .slider:before {
     }
 }
 
-/* Active State (ON - Yellow) */
 #hudToggleBtn.active {
     background-color: #ffc107 !important;
     color: black !important;
     border-color: #ffc107 !important;
 }
 
-/* Visual feedback on press */
 #hudToggleBtn:active {
     transform: scale(0.95);
 }
 
-/* --- FIX 2: Live HUD Layering --- */
 .live-hud {
     position: fixed;
-    /* Elevated to clear the Drawer (2000) and Target Panel (2500) */
     z-index: 2600 !important;
-    background: rgba(15, 15, 15, 0.9); /* Slightly darker for legibility */
+    background: rgba(15, 15, 15, 0.9);
     pointer-events: none;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-left: 3px solid #ffc107;
@@ -3680,21 +3357,18 @@ input:checked + .slider:before {
     color: #ffc107;
 }
 
-/* --- TACTICAL INDICATOR TOOLTIPS --- */
 
 [data-tooltip] {
     position: relative;
 }
 
-/* Tooltip Box Styling */
 [data-tooltip]::before {
     content: attr(data-tooltip);
     position: absolute;
-    right: calc(100% + 12px); /* Spacing to the left of buttons */
+    right: calc(100% + 12px);
     top: 50%;
     transform: translateY(-50%) scale(0.9);
 
-    /* Tactical Aesthetics matching GothamSS font */
     background-color: rgba(29, 31, 39, 0.95);
     color: #ffc107;
     font-family: "GothamSS", sans-serif;
@@ -3714,7 +3388,6 @@ input:checked + .slider:before {
         transform 0.1s ease-out;
 }
 
-/* Small Indicator Arrow */
 [data-tooltip]::after {
     content: "";
     position: absolute;
@@ -3729,7 +3402,6 @@ input:checked + .slider:before {
     transition: opacity 0.1s ease-out;
 }
 
-/* Desktop Hover Interaction */
 @media (hover: hover) {
     [data-tooltip]:hover::before {
         opacity: 1;
@@ -3740,14 +3412,12 @@ input:checked + .slider:before {
     }
 }
 
-/* Ensure arrow is fully opaque on hover */
 @media (hover: hover) {
     [data-tooltip]:hover::after {
-        opacity: 1 !important; /* Forces full visibility */
+        opacity: 1 !important;
     }
 }
 
-/* Hub specific content size */
 .projects-hub-content {
     max-width: 500px !important;
     height: auto !important;
@@ -3760,21 +3430,19 @@ input:checked + .slider:before {
     gap: 10px;
 }
 
-/* THE ALIGNMENT FIX: Ensure buttons in modal use same flex logic */
 .projects-list .footer-btn {
     display: flex;
-    align-items: center; /* Vertically centers icon/emoji and text */
-    justify-content: flex-start; /* Aligns to left side */
+    align-items: center;
+    justify-content: flex-start;
     text-align: left;
-    margin-bottom: 0; /* Use gap from parent container instead */
+    margin-bottom: 0;
 }
 
-/* Ensure images and emojis share exact same width for text alignment */
 .projects-list .footer-project-icon,
 .projects-list .icon {
-    width: 24px; /* Consistent width for all icons */
+    width: 24px;
     height: 24px;
-    margin-right: 15px; /* Consistent spacing to text */
+    margin-right: 15px;
     flex-shrink: 0;
     object-fit: contain;
     display: flex;
@@ -3782,26 +3450,22 @@ input:checked + .slider:before {
     justify-content: center;
 }
 
-/* GitHub specific left border color */
 .github-btn {
     border-left-color: #ffffff !important;
 }
 
-/* Increase main title size for all devices */
 .main-title {
     font-size: 36px !important;
 }
 
-/* Smaller title for projects modal */
 #projectsModal .main-title {
     font-size: 24px !important;
 }
 
 /* ==========================================
-   FIRE BUTTON GUIDE ARROWS (Above Panel)
+   FIRE BUTTON GUIDE ARROWS
    ========================================== */
 
-/* Ensure the drawer allows elements to peek outside its box */
 .controls-drawer {
     overflow: visible !important;
 }
@@ -3810,7 +3474,6 @@ input:checked + .slider:before {
     display: none;
 }
 
-/* --- Mobile Fire Button (Centered & Lower) --- */
 .mobile-fire-btn {
     position: absolute;
     bottom: 40px;
@@ -3841,43 +3504,32 @@ input:checked + .slider:before {
     align-items: center;
     justify-content: center;
 
-    /* Smooth return to normal position */
     transition:
         transform 0.1s ease,
         box-shadow 0.1s ease,
         background-color 0.1s;
 }
 
-/* THE FIX: Apply movement on :active AND .pressed class */
 .mobile-fire-btn:active,
 .mobile-fire-btn.pressed {
-    /* 1. Maintain horizontal center (-50%)
-     2. Push DOWN (4px)
-     3. Shrink slightly (0.95)
-  */
     transform: translateX(-50%) translateY(4px) scale(0.95) !important;
 
-    /* Reduce shadow to look "flat" against screen */
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4) !important;
 
-    /* Visual Feedback Colors */
     background-color: #ffc107 !important;
     color: black !important;
     border-color: transparent !important;
 }
 
-/* --- Ring Container (Scales via JS) --- */
 .ring-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    /* Size is set by JS */
     pointer-events: none;
     z-index: 199;
 }
 
-/* --- Shared Ring Styles --- */
 .m-ring {
     position: absolute;
     top: 50%;
@@ -3887,48 +3539,40 @@ input:checked + .slider:before {
     box-sizing: border-box;
 }
 
-/* 1. Dispersion Circle (20m Radius / 40m Width) */
 .m-ring.dispersion {
     width: 100%;
     height: 100%;
-    /* Dashed line to match your screenshot */
     border: 2px dashed rgba(255, 255, 255, 0.7);
     background-color: rgba(255, 0, 0, 0.1);
     box-shadow: inset 0 0 5px rgba(255, 0, 0, 0.1);
 }
 
-/* 2. Deadzone Circle (10m Radius / 50% Size) - FIXED */
 .m-ring.deadzone {
-    width: 50%; /* 10m / 20m = 50% */
+    width: 50%;
     height: 50%;
     border: 1px solid rgba(255, 255, 255, 0.5);
     background-color: rgba(255, 0, 0, 0.15);
 }
 
-/* 3. Blast Circle (5m Radius / 25% Size) */
 .m-ring.blast {
-    width: 25%; /* 5m / 20m = 25% */
+    width: 25%;
     height: 25%;
     background-color: rgba(255, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
 }
 
-/* --- Splash Damage Ring (High Visibility & Circular) --- */
 .splash-ring {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 
-    /* Initial size (overwritten by JS) */
     width: 0;
     height: 0;
 
-    /* THE FIX: Force it to be a circle */
     border-radius: 50% !important;
 
-    /* Visuals */
     border: 2px dashed rgba(255, 255, 255, 0.9);
     background-color: rgba(255, 0, 0, 0.15);
     box-shadow:
@@ -3943,7 +3587,6 @@ input:checked + .slider:before {
         height 0.1s linear;
 }
 
-/* Inner Kill-Zone Dot (5m) */
 .splash-ring::after {
     content: "";
     position: absolute;
@@ -3954,16 +3597,14 @@ input:checked + .slider:before {
     height: 25%;
     background-color: rgba(255, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 50%; /* Ensure this is also circular */
+    border-radius: 50%;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
 }
 
-/* Utility to hide them by default */
 .hidden {
     display: none !important;
 }
 
-/* --- INLINE STYLE REPLACEMENTS --- */
 .map-arrow {
     font-size: 18px;
     margin-left: 10px;
@@ -3974,19 +3615,15 @@ input:checked + .slider:before {
     margin: 0 3px;
 }
 
-/* --- Desktop Cursor Follower --- */
 #desktopCursorRings {
-    position: fixed; /* Follows the viewport/mouse exactly */
+    position: fixed;
     top: 0;
     left: 0;
-    /* Keep the translation to center the rings exactly on the cursor tip */
     transform: translate(-50%, -50%);
-    /* Ensure it sits above markers but below the control panel */
     z-index: 90;
     pointer-events: none;
 }
 
-/* --- HUD CROSSHAIR (Center +) --- */
 #mobileCrosshair {
     position: absolute;
     top: 50%;
@@ -4000,12 +3637,11 @@ input:checked + .slider:before {
     display: none;
 }
 
-/* Hide garrison dot image during Live HUD (show only rings) */
 #mobileCrosshair:not(.placement-mode) img {
     display: none !important;
 }
 
-/* === PLACEMENT MODE ARROWS (exactly like live HUD) === */
+
 .fire-guide-arrow.placement-arrow {
     color: #ffc107;
     text-shadow:
@@ -4017,7 +3653,6 @@ input:checked + .slider:before {
     pointer-events: none;
 }
 
-/* Show arrows when panel is open AND we are in placement mode */
 body.placement-active
     .controls-drawer:not(.closed)
     .fire-guide-arrow.placement-arrow {
@@ -4036,12 +3671,11 @@ body.placement-active
     }
 }
 
-/* Ensure the Manual Calculator Modal doesn't have dead space */
 #calcModal .modal-content {
     height: auto !important;
     min-height: unset !important;
     max-height: 90vh;
-    align-self: center; /* Centers vertically if it's short */
+    align-self: center;
 }
 
 #calcModal .modal-content.history-expanded {
@@ -4050,42 +3684,37 @@ body.placement-active
 }
 
 /* ==========================================
-   DESKTOP HOVER FIX: MORE PROJECTS
+   DESKTOP MORE PROJECTS
    ========================================== */
 @media (hover: hover) and (min-width: 769px) {
-    /* Target button AND icon inside when hovering */
     .modal-footer #btnOtherProjects:hover {
         background: rgba(
             255,
             193,
             7,
             0.1
-        ) !important; /* Subtle yellow glow BG */
-        border-color: #ffc107 !important; /* Bright yellow border */
-        color: #ffc107 !important; /* Yellow text */
+        ) !important;
+        border-color: #ffc107 !important;
+        color: #ffc107 !important;
         box-shadow: 0 0 15px rgba(255, 193, 7, 0.1) !important;
     }
 
-    /* Ensure the icon specifically turns yellow too */
     .modal-footer #btnOtherProjects:hover .icon {
         stroke: #ffc107 !important;
-        filter: none !important; /* Removes any grayscale if present */
+        filter: none !important;
     }
 }
 
-/* --- PROJECTS HUB EXTERNAL LINK ICONS --- */
 
 .projects-list .footer-btn {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
     padding-left: 20px !important;
-    /* Reduced right padding to let the icon get closer to the edge */
     padding-right: 15px !important;
     width: 100% !important;
 }
 
-/* This forces the text to take up all available space, pushing the icon to the end */
 .projects-list .footer-btn span {
     flex-grow: 1 !important;
     text-align: left !important;
@@ -4097,12 +3726,10 @@ body.placement-active
     opacity: 0.4;
     transition: all 0.2s ease;
 
-    /* Ensure it doesn't shrink and stays at the very end */
     flex-shrink: 0 !important;
     margin-left: 10px !important;
 }
 
-/* Hover highlight for the whole button */
 .projects-list .footer-btn:hover {
     border-color: #ffc107 !important;
     color: #ffc107 !important;
@@ -4111,15 +3738,13 @@ body.placement-active
 .projects-list .footer-btn:hover .external-link-icon {
     opacity: 1;
     color: #ffc107;
-    /* Subtle pop effect on hover */
     transform: translateX(2px);
 }
 
 /* ==========================================
-   FINAL FIX: MOBILE STICKY HOVER RESET (WHITE ICONS)
+   MOBILE STICKY HOVER RESET
    ========================================== */
 @media (hover: none) {
-    /* 1. BACKGROUND: Force Grey (No Yellow) on Focus/Hover */
     .footer-btn:hover,
     .footer-btn:focus,
     .footer-btn:focus-visible,
@@ -4132,26 +3757,23 @@ body.placement-active
         outline: none !important;
     }
 
-    /* 2. ICONS: Force them BRIGHT WHITE (opacity 1), not Grey */
     .footer-btn:hover .icon,
     .footer-btn:focus .icon,
     .footer-btn:focus-visible .icon,
     .projects-list .footer-btn:hover .external-link-icon,
     .projects-list .footer-btn:focus .external-link-icon {
-        stroke: #ffffff !important; /* Force Bright White */
+        stroke: #ffffff !important;
         fill: none !important;
-        opacity: 1 !important; /* CHANGED: 0.4 -> 1 (Fully Visible) */
+        opacity: 1 !important;
         transform: none !important;
     }
 
-    /* 2b. DOTS: Ensure dots inside calculator icon are also white */
     .footer-btn:hover .icon circle,
     .footer-btn:focus .icon circle {
         fill: #ffffff !important;
         stroke: none !important;
     }
 
-    /* 3. ACTIVE: The ONLY time it should be yellow (While finger is down) */
     .footer-btn:active,
     .projects-list .footer-btn:active {
         background: rgba(255, 193, 7, 0.2) !important;
@@ -4163,7 +3785,7 @@ body.placement-active
     .footer-btn:active .icon,
     .projects-list .footer-btn:active .external-link-icon {
         opacity: 1 !important;
-        stroke: #ffc107 !important; /* Yellow when actually pressing */
+        stroke: #ffc107 !important;
     }
 
     .footer-btn:active .icon circle {
@@ -4172,17 +3794,14 @@ body.placement-active
 }
 
 /* ==========================================================================
-   FINAL UNIFIED MOBILE OPTIMIZATIONS (MAX-WIDTH: 768PX)
+   FINAL MOBILE OPTIMIZATIONS
    ========================================================================== */
 @media (max-width: 768px) {
-    /* --- 1. MAIN UI & DRAWER --- */
 
-    /* Reduce main title size on mobile */
     .main-title {
         font-size: 24px !important;
     }
 
-    /* THE FULL-SIZE FIX: Remove borders and padding from the main wrapper */
     .shell {
         padding: 0 !important;
         margin: 0 !important;
@@ -4190,12 +3809,11 @@ body.placement-active
         width: 100vw !important;
     }
 
-    /* THE FULL-SIZE FIX: Make the map container cover the entire screen */
     .map-wrap {
-        border: none !important; /* Removes the grey border line */
-        border-radius: 0 !important; /* Square edges for full-screen look */
-        height: 100dvh !important; /* Force full viewport height */
-        width: 100vw !important; /* Force full viewport width */
+        border: none !important;
+        border-radius: 0 !important;
+        height: 100dvh !important;
+        width: 100vw !important;
         margin: 0 !important;
         padding: 0 !important;
     }
@@ -4224,7 +3842,6 @@ body.placement-active
         overflow: visible !important;
     }
 
-    /* Modal Footer Mobile Styles */
     .modal-footer {
         padding: 12px 10px !important;
         gap: 10px !important;
@@ -4272,14 +3889,11 @@ body.placement-active
         max-width: none !important;
         border-radius: 12px 12px 0 0 !important;
 
-        /* FIX: Reduced bottom padding from 25px to 12px */
         padding: 10px 10px 12px 10px !important;
 
         gap: 8px;
-        /* FIX: Change from #181818 to solid black with 1.0 opacity */
         background-color: rgba(24, 24, 24, 1) !important;
 
-        /* Ensure no blur effects are making it look "glassy" */
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
 
@@ -4294,51 +3908,42 @@ body.placement-active
         position: relative;
         z-index: 1300 !important;
 
-        /* FIX: Force height to fit content exactly */
         height: auto !important;
         min-height: 0 !important;
     }
 
-    /* Eraser Patch (Centered without translateX) */
     .controls-content::before {
         content: "";
         position: absolute;
         top: -2px;
 
-        /* THE GPU-SAFE CENTERING FIX */
         left: 0;
         right: 0;
         margin-left: auto;
         margin-right: auto;
-        width: 78px; /* Fixed width matching the tab's inner seam */
+        width: 78px;
 
-        /* Remove transform to prevent checkerboarding */
         transform: none !important;
 
         height: 4px;
-        /* FIX: Match solid background with 1.0 opacity */
         background-color: rgba(24, 24, 24, 1) !important;
         z-index: 1301;
     }
 
-    /* Drawer Tab (Centered without translateX) */
     .drawer-tab {
         position: absolute !important;
         top: -31px !important;
 
-        /* THE GPU-SAFE CENTERING FIX */
         left: 0 !important;
         right: 0 !important;
         margin-left: auto !important;
         margin-right: auto !important;
-        width: 80px !important; /* Specific width allows margin:auto to work */
+        width: 80px !important;
 
-        /* Remove transform to avoid checkerboarding */
         transform: none !important;
 
         height: 32px !important;
         z-index: 1000 !important;
-        /* FIX: Match solid background with 1.0 opacity */
         background-color: rgba(24, 24, 24, 1) !important;
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-bottom: none !important;
@@ -4347,7 +3952,6 @@ body.placement-active
         pointer-events: auto;
     }
 
-    /* --- 2. DROPDOWNS & BUTTONS --- */
     .custom-dropdown {
         position: relative;
         z-index: 1400 !important;
@@ -4358,29 +3962,24 @@ body.placement-active
 
     .dropdown-menu {
         z-index: 1500 !important;
-        /* FIX: Change from 0.95 to 1.0 for solid opacity */
         background-color: rgba(29, 31, 39, 1) !important;
 
-        /* Force remove blur which can cause a translucent look on some mobile browsers */
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
     }
 
-    /* Map Button (Full Width) */
     .custom-dropdown:nth-child(1),
     .btn-map-select:nth-child(1) {
         width: 100% !important;
         flex: 0 0 100% !important;
     }
 
-    /* Faction & Gun (50% Split) */
     .custom-dropdown:nth-child(2),
     .custom-dropdown:nth-child(3) {
         width: calc(50% - 4px) !important;
         flex: 0 0 calc(50% - 4px) !important;
     }
 
-    /* Ensure the entire button area is a single hit-target for Firefox */
     .btn-map-select {
         font-size: 13px !important;
         padding: 10px 12px !important;
@@ -4392,14 +3991,12 @@ body.placement-active
         justify-content: space-between !important;
         flex-grow: 1;
 
-        /* THE FIX: Ensure no internal elements block the click */
         cursor: pointer !important;
         pointer-events: auto !important;
         user-select: none !important;
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* VITAL FOR FIREFOX: Force labels to pass clicks to the parent button */
     #currentMapName,
     #factionLabel,
     #gunLabel,
@@ -4413,13 +4010,11 @@ body.placement-active
         text-overflow: ellipsis !important;
         display: block !important;
 
-        /* THE FIX: Text/Icons won't "swallow" the touch event */
         pointer-events: none !important;
     }
 
-    /* --- 3. TARGET DATA PANEL --- */
     .target-data-panel {
-        top: 20px; /* Lower on mobile so it doesn't hit header */
+        top: 20px;
         min-width: 260px;
     }
 
@@ -4431,14 +4026,11 @@ body.placement-active
         padding: 8px 10px;
     }
 
-    /* --- 4. SCALE BAR (FIXED: Spacing & Centering) --- */
     .scale-container {
-        /* 1. Use Flexbox to center the child wrapper */
         display: flex !important;
         justify-content: center !important;
         align-items: flex-end !important;
 
-        /* 2. Position the container itself */
         width: 100% !important;
         height: 50px !important;
         margin-bottom: 190px !important;
@@ -4449,25 +4041,19 @@ body.placement-active
     }
 
     .scale-wrapper {
-        /* 3. Disable Absolute/Stretching logic */
         position: relative !important;
         left: auto !important;
         right: auto !important;
         bottom: auto !important;
         margin: 0 !important;
 
-        /* 4. Allow JS to control the width */
         width: auto;
-        /* The JavaScript style="width: 240px" will now apply correctly
-           and Flexbox will keep it centered. */
 
-        /* 5. Performance & Safety */
         transform: none !important;
         transition: none !important;
         pointer-events: none !important;
     }
 
-    /* 6. VERTICAL SPACING FIX */
     .scale-labels {
         position: relative;
         width: 100%;
@@ -4475,18 +4061,15 @@ body.placement-active
         margin-top: 4px !important;
     }
 
-    /* 7. CLEAN TEXT STYLE (Stroke Method) */
     .scale-lbl {
         position: absolute;
         bottom: 0;
 
-        /* 1. GPU-SAFE CENTERING */
         transform: none !important;
         width: 40px;
         margin-left: -20px;
         text-align: center;
 
-        /* 2. FONT STYLING */
         font-family: "GothamSS", sans-serif;
         font-weight: 900;
         font-size: 12px;
@@ -4495,22 +4078,17 @@ body.placement-active
         line-height: 1;
         letter-spacing: 1px;
 
-        /* 3. THE FIX: SIMPLE STROKE */
-        /* We remove the complex shadow and use a real vector stroke */
         text-shadow: none !important;
         -webkit-text-stroke: 2px #000000;
 
-        /* This ensures the stroke stays BEHIND the white fill */
         paint-order: stroke fill;
     }
 
-    /* --- 5. ZOOM SLIDER (RIGHT SIDE - ADJUSTED) --- */
     .zoom-slider-container {
         position: absolute !important;
         right: 5px !important;
         left: auto !important;
 
-        /* UPDATED: Increased height */
         height: 450px !important;
         max-height: 85vh !important;
 
@@ -4543,7 +4121,6 @@ body.placement-active
         pointer-events: auto !important;
     }
 
-    /* Reset hover/pressed states for mobile */
     .zoom-icons span:hover {
         background-color: rgba(20, 20, 20, 0.95) !important;
         color: white !important;
@@ -4552,21 +4129,17 @@ body.placement-active
         transform: scale(0.82) !important;
     }
 
-    /* --- 6. ZOOM INDICATOR TEXT (CENTERED - NO TRANSFORMS) --- */
     .zoom-indicator-inline {
         position: fixed !important;
 
-        /* THE GPU-SAFE CENTERING FIX */
         left: 0 !important;
         right: 0 !important;
         margin-left: auto !important;
         margin-right: auto !important;
-        width: 100px !important; /* Set a fixed width to allow margin:auto to work */
+        width: 100px !important;
 
-        /* Removed transform: translateX to prevent checkerboarding */
         transform: none !important;
 
-        /* Vertical position */
         bottom: 170px !important;
 
         top: auto !important;
@@ -4581,7 +4154,6 @@ body.placement-active
         display: block !important;
         line-height: 1 !important;
 
-        /* Unified Sharp Style */
         font-family: "GothamSS", sans-serif !important;
         font-weight: 900 !important;
         text-shadow: none !important;
@@ -4589,19 +4161,13 @@ body.placement-active
         paint-order: stroke fill;
         color: #fff;
     }
-    /* --- 7. LIVE HUD (TOP-RIGHT OF CROSSHAIR) --- */
     .live-hud {
         position: fixed !important;
-        /* Anchor to center */
         top: 50% !important;
         left: 50% !important;
 
-        /* UPDATED: Push into Top-Right Quadrant */
-        /* X: 25px (Right) */
-        /* Y: -105% (Up - Moves it up by its own height + 5% padding) */
         transform: translate(25px, -140%) !important;
 
-        /* Reset old conflicting anchors */
         bottom: auto !important;
         right: auto !important;
 
@@ -4641,16 +4207,13 @@ body.placement-active
         display: none !important;
     }
 
-    /* --- 8. TRAJECTORY SLIDER & SQUARE BUTTONS --- */
     .traj-slider-container {
         bottom: 50px !important;
         width: 96vw !important;
         padding: 10px 8px !important;
-        /* Ensure it sits below target panel */
         z-index: 400 !important;
     }
 
-    /* THE SQUARE BUTTON FIX */
     .traj-step-btn {
         width: 32px !important;
         height: 32px !important;
@@ -4665,7 +4228,6 @@ body.placement-active
         gap: 8px !important;
     }
 
-    /* --- 9. MODALS & MENUS --- */
     .modal-content {
         height: auto !important;
         max-height: 85vh !important;
@@ -4674,40 +4236,33 @@ body.placement-active
         overflow-y: auto !important;
     }
 
-    /* Change modal overlay alignment to start from top on mobile */
     .modal-overlay {
         align-items: flex-start !important;
         padding: 10px 0 0 0 !important;
         overflow-y: auto !important;
     }
 
-    /* --- MOBILE CALCULATOR OPTIMIZATIONS --- */
-    /* Calculator modal positioned at top, expands downward */
     #calcModal .modal-content {
         margin-top: 10px !important;
         margin-bottom: auto !important;
     }
 
-    /* When history expands, modal stays at top and grows downward */
     #calcModal .modal-content.history-expanded {
         height: auto !important;
         min-height: auto !important;
         max-height: none !important;
     }
 
-    /* History section: flex column layout with scrolling list */
     .calc-history-section {
         max-height: 220px !important;
         display: flex !important;
         flex-direction: column !important;
     }
 
-    /* Only add min-height when history list is visible (expanded) */
     .calc-history-section .history-list:not([style*="none"]) {
         min-height: 150px !important;
     }
 
-    /* History header stays fixed at top */
     .history-header {
         position: relative !important;
         z-index: 100 !important;
@@ -4715,25 +4270,21 @@ body.placement-active
         flex-shrink: 0 !important;
     }
 
-    /* History list scrolls independently */
     .history-list {
         overflow-y: auto !important;
         flex: 1 !important;
         padding: 0 !important;
     }
 
-    /* Reduce history item padding on mobile */
     .history-item {
         padding: 6px 15px !important;
     }
 
-    /* History empty message - reduced padding */
     .history-empty {
         padding: 14px !important;
         font-size: 15px !important;
     }
 
-    /* Reduce header padding and title size */
     .modal-brand-header {
         padding: 10px 20px !important;
         min-height: 50px !important;
@@ -4742,60 +4293,50 @@ body.placement-active
         font-size: 25px !important;
     }
 
-    /* Reduce faction bar padding */
     .calc-faction-bar {
         padding: 8px 15px !important;
     }
 
-    /* Reduce screen padding */
     .calc-screen {
         padding: 6px !important;
     }
 
-    /* --- THE FIX: Force Projects Modal to shrink to fit content --- */
     .modal-content.projects-hub-content {
-        height: auto !important; /* Disable the fixed 92vh height */
-        min-height: auto !important; /* Allow shrinking */
-        flex: 0 1 auto !important; /* Flexbox: Don't grow, allow shrink */
+        height: auto !important;
+        min-height: auto !important;
+        flex: 0 1 auto !important;
 
-        /* Optional: Vertical centering if the overlay uses flex */
         margin: auto !important;
-        max-height: 85vh !important; /* Safety cap */
+        max-height: 85vh !important;
     }
-    /* 1. Header Container: Forced Symmetrical Padding */
     .modal-brand-header {
         display: flex !important;
         flex-direction: column !important;
-        align-items: center !important; /* Centers title and version horizontally */
-        justify-content: center !important; /* Centers them vertically */
+        align-items: center !important;
+        justify-content: center !important;
         text-align: center !important;
 
-        /* THE ALIGNMENT FIX: 50px on both sides balances the Close Button */
         padding: 12px 50px !important;
         gap: 6px !important;
         min-height: 70px !important;
         position: relative !important;
     }
 
-    /* 3. Credits/Version: Center Locked */
     .main-subtitle-credits {
         font-size: 9px !important;
         letter-spacing: 1.5px !important;
-        justify-content: center !important; /* Centers the flex content */
+        justify-content: center !important;
         margin-top: 0 !important;
         width: 100% !important;
     }
 
-    /* 4. Close Button: Absolute Top-Right Corner */
     .close-btn {
         position: absolute !important;
-        right: 5px !important; /* Tucked into the right edge */
-        top: 5px !important; /* Tucked into the top edge */
+        right: 5px !important;
+        top: 5px !important;
 
-        /* Reset centering from previous steps */
         transform: none !important;
 
-        /* Tactical sizing & look */
         width: 44px !important;
         height: 44px !important;
         display: flex !important;
@@ -4816,7 +4357,6 @@ body.placement-active
         padding: 10px;
     }
 
-    /* Footer Layout */
     .modal-footer {
         display: flex !important;
         flex-direction: row !important;
@@ -4850,69 +4390,56 @@ body.placement-active
         display: block !important;
         flex-shrink: 0 !important;
     }
-    /* 2. PROJECTS BUTTON (Mobile: Grid Layout) */
     .modal-footer #btnOtherProjects {
         flex: 1 !important;
         min-width: 0 !important;
         height: 54px !important;
 
-        /* GRID LAYOUT: [Icon] [----- Remaining Space -----] */
         display: grid !important;
         grid-template-columns: auto 1fr !important;
         align-items: center !important;
 
-        /* Gap between Icon and Text */
         gap: 10px !important;
 
-        /* Safe distance from the button edges */
         padding-left: 12px !important;
         padding-right: 12px !important;
 
         font-size: 14px !important;
 
-        /* Reset Flex/Align properties */
         justify-content: unset !important;
         overflow: hidden !important;
     }
 
-    /* ICON: Occupies Column 1 */
     .modal-footer #btnOtherProjects .icon {
-        position: static !important; /* Sits naturally in the grid */
-        transform: none !important; /* Remove old centering hacks */
+        position: static !important;
+        transform: none !important;
 
         width: 28px !important;
         height: 28px !important;
 
-        /* Reset margins/padding */
         margin: 0 !important;
         padding: 0 !important;
         flex-shrink: 0 !important;
     }
 
-    /* TEXT: Occupies Column 2 (The Remaining Space) */
     .modal-footer #btnOtherProjects {
-        /* Prevent text wrapping */
         white-space: nowrap !important;
     }
 
     .modal-footer #btnOtherProjects span {
-        /* Center yourself inside the remaining space */
         text-align: center !important;
 
         width: 100% !important;
         display: block !important;
 
-        /* Safety: Truncate if screen is microscopic */
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
 
-        /* Reset padding since Grid Gap handles the spacing */
         padding: 0 !important;
         margin: 0 !important;
     }
 
-    /* Projects Hub List Fix */
     .projects-list .footer-btn {
         flex: 0 0 auto !important;
         width: 100% !important;
@@ -4958,7 +4485,6 @@ body.placement-active
         animation: kofi-idle 3s ease-in-out infinite !important;
     }
 
-    /* --- 10. HIDES & UTILITIES --- */
     [data-tooltip]::before,
     [data-tooltip]::after,
     #desktopCursorRings,
@@ -4972,7 +4498,6 @@ body.placement-active
         bottom: 3px;
     }
 
-    /* --- 11. FIRE GUIDE ARROWS --- */
     .fire-guide-arrow {
         position: absolute;
         top: -55px;
@@ -4992,7 +4517,6 @@ body.placement-active
         right: 10%;
     }
 
-    /* Show ONLY if: HUD active + NOT dismissed + Panel OPEN */
     body.hud-active:not(.guides-dismissed)
         .controls-drawer:not(.closed)
         .fire-guide-arrow {
@@ -5011,28 +4535,23 @@ body.placement-active
         }
     }
 
-    /* Mobile Fire Button (Centered without translateX) */
     .mobile-fire-btn {
         position: absolute;
         bottom: 120px;
 
-        /* THE GPU-SAFE CENTERING FIX */
         left: 0;
         right: 0;
         margin-left: auto;
         margin-right: auto;
-        width: fit-content; /* Shrinks to text width */
-        min-width: 160px; /* Ensures a good hit area */
+        width: fit-content;
+        min-width: 160px;
 
-        /* Removed translateX to prevent checkerboarding */
         transform: none;
         z-index: 500;
     }
 
-    /* Vertical-only movement on press */
     .mobile-fire-btn:active,
     .mobile-fire-btn.pressed {
-        /* Remove translateX(-50%) here because margin:auto handles X-axis */
         transform: translateY(4px) scale(0.95) !important;
 
         background-color: #ffc107 !important;
@@ -5041,15 +4560,12 @@ body.placement-active
         box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4) !important;
     }
 
-    /* REDUCE STICKY GRID LABELS (Mobile) */
     .hll-grid-label {
-        font-size: 20px !important; /* Reduced from 24px */
+        font-size: 20px !important;
 
-        /* Adjust black outline thickness for smaller text */
         -webkit-text-stroke: 2px #000000 !important;
     }
 
-    /* History modal close button - keep dark color on mobile */
     .history-modal .close-btn {
         color: #2d2d2d !important;
         opacity: 0.6 !important;
@@ -5061,15 +4577,13 @@ body.placement-active
     }
 }
 
-/* END OF MOBILE MEDIA QUERY */
 
 /* ==========================================
    MATCH SETUP & SECTOR HIGHLIGHTS (FINAL)
    ========================================== */
 
-/* Button States */
 #spFilterBtn.active {
-    background-color: #28a745 !important; /* Green Button for Setup */
+    background-color: #28a745 !important;
     color: white !important;
     border-color: #28a745 !important;
 }
@@ -5081,7 +4595,6 @@ body.placement-active
     }
 }
 
-/* --- SECTOR HIGHLIGHT LAYER (Smart Auto-Step) --- */
 .sector-layer {
     position: absolute;
     top: 0;
@@ -5092,7 +4605,6 @@ body.placement-active
     z-index: 1;
 }
 
-/* The Active "Target" Sector */
 .sector-highlight {
     position: absolute;
     background-color: rgba(40, 167, 69, 0.3);
@@ -5101,7 +4613,6 @@ body.placement-active
     z-index: 50;
 }
 
-/* FIX 3: Safe Pulse Animation (No Box-Shadow Thrashing) */
 @keyframes sector-pulse {
     0%,
     100% {
@@ -5113,13 +4624,11 @@ body.placement-active
 }
 
 /* ==========================================
-   STRONGPOINT STATES (CLEANED)
+   STRONGPOINT STATES
    ========================================== */
 
-/* 1. SELECTED (Active - GREEN) */
 .marker.strongpoint.is-confirmed .marker-visual {
     border: none !important;
-    /* Clip stripes to circle */
     mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
     -webkit-mask-image: radial-gradient(
         circle,
@@ -5132,14 +4641,12 @@ body.placement-active
     -webkit-mask-position: center !important;
     mask-repeat: no-repeat !important;
     -webkit-mask-repeat: no-repeat !important;
-    /* Thick GREEN Ring + Glow */
     box-shadow:
         inset 0 0 0 8px #00ff00,
         0 0 20px rgba(0, 255, 0, 0.6) !important;
     background-color: rgba(0, 255, 0, 0.15) !important;
     opacity: 1 !important;
 
-    /* Green Lines */
     background-image: repeating-linear-gradient(
         -45deg,
         rgba(0, 255, 0, 0.05),
@@ -5157,7 +4664,6 @@ body.placement-active
     transform: scale(1.1);
 }
 
-/* 2. REJECTED / UNSELECTED (During Setup) */
 .marker.strongpoint.is-rejected {
     opacity: 1 !important;
     filter: none !important;
@@ -5166,10 +4672,8 @@ body.placement-active
 }
 
 .marker.strongpoint.is-rejected .marker-visual {
-    /* Inset 4px RED ring (No white dots) */
     box-shadow: inset 0 0 0 4px #ff4444 !important;
     border: none !important;
-    /* Clip stripes to circle */
     mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
     -webkit-mask-image: radial-gradient(
         circle,
@@ -5185,7 +4689,6 @@ body.placement-active
 
     background-color: transparent !important;
 
-    /* RED Diagonal Lines */
     background-image: repeating-linear-gradient(
         -45deg,
         rgba(255, 68, 68, 0.15) 0px,
@@ -5195,26 +4698,22 @@ body.placement-active
     ) !important;
 }
 
-/* RED Label Text */
 .marker.strongpoint.is-rejected .marker-label {
     opacity: 1 !important;
     color: #ff4444 !important;
     text-decoration: none;
 }
 
-/* 3. LOCKED (Future Steps) - NO DOTS, JUST BLACK */
 .marker.strongpoint.is-locked {
-    opacity: 0.5 !important; /* Dimmed to show it's not ready */
-    pointer-events: none !important; /* Cannot click */
-    filter: none !important; /* Standard colors */
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+    filter: none !important;
     z-index: 1 !important;
 }
 
 .marker.strongpoint.is-locked .marker-visual {
-    /* DEFAULT BLACK RING */
     box-shadow: inset 0 0 0 8px #000000 !important;
-    border: none !important; /* Removes the white dots */
-    /* Clip stripes to circle */
+    border: none !important;
     mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
     -webkit-mask-image: radial-gradient(
         circle,
@@ -5229,7 +4728,6 @@ body.placement-active
     -webkit-mask-repeat: no-repeat !important;
     background-color: transparent !important;
 
-    /* DEFAULT BLACK LINES */
     background-image: repeating-linear-gradient(
         -45deg,
         rgba(255, 255, 255, 0.05) 0px,
@@ -5239,13 +4737,11 @@ body.placement-active
     ) !important;
 }
 
-/* Dimmed White Text */
 .marker.strongpoint.is-locked .marker-label {
     opacity: 0.5 !important;
     color: #ffffff !important;
 }
 
-/* 4. OPEN / AVAILABLE (Active Sector) - FULL BLACK */
 .marker.strongpoint.is-open {
     opacity: 1 !important;
     filter: none !important;
@@ -5254,12 +4750,10 @@ body.placement-active
 }
 
 .marker.strongpoint.is-open .marker-visual {
-    /* DEFAULT BLACK RING */
     box-shadow:
         inset 0 0 0 8px #000000,
         0 0 4px rgba(0, 0, 0, 0.5) !important;
     border: none !important;
-    /* Clip stripes to circle */
     mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
     -webkit-mask-image: radial-gradient(
         circle,
@@ -5274,7 +4768,6 @@ body.placement-active
     -webkit-mask-repeat: no-repeat !important;
     background-color: transparent !important;
 
-    /* DEFAULT BLACK LINES */
     background-image: repeating-linear-gradient(
         -45deg,
         rgba(255, 255, 255, 0.1) 0px,
@@ -5290,7 +4783,6 @@ body.placement-active
     text-shadow: none !important;
 }
 
-/* 5. INTERACTIVE HOVER (Green Preview) */
 .marker.strongpoint.setup-active {
     pointer-events: auto !important;
     cursor: pointer;
@@ -5303,7 +4795,6 @@ body.placement-active
 
 .marker.strongpoint.setup-active:hover .marker-visual {
     border: none !important;
-    /* Clip stripes to circle */
     mask-image: radial-gradient(circle, black 99%, transparent 100%) !important;
     -webkit-mask-image: radial-gradient(
         circle,
@@ -5316,12 +4807,10 @@ body.placement-active
     -webkit-mask-position: center !important;
     mask-repeat: no-repeat !important;
     -webkit-mask-repeat: no-repeat !important;
-    /* PREVIEW: Thick GREEN Ring + Glow */
     box-shadow:
         inset 0 0 0 8px #00ff00,
         0 0 20px rgba(0, 255, 0, 0.6) !important;
 
-    /* PREVIEW: Green Lines */
     background-image: repeating-linear-gradient(
         -45deg,
         rgba(0, 255, 0, 0.05) 0px,
@@ -5338,22 +4827,18 @@ body.placement-active
 }
 
 /* ==========================================
-   SETUP MODE GUIDE TEXT (TACTICAL THEME - SAFE)
+   SETUP MODE GUIDE TEXT
    ========================================== */
 
 .setup-guide {
     pointer-events: none;
 
-    /* THEME: Dark Background (Matches Drawer/Panels) */
     background-color: rgba(20, 20, 20, 0.95) !important;
 
-    /* THEME: Thin Grey Border */
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
 
-    /* THEME: Tactical Yellow Top Accent */
     border-top: 3px solid #ffc107 !important;
 
-    /* Text Styles */
     color: #ffffff !important;
     font-family: "GothamSS", sans-serif;
     font-weight: 900;
@@ -5362,21 +4847,15 @@ body.placement-active
     text-transform: uppercase;
     text-align: center;
 
-    /* Layout */
     padding: 12px 24px;
     border-radius: 2px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 
-    /* Position: Top Center */
     margin-bottom: 20px;
     z-index: 2500;
 
-    /* Desktop Positioning */
     transform: none;
 
-    /* FIX: REMOVED 'will-change'.
-       This prevents Chrome Mobile from creating aggressive GPU layers
-       that cause checkerboarding/blur. */
     transition:
         opacity 0.2s,
         transform 0.2s,
@@ -5388,21 +4867,16 @@ body.placement-active
     opacity: 0;
 }
 
-/* SUCCESS STATE: Green Accent */
 .setup-guide.success {
-    /* Change Top Border to Green */
     border-top-color: #28a745 !important;
 
-    /* Add subtle Green Glow */
     box-shadow: 0 0 30px rgba(40, 167, 69, 0.25);
 
-    /* Pop effect */
     transform: scale(1.05);
 }
 
-/* Finish Button (Matches Footer Buttons) */
 .setup-finish-btn {
-    background-color: rgba(40, 167, 69, 0.2); /* Semi-transparent Green */
+    background-color: rgba(40, 167, 69, 0.2);
     border: 1px solid #28a745;
     color: #ffffff;
 
@@ -5422,7 +4896,7 @@ body.placement-active
 }
 
 .setup-finish-btn:hover {
-    background-color: #28a745; /* Solid Green on Hover */
+    background-color: #28a745;
     color: #000000;
     box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
 }
@@ -5431,7 +4905,6 @@ body.placement-active
     transform: scale(0.95);
 }
 
-/* Flex layout for the content */
 .setup-guide.success {
     pointer-events: auto !important;
     display: flex;
@@ -5439,7 +4912,6 @@ body.placement-active
     justify-content: center;
 }
 
-/* Mobile Adjustments (Keep Fixed Positioning) */
 @media (max-width: 768px) {
     .setup-guide {
         font-size: 13px;
@@ -5451,43 +4923,37 @@ body.placement-active
         position: fixed;
         top: 90px;
         left: 50%;
-        /* Force Centering on Mobile */
         transform: translateX(-50%);
         margin: 0;
     }
 
-    /* Success Pop + Center */
     .setup-guide.success {
         transform: translateX(-50%) scale(1.05);
     }
 
-    /* 1. Row Container: Center vertically, reset horizontal spacing */
     .panel-row.context-row {
         display: flex !important;
-        justify-content: center !important; /* Don't push to edges */
-        align-items: stretch !important; /* Make all groups equal height */
+        justify-content: center !important;
+        align-items: stretch !important;
         gap: 0 !important;
-        padding: 8px 0 12px !important; /* More padding on bottom */
-        height: 45px !important; /* Slightly taller for values */
+        padding: 8px 0 12px !important;
+        height: 45px !important;
     }
 
-    /* 2. The 3 Data Groups: Force 3 Equal Columns */
     .data-group {
-        flex: 1 1 33% !important; /* Each takes exactly 1/3 width */
-        width: 33% !important; /* Fallback */
+        flex: 1 1 33% !important;
+        width: 33% !important;
         display: inline-block !important;
         text-align: center !important;
         vertical-align: middle !important;
     }
 
-    /* 3. Ensure Text is Centered */
     .lbl-tiny,
     .val-mid {
         display: block !important;
         text-align: center !important;
     }
 
-    /* 4. Match Label Styles to Desktop */
     .lbl-tiny {
         font-size: 8px !important;
         letter-spacing: 0.5px !important;
@@ -5497,7 +4963,6 @@ body.placement-active
         white-space: nowrap !important;
     }
 
-    /* 5. Ensure Values Match Desktop Size */
     .val-mid {
         font-size: 15px !important;
         line-height: 1.1 !important;
@@ -5509,34 +4974,31 @@ body.placement-active
         vertical-align: middle !important;
     }
 
-    /* Specific fix for distance value with "m" suffix */
     #panelDist {
         vertical-align: middle !important;
     }
 
     .val-huge {
-        font-size: 35px !important; /* Reduced size */
+        font-size: 35px !important;
         line-height: 1 !important;
-        margin-top: 0 !important; /* Remove extra top gap */
-        margin-bottom: 2px !important; /* Slight spacing before the line */
+        margin-top: 0 !important;
+        margin-bottom: 2px !important;
     }
 }
 
-/* CLEAN CUSTOM ARTILLERY ICONS - No square border */
 .marker.custom-artillery {
-    border: none !important; /* ← REMOVED the square */
+    border: none !important;
     background-color: transparent !important;
     box-shadow: none !important;
 }
 
-/* === CLEAN CUSTOM ARTILLERY ICONS (no square ever) === */
+
 .marker.custom-artillery {
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
 }
 
-/* Active custom gun: clean without yellow glow */
 .marker.custom-artillery.active-gun .arty-icon {
     filter: invert(1);
     transform: scale(1.1);
@@ -5545,14 +5007,13 @@ body.placement-active
         transform 0.15s ease;
 }
 
-/* Dimmed custom guns stay perfectly clean */
 .marker.custom-artillery.dimmed-gun .arty-icon {
     filter: none;
     transform: scale(1);
 }
 
 /* ==========================================
-   CUSTOM CONFIRM MODAL (matches dropdown style)
+   CUSTOM CONFIRM MODAL
    ========================================== */
 .confirm-modal-overlay {
     position: fixed;
@@ -5633,12 +5094,11 @@ body.placement-active
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* TARGET PANEL CLOSE BUTTON — safe absolute positioning */
 .panel-close-btn {
     position: absolute;
     top: 8px;
     right: 10px;
-    width: 28px; /* slightly bigger for easy taps */
+    width: 28px;
     height: 28px;
     display: flex;
     align-items: center;
@@ -5652,7 +5112,6 @@ body.placement-active
     transition: all 0.15s ease;
     user-select: none;
 
-    /* THIS IS THE FIX */
     pointer-events: auto !important;
 }
 
@@ -5666,19 +5125,16 @@ body.placement-active
     transform: scale(0.9);
 }
 
-/* FORCE PLACE BUTTON MOBILE-ONLY (defensive) */
 @media (min-width: 769px) {
     #mobilePlaceBtn {
         display: none !important;
     }
 }
 
-/* ACTIVE GUN — use pre-inverted white icon (no CSS filter needed) */
 .marker.active-gun .arty-icon {
-    filter: none !important; /* important so Firefox doesn't fight us */
+    filter: none !important;
 }
 
-/* FIREFOX: Smooth rendering for scaled + rotated icons */
 @supports (-moz-appearance: none) {
     .marker.active-gun,
     .marker.point.active-gun,
@@ -5689,7 +5145,6 @@ body.placement-active
     }
 }
 
-/* BEYOND MAX RANGE DARK OVERLAY — always on when gun selected */
 #beyondRangeOverlay {
     position: absolute;
     top: 0;
@@ -5706,7 +5161,6 @@ body.placement-active
     display: none;
 }
 
-/* MIN RANGE DARK OVERLAY — darkens inside the dead zone (no outline) */
 #minRangeOverlay {
     position: absolute;
     top: 0;
@@ -5719,17 +5173,14 @@ body.placement-active
         transparent calc(var(--min-range-r) + 1px)
     );
     pointer-events: none;
-    z-index: 95; /* slightly below max overlay */
+    z-index: 95;
     display: none;
 }
 
-/* ENEMY ARTILLERY — same perfect centering as friendly guns */
 .marker.enemy-gun {
-    /* Fixed size - same as friendly guns when fully zoomed in (10x) */
     width: 13px !important;
     height: 13px !important;
 
-    /* Perfect negative margin centering for fixed size */
     margin-left: -6.5px !important;
     margin-top: -6.5px !important;
 
@@ -5738,8 +5189,8 @@ body.placement-active
     align-items: center;
     justify-content: center;
 
-    pointer-events: none; /* prevents accidental clicks on enemy icons */
-    z-index: 90; /* sits below friendly guns */
+    pointer-events: none;
+    z-index: 90;
 }
 
 .marker.enemy-gun .arty-icon {

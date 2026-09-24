@@ -1,4 +1,4 @@
-const SW_VERSION = "1.4.3-2";
+const SW_VERSION = "1.4.3-3";
 const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
 
 const ASSETS_TO_CACHE = [
