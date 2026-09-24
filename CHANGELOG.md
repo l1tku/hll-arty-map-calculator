@@ -7,7 +7,7 @@ The app updates automatically — **refresh the page twice** and it will update.
 
 ## [1.4.3] - 2026-09-24
 ### Changed
-- Removed useless comments from `index.html`, `service-worker.js`, `css/style.css`,  `js/ballistics.js` and `js/maps.js`
+- Removed obsolete comments from `index.html`, `service-worker.js`, `css/style.css`, `js/script.js`, `js/ballistics.js`, and `js/maps.js`
 - Reorganized and refactored `js/maps.js` structure
 - Removed the close transition from the manual calculator
 
