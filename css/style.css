@@ -1624,25 +1624,33 @@ select.btn-map-select option {
     justify-content: center;
     align-items: center;
     z-index: 3000;
-    transition: opacity 0.2s ease-in-out;
+    
+    /* Default Closed State */
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    /* FIX 4: Disable Backdrop Filter on Mobile (GPU Hog) */
+    
+    /* INSTANT CLOSE: No transition when removing .active class */
+    transition: none; 
+
     /* Default: No Blur (Mobile Safe) */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
+
 .modal-overlay.active {
     opacity: 1;
     visibility: visible;
     pointer-events: all;
+    
+    /* FADE IN ON OPEN ONLY: Apply 0.2s transition when opening */
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 }
 
 /* FIX 4: Desktop Only: Re-enable Blur */
 @media (min-width: 769px) {
-    /* Desktop Only: Re-enable Blur */
-    .modal-overlay {
+    /* Apply blur ONLY when active on desktop to prevent background rendering bugs while hidden */
+    .modal-overlay.active {
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
     }

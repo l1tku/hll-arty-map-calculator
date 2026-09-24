@@ -1,19 +1,4 @@
-/**
- * Service Worker Versioning Strategy:
- *
- * SW_VERSION controls the cache name and forces clients to get fresh JS/CSS.
- * Bump this when you update JS/CSS files and want existing users to get the changes.
- *
- * Format: "{app-version}-{build}" (e.g., "1.3.6-1")
- * - app-version: Matches your app version for reference
- * - build: Increment when you need to force cache refresh
- *
- * Examples:
- * - App v1.3.5, first SW release: "1.3.5-1"
- * - Same app version, JS bugfix: "1.3.5-2"  <-- bump build number
- * - App v1.3.6 released: "1.3.6-1"
- */
-const SW_VERSION = "1.4.2-1";  // Change this to force cache refresh
+const SW_VERSION = "1.4.3-1";
 const CACHE_NAME = `hll-arty-cache-v${SW_VERSION}`;
 
 const ASSETS_TO_CACHE = [
@@ -41,7 +26,6 @@ const ASSETS_TO_CACHE = [
   "./images/flags/ger.webp",
   "./images/flags/rus.webp",
   "./images/flags/gb.webp",
-  // Core map files
   "./images/maps/map_carentan.webp",
   "./images/maps/map_driel.webp",
   "./images/maps/map_elalamein.webp",
@@ -107,7 +91,6 @@ async function matchFromCache(request) {
   return cache.match(toCacheKey(request));
 }
 
-// Install: Cache core assets + skip waiting for immediate activation
 console.log(`[SW] Installing service worker v${SW_VERSION}`);
 
 self.addEventListener("install", (e) => {
@@ -115,7 +98,6 @@ self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log(`[SW] Caching assets for v${SW_VERSION}`);
-      // Cache assets individually to handle partial failures gracefully
       return Promise.all(
         ASSETS_TO_CACHE.map((url) => {
           const absoluteUrl = new URL(url, self.location.href).toString();
@@ -126,7 +108,6 @@ self.addEventListener("install", (e) => {
             })
             .catch((err) => {
               console.warn(`[SW] Failed to cache: ${url}`, err.message);
-              // Don't let one failure stop the install
               return null;
             });
         })
@@ -136,12 +117,10 @@ self.addEventListener("install", (e) => {
       });
     }).catch((err) => {
       console.error('[SW] Install failed:', err);
-      // Don't fail install - continue with empty cache
     })
   );
 });
 
-// Activate: Clean up old caches + claim clients immediately
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keyList) =>
