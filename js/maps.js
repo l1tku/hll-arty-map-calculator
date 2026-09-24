@@ -36,7 +36,6 @@ const MAP_DATABASE = {
       }
     },
     
-    // 40320 units * 5 sectors = 2016 meters
     widthMeters: 2016, 
     heightMeters: 2016, 
     gunRotations: { "us": -90, "ger": 90 },
@@ -113,9 +112,6 @@ const MAP_DATABASE = {
       }
     }, 
 
-// --- SCALE FIX: 1984 METERS ---
-    // Although SectorWidth indicates 2016m, the Level Settings (HLLWorldSettings)
-    // define MBPBounds as -99200 to 99200 units (1984 meters).
     widthMeters: 1984, 
     heightMeters: 1984, 
     gunRotations: { "us": -180, "ger": 0 },
@@ -262,8 +258,6 @@ const MAP_DATABASE = {
       }
     },
 
-    // Calculated from LayoutMeta: 5 sectors * 40000 units = 2000m.
-    // 1 Game Unit = 1 cm. 100 units = 1m.
     widthMeters: 2000, 
     heightMeters: 2000, 
     gunSort: "x",
@@ -331,7 +325,6 @@ const MAP_DATABASE = {
       }
     },
 
-    // Verified standard dimensions
     widthMeters: 1984, 
     heightMeters: 1984, 
     gunSort: "x",
