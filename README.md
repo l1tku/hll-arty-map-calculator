@@ -29,12 +29,11 @@ No installation required. Open [HLL Artillery Calculator](https://l1tku.github.i
 1. **Select Map**: Choose your map from the selector
 2. **Configure Faction**: Select your Faction from the control panel (bottom)
 3. **Select or Place Artillery**:
-   - **HQ Guns**: Select Gun 1, 2, or 3 from the dropdown
-   - **Custom Guns**: Click "+" to enter placement mode, then click on map (desktop) or tap PLACE (mobile)
-4. **Aim**: Click on map to place target or use Live Tracking
-5. **Result**: View firing solution in the data panel
-
-**Custom Gun Management**: Click icon to select. Desktop: right-click icon on map for Move/Delete menu. Mobile: remove guns from the dropdown menu where you select the gun.
+   - **HQ Guns**: Select Gun 1, 2, or 3 from the dropdown or click directly on an artillery icon on the map
+   - **Custom Guns**: Click "+" in the bottom control panel to enter placement mode, then click on map (desktop) or tap PLACE (mobile)
+   - **Custom Gun Management**: Delete placed guns by clicking the red X in the gun selector dropdown menu, or right-click any custom gun icon directly on the map
+4. **Aim**: Click on the map to set a target, or enable **Live Tracking** via the GPS icon in the right map toolbar
+5. **Result**: Get instant Elevation MILs, distance, bearing, and flight time in the popup HUD
 
 ### Method 2: Manual Calculator
 1. Click the Calculator Icon in the sidebar or within the Map Selection footer.
