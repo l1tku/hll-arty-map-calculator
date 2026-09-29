@@ -53,26 +53,26 @@ No installation required. Open [HLL Artillery Calculator](https://l1tku.github.i
 - **PWA Support**: Installable on mobile devices with full offline capability once maps are loaded.
 
 ## Supported Maps
-* Carentan (CAR)
-* Driel (DRI)
-* El Alamein (ELA)
-* Elsenborn Ridge (EBR)
-* Foy (FOY)
-* Hill 400 (H4)
-* Hurtgen Forest (HUR)
-* Juno Beach (JUN)
-* Kharkov (KHA)
-* Kursk (KUR)
-* Mortain (MOR)
-* Omaha Beach (OMA)
-* Purple Heart Lane (PHL)
-* Remagen (REM)
-* Sainte-Marie-du-Mont (SMM)
-* Sainte-Mère-Église (SME)
-* Smolensk (SMO)
-* Stalingrad (STA)
-* Tobruk (TOB)
-* Utah Beach (UTA)
+* Carentan
+* Driel
+* El Alamein
+* Elsenborn Ridge
+* Foy
+* Hill 400
+* Hurtgen Forest
+* Juno Beach
+* Kharkov
+* Kursk
+* Mortain
+* Omaha Beach
+* Purple Heart Lane
+* Remagen
+* Sainte-Marie-du-Mont
+* Sainte-Mère-Église
+* Smolensk
+* Stalingrad
+* Tobruk
+* Utah Beach
 
 ## Browser Support
 - Chrome/Chromium 80+
