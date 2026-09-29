@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.4.3";
+const APP_VERSION = "v1.4.4";
 const GAME_VERSION = "Update 21";
 
 const versionMap = {
@@ -161,8 +161,8 @@ let IS_MOBILE =
 
 const MOBILE_QUALITY = {
   showRangeCircle: !IS_MOBILE,
-  rulerIntervalMeters: IS_MOBILE ? 100 : 50,
-  maxRulerMarkers: IS_MOBILE ? 8 : 32,
+  rulerIntervalMeters: 50,
+  maxRulerMarkers: 32,
 };
 
 window.addEventListener("resize", () => {
@@ -453,7 +453,6 @@ function syncToggleUI() {
 
   const hudEl = document.getElementById("liveCursorHud");
   const crosshair = document.getElementById("mobileCrosshair");
-  const fireBtn = document.getElementById("mobileFireBtn");
 
   const desktopRings = document.getElementById("desktopCursorRings");
 
@@ -465,7 +464,6 @@ function syncToggleUI() {
 
     if (isMobile) {
       if (crosshair) crosshair.classList.remove("hidden");
-      if (fireBtn) fireBtn.classList.remove("hidden");
       if (desktopRings) desktopRings.classList.add("hidden");
     } else {
       if (desktopRings) {
@@ -473,14 +471,14 @@ function syncToggleUI() {
         desktopRings.style.opacity = "0";
       }
       if (crosshair) crosshair.classList.add("hidden");
-      if (fireBtn) fireBtn.classList.add("hidden");
     }
   } else {
     if (hudEl) hudEl.classList.add("hidden");
     if (crosshair) crosshair.classList.add("hidden");
-    if (fireBtn) fireBtn.classList.add("hidden");
     if (desktopRings) desktopRings.classList.add("hidden");
   }
+
+  syncFireBtn();
 }
 
 function updateDesktopRingScale() {
@@ -955,6 +953,7 @@ function renderMarkers() {
             renderTargeting();
             render();
             saveState();
+            updateGunUI(mapConfig);
           }
         };
 
@@ -1578,7 +1577,6 @@ function updateMinRangeOverlay() {
 function renderTargeting() {
   const layer = cached.markersLayer;
   const panel = cached.targetDataPanel;
-  const mobileFireBtn = document.getElementById("mobileFireBtn");
 
   layer
     .querySelectorAll(".trajectory-visual, .impact-marker, .impact-circles-svg")
@@ -1586,15 +1584,15 @@ function renderTargeting() {
 
   if (filterMode) {
     if (panel) panel.classList.add("hidden");
-    if (mobileFireBtn) mobileFireBtn.classList.add("hidden");
     rulerLabelPool.forEach((el) => (el.style.display = "none"));
+    syncFireBtn();
     return;
   }
 
   if (!activeTarget || !getActiveGunCoords()) {
     if (panel) panel.classList.add("hidden");
-    if (mobileFireBtn) mobileFireBtn.classList.add("hidden");
     rulerLabelPool.forEach((el) => (el.style.display = "none"));
+    syncFireBtn();
     return;
   }
 
@@ -1621,13 +1619,7 @@ function renderTargeting() {
     }
   }
 
-  if (mobileFireBtn) {
-    if (hudEnabled && IS_MOBILE) {
-      mobileFireBtn.classList.remove("hidden");
-    } else {
-      mobileFireBtn.classList.add("hidden");
-    }
-  }
+  syncFireBtn();
 
   const elDist = cached.panelDist;
   const elMil = cached.panelMil;
@@ -2630,6 +2622,14 @@ function updateFactionUI(config) {
     item2.querySelector(".item-flag").src = t2Flag;
   }
 
+  [item1, itemCan, item2].forEach((el) => {
+    if (!el) return;
+    el.classList.toggle(
+      "selected",
+      activeFaction !== null && el.getAttribute("data-value") === activeFaction,
+    );
+  });
+
   const mainLabel = document.getElementById("factionLabel");
   const mainFlag = document.getElementById("currentFactionFlag");
 
@@ -2657,11 +2657,50 @@ function updateFactionUI(config) {
 // UPDATE GUN UI
 // ==========================================
 function updateGunUI(config) {
-  const gunNames = config.guns || [
+  const baseGunNames = config.guns || [
     "Gun 1 (Left)",
     "Gun 2 (Mid)",
     "Gun 3 (East)",
   ];
+
+  const teamGunPoints = activeFaction
+    ? currentStrongpoints.filter(
+        (p) => p.team === activeFaction && p.type === "point",
+      )
+    : [];
+  const sortMode = config.gunSort || "y";
+  teamGunPoints.sort((a, b) =>
+    sortMode === "x" ? a.gameX - b.gameX : b.gameY - a.gameY,
+  );
+
+  const gunCount = Math.max(baseGunNames.length, teamGunPoints.length);
+  const gunNames = [];
+  for (let i = 0; i < gunCount; i++) {
+    gunNames.push(baseGunNames[i] || `HQ Gun ${i + 1}`);
+  }
+
+  // Resolve the selection BEFORE building the items, otherwise the
+  // auto-fallback below would pick a gun after the highlight was applied.
+  if (
+    (activeGunIndex < 0 || activeGunIndex >= gunNames.length) &&
+    activeCustomGunId === null &&
+    !placementMode &&
+    !moveMode
+  ) {
+    const fallback = customArtillery.filter(
+      (g) => g.team === activeFaction,
+    );
+    if (fallback.length > 0) {
+      activeCustomGunId = fallback[fallback.length - 1].id;
+    }
+  }
+  if (activeCustomGunId !== null) {
+    const stillExists = customArtillery.some(
+      (g) => g.id === activeCustomGunId && g.team === activeFaction,
+    );
+    if (!stillExists) activeCustomGunId = null;
+  }
+
   const gunDropdown = document.getElementById("gunDropdown");
   const menu = gunDropdown ? gunDropdown.querySelector(".dropdown-menu") : null;
   const label = document.getElementById("gunLabel");
@@ -2743,10 +2782,12 @@ function updateGunUI(config) {
   );
   factionCustomGuns.forEach((gun) => {
     const item = document.createElement("div");
-    item.className = "dropdown-item";
+    item.className = "dropdown-item has-actions";
     item.style.display = "flex";
     item.style.alignItems = "center";
     item.style.justifyContent = "space-between";
+
+    if (activeCustomGunId === gun.id) item.classList.add("selected");
 
     const nameSpan = document.createElement("span");
     nameSpan.style.flexGrow = "1";
@@ -2805,6 +2846,7 @@ function updateGunUI(config) {
         renderTargeting();
         render();
         saveState();
+        updateGunUI(config);
       }
     });
 
@@ -2820,6 +2862,10 @@ function updateGunUI(config) {
     item.className = "dropdown-item";
     item.setAttribute("data-value", index);
     item.textContent = name;
+
+    if (activeCustomGunId === null && activeGunIndex === index) {
+      item.classList.add("selected");
+    }
 
     item.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -2839,6 +2885,7 @@ function updateGunUI(config) {
       renderTargeting();
       render();
       saveState();
+      updateGunUI(config);
     });
 
     menu.appendChild(item);
@@ -2883,7 +2930,22 @@ function updateGunUI(config) {
 // CUSTOM ARTILLERY FUNCTIONS
 // ==========================================
 
+// Single source of truth for the mobile FIRE button.
+// Deliberately independent of the selected target/gun so the button can never
+// disappear while the HUD is on (e.g. after closing the result panel).
+function syncFireBtn() {
+  const fireBtn = cached.getElem("mobileFireBtn");
+  if (!fireBtn) return;
+
+  const show =
+    IS_MOBILE && hudEnabled && !placementMode && !moveMode && !filterMode;
+
+  fireBtn.classList.toggle("hidden", !show);
+}
+
 function updateMapCursor() {
+  syncFireBtn();
+
   const newCursorMode = `${placementMode ? 1 : 0}|${moveMode ? 1 : 0}|${hudEnabled ? 1 : 0}|${IS_MOBILE ? 1 : 0}`;
   if (newCursorMode === _lastCursorMode) return;
   _lastCursorMode = newCursorMode;
@@ -2891,7 +2953,6 @@ function updateMapCursor() {
   const mapContainer = cached.mapContainer;
   const crosshair = cached.getElem("mobileCrosshair");
   const placeBtn = cached.getElem("mobilePlaceBtn");
-  const fireBtn = cached.getElem("mobileFireBtn");
 
   if (placementMode || moveMode) {
     mapContainer.style.cursor = "crosshair";
@@ -2907,7 +2968,6 @@ function updateMapCursor() {
       if (IS_MOBILE) placeBtn.classList.remove("hidden");
       else placeBtn.classList.add("hidden");
     }
-    if (fireBtn) fireBtn.classList.add("hidden");
   }
   else if (IS_MOBILE && hudEnabled) {
     mapContainer.style.cursor = "crosshair";
@@ -2919,7 +2979,6 @@ function updateMapCursor() {
       if (ringContainer) ringContainer.style.display = "block";
     }
     if (placeBtn) placeBtn.classList.add("hidden");
-    if (fireBtn) fireBtn.classList.remove("hidden");
   } else {
     mapContainer.style.cursor = "default";
     if (IS_MOBILE && crosshair) {
@@ -2928,7 +2987,6 @@ function updateMapCursor() {
       crosshair.style.display = "none";
     }
     if (placeBtn) placeBtn.classList.add("hidden");
-    if (fireBtn) fireBtn.classList.add("hidden");
   }
 }
 
@@ -3328,7 +3386,7 @@ function setupDropdown(containerId, buttonId, labelId, onSelect) {
       .querySelectorAll(".dropdown-menu")
       .forEach((el) => el.classList.add("hidden"));
     document
-      .querySelectorAll(".btn-map-Select")
+      .querySelectorAll(".btn-map-select")
       .forEach((el) => el.classList.remove("active"));
 
     if (!isCurrentlyOpen) {
@@ -3402,7 +3460,7 @@ function initArtyControls() {
         .querySelectorAll(".dropdown-menu")
         .forEach((el) => el.classList.add("hidden"));
       document
-        .querySelectorAll(".btn-map-Select")
+        .querySelectorAll(".btn-map-select")
         .forEach((el) => el.classList.remove("active"));
 
       if (wasHidden) {
@@ -3478,18 +3536,16 @@ function initArtyControls() {
 
     const hudEl = document.getElementById("liveCursorHud");
     const crosshair = document.getElementById("mobileCrosshair");
-    const fireBtn = document.getElementById("mobileFireBtn");
     if (hudEnabled) {
       if (hudEl) hudEl.classList.remove("hidden");
       if (IS_MOBILE) {
         if (crosshair) crosshair.classList.remove("hidden");
-        if (fireBtn) fireBtn.classList.remove("hidden");
       }
     } else {
       if (hudEl) hudEl.classList.add("hidden");
       if (crosshair) crosshair.classList.add("hidden");
-      if (fireBtn) fireBtn.classList.add("hidden");
     }
+    syncFireBtn();
   }
 
   window.addEventListener("click", () => {
@@ -3497,7 +3553,7 @@ function initArtyControls() {
       .querySelectorAll(".dropdown-menu")
       .forEach((el) => el.classList.add("hidden"));
     document
-      .querySelectorAll(".btn-map-Select")
+      .querySelectorAll(".btn-map-select")
       .forEach((el) => el.classList.remove("active"));
   });
 
@@ -4528,7 +4584,7 @@ document.addEventListener("DOMContentLoaded", function () {
           .querySelectorAll(".dropdown-menu")
           .forEach((el) => el.classList.add("hidden"));
         document
-          .querySelectorAll(".btn-map-Select")
+          .querySelectorAll(".btn-map-select")
           .forEach((el) => el.classList.remove("active"));
       }
 

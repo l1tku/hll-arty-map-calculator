@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.4.3 — Updated for Hell Let Loose Update 21**
+**v1.4.4 — Updated for Hell Let Loose Update 21**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose with 1:1 scale tactical maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 

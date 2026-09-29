@@ -562,7 +562,11 @@ H4: {
     heightMeters: 2000,
     gunSort: "x",
     gunRotations: { "ger": 180, "can": 0 },
-    guns: ["HQ Gun 1 (West)", "HQ Gun 2 (Mid)", "HQ Gun 3 (East)"],
+    guns: [
+      "HQ Gun 1 (West-West)", "HQ Gun 2 (West)", "HQ Gun 3 (West)",
+      "HQ Gun 4 (Mid)", "HQ Gun 5 (Mid)", "HQ Gun 6 (Mid)",
+      "HQ Gun 7 (East)", "HQ Gun 8 (East)", "HQ Gun 9 (East)"
+    ],
     strongpoints: [
 
       // --- ALLIES GUNS ---

@@ -1853,6 +1853,8 @@ select.btn-map-select option {
     left: 0;
     width: 100%;
     min-width: 150px;
+    max-height: 60vh;
+    overflow-y: auto;
 
     background-color: rgba(29, 31, 39, 0.95) !important;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1908,6 +1910,27 @@ button.btn-map-select:hover {
 }
 button.btn-map-select:hover {
     border-left-color: #ffffff;
+}
+
+/* Currently selected option — must stay after the :hover rules so it wins */
+.dropdown-item.selected {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+    color: #ffc107 !important;
+    box-shadow: inset 3px 0 0 0 #ffc107;
+}
+.dropdown-item.selected:hover {
+    background-color: rgba(255, 193, 7, 0.28) !important;
+}
+.dropdown-item.selected::after {
+    content: "\2713";
+    margin-left: auto;
+    padding-left: 10px;
+    color: #ffc107;
+    font-weight: 900;
+}
+/* items carrying their own trailing control (e.g. the delete ×) */
+.dropdown-item.selected.has-actions::after {
+    content: none;
 }
 
 /* ==========================================

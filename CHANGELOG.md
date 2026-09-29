@@ -5,6 +5,18 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.4.4] - 2026-09-29
+### Changed
+- Distance ruler on mobile now matches desktop: marker interval reduced from 100m to 50m and marker limit raised from 8 to 32
+
+### Fixed
+- Juno Beach gun dropdown now lists all 9 guns per team instead of 3
+- Gun dropdown now follows the selected team's actual gun positions
+- Gun dropdown now scrolls on small screens
+- Selected option now highlighted in team and gun dropdowns
+- Dropdown button no longer stays highlighted when closed
+- Mobile FIRE button no longer disappears after closing the result panel or changing gun
+
 ## [1.4.3] - 2026-09-24
 ### Changed
 - Removed obsolete comments from `index.html`, `service-worker.js`, `css/style.css`, `js/script.js`, `js/ballistics.js`, and `js/maps.js`
