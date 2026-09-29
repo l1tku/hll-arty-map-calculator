@@ -3,6 +3,19 @@
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose. Features dynamic scaling for all maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
+## Features
+- **Interactive Maps**: High-resolution maps with pan/zoom, grid labels, and accurate meter scale
+- **Multi-Faction**: US, Germany, Canada, Soviet Union, and Great Britain with accurate ballistics
+- **Visual Targeting**: Trajectory line, distance ruler, adjustment slider, and dispersion rings
+- **Strongpoint Setup**: Select 5 active strongpoints to match Warfare in-game layouts
+- **Custom Artillery**: Place up to 3 custom guns per team with move/delete support
+- **Gun Selection**: Select via dropdown or direct click on map icons
+- **Live HUD**: Real-time distance, MILs, grid, and bearing under cursor (desktop) or screen center (mobile)
+- **Manual Calculator**: Quick distance-to-MIL calculations with keypad and calculation history
+- **Historical Context**: In-depth real-world battle histories, tactical breakdowns, and archival WWII photos accessible via the book icon on map cards
+- **Mobile Optimized**: Touch targets, haptic feedback, and snappy zoom
+- **Map Selector**: Visual grid with search bar
+
 ## Installation & Local Usage
 ### Option 1: Live Web Access (Recommended)
 No installation required. Simply visit the [Live Demo Link](https://l1tku.github.io/hll-arty-map-calculator/) from any desktop or mobile browser.
@@ -34,19 +47,6 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 - Toggle history on to enable saving calculations.
 - When history is on: The C keypad button becomes **SAVE** on both desktop and mobile. Press **Enter** or tap **SAVE** to save the calculation before clearing.
 - View recent calculations in the history log below the keypad.
-
-## Features
-- **Interactive Maps**: High-resolution maps with pan/zoom, grid labels, and accurate meter scale
-- **Multi-Faction**: US, Germany, Canada, Soviet Union, and Great Britain with accurate ballistics
-- **Visual Targeting**: Trajectory line, distance ruler, adjustment slider, and dispersion rings
-- **Strongpoint Setup**: Select 5 active strongpoints to match Warfare in-game layouts
-- **Custom Artillery**: Place up to 3 custom guns per team with move/delete support
-- **Gun Selection**: Select via dropdown or direct click on map icons
-- **Live HUD**: Real-time distance, MILs, grid, and bearing under cursor (desktop) or screen center (mobile)
-- **Manual Calculator**: Quick distance-to-MIL calculations with keypad and calculation history
-- **Historical Context**: In-depth real-world battle histories, tactical breakdowns, and archival WWII photos accessible via the book icon on map cards
-- **Mobile Optimized**: Touch targets, haptic feedback, and snappy zoom
-- **Map Selector**: Visual grid with search bar
 
 ## Technical Details
 - **Dynamic Caching**: Downloads and caches maps on demand to keep storage minimal while providing instant reloads.
