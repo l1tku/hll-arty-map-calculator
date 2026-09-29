@@ -44,6 +44,7 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 - **Gun Selection**: Select via dropdown or direct click on map icons
 - **Live HUD**: Real-time distance, MILs, grid, and bearing under cursor (desktop) or screen center (mobile)
 - **Manual Calculator**: Quick distance-to-MIL calculations with keypad and calculation history
+- **Historical Context**: In-depth real-world battle histories, tactical breakdowns, and archival WWII photos accessible via the book icon on map cards
 - **Mobile Optimized**: Touch targets, haptic feedback, and snappy zoom
 - **Map Selector**: Visual grid with search bar
 
