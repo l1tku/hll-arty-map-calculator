@@ -35,22 +35,11 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 - When history is on: The C keypad button becomes **SAVE** on both desktop and mobile. Press **Enter** or tap **SAVE** to save the calculation before clearing.
 - View recent calculations in the history log below the keypad.
 
-## Map Controls
-### Desktop
-- **Left Click**: Place Target / Select Artillery.
-- **Click & Drag**: Pan the map.
-- **Mouse Wheel**: Zoom in/out.
-- **Hover**: View live distance and grid reference in the HUD.
-
-### Mobile
-- **One Finger Drag**: Pan the map.
-- **Tap "Fire" Button**: Places target at the center of the screen (Live Tracking).
-
 ## Features
 - **Interactive Maps**: High-resolution maps with pan/zoom, grid labels, and accurate meter scale
-- **Multi-Faction**: US, Germany, Soviet Union, and Great Britain with accurate ballistics
+- **Multi-Faction**: US, Germany, Canada, Soviet Union, and Great Britain with accurate ballistics
 - **Visual Targeting**: Trajectory line, distance ruler, adjustment slider, and dispersion rings
-- **Strongpoint Setup**: Select 5 active strongpoints to match in-game layouts
+- **Strongpoint Setup**: Select 5 active strongpoints to match Warfare in-game layouts
 - **Custom Artillery**: Place up to 3 custom guns per team with move/delete support
 - **Gun Selection**: Select via dropdown or direct click on map icons
 - **Live HUD**: Real-time distance, MILs, grid, and bearing under cursor (desktop) or screen center (mobile)
@@ -59,9 +48,9 @@ No installation required. Simply visit the [Live Demo Link](https://l1tku.github
 - **Map Selector**: Visual grid with search bar
 
 ## Technical Details
-- **Dynamic Caching**: "Stale-While-Revalidate" – only downloads and caches maps you open, keeping storage low while ensuring instant reloads.
-- **Performance**: GPU-accelerated on desktop, memory-safe transforms on mobile, throttled HUD updates, batch rendering.
-- **PWA Ready**: Installable to home screen on mobile for native-like experience (offline-capable once cached).
+- **Dynamic Caching**: Downloads and caches maps on demand to keep storage minimal while providing instant reloads.
+- **Performance**: Runs smoothly across devices with optimized rendering and lightweight touch controls.
+- **PWA Support**: Installable on mobile devices with full offline capability once maps are loaded.
 
 ## Supported Maps
 * Carentan (CAR)
