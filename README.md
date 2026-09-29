@@ -5,16 +5,16 @@ An interactive tactical map and high-precision artillery calculator for Hell Let
 
 ## Features
 - **Interactive Maps**: High-resolution maps with pan/zoom, grid labels, and accurate meter scale
+- **Map Selector**: Visual grid with search bar for quick navigation
+- **Historical Context**: In-depth real-world battle histories, tactical breakdowns, and archival WWII photos accessible via the book icon on map cards
 - **Multi-Faction**: US, Germany, Canada, Soviet Union, and Great Britain with accurate ballistics
 - **Visual Targeting**: Trajectory line, distance ruler, adjustment slider, and dispersion rings
+- **Live HUD**: Real-time distance, MILs, grid, and bearing under cursor (desktop) or screen center (mobile)
 - **Strongpoint Setup**: Select 5 active strongpoints to match Warfare in-game layouts
 - **Custom Artillery**: Place up to 3 custom guns per team with move/delete support
 - **Gun Selection**: Select via dropdown or direct click on map icons
-- **Live HUD**: Real-time distance, MILs, grid, and bearing under cursor (desktop) or screen center (mobile)
 - **Manual Calculator**: Quick distance-to-MIL calculations with keypad and calculation history
-- **Historical Context**: In-depth real-world battle histories, tactical breakdowns, and archival WWII photos accessible via the book icon on map cards
 - **Mobile Optimized**: Touch targets, haptic feedback, and snappy zoom
-- **Map Selector**: Visual grid with search bar
 
 ## Installation & Local Usage
 ### Option 1: Live Web Access (Recommended)
