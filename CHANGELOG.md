@@ -5,6 +5,11 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.4.5] - 2026-10-07
+### Changed
+- **Dispersion ring 20 m → 30 m radius**, **kill ring 10 m → 20 m radius** (target map, cursor rings, mobile crosshair, trajectory line)
+- Source: `WPN_*Howitzer.MinMaxDispersion {300, 3000}` cm + `BP_HEShell_COM` (Damage 500, DamageRadius 2500 cm), verified by decompiling `Server_FireHowitzer_Implementation` and `HLLApplyExplosionDamageWithFalloff` (linear falloff vs 100 HP → 20 m kill)
+
 ## [1.4.4] - 2026-09-29
 ### Changed
 - Distance ruler on mobile now matches desktop: marker interval reduced from 100m to 50m and marker limit raised from 8 to 32

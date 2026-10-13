@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.4.4";
+const APP_VERSION = "v1.4.5";
 const GAME_VERSION = "Update 21";
 
 const versionMap = {
@@ -495,7 +495,8 @@ function updateDesktopRingScale() {
   const totalMapMeters = dims.width / GAME_UNITS_PER_METER;
   const pixelsPerMeter = currentMapPixelWidth / totalMapMeters;
 
-  const rawDiameter = 40 * pixelsPerMeter;
+  // Container = dispersion diameter (2 x 30 m radius); inner rings scale via CSS percentages
+  const rawDiameter = 60 * pixelsPerMeter;
 
   const diameterPx = Math.round(rawDiameter / 2) * 2;
 
@@ -1640,7 +1641,7 @@ function renderTargeting() {
   const totalDistPx = Math.sqrt(
     Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2),
   );
-  const dangerZoneRadiusPx = 20.0 * pixelsPerMeter;
+  const dangerZoneRadiusPx = 30.0 * pixelsPerMeter; // dispersion radius — line stops at ring edge
   const lineLength = Math.max(0, totalDistPx - dangerZoneRadiusPx);
   const angleRad = Math.atan2(end.y - start.y, end.x - start.x);
 
@@ -1811,8 +1812,13 @@ function renderTargeting() {
     return circle;
   }
 
-  circleSvg.appendChild(createSvgCircle(20.0, "dispersion-circle"));
-  circleSvg.appendChild(createSvgCircle(10.0, "deadzone-circle"));
+  // Dispersion: 30 m radius. Source: HLL datamine (WPN_*Howitzer.MinMaxDispersion = {300, 3000} cm)
+  // + decompile of Server_FireHowitzer_Implementation: impact offset = randRange(min, max) cm at a
+  // random azimuth from the aim point, applied as a radius (no halving). Min deviation is 3 m.
+  circleSvg.appendChild(createSvgCircle(30.0, "dispersion-circle"));
+  // Kill radius: 20 m. HLLApplyExplosionDamageWithFalloff: 500 dmg, linear falloff (exponent 1.0),
+  // 0 at DamageRadius 2500 cm -> 100 HP infantry dies at exactly 20 m. (Was 10 m pre-datamine.)
+  circleSvg.appendChild(createSvgCircle(20.0, "deadzone-circle"));
   circleSvg.appendChild(createSvgCircle(5.0, "blast-circle"));
 
   layer.appendChild(circleSvg);
@@ -5301,7 +5307,7 @@ function updateMobileHud() {
   const currentMapPixelWidth = w * effectiveZoom;
   const pixelsPerMeter = currentMapPixelWidth / totalMapMeters;
 
-  const dispersionDiameterMeters = 40;
+  const dispersionDiameterMeters = 60; // 2 x 30 m dispersion radius — see renderTargeting() note
   const rawSize = pixelsPerMeter * dispersionDiameterMeters;
 
   const containerSize = Math.round(rawSize / 2) * 2;
