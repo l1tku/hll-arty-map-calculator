@@ -1,301 +1,344 @@
 # Changelog
+
 ### Not seeing the latest version?
+
 The app updates automatically — **refresh the page twice** and it will update. Still stuck? Force a full reload:
+
 - **PC:** Ctrl + Shift + R
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
 ## [1.4.5] - 2026-10-07
+
 ### Changed
-- **Dispersion ring 20 m → 30 m radius**, **kill ring 10 m → 20 m radius** (target map, cursor rings, mobile crosshair, trajectory line)
-- Source: `WPN_*Howitzer.MinMaxDispersion {300, 3000}` cm + `BP_HEShell_COM` (Damage 500, DamageRadius 2500 cm), verified by decompiling `Server_FireHowitzer_Implementation` and `HLLApplyExplosionDamageWithFalloff` (linear falloff vs 100 HP → 20 m kill)
+- Dispersion ring radius: 20 m → 30 m.
+- Kill ring radius: 10 m → 20 m.
+- Updated target map, cursor rings, mobile crosshair, and trajectory line to match.
 
 ## [1.4.4] - 2026-09-29
+
 ### Changed
-- Distance ruler on mobile now matches desktop: marker interval reduced from 100m to 50m and marker limit raised from 8 to 32
+- Mobile distance ruler now matches desktop: 50 m intervals, up to 32 markers.
 
 ### Fixed
-- Juno Beach gun dropdown now lists all 9 guns per team instead of 3
-- Gun dropdown now follows the selected team's actual gun positions
-- Gun dropdown now scrolls on small screens
-- Selected option now highlighted in team and gun dropdowns
-- Dropdown button no longer stays highlighted when closed
-- Mobile FIRE button no longer disappears after closing the result panel or changing gun
+- Juno Beach gun dropdown now lists all 9 guns per team.
+- Gun dropdown follows the selected team's actual gun positions.
+- Gun dropdown scrolls on small screens.
+- Selected option now highlighted in team and gun dropdowns.
+- Dropdown button no longer stays highlighted when closed.
+- Mobile FIRE button no longer disappears after closing the result panel or changing gun.
 
 ## [1.4.3] - 2026-09-24
+
 ### Changed
-- Removed obsolete comments from `index.html`, `service-worker.js`, `css/style.css`, `js/script.js`, `js/ballistics.js`, and `js/maps.js`
-- Reorganized and refactored `js/maps.js` structure
-- Removed the close transition from the manual calculator
+- Reorganized and refactored `js/maps.js` structure.
+- Removed the close transition from the manual calculator.
+
+### Removed
+- Obsolete comments across `index.html`, `service-worker.js`, `css/style.css`, `js/script.js`, `js/ballistics.js`, and `js/maps.js`.
 
 ## [1.4.2] - 2026-09-23
+
 ### Changed
-- Removed the slow fade animation from modal close (X) buttons — hover feedback is now instant
-- Removed the fade transition from modal footer buttons so they no longer fade out when the hover ends
+- Removed fade animations from modal close buttons and footer buttons for instant hover feedback.
 
 ## [1.4.1] - 2026-09-23
+
 ### Changed
-- Updated game version compatibility to **Hell Let Loose Update 21**
-- Game version link now points to the new Update 21 changelog
+- Updated game version compatibility to Hell Let Loose Update 21.
+- Game version link now points to the Update 21 changelog.
 
 ## [1.4.0] - 2026-09-16
+
 ### Added
-- Added SEO meta description, Open Graph, Twitter card, and Schema.org WebSite metadata for proper Google Search listing and site name branding
-- Added high-resolution 192x192 and 512x512 icon definitions for search engines and mobile devices
+- SEO meta description, Open Graph, Twitter Card, and Schema.org WebSite metadata.
+- High-resolution 192×192 and 512×512 icon definitions.
 
 ## [1.3.9] - 2026-06-18
+
 ### Fixed
-- Fixed shot-pulse ring not animating
+- Shot-pulse ring animation.
 
 ## [1.3.8] - 2026-06-14
+
 ### Added
-- Added Ko-fi support button
+- Ko-fi support button.
 
 ### Fixed
-- Fixed some scaling issues on the map overlay
+- Map overlay scaling issues.
 
 ## [1.3.7] - 2026-06-10
+
 ### Added
-- Added missing west and east side HQ guns on Juno Beach
+- Missing west and east side HQ guns on Juno Beach.
 
 ## [1.3.6] - 2026-06-07
+
 ### Changed
-- Assigned the PWA a dedicated manifest identity, start URL, and scope under `/hll-arty-map-calculator/` so it installs separately from other projects on the same domain
-- Bumped service worker and asset cache-buster versions to force clients onto the new PWA identity cleanly
+- Assigned the PWA a dedicated manifest identity, start URL, and scope so it installs separately from other projects on the same domain.
+- Bumped service worker and asset cache-buster versions.
 
 ### Added
-- Updated the header `by l1tku` link so it points to the correct author profile
+- Header `by l1tku` link now points to the correct author profile.
 
 ### Fixed
-- Cleaned up Other Projects names so linked project titles display consistently
+- Other Projects links now display consistently.
 
 ## [1.3.5] - 2026-06-03
+
 ### Added
-- Added Juno Beach
+- Juno Beach.
 
 ### Fixed
-- Prevented accidental map history popups caused by rapid duplicate touch/click input in the map selector
-- Blocked map history from opening unless the map selector is actually open, and hardened hidden modal overlays so invisible layers cannot catch clicks
-- Restored normal mobile scrolling in the map selector so vertical swipes no longer instantly activate a map card
-- Centered the calculator history toggle thumb
-- Fixed Firefox mobile zoom darkening by replacing the transformed range-mask overlays with lighter screen-space radial overlays
+- Prevented accidental map history popups from rapid or duplicate input.
+- Map history no longer opens unless the selector is open; invisible modal overlays no longer catch clicks.
+- Restored normal vertical scrolling in the map selector.
+- Centered the calculator history toggle thumb.
+- Fixed Firefox mobile zoom darkening.
 
 ## [1.3.4] - 2026-04-28
+
 ### Fixed
-- Service worker error handling with improved fetch interception
-- Map loading screen now shows loading overlay correctly when switching maps
-- Cache-busting added to map images to prevent stale map display
+- Service worker error handling and fetch interception.
+- Map loading overlay when switching maps.
+- Cache-busting on map images to prevent stale displays.
 
 ### Changed
-- Service worker now only registers on HTTPS (not HTTP localhost)
+- Service worker now only registers on HTTPS.
 
 ## [1.3.3] - 2026-04-28
-### Performance
-- Render loop optimisations: element caching, dirty-checks, O(n) sector lookup, image pre-decode, and service worker cache fixes for smoother panning and faster map switches
+
+### Changed
+- Render loop and map-switch performance improvements.
 
 ## [1.3.2] - 2026-04-28
+
 ### Added
-- History section for map (click the book icon on map thumbnails to view)
+- Map history section (book icon on map thumbnails).
 
 ### Changed
-- App is now fully offline-capable (PWA improvements)
+- App is now fully offline-capable.
 
 ### Fixed
-- Infinite spinner when a map image fails to load
-- Various minor bugs and security hardening
+- Infinite spinner when a map image fails to load.
+- Minor bugs and security hardening.
 
 ## [1.3.1] - 2026-04-25
-### Added 
-- Haptic feedback on history buttons
 
-### Fixed
-- Map switch flicker
-- CLEAR button animation
+### Added
+- Haptic feedback on history buttons.
 
 ### Changed
-- Target panel closes on custom artillery placement
-- CLEAR button animation matches calculator keys
+- Target panel closes on custom artillery placement.
+- CLEAR button animation matches calculator keys.
 
 ### Fixed
-- **Mobile <370px Layout**: Fixed text wrapping and reduced icon size for very small screens
+- Map switch flicker.
+- CLEAR button animation.
+- Mobile layout below 370 px (text wrapping and icon size).
 
 ## [1.3.0] - 2026-04-25
-### Fixed
-- **Strongpoint Stripe Clipping**: Fixed stripes overflowing circle boundary
-- **Ballistic Ruler Range**: Fixed ruler stopping at 1000m on desktop (now shows full 1600m)
 
-### Performance
-- **Reduced Layout Thrashing**: Cached getBoundingClientRect() calls and eliminated repeated window.innerWidth checks for smoother panning/zooming
+### Fixed
+- Strongpoint stripes overflowing circle boundary.
+- Ballistic ruler now shows full 1600 m range on desktop (was stopping at 1000 m).
+
+### Changed
+- Reduced layout thrashing for smoother panning and zooming.
 
 ## [1.2.9] - 2026-04-23
+
 ### Added
-- **Calculator History**: Added calculation history log with faction flag, distance, MIL value, and timestamp
-- **History Controls**: Added toggle switch to enable/disable history and collapsible history section
-- **History Persistence**: History and settings are saved to localStorage
+- Calculator history log with faction flag, distance, MIL value, and timestamp.
+- Toggle to enable/disable history.
+- History and settings persistence.
 
 ### Changed
-- **Calculator Button**: C button now shows C/SAVE when history is enabled
-- **Input Behavior**: Calculator input clears to empty on click and Enter instead of showing "0"
+- C button shows C/SAVE when history is enabled.
+- Calculator input clears to empty on click and Enter instead of showing `0`.
 
 ### Fixed
-- **Firefox Mobile Darkening**: Reduced range overlay opacity in Firefox to fix map darkening at zoom level 4
-- **Carentan Map Loading**: Fixed case mismatch in filename reference (map_Carentan.webp → map_carentan.webp) for GitHub Pages compatibility
+- Firefox mobile map darkening at zoom level 4.
+- Carentan map filename case mismatch for GitHub Pages compatibility.
 
 ## [1.2.8] - 2026-04-22
+
 ### Added
-- **Changelog Modal**: Added 📋 button that opens an in-app changelog modal showing latest changes
-- **Clickable Version Links**: App version links to GitHub, game version links to HLL patch notes
-- **New Artillery for Smolensk**: Added new artillery positions to Smolensk map
+- In-app changelog modal.
+- Clickable version links (app → GitHub, game → HLL patch notes).
+- New artillery positions on Smolensk.
 
 ### Changed
-- **Version Format**: Updated game version display
-- **Target Data Panel**: Changed "DIST" to "DISTANCE" for clarity
+- Game version display format.
+- Target panel label changed from `DIST` to `DISTANCE`.
 
 ### Fixed
-- **Mobile Alignment**: Fixed vertical alignment of distance/bearing/impact values on mobile
-- **Mobile Cursor**: Fixed cursor image path for custom artillery placement
-- **Service Worker Error**: Fixed service worker errors by disabling interception to prevent GitHub Pages conflicts
-- **Useless Thumbnail Removal**: Removed unused thumbnail image
-- **Custom Artillery UX**: Target data panel now closes when placing or moving custom artillery
-- **Debug Cleanup**: Removed leftover console.log statements
+- Mobile alignment of distance/bearing/impact values.
+- Custom artillery cursor image path on mobile.
+- Service worker errors by disabling interception.
+- Target data panel now closes when placing or moving custom artillery.
+
+### Removed
+- Unused thumbnail image.
+- Leftover debug logging.
 
 ## [1.2.7] - 2026-04-21
+
 ### Fixed
-- Manual calculator now supports keyboard input for typing distances
-- Enter key clears calculator input to empty
-- Backspace allows removing all characters including the last 0
+- Manual calculator now supports keyboard input.
+- Enter key clears calculator input to empty.
+- Backspace allows removing all characters including the last `0`.
 
 ## [1.2.6] - 2026-04-11
-### Fixed
-- **Stalingrad Strongpoint Positions**: Reverted Changes.
+
+### Changed
+- Reverted Stalingrad strongpoint position changes.
 
 ## [1.2.5] - 2026-04-11
-### Fixed
-- **Stalingrad Strongpoint Positions**: Updated all 15 strongpoint coordinates to use accurate TextRenderComponent label positions from game files for precise map alignment.
+
+### Changed
+- Updated all 15 Stalingrad strongpoint coordinates for precise map alignment.
 
 ## [1.2.4] - 2026-04-05
+
 ### Fixed
-- **404 Artillery Position Image**: Fixed missing image error by updating service worker cache
-- **Mobile UI Refresh on Map Change**: Fixed mobile crosshair and place button remaining visible after switching maps by calling updateMapCursor() when resetting placement mode
+- Missing artillery position image.
+- Mobile crosshair and place button remaining visible after switching maps.
 
 ## [1.2.3] - 2026-03-30
+
 ### Fixed
-- **Custom Artillery Move Sector Restriction**: Fixed bug where custom artillery could be moved past the 2-sector boundary. Moving custom guns now enforces the same green sector restriction as placement.
-- **Green Sector Highlight in Move Mode**: The green sector highlight is now displayed during move mode, not just placement mode.
+- Custom artillery can no longer be moved past the 2-sector boundary.
+- Green sector highlight now shown in move mode as well as placement mode.
 
 ## [1.2.2] - 2026-03-29
+
 ### Fixed
-- **Mil Display on Gun Switch**: Fixed bug where "OUT" was incorrectly displayed for elevation mil when switching between HQ and custom artillery, even when the target was within range. The mil value is now correctly recalculated from the current gun position in `renderTargeting()`.
+- Mil display now recalculates correctly when switching between HQ and custom artillery.
 
 ## [1.2.1] - 2026-03-29
+
 ### Fixed
-- Manual calculator "FIRING AS" label now consistently shows "UNITED STATES" for US faction
-- Desktop haptic feedback: Added vibration when shooting via desktop map click (was only on mobile fire button previously)
-- Individual gun rotations: Added authentic Yaw rotation values from game files to all 114 artillery guns across 19 maps
-- Updated all artillery icon images
-- Removed leftover unused crosshair.png file
+- Manual calculator `FIRING AS` label now consistently shows `UNITED STATES` for US faction.
+
+### Added
+- Desktop vibration when shooting via map click.
+- Authentic Yaw rotation values for all artillery guns across 19 maps.
+
+### Changed
+- Updated all artillery icon images.
+
+### Removed
+- Leftover unused `crosshair.png` file.
 
 ## [1.2.0] - 2026-03-29
+
 ### Added
-- **Dynamic Version System**: APP_VERSION now extracts automatically from script URL query parameter, ensuring displayed version always matches cache-buster.
-- **Haptic Feedback for Custom Artillery**: Added vibration feedback when selecting custom artillery guns (was missing previously).
+- Dynamic app version extracted from script URL cache-buster.
+- Haptic feedback when selecting custom artillery guns.
 
 ### Changed
-- Updated script.js cache-buster to semantic versioning (`?v=1.2.0`).
+- Script cache-buster updated to semantic versioning.
 
 ### Fixed
-- **Desktop Haptic Feedback**: Added missing vibration feedback when shooting via desktop map click (was only on mobile fire button previously).
+- Desktop vibration when shooting via map click.
 
 ## [1.1.8] - 2026-03-28
+
 ### Added
-- **Custom Artillery System (Major Feature)**: Players can now place up to 3 custom guns per team directly on the map. Custom guns are fully functional and appear in the gun dropdown or when clicked on, and support a context menu (Move / Delete).
-- **Remagen Refresh Support**: Updated the Remagen map data and scaling to match the official Hell Let Loose Update 19.1 map refresh.
-- **Permanent Range Overlays**: Added soft dark background overlays that permanently show the **1600m maximum range** (everything outside the circle) and **100m minimum range** (everything inside the circle).
-- **Target Panel Close Button**: Added a clean "✕" button in the top-right corner of the Target Data Panel for clearing of the current target.
-- **Green Sector Highlight**: Added persistent green sector highlight that stays visible while placing custom artillery so you always know the allowed placement area.
+- Custom artillery system: place up to 3 custom guns per team on the map, with move/delete support.
+- Remagen map data updated for Hell Let Loose Update 19.1.
+- Permanent range overlays showing 1600 m maximum range and 100 m minimum range.
+- Target panel close button.
+- Persistent green sector highlight during custom artillery placement.
 
 ### Changed
-- **Clean Range Visualization**: Completely removed the old red dashed 1600 m circle. Range limits are now shown exclusively through elegant dark overlays.
-- **Mobile Custom Gun Placement**: On mobile you must now aim with the crosshair and then **tap the PLACE button** to position custom artillery.
+- Replaced the old red dashed 1600 m circle with dark range overlays.
+- Mobile custom artillery placement now uses crosshair aim + PLACE button.
+- Optimized range overlay rendering.
 
 ### Fixed
-- **Overlay Timing**: Both max-range and min-range dark overlays now appear **immediately** when any gun (HQ or custom) is selected.
-- **Code Cleanup**: Final polish on overlay creation, update calls, and mobile text restoration logic.
-
-### Performance
-- Overlays use lightweight GPU-accelerated CSS masks — zero impact on frame rate or battery life.
+- Range overlays now appear immediately when any gun is selected.
 
 ## [1.1.7] - 2026-03-20
+
 ### Changed
-- Preparing for **Update 19.1** compatibility (game version string updated).
+- Updated game version string for Update 19.1 compatibility.
 
 ## [1.1.6] - 2026-01-26
+
 ### Added
-- Match Setup Mode with Strongpoint Filter
-- Max Range Indicator (temporary red dashed circle)
-- Shooting Pulse effect
-- Target Compass Bearing
+- Match Setup Mode with Strongpoint Filter.
+- Max Range Indicator.
+- Shooting pulse effect.
+- Target compass bearing.
 
 ### Fixed
-- Bearing accuracy with proper flooring
-- Z-index layering
-- Zoom performance
-- Haptic feedback
-- Mobile Projects Hub alignment
-
-*(Older versions below remain unchanged)*
+- Bearing accuracy.
+- Z-index layering.
+- Zoom performance.
+- Haptic feedback.
+- Mobile Projects Hub alignment.
 
 ## [1.1.5] - 2026-01-23
+
 ### Changed
-- Responsiveness overhaul (instant zoom/pan)
-- Dynamic artillery icon scaling
-- Removed dimming on unselected guns
-- Mobile ruler precision improvements
+- Responsiveness overhaul (instant zoom/pan).
+- Dynamic artillery icon scaling.
+- Removed dimming on unselected guns.
+- Mobile ruler precision improvements.
 
 ### Fixed
-- Map switch state reset
-- Gun rotation logic
-- Strongpoint label blur
-- Scale bar accuracy
-- Mobile checkerboarding
+- Map switch state reset.
+- Gun rotation logic.
+- Strongpoint label blur.
+- Scale bar accuracy.
+- Mobile checkerboarding.
 
 ## [1.1.4] - 2026-01-21
+
 ### Added
-- Trajectory Adjustment Slider
+- Trajectory Adjustment Slider.
 
 ### Fixed
-- Mobile fire offset
-- Map transition flicker
-- Dynamic page titles
-- Scale bar rendering
-- Mobile UI ergonomics
+- Mobile fire offset.
+- Map transition flicker.
+- Dynamic page titles.
+- Scale bar rendering.
+- Mobile UI ergonomics.
 
 ## [1.1.3] - 2026-01-17
+
 ### Fixed
-- Desktop stutter on wheel zoom
+- Desktop stutter on wheel zoom.
 
 ## [1.1.2] - 2026-01-17
+
 ### Fixed
-- Mobile GPU checkerboarding
-- Stuck zoom on reload
-- Script initialization errors
-- Desktop hover highlights
-- Modal persistence
+- Mobile GPU checkerboarding.
+- Stuck zoom on reload.
+- Script initialization errors.
+- Desktop hover highlights.
+- Modal persistence.
 
 ## [1.1.1] - 2026-01-16
+
 ### Fixed
-- Projects Hub logic and alignment
-- Visual weight balancing
-- Mobile overflow
+- Projects Hub logic and alignment.
+- Visual weight balancing.
+- Mobile overflow.
 
 ## [1.1.0] - 2026-01-16
-### Added
-- Core engine with dynamic targeting
-- Visual impact zones
-- Interactive map selector
 
-### Fixed & Performance
-- Major rendering and state fixes
-- GPU acceleration
-- Haptic feedback
-- Viewport locking
+### Added
+- Core engine with dynamic targeting.
+- Visual impact zones.
+- Interactive map selector.
+- Haptic feedback.
+
+### Fixed
+- Major rendering and state fixes.
+
+### Changed
+- GPU acceleration.
+- Viewport locking.
