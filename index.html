@@ -12,6 +12,8 @@
         <title>HLL Arty Map Calculator</title>
         <meta name="description" content="Interactive tactical map and high-precision artillery calculator for Hell Let Loose. Calculate distance, elevation, azimuth, and flight time with mil-spec accuracy." />
 
+        <link rel="canonical" href="https://l1tku.github.io/hll-arty-map-calculator/" />
+
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://l1tku.github.io/hll-arty-map-calculator/" />
         <meta property="og:title" content="HLL Arty Map Calculator" />
@@ -41,6 +43,19 @@
         <script type="application/ld+json">
         {
           "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "HLL Arty Map Calculator",
+          "url": "https://l1tku.github.io/hll-arty-map-calculator/",
+          "applicationCategory": "GameApplication",
+          "operatingSystem": "Web",
+          "keywords": "Hell Let Loose, artillery calculator, tactical map, Carentan, Omaha Beach, ballistics",
+          "description": "Interactive tactical map and high-precision artillery calculator for Hell Let Loose."
+        }
+        </script>
+
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
           "@type": "ImageObject",
           "url": "https://l1tku.github.io/hll-arty-map-calculator/images/og_image_wide.png",
           "contentUrl": "https://l1tku.github.io/hll-arty-map-calculator/images/og_image_wide.png",
@@ -50,7 +65,7 @@
         }
         </script>
 
-        <link rel="manifest" href="manifest.json?v=1.4.5-3" />
+        <link rel="manifest" href="manifest.json?v=1.4.5-5" />
 
         <meta name="theme-color" content="#ffc107" />
 
@@ -68,13 +83,13 @@
             content="HLL Arty Map Calculator"
         />
 
-        <link rel="icon" type="image/webp" href="images/favicon.webp?v=1.4.5-3" />
-        <link rel="icon" type="image/png" href="images/favicon.png?v=1.4.5-3" />
-        <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=1.4.5-3" />
-        <link rel="icon" type="image/png" sizes="512x512" href="images/icon-512.png?v=1.4.5-3" />
-        <link rel="apple-touch-icon" href="images/icon-180.png?v=1.4.5-3" />
+        <link rel="icon" type="image/webp" href="images/favicon.webp?v=1.4.5-5" />
+        <link rel="icon" type="image/png" href="images/favicon.png?v=1.4.5-5" />
+        <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=1.4.5-5" />
+        <link rel="icon" type="image/png" sizes="512x512" href="images/icon-512.png?v=1.4.5-5" />
+        <link rel="apple-touch-icon" href="images/icon-180.png?v=1.4.5-5" />
 
-        <link rel="stylesheet" href="css/style.css?v=1.4.5-3" />
+        <link rel="stylesheet" href="css/style.css?v=1.4.5-5" />
 
         <script>
             const isStandaloneWindow =
@@ -91,7 +106,7 @@
 
         <script>
             if ("serviceWorker" in navigator) {
-                const SERVICE_WORKER_VERSION = "1.4.5-3";
+                const SERVICE_WORKER_VERSION = "1.4.5-5";
                 const isLocalhost =
                     location.hostname === "localhost" ||
                     location.hostname === "127.0.0.1" ||
@@ -154,6 +169,7 @@
     </head>
 
     <body>
+        <h1 class="sr-only">HLL Arty Map Calculator — Hell Let Loose artillery tool</h1>
         <div class="shell">
             <div class="panel map-wrap" id="mapContainer">
                 <div class="loading-overlay" id="loadingOverlay">
@@ -1174,10 +1190,10 @@
             </div>
         </div>
 
-        <script src="js/maps.js?v=1.4.5-3"></script>
+        <script src="js/maps.js?v=1.4.5-5"></script>
 
-        <script src="js/ballistics.js?v=1.4.5-3"></script>
+        <script src="js/ballistics.js?v=1.4.5-5"></script>
 
-        <script src="js/script.js?v=1.4.5-3"></script>
+        <script src="js/script.js?v=1.4.5-5"></script>
     </body>
 </html>

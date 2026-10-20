@@ -247,9 +247,9 @@ function isStandaloneAppWindow() {
 }
 
 function updatePageTitle(mapName) {
-  document.title = isStandaloneAppWindow()
-    ? mapName
-    : `HLL Arty Map Calculator - ${mapName}`;
+  if (isStandaloneAppWindow()) {
+    document.title = mapName;
+  }
 }
 
 function escapeAttr(str) {
