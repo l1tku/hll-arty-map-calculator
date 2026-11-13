@@ -3510,7 +3510,8 @@ input:checked + .slider:before {
     justify-content: center;
 }
 
-.github-btn {
+.github-btn,
+.website-btn {
     border-left-color: #ffffff !important;
 }
 
