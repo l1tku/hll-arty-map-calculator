@@ -46,6 +46,7 @@ const ASSETS_TO_CACHE = [
   "./images/maps/map_stmereeglise.webp",
   "./images/maps/map_tobruk.webp",
   "./images/maps/map_utahbeach.webp",
+  "./images/maps/thumbnail/BAL.webp",
   "./images/maps/thumbnail/CAR.webp",
   "./images/maps/thumbnail/DRI.webp",
   "./images/maps/thumbnail/EBR.webp",

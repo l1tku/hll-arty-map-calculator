@@ -2354,12 +2354,13 @@ function renderMapGrid(filter = "") {
       bindDedupedPress(card, () => {
         SelectMapFromGrid(key);
       });
+    }
 
+    const imgPath = mapData.thumbnail || mapData.image;
+    if (imgPath) {
       const img = document.createElement("img");
       img.className = "map-card-img";
       img.alt = mapData.name;
-
-      const imgPath = mapData.thumbnail || mapData.image;
       img.src = imgPath;
 
       img.onerror = () => {
@@ -2367,7 +2368,9 @@ function renderMapGrid(filter = "") {
         card.style.background = "#222";
       };
       card.appendChild(img);
-    } else {
+    }
+
+    if (!isReleased) {
       const status = document.createElement("div");
       status.className = "map-card-status";
       status.textContent = "NOT RELEASED";
