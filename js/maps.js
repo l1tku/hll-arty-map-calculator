@@ -1563,4 +1563,57 @@ UTA: {
       { label: "SUNKEN BRIDGE", id: "B14", gameX: -30810.0, gameY: 47853.0, radius: 3000.0, team: "ger", type: "strongpoint" }
     ] 
   },
+
+  BAL: {
+    name: "Lake Balaton",
+    image: "images/maps/map_lake_balaton.webp",
+    thumbnail: "images/maps/thumbnail/BAL.webp",
+    teams: { t1: "SOVIET UNION", t2: "GERMANY" },
+    history: {
+      battle: "Operation Spring Awakening (March 6–15, 1945)",
+      images: [
+        {
+          thumbnail: "images/history/lake_balaton/lake_balaton_1945_german_troops_thumbnail.webp",
+          full: "images/history/lake_balaton/lake_balaton_1945_german_troops.webp",
+          caption: "German troops during the Lake Balaton offensive, 1945."
+        },
+        {
+          thumbnail: "images/history/lake_balaton/lake_balaton_1945_panther_thumbnail.webp",
+          full: "images/history/lake_balaton/lake_balaton_1945_panther.webp",
+          caption: "A Panther tank of SS Leibstandarte during the Lake Balaton offensive, 1945."
+        }
+      ],
+      description: "Germany's last major offensive of World War II, launched south of Lake Balaton in Hungary. The 6th Panzer Army, 6th Army, and 2nd Panzer Army attacked the Soviet 3rd Ukrainian Front to reach the Danube, retake Budapest, and secure the Nagykanizsa oil fields. Spring thaw turned the roads to mud, and Soviet defense-in-depth limited the advance to a few kilometres in most sectors and about 30 km at its deepest.",
+      tactics: "German forces massed their armor between Lake Velence and Lake Balaton, spearheaded by SS panzer divisions with Tiger II and Panther tanks. Soviet commanders were ordered to defend and built layered anti-tank zones with minefields, artillery, and dug-in infantry. When the German spearheads were exhausted, the 3rd Ukrainian Front counterattacked on 16 March, starting the Vienna Offensive. Mud and flooded terrain severely limited German mobility.",
+      tacticalSituation: {
+        images: [
+          {
+            thumbnail: "images/history/lake_balaton/lake_balaton_1945_panzers_thumbnail.webp",
+            full: "images/history/lake_balaton/lake_balaton_1945_panzers.webp",
+            caption: "German half-tracks and Panzer IV tanks during the Lake Balaton offensive, 1945."
+          }
+        ]
+      },
+      significance: "The offensive failed to reach the Danube or retake Budapest, which had fallen in February 1945. It consumed Germany's remaining armored reserves and allowed the Soviet Vienna Offensive to begin on 16 March. It was the last major German offensive of the war.",
+      strategicContext: {
+        images: [
+          {
+            thumbnail: "images/history/lake_balaton/lake_balaton_1945_german_retreat_thumbnail.webp",
+            full: "images/history/lake_balaton/lake_balaton_1945_german_retreat.webp",
+            caption: "German retreat toward Lake Balaton, March 1945."
+          },
+          {
+            thumbnail: "images/history/lake_balaton/lake_balaton_1945_panther_destroyed_thumbnail.webp",
+            full: "images/history/lake_balaton/lake_balaton_1945_panther_destroyed.webp",
+            caption: "A Panther destroyed by Soviet forces during the Lake Balaton offensive, 1945."
+          }
+        ]
+      }
+    },
+    widthMeters: 2000,
+    heightMeters: 2000,
+    guns: [],
+    strongpoints: [],
+    released: false
+  },
 };

@@ -2,7 +2,7 @@
 // 1. DATA & CONFIGURATION
 // ==========================================
 
-const APP_VERSION = "v1.4.5";
+const APP_VERSION = "v1.4.6";
 const GAME_VERSION = "Update 21";
 
 const versionMap = {
@@ -2347,21 +2347,32 @@ function renderMapGrid(filter = "") {
     card.dataset.mapKey = key;
     if (key === activeMapKey) card.classList.add("active");
 
-    bindDedupedPress(card, () => {
-      SelectMapFromGrid(key);
-    });
+    const isReleased = mapData.released !== false;
+    if (!isReleased) card.classList.add("unreleased");
 
-    const img = document.createElement("img");
-    img.className = "map-card-img";
-    img.alt = mapData.name;
+    if (isReleased) {
+      bindDedupedPress(card, () => {
+        SelectMapFromGrid(key);
+      });
 
-    const imgPath = mapData.thumbnail || mapData.image;
-    img.src = imgPath;
+      const img = document.createElement("img");
+      img.className = "map-card-img";
+      img.alt = mapData.name;
 
-    img.onerror = () => {
-      img.style.display = "none";
-      card.style.background = "#222";
-    };
+      const imgPath = mapData.thumbnail || mapData.image;
+      img.src = imgPath;
+
+      img.onerror = () => {
+        img.style.display = "none";
+        card.style.background = "#222";
+      };
+      card.appendChild(img);
+    } else {
+      const status = document.createElement("div");
+      status.className = "map-card-status";
+      status.textContent = "NOT RELEASED";
+      card.appendChild(status);
+    }
 
     const label = document.createElement("div");
     label.className = "map-card-name";
@@ -2371,7 +2382,7 @@ function renderMapGrid(filter = "") {
       const infoBtn = document.createElement("button");
       infoBtn.className = "map-info-btn";
       infoBtn.innerHTML =
-        '<svg viewBox="0 0 26 26" width="26" height="26"><circle cx="13" cy="13" r="11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"/><path d="M18 7H8c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM8 9h4v5l-2-1.5L8 14V9z" fill="rgba(255,255,255,0.9)"/></svg>';
+        '<svg viewBox="0 0 26 26" width="26" height="26"><circle cx="13" cy="13" r="11" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="2"/><circle cx="13" cy="8.5" r="1.7" fill="currentColor"/><rect x="11.3" y="11.5" width="3.4" height="8" rx="1.7" fill="currentColor"/></svg>';
       infoBtn.title = "View map history";
       bindDedupedPress(
         infoBtn,
@@ -2383,7 +2394,6 @@ function renderMapGrid(filter = "") {
       card.appendChild(infoBtn);
     }
 
-    card.appendChild(img);
     card.appendChild(label);
     grid.appendChild(card);
   });

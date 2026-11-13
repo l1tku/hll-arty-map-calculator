@@ -1686,6 +1686,39 @@ select.btn-map-select option {
     border-color: #28a745 !important;
 }
 
+.map-card.unreleased {
+    cursor: default;
+    background: #2b2b2b;
+}
+
+.map-card.unreleased:hover {
+    border-color: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.map-card.unreleased .map-card-name {
+    color: #8d8d8d;
+}
+
+.map-card-status {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 24px;
+    background: #2b2b2b;
+    color: #8d8d8d;
+    font-family: "GothamSS", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
 .map-card-name {
     position: absolute;
     bottom: 0;
@@ -1721,6 +1754,7 @@ select.btn-map-select option {
     transition: transform 0.2s ease;
     pointer-events: auto;
     overflow: hidden;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .map-info-btn svg {
@@ -1731,6 +1765,7 @@ select.btn-map-select option {
 
 .map-info-btn:hover {
     transform: scale(1.1);
+    color: #ffc107;
 }
 
 .map-info-btn:hover svg circle {
@@ -1738,7 +1773,8 @@ select.btn-map-select option {
 }
 
 .map-info-btn:hover svg text,
-.map-info-btn:hover svg path {
+.map-info-btn:hover svg path,
+.map-info-btn:hover svg rect {
     fill: #ffc107;
 }
 

@@ -1,5 +1,5 @@
 # HLL Artillery Map Calculator
-**v1.4.5 — Updated for Hell Let Loose Update 21**
+**v1.4.6 — Updated for Hell Let Loose Update 21**
 
 An interactive tactical map and high-precision artillery calculator for Hell Let Loose with 1:1 scale tactical maps, manual calculator, visual trajectory aids, and a mobile-optimized targeting UI.
 
@@ -91,10 +91,11 @@ This project is a community-made tool and is **not** affiliated with, endorsed b
 ## Historical Images Attribution
 Historical photographs used in the map history sections are sourced from:
 - **Wikimedia Commons** - Public domain and Creative Commons licensed images
+- **Bundesarchiv, Bild 146-1989-105-13A** - Wilfried Woscidlo, CC BY-SA 3.0 DE (Lake Balaton, 1945)
 - **U.S. National Archives** - Public domain U.S. government photographs
 - **Imperial War Museums** - Public domain photographs
 
-All historical images are used for educational and historical documentation purposes. Specific image attributions are provided in the image captions within the application.
+All historical images are used for educational and historical documentation purposes. Specific image attributions are provided in this repository.
 
 ## License
 The source code (HTML, CSS, JavaScript) of this project is licensed under the **MIT License**.  

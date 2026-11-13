@@ -8,6 +8,22 @@ The app updates automatically — **refresh the page twice** and it will update.
 - **iPhone / iPad:** Settings → Safari → Clear History and Website Data, then reopen
 - **Android Chrome:** Menu → Settings → Privacy → Clear browsing data
 
+## [1.4.6] - 2026-11-13
+
+### Added
+- Lake Balaton placeholder map, marked NOT RELEASED.
+- Lake Balaton history with Wikimedia Commons photos.
+- Website link in the Other Projects modal.
+
+### Changed
+- Dark Reader lock and dark color scheme.
+- Updated project labels.
+- Map history button now uses an info icon.
+
+### Fixed
+- White flash on load.
+- Google thumbnail and page title.
+
 ## [1.4.5] - 2026-10-07
 
 ### Changed
